@@ -2,7 +2,7 @@ spring:
   application:
     name: disaster-rescue-system
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: ${SPRING_PROFILES_ACTIVE:sqlserver}
   config:
     import: "optional:classpath:application-secret.yml"
   servlet:
