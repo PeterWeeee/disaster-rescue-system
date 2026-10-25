@@ -1,9 +1,12 @@
 package vn.edu.cuunan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
 
     @Id
@@ -13,6 +16,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String username;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 

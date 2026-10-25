@@ -10,5 +10,7 @@ import java.util.List;
 public interface SosRequestRepository extends JpaRepository<SosRequest, Long> {
     List<SosRequest> findByStatusOrderByCreatedAtDesc(String status);
     List<SosRequest> findBySenderIdOrderByCreatedAtDesc(Long senderId);
+    List<SosRequest> findByContactPhoneOrderByCreatedAtDesc(String contactPhone);
     List<SosRequest> findAllByOrderByCreatedAtDesc();
+    long countByStatus(String status);
 }

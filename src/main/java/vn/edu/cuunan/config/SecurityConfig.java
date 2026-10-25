@@ -50,7 +50,8 @@ public class SecurityConfig {
                 "/api/**",
                 "/ws/**",
                 "/h2-console/**",
-                "/auth/**"
+                "/auth/**",
+                "/sos/**"
             ))
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,11 +1,13 @@
 package vn.edu.cuunan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sos_requests")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SosRequest extends BaseEntity {
 
     @Id
@@ -14,6 +16,7 @@ public class SosRequest extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
     private User sender;
 
     @Column(name = "contact_name", nullable = false, length = 150)
@@ -62,6 +65,70 @@ public class SosRequest extends BaseEntity {
     private LocalDateTime resolvedAt;
 
     public SosRequest() {
+    }
+
+    public static SosRequestBuilder builder() {
+        return new SosRequestBuilder();
+    }
+
+    public static class SosRequestBuilder {
+        private Long id;
+        private User sender;
+        private String contactName;
+        private String contactPhone;
+        private String secondaryPhone;
+        private Double latitude;
+        private Double longitude;
+        private String addressDetail;
+        private String urgencyLevel = "HIGH";
+        private Integer peopleCount = 1;
+        private Boolean hasElderly = false;
+        private Boolean hasChildren = false;
+        private Boolean hasInjured = false;
+        private String description;
+        private String imageUrl;
+        private String status = "PENDING";
+        private LocalDateTime resolvedAt;
+
+        public SosRequestBuilder id(Long id) { this.id = id; return this; }
+        public SosRequestBuilder sender(User sender) { this.sender = sender; return this; }
+        public SosRequestBuilder contactName(String contactName) { this.contactName = contactName; return this; }
+        public SosRequestBuilder contactPhone(String contactPhone) { this.contactPhone = contactPhone; return this; }
+        public SosRequestBuilder secondaryPhone(String secondaryPhone) { this.secondaryPhone = secondaryPhone; return this; }
+        public SosRequestBuilder latitude(Double latitude) { this.latitude = latitude; return this; }
+        public SosRequestBuilder longitude(Double longitude) { this.longitude = longitude; return this; }
+        public SosRequestBuilder addressDetail(String addressDetail) { this.addressDetail = addressDetail; return this; }
+        public SosRequestBuilder urgencyLevel(String urgencyLevel) { this.urgencyLevel = urgencyLevel; return this; }
+        public SosRequestBuilder peopleCount(Integer peopleCount) { this.peopleCount = peopleCount; return this; }
+        public SosRequestBuilder hasElderly(Boolean hasElderly) { this.hasElderly = hasElderly; return this; }
+        public SosRequestBuilder hasChildren(Boolean hasChildren) { this.hasChildren = hasChildren; return this; }
+        public SosRequestBuilder hasInjured(Boolean hasInjured) { this.hasInjured = hasInjured; return this; }
+        public SosRequestBuilder description(String description) { this.description = description; return this; }
+        public SosRequestBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
+        public SosRequestBuilder status(String status) { this.status = status; return this; }
+        public SosRequestBuilder resolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; return this; }
+
+        public SosRequest build() {
+            SosRequest sos = new SosRequest();
+            sos.setId(id);
+            sos.setSender(sender);
+            sos.setContactName(contactName);
+            sos.setContactPhone(contactPhone);
+            sos.setSecondaryPhone(secondaryPhone);
+            sos.setLatitude(latitude);
+            sos.setLongitude(longitude);
+            sos.setAddressDetail(addressDetail);
+            sos.setUrgencyLevel(urgencyLevel != null ? urgencyLevel : "HIGH");
+            sos.setPeopleCount(peopleCount != null && peopleCount > 0 ? peopleCount : 1);
+            sos.setHasElderly(Boolean.TRUE.equals(hasElderly));
+            sos.setHasChildren(Boolean.TRUE.equals(hasChildren));
+            sos.setHasInjured(Boolean.TRUE.equals(hasInjured));
+            sos.setDescription(description);
+            sos.setImageUrl(imageUrl);
+            sos.setStatus(status != null ? status : "PENDING");
+            sos.setResolvedAt(resolvedAt);
+            return sos;
+        }
     }
 
     public Long getId() {

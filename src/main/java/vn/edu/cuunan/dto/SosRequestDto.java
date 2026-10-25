@@ -1,17 +1,44 @@
 package vn.edu.cuunan.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 public class SosRequestDto {
+
+    @NotBlank(message = "Họ và tên người liên hệ không được để trống")
     private String contactName;
+
+    @NotBlank(message = "Số điện thoại liên hệ không được để trống")
+    @Pattern(regexp = "^(0|\\+84)[0-9]{8,10}$", message = "Số điện thoại liên hệ không đúng định dạng (vd: 0987654321)")
     private String contactPhone;
+
     private String secondaryPhone;
+
+    @NotNull(message = "Vui lòng cung cấp tọa độ vĩ độ (Latitude)")
+    @DecimalMin(value = "-90.0", message = "Vĩ độ phải nằm trong khoảng -90 đến 90")
+    @DecimalMax(value = "90.0", message = "Vĩ độ phải nằm trong khoảng -90 đến 90")
     private Double latitude;
+
+    @NotNull(message = "Vui lòng cung cấp tọa độ kinh độ (Longitude)")
+    @DecimalMin(value = "-180.0", message = "Kinh độ phải nằm trong khoảng -180 đến 180")
+    @DecimalMax(value = "180.0", message = "Kinh độ phải nằm trong khoảng -180 đến 180")
     private Double longitude;
+
     private String addressDetail;
-    private String urgencyLevel;
-    private Integer peopleCount;
-    private Boolean hasElderly;
-    private Boolean hasChildren;
-    private Boolean hasInjured;
+
+    private String urgencyLevel = "HIGH"; // CRITICAL, HIGH, MEDIUM, LOW
+
+    @NotNull(message = "Số lượng người không được để trống")
+    @Min(value = 1, message = "Số lượng người cần cứu nạn tối thiểu là 1")
+    private Integer peopleCount = 1;
+
+    private Boolean hasElderly = false;
+    private Boolean hasChildren = false;
+    private Boolean hasInjured = false;
     private String description;
     private String imageUrl;
 
@@ -25,13 +52,51 @@ public class SosRequestDto {
         this.latitude = latitude;
         this.longitude = longitude;
         this.addressDetail = addressDetail;
-        this.urgencyLevel = urgencyLevel;
-        this.peopleCount = peopleCount;
-        this.hasElderly = hasElderly;
-        this.hasChildren = hasChildren;
-        this.hasInjured = hasInjured;
+        this.urgencyLevel = urgencyLevel != null ? urgencyLevel : "HIGH";
+        this.peopleCount = peopleCount != null ? peopleCount : 1;
+        this.hasElderly = Boolean.TRUE.equals(hasElderly);
+        this.hasChildren = Boolean.TRUE.equals(hasChildren);
+        this.hasInjured = Boolean.TRUE.equals(hasInjured);
         this.description = description;
         this.imageUrl = imageUrl;
+    }
+
+    public static SosRequestDtoBuilder builder() {
+        return new SosRequestDtoBuilder();
+    }
+
+    public static class SosRequestDtoBuilder {
+        private String contactName;
+        private String contactPhone;
+        private String secondaryPhone;
+        private Double latitude;
+        private Double longitude;
+        private String addressDetail;
+        private String urgencyLevel = "HIGH";
+        private Integer peopleCount = 1;
+        private Boolean hasElderly = false;
+        private Boolean hasChildren = false;
+        private Boolean hasInjured = false;
+        private String description;
+        private String imageUrl;
+
+        public SosRequestDtoBuilder contactName(String contactName) { this.contactName = contactName; return this; }
+        public SosRequestDtoBuilder contactPhone(String contactPhone) { this.contactPhone = contactPhone; return this; }
+        public SosRequestDtoBuilder secondaryPhone(String secondaryPhone) { this.secondaryPhone = secondaryPhone; return this; }
+        public SosRequestDtoBuilder latitude(Double latitude) { this.latitude = latitude; return this; }
+        public SosRequestDtoBuilder longitude(Double longitude) { this.longitude = longitude; return this; }
+        public SosRequestDtoBuilder addressDetail(String addressDetail) { this.addressDetail = addressDetail; return this; }
+        public SosRequestDtoBuilder urgencyLevel(String urgencyLevel) { this.urgencyLevel = urgencyLevel; return this; }
+        public SosRequestDtoBuilder peopleCount(Integer peopleCount) { this.peopleCount = peopleCount; return this; }
+        public SosRequestDtoBuilder hasElderly(Boolean hasElderly) { this.hasElderly = hasElderly; return this; }
+        public SosRequestDtoBuilder hasChildren(Boolean hasChildren) { this.hasChildren = hasChildren; return this; }
+        public SosRequestDtoBuilder hasInjured(Boolean hasInjured) { this.hasInjured = hasInjured; return this; }
+        public SosRequestDtoBuilder description(String description) { this.description = description; return this; }
+        public SosRequestDtoBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
+
+        public SosRequestDto build() {
+            return new SosRequestDto(contactName, contactPhone, secondaryPhone, latitude, longitude, addressDetail, urgencyLevel, peopleCount, hasElderly, hasChildren, hasInjured, description, imageUrl);
+        }
     }
 
     public String getContactName() {
