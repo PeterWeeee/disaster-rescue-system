@@ -1,0 +1,50 @@
+# ĐẶC TẢ GIAO TIẾP: REST API & WEBSOCKET (SPECS)
+> **Mục tiêu:** Thống nhất danh sách endpoint HTTP và kênh WebSocket giữa Spring Boot backend và frontend (Thymeleaf/JS/STOMP) để tránh sai lệch path hoặc payload.
+
+---
+
+## 1. WebSocket & STOMP Protocol Specifications
+
+- **WebSocket Handshake Endpoint:** `/ws` (kèm fallback SockJS)
+- **STOMP Prefix Application:** `/app` (dành cho client gửi message lên server)
+- **Broker Destinations:** `/topic` (quảng bá công khai/nhóm) và `/user` (tin nhắn riêng từng người)
+
+### 1.1. Danh Sách Các Topic / Channels
+
+| STOMP Destination | Người Nhận (Subscribers) | Sự Kiện (Event) & Dữ Liệu Gửi Đi |
+| :--- | :--- | :--- |
+| `/topic/sos-alerts` | Coordinator, Rescuer, Admin | **Có SOS mới:** Gửi `SosAlertMessage` (id, contactName, phone, lat, lng, urgency, peopleCount, address). Client phát chuông & vẽ marker đỏ nhấp nháy. |
+| `/topic/map-updates` | Mọi client đang xem bản đồ | **Cập nhật Marker:** Trạng thái ca SOS thay đổi (Đỏ -> Vàng khi có đội nhận, Vàng -> Xanh khi cứu xong). |
+| `/topic/broadcast-alerts` | Tất cả user đang truy cập | **Cảnh báo khẩn cấp:** Admin gửi thông báo thiên tai, xả lũ, di dời đè lên toàn màn hình client. |
+| `/user/queue/assignments` | Rescuer (Đội trưởng cụ thể) | **Nhiệm vụ mới được giao:** Gửi chi tiết ca cứu hộ vừa được Coordinator phân công cho đội này. |
+| `/user/queue/sos-status` | Citizen (Nạn nhân gửi SOS) | **Cập nhật trạng thái phiếu cứu hộ:** Báo cho người dân biết đội nào đã nhận, đang di chuyển đến. |
+
+---
+
+## 2. Danh Sách REST APIs
+
+### 2.1. Xác Thực & Người Dùng (`/api/auth`)
+- `POST /api/auth/register` - Đăng ký tài khoản mới.
+- `POST /api/auth/login` - Đăng nhập, trả về JWT Token và set Cookie `jwt_token`.
+- `POST /api/auth/logout` - Đăng xuất, xóa Cookie.
+- `GET /api/auth/me` - Lấy thông tin tài khoản đang đăng nhập.
+
+### 2.2. Quản Lý Yêu Cầu Cứu Nạn (`/api/sos`)
+- `POST /api/sos` - Gửi yêu cầu cứu nạn khẩn cấp (kèm tọa độ GPS, số người, mô tả, ảnh). Bắn WebSocket `/topic/sos-alerts`.
+- `GET /api/sos` - Lấy danh sách SOS (hỗ trợ phân trang, lọc theo trạng thái, mức độ khẩn cấp).
+- `GET /api/sos/{id}` - Chi tiết 1 yêu cầu cứu nạn.
+- `PUT /api/sos/{id}/cancel` - Người dân tự hủy yêu cầu khi chưa có đội nhận.
+
+### 2.3. Điều Phối Cứu Hộ (`/api/coordinator`)
+- `GET /api/coordinator/map-data` - Lấy toàn bộ danh sách điểm SOS và đội cứu hộ đang active để vẽ lên Leaflet map.
+- `GET /api/coordinator/nearest-teams?sosId={id}` - Lấy danh sách các đội cứu hộ gần nhất tính theo công thức khoảng cách Haversine.
+- `POST /api/coordinator/assign` - Phân công nhiệm vụ cho đội cứu hộ (Body: `sosId`, `teamId`). Bắn WebSocket `/user/queue/assignments`.
+
+### 2.4. Đội Cứu Hộ (`/api/rescuer`)
+- `GET /api/rescuer/my-tasks` - Danh sách nhiệm vụ của đội mình.
+- `PUT /api/rescuer/tasks/{assignmentId}/accept` - Nhận nhiệm vụ.
+- `PUT /api/rescuer/tasks/{assignmentId}/reject` - Từ chối nhiệm vụ (kèm lý do).
+- `PUT /api/rescuer/tasks/{assignmentId}/update-status` - Cập nhật trạng thái (`IN_PROGRESS`, `COMPLETED`, kèm ảnh báo cáo).
+
+### 2.5. Upload Tệp Lên Cloudinary (`/api/media`)
+- `POST /api/media/upload` - Multipart form upload ảnh, trả về link ảnh an toàn HTTPS của Cloudinary.
