@@ -51,7 +51,8 @@ public class SecurityConfig {
                 "/ws/**",
                 "/h2-console/**",
                 "/auth/**",
-                "/sos/**"
+                "/sos",
+                    "/sos/**"
             ))
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -63,8 +64,10 @@ public class SecurityConfig {
                 // Công khai hoàn toàn (Public)
                 .requestMatchers(
                     "/",
+                    "/map",
                     "/map/**",
                     "/alerts/**",
+                    "/sos",
                     "/sos/**",
                     "/auth/**",
                     "/css/**",
@@ -74,6 +77,7 @@ public class SecurityConfig {
                     "/h2-console/**",
                     "/ws/**",
                     "/api/auth/**",
+                    "/api/sos",
                     "/api/sos/**"
                 ).permitAll()
 

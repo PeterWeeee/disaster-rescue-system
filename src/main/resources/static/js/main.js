@@ -3,120 +3,112 @@
  */
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Quét GPS tự động ở Hero Card
+    console.log(">>> CứuNạn 24/7 JS Engine initialized successfully.");
+
+    // 1. Quét GPS tự động ở Hero Card (Trang chủ)
     const btnDetectGps = document.getElementById("btn-detect-gps");
     const quickLatLng = document.getElementById("quick-latlng");
     const quickGeoStatus = document.getElementById("quick-geo-status");
+    const btnGotoSos = document.getElementById("btn-goto-sos");
 
     if (btnDetectGps && quickLatLng) {
         btnDetectGps.addEventListener("click", function () {
+            console.log(">>> Clicked btn-detect-gps");
             if (!navigator.geolocation) {
-                quickGeoStatus.className = "alert alert-warning py-2 small mb-3";
-                quickGeoStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Trình duyệt của bạn không hỗ trợ định vị GPS.';
-                return;
-            }
-
-            quickGeoStatus.className = "alert alert-info py-2 small mb-3";
-            quickGeoStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang truy vấn vệ tinh GPS xác định tọa độ của bạn...';
-
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lng = position.coords.longitude.toFixed(6);
-                    quickLatLng.value = `${lat}, ${lng}`;
-                    quickGeoStatus.className = "alert alert-success py-2 small mb-3";
-                    quickGeoStatus.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã bắt được tọa độ: <strong>${lat}, ${lng}</strong> (Độ chính xác: ±${Math.round(position.coords.accuracy)}m)`;
-                    sessionStorage.setItem("user_last_lat", lat);
-                    sessionStorage.setItem("user_last_lng", lng);
-                },
-                function (error) {
-                    quickGeoStatus.className = "alert alert-danger py-2 small mb-3";
-                    quickGeoStatus.innerHTML = `<i class="fa-solid fa-circle-xmark me-1"></i> Không thể lấy vị trí: ${error.message}. Vui lòng cấp quyền truy cập vị trí.`;
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        });
-    }
-
-    // 2. Quét GPS tự động ở Form SOS (/sos) - chỉ dùng fallback khi không có bản đồ Leaflet
-    const sosMapPresent = document.getElementById("sosMap");
-    const btnGetLocation = document.getElementById("btn-get-location");
-    const inputLat = document.getElementById("input-lat");
-    const inputLng = document.getElementById("input-lng");
-    const geoAlert = document.getElementById("geo-alert");
-
-    // Tự động điền nếu đã quét trước đó ở trang chủ (chỉ fallback nếu không có sosMap)
-    if (!sosMapPresent && inputLat && inputLng) {
-        const savedLat = sessionStorage.getItem("user_last_lat");
-        const savedLng = sessionStorage.getItem("user_last_lng");
-        if (savedLat && savedLng && !inputLat.value) {
-            inputLat.value = savedLat;
-            inputLng.value = savedLng;
-            if (geoAlert) {
-                geoAlert.className = "small mt-2 text-success";
-                geoAlert.innerHTML = `<i class="fa-solid fa-check me-1"></i> Đã nạp vị trí từ phiên trước: ${savedLat}, ${savedLng}`;
-            }
-        }
-    }
-
-    if (!sosMapPresent && btnGetLocation && inputLat && inputLng) {
-        btnGetLocation.addEventListener("click", function () {
-            if (!navigator.geolocation) {
-                if (geoAlert) {
-                    geoAlert.className = "small mt-2 text-danger";
-                    geoAlert.innerText = "Trình duyệt không hỗ trợ GPS.";
+                if (quickGeoStatus) {
+                    quickGeoStatus.className = "alert alert-warning py-2 small mb-3";
+                    quickGeoStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Trình duyệt của bạn không hỗ trợ định vị GPS.';
                 }
                 return;
             }
 
-            if (geoAlert) {
-                geoAlert.className = "small mt-2 text-primary";
-                geoAlert.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lấy tọa độ vệ tinh độ chính xác cao...';
+            btnDetectGps.disabled = true;
+            btnDetectGps.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang quét...';
+            if (quickGeoStatus) {
+                quickGeoStatus.className = "alert alert-info py-2 small mb-3";
+                quickGeoStatus.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Đang truy vấn vệ tinh GPS xác định tọa độ...';
+            }
+
+            function onQuickSuccess(position) {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+                const acc = Math.round(position.coords.accuracy || 15);
+
+                quickLatLng.value = `${lat}, ${lng}`;
+                btnDetectGps.disabled = false;
+                btnDetectGps.innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i> Quét lại';
+
+                if (quickGeoStatus) {
+                    quickGeoStatus.className = "alert alert-success py-2 small mb-3 fw-semibold";
+                    quickGeoStatus.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Đã định vị thành công: <strong>${lat}, ${lng}</strong> (Sai số: ±${acc}m)`;
+                }
+
+                if (btnGotoSos) {
+                    btnGotoSos.href = `/sos?lat=${lat}&lng=${lng}`;
+                }
+
+                sessionStorage.setItem("user_last_lat", lat);
+                sessionStorage.setItem("user_last_lng", lng);
+            }
+
+            function onQuickFail(err) {
+                // Nếu timeout hoặc không có chip GPS (máy tính bàn), fallback sang định vị Wi-Fi/IP
+                if (err.code === err.TIMEOUT || err.code === err.POSITION_UNAVAILABLE) {
+                    if (quickGeoStatus) {
+                        quickGeoStatus.innerHTML = '<i class="fa-solid fa-network-wired fa-spin me-1"></i> Vệ tinh bận, đang chuyển sang định vị Wi-Fi/IP...';
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        onQuickSuccess,
+                        function (err2) {
+                            finalizeFail(err2);
+                        },
+                        { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 }
+                    );
+                    return;
+                }
+                finalizeFail(err);
+            }
+
+            function finalizeFail(err) {
+                btnDetectGps.disabled = false;
+                btnDetectGps.innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i> Quét GPS';
+
+                let msg = "Không thể lấy vị trí hiện tại.";
+                if (err.code === err.PERMISSION_DENIED) {
+                    msg = "Trình duyệt chưa được cấp quyền vị trí. Vui lòng bấm <b>Cho phép (Allow)</b> trên thanh địa chỉ.";
+                } else {
+                    msg = "Thiết bị không bắt được tín hiệu vệ tinh. Bạn có thể mở form cứu nạn và <b>click trực tiếp lên bản đồ</b>.";
+                }
+
+                if (quickGeoStatus) {
+                    quickGeoStatus.className = "alert alert-warning py-2 small mb-3";
+                    quickGeoStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> ${msg}`;
+                }
             }
 
             navigator.geolocation.getCurrentPosition(
-                function (pos) {
-                    const lat = pos.coords.latitude.toFixed(6);
-                    const lng = pos.coords.longitude.toFixed(6);
-                    inputLat.value = lat;
-                    inputLng.value = lng;
-                    sessionStorage.setItem("user_last_lat", lat);
-                    sessionStorage.setItem("user_last_lng", lng);
-
-                    if (geoAlert) {
-                        geoAlert.className = "small mt-2 text-success fw-semibold";
-                        geoAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã định vị chính xác: ${lat}, ${lng} (Sai số ±${Math.round(pos.coords.accuracy)}m)`;
-                    }
-                },
-                function (err) {
-                    if (geoAlert) {
-                        geoAlert.className = "small mt-2 text-danger";
-                        geoAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Lỗi lấy vị trí: ${err.message}.`;
-                    }
-                },
-                { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+                onQuickSuccess,
+                onQuickFail,
+                { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
             );
         });
     }
 
-    // 3. Preview ảnh tải lên hiện trường
-    const photoInput = document.getElementById("photoInput");
-    const imagePreview = document.getElementById("imagePreview");
-    const previewImg = document.getElementById("previewImg");
+    // 2. Tự động điền tọa độ nếu đã quét ở trang chủ trước đó (khi vào trang /sos)
+    const inputLat = document.getElementById("input-lat");
+    const inputLng = document.getElementById("input-lng");
+    const geoAlert = document.getElementById("geo-alert");
 
-    if (photoInput && imagePreview && previewImg) {
-        photoInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.classList.remove("d-none");
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.add("d-none");
+    if (inputLat && inputLng && !inputLat.value) {
+        const savedLat = sessionStorage.getItem("user_last_lat");
+        const savedLng = sessionStorage.getItem("user_last_lng");
+        if (savedLat && savedLng) {
+            inputLat.value = savedLat;
+            inputLng.value = savedLng;
+            if (geoAlert) {
+                geoAlert.className = "alert alert-success py-2 small mb-3";
+                geoAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã đồng bộ tọa độ từ trang chủ: <strong>${savedLat}, ${savedLng}</strong>`;
             }
-        });
+        }
     }
 });
