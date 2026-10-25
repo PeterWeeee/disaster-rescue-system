@@ -14,6 +14,12 @@
                         <small class="text-white-50">Dành cho Người Dân hoặc Tình Nguyện Viên Cứu Hộ</small>
                     </div>
                     <div class="card-body p-4 p-md-5">
+                        <!-- Thông báo lỗi -->
+                        <div th:if="${errorMessage}" class="alert alert-danger small py-2 d-flex align-items-center">
+                            <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
+                            <span th:text="${errorMessage}">Đã xảy ra lỗi khi đăng ký!</span>
+                        </div>
+
                         <form th:action="@{/auth/register}" method="post">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Họ và tên đầy đủ <span class="text-danger">*</span></label>
@@ -29,9 +35,15 @@
                                     <input type="tel" class="form-control" name="phone" required placeholder="0987654321">
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password" required placeholder="Ít nhất 6 ký tự">
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email (tùy chọn)</label>
+                                    <input type="email" class="form-control" name="email" placeholder="email@example.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" name="password" required placeholder="Ít nhất 6 ký tự">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Vai trò đăng ký</label>
@@ -45,7 +57,7 @@
                                 <input type="text" class="form-control" name="address" placeholder="Xã/Phường, Huyện/Quận, Tỉnh/TP">
                             </div>
                             <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-primary fw-bold py-2">
+                                <button type="submit" class="btn btn-primary fw-bold py-2 shadow-sm">
                                     <i class="fa-solid fa-user-check me-1"></i> Hoàn Tất Đăng Ký
                                 </button>
                             </div>

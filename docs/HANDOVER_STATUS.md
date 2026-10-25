@@ -6,8 +6,8 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 25/10/2026
 - **Nhánh Git hiện tại:** `develop`
-- **Giai đoạn (Phase):** Phase 1 - Khởi tạo mã nguồn Spring Boot 3, Đa CSDL & Base Layout (ĐÃ HOÀN THÀNH SESSION 01)
-- **Trạng thái tổng quan:** Đã hoàn thành toàn bộ mã nguồn nền tảng Spring Boot 3.3.5, cấu hình đa profile (MySQL, SQL Server, H2 local), tích hợp Cloudinary SDK với tài khoản thực tế của người dùng, hoàn thiện Base Layout Thymeleaf + Bootstrap 5. Biên dịch `mvn clean compile` và chạy kiểm thử `mvn test` thành công 100%. Đã đồng bộ mã nguồn sang cả 2 thư mục làm việc trên máy (`c:\ute\WEB programming\Group` và `C:\Users\Will\Projects\disaster-rescue-system`). Sẵn sàng cho Session 02.
+- **Giai đoạn (Phase):** Phase 2 - Xác thực & Phân quyền Spring Security 6 + JWT + Entity Toàn Diện (ĐÃ HOÀN THÀNH SESSION 02)
+- **Trạng thái tổng quan:** Đã hoàn thành 100% Session 01 và Session 02. Toàn bộ 7 Entities JPA, 7 Repositories, hệ thống bảo mật Spring Security 6 + Stateless JWT qua HttpOnly Cookie, DataInitializer nạp 4 roles & 4 accounts mặc định, Controllers & Views đăng ký/đăng nhập/403 forbidden. Toàn bộ 13 unit & integration tests đạt **100% BUILD SUCCESS**. Sẵn sàng cho Session 03 (Phân hệ Gửi SOS & Leaflet.js).
 
 ---
 
@@ -16,45 +16,52 @@
 - [x] Tạo file `.gitignore` tiêu chuẩn cho Java Spring Boot, Maven/Gradle, IDEs và OS.
 - [x] Tạo branch `main` và `develop` trên GitHub (`https://github.com/PeterWeeee/disaster-rescue-system.git`).
 - [x] Tách lộ trình thành 9 phiên làm việc trong `docs/roadmap/`.
-- [x] **SESSION 01:**
-  - [x] Tạo `pom.xml` chuẩn Spring Boot 3.3.5 (Java 17, Web, Thymeleaf, Security, JPA, WebSocket STOMP, Validation, Lombok, Cloudinary HTTP5, MySQL, SQL Server, H2, JJWT).
+- [x] Thiết lập bảng phân công nhiệm vụ 3 thành viên (`docs/TEAM_WORK_DIVISION.md`) và script chuyển đổi commit tự động (`git-member.ps1`, `commit-as.ps1`).
+- [x] **SESSION 01 (PeterWeeee):**
+  - [x] Tạo `pom.xml` chuẩn Spring Boot 3.3.5 (Java 17, Web, Thymeleaf, Security, JPA, WebSocket STOMP, Validation, Cloudinary HTTP5, MySQL, SQL Server, H2, JJWT).
   - [x] Cấu hình đa profile (`application.yml`, `application-local.yml`, `application-mysql.yml`, `application-sqlserver.yml`).
   - [x] Cấu hình Cloudinary (`odwf5uoi`, `329355988118811`, `w6nY13mFiftdZCSg6Sqd0GdU4j0`) trong `application.yml` và bean `CloudinaryConfig.java`.
-  - [x] Cấu hình `SecurityConfig.java`, `WebSocketConfig.java`, `MvcConfig.java`.
-  - [x] Tạo `BaseEntity.java`, `HomeController.java`, `AuthController.java`, `SosRequestDto.java`.
-  - [x] Xây dựng trọn bộ Thymeleaf layout (`main.html`, `navbar.html`, `footer.html`, `head.html`).
-  - [x] Thiết kế giao diện chuyên nghiệp: `index.html` (Hero SOS, GPS 1 chạm, quy trình cứu nạn), `sos/request.html` (Form SOS khẩn cấp + GPS auto-fill + photo preview), `map/live-map.html`, `auth/login.html`, `auth/register.html`.
-  - [x] Custom CSS/JS (`style.css`, `main.js`) cho hiệu ứng nhịp tim radar khẩn cấp và định vị GPS độ chính xác cao.
-  - [x] Biên dịch `mvn clean compile` thành công (11 files java) và chạy `mvn test` thành công.
+  - [x] Base Layout Thymeleaf (`main.html`, `navbar.html`, `footer.html`, `head.html`).
+- [x] **SESSION 02 (Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
+  - [x] Xây dựng trọn bộ 7 Entities JPA tương thích đa CSDL: `Role`, `User`, `RescueTeam`, `TeamMember`, `SosRequest`, `RescueAssignment`, `DisasterAlert`.
+  - [x] Xây dựng 7 JPA Repositories tương ứng trong `vn.edu.cuunan.repository`.
+  - [x] Triển khai bảo mật Spring Security 6 + Stateless JWT qua HttpOnly Cookie:
+    - `JwtTokenProvider.java` (chuẩn JJWT 0.12.x).
+    - `CustomUserDetails.java` & `CustomUserDetailsService.java`.
+    - `JwtAuthenticationFilter.java` (hỗ trợ đọc cả HttpOnly Cookie `jwt_token` và Bearer header).
+    - `JwtAuthenticationEntryPoint.java` & `CustomAccessDeniedHandler.java` (403 Forbidden).
+    - `SecurityConfig.java` phân quyền chặt chẽ các route `/coordinator/**`, `/rescuer/**`, `/admin/**`.
+  - [x] `DataInitializer.java`: Tự động nạp 4 vai trò và 4 tài khoản mặc định (`admin`, `coordinator`, `rescuer`, `citizen` với pass `123456`) khi khởi động.
+  - [x] Controllers & DTOs: `AuthController`, `AuthApiController`, `CoordinatorController`, `RescuerController`, `AdminController`, `ProfileController`.
+  - [x] Giao diện Thymeleaf hoàn chỉnh: `auth/login.html` (có nút điền nhanh tài khoản demo), `auth/register.html`, `auth/forbidden.html`.
+  - [x] Bộ kiểm thử 13 unit & integration tests (`SecurityIntegrationTest`, `AuthServiceTest`, `JwtTokenProviderTest`, `DisasterRescueApplicationTests`) chạy thành công 100%.
 
 ---
 
 ## 3. Những Việc ĐANG LÀM DỞ DANG (In Progress)
-- [ ] Chuẩn bị bắt đầu Session 02: Xây dựng Entity toàn diện và hệ thống Xác thực Spring Security 6 + JWT.
+- [ ] Chuẩn bị bắt đầu Session 03: Phân hệ Gửi SOS & Bản đồ tương tác Leaflet.js (GPS 1 chạm).
 
 ---
 
 ## 4. Việc CẦN LÀM TIẾP THEO (Next Steps)
-1. **Phiên AI tiếp theo (Session 02):**
-   - Tạo toàn bộ Entity JPA tương thích đa CSDL (`Role`, `User`, `RescueTeam`, `TeamMember`, `SosRequest`, `RescueAssignment`, `DisasterAlert`).
-   - Xây dựng hệ thống bảo mật Spring Security 6 + JWT:
-     - `UserRepository`, `RoleRepository`.
-     - `CustomUserDetailsService`, `JwtTokenProvider`, `JwtAuthenticationFilter`.
-     - API và Controller đăng ký tài khoản (mã hóa BCrypt), đăng nhập (cấp phát JWT lưu Cookie & Header).
-     - Gắn phân quyền các vai trò: `ROLE_CITIZEN`, `ROLE_RESCUER`, `ROLE_COORDINATOR`, `ROLE_ADMIN`.
-2. **Phiên AI kế tiếp (Session 03):**
-   - Xây dựng chức năng gửi SOS lưu vào CSDL, upload ảnh lên Cloudinary và hiển thị Marker trên bản đồ Leaflet.js.
+1. **Phiên AI tiếp theo (Session 03 - Phụ trách: Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
+   - Xây dựng chức năng gửi yêu cầu cứu nạn khẩn cấp SOS (lưu CSDL, hỗ trợ gửi nặc danh hoặc đã đăng nhập).
+   - Tích hợp HTML5 Geolocation API lấy tọa độ GPS 1 chạm.
+   - Nhúng bản đồ Leaflet.js + OpenStreetMap (kéo thả marker, ghim vị trí, tự điền vĩ độ/kinh độ).
+   - Trang theo dõi tiến độ ca cứu hộ cho người dân (`templates/sos/track.html`).
+2. **Phiên AI kế tiếp (Session 04 - Phụ trách: PeterWeeee):**
+   - Tích hợp Cloudinary Media Upload ảnh hiện trường cứu hộ.
 
 ---
 
 ## 5. Vấn Đề Tồn Đọng & Lưu Ý Kỹ Thuật (Known Issues / Blockers)
 - **Cơ sở dữ liệu:** Mặc định profile được đặt là `local` (sử dụng H2 in-memory) để ứng dụng có thể chạy và test ngay lập tức mà không cần bật MySQL hay SQL Server. Khi chạy môi trường thực tế, truyền `-Dspring-boot.run.profiles=mysql` hoặc `-Dspring-boot.run.profiles=sqlserver`.
-- **Thư mục dự án:** Hai thư mục `c:\ute\WEB programming\Group` và `C:\Users\Will\Projects\disaster-rescue-system` đã được đồng bộ hóa mã nguồn đầy đủ.
+- **Thư mục dự án:** Dự án được phát triển và quản lý duy nhất tại `C:\Users\Will\Projects\disaster-rescue-system`. Toàn bộ tài liệu nghiệp vụ gốc (`.docx`) đã được lưu trữ an toàn trong `docs/`.
 
 ---
 
 ## 6. Hướng Dẫn Nhanh Cho AI / Lập Trình Viên Mới Tiếp Quản
-1. Đọc nhanh file `docs/HANDOVER_STATUS.md` để nắm bắt tiến độ (Session 01 đã xong, bắt đầu Session 02).
-2. Xem lộ trình chi tiết phiên 02 tại `docs/roadmap/session-02-auth-security-jwt.md`.
+1. Đọc nhanh file `docs/HANDOVER_STATUS.md` để nắm bắt tiến độ (Session 01 và 02 đã xong, bắt đầu Session 03).
+2. Xem lộ trình chi tiết phiên 03 tại `docs/roadmap/session-03-sos-geolocation-leaflet.md`.
 3. Kiểm tra schema CSDL tại `docs/DATABASE_SCHEMA.md`.
-4. Sau khi hoàn thành Session 02, cập nhật lại trạng thái trong file này.
+4. Sau khi hoàn thành Session 03, cập nhật lại trạng thái trong file này.

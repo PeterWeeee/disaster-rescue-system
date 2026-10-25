@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#rescuer-content})}">
+<body>
+
+<div id="rescuer-content" class="py-4">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-person-military-pointing text-warning me-2"></i> TÁC NGHIỆP CỨU HỘ HIỆN TRƯỜNG (RESCUER PORTAL)
+                </h3>
+                <small class="text-muted">Nhận lệnh điều động, cập nhật tiến độ di chuyển và báo cáo nghiệm thu</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark py-2 px-3"><i class="fa-solid fa-satellite-dish me-1"></i> GPS Sẵn Sàng</span>
+            </div>
+        </div>
+
+        <div class="alert alert-warning py-3 shadow-sm border-0">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Bạn đã đăng nhập với vai trò <strong><span sec:authentication="name">Rescuer</span></strong>. Phân hệ tác nghiệp hiện trường của Đội cứu hộ sẽ được tích hợp chi tiết trong <strong>Session 07</strong> (Tiếp nhận nhiệm vụ, cập nhật trạng thái di chuyển và upload ảnh nghiệm thu).
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

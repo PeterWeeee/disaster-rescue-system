@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#admin-content})}">
+<body>
+
+<div id="admin-content" class="py-4">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-screwdriver-wrench text-primary me-2"></i> TRUNG TÂM QUẢN TRỊ HỆ THỐNG (ADMIN PORTAL)
+                </h3>
+                <small class="text-muted">Quản lý người dùng, phân quyền, cấu hình đội cứu hộ và phát cảnh báo Broadcast</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger py-2 px-3"><i class="fa-solid fa-lock me-1"></i> Quyền Quản Trị Cao Nhất</span>
+            </div>
+        </div>
+
+        <div class="alert alert-danger py-3 shadow-sm border-0">
+            <i class="fa-solid fa-shield-halved me-2"></i>
+            Bạn đã đăng nhập với vai trò <strong><span sec:authentication="name">Admin</span></strong>. Phân hệ Quản trị toàn diện sẽ được hoàn thiện trong <strong>Session 08</strong> (Quản lý User & Đội cứu hộ, Broadcast WebSocket cảnh báo khẩn cấp toàn màn hình, thống kê Chart.js).
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

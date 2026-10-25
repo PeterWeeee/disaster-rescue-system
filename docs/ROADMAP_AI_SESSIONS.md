@@ -1,5 +1,5 @@
 # KẾ HOẠCH CHIA NHỎ PHIÊN LÀM VIỆC CỦA AI (AI SESSIONS ROADMAP)
-> **Mục tiêu:** Tránh việc AI bị "tràn ngữ cảnh" (context window loss) dẫn đến quên code cũ hoặc code chắp vá. Kế hoạch này được tách thành các file chi tiết độc lập trong thư mục [`docs/roadmap/`](file:///c:/ute/WEB%20programming/Group/docs/roadmap/).
+> **Mục tiêu:** Tránh việc AI bị "tràn ngữ cảnh" (context window loss) dẫn đến quên code cũ hoặc code chắp vá. Kế hoạch này được tách thành các file chi tiết độc lập trong thư mục [`docs/roadmap/`](roadmap/).
 
 ---
 
@@ -32,21 +32,21 @@
 
 ## 📂 Danh Sách File Chi Tiết Từng Phiên
 
-1. **[Session 01: Khởi tạo Spring Boot & Cấu hình Đa Database](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-01-setup-and-dual-db.md)**
+1. **[Session 01: Khởi tạo Spring Boot & Cấu hình Đa Database](roadmap/session-01-setup-and-dual-db.md)**
    - Setup `pom.xml`, cấu hình song song MySQL + SQL Server, Base Layout Thymeleaf + Bootstrap 5.
-2. **[Session 02: Xác thực & Phân quyền (Security + JWT)](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-02-auth-security-jwt.md)**
+2. **[Session 02: Xác thực & Phân quyền (Security + JWT)](roadmap/session-02-auth-security-jwt.md)**
    - User, Role, Spring Security 6, JWT lưu HttpOnly Cookie, Đăng ký, Đăng nhập cho 4 roles.
-3. **[Session 03: Phân hệ Gửi SOS & Bản đồ Leaflet.js](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-03-sos-geolocation-leaflet.md)**
+3. **[Session 03: Phân hệ Gửi SOS & Bản đồ Leaflet.js](roadmap/session-03-sos-geolocation-leaflet.md)**
    - Entity SosRequest, lấy GPS 1 chạm, ghim bản đồ Leaflet, theo dõi tiến độ.
-4. **[Session 04: Tích hợp Upload Ảnh Lên Cloudinary](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-04-cloudinary-media-upload.md)**
+4. **[Session 04: Tích hợp Upload Ảnh Lên Cloudinary](roadmap/session-04-cloudinary-media-upload.md)**
    - Cấu hình Cloudinary SDK, upload ảnh hiện trường kèm form SOS, xem trước ảnh.
-5. **[Session 05: WebSocket Real-time Cốt Lõi](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-05-websocket-realtime-sos.md)**
+5. **[Session 05: WebSocket Real-time Cốt Lõi](roadmap/session-05-websocket-realtime-sos.md)**
    - STOMP over SockJS, kênh `/topic/sos-alerts`, âm thanh chuông báo, marker đỏ động.
-6. **[Session 06: Phân hệ Điều Phối Viên (Dashboard & Dispatch)](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-06-coordinator-dashboard-dispatch.md)**
+6. **[Session 06: Phân hệ Điều Phối Viên (Dashboard & Dispatch)](roadmap/session-06-coordinator-dashboard-dispatch.md)**
    - Trung tâm chỉ huy, công thức Haversine gợi ý đội gần nhất, gán nhiệm vụ.
-7. **[Session 07: Phân hệ Đội Cứu Hộ](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-07-rescuer-team-operations.md)**
+7. **[Session 07: Phân hệ Đội Cứu Hộ](roadmap/session-07-rescuer-team-operations.md)**
    - Nhận nhiệm vụ, cập nhật tiến độ di chuyển, hoàn thành ca cứu nạn kèm ảnh.
-8. **[Session 08: Phân hệ Admin (Quản Trị & Cảnh Báo Khẩn)](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-08-admin-broadcast-statistics.md)**
+8. **[Session 08: Phân hệ Admin (Quản Trị & Cảnh Báo Khẩn)](roadmap/session-08-admin-broadcast-statistics.md)**
    - Broadcast cảnh báo khẩn cấp toàn màn hình, quản trị tài khoản, biểu đồ Chart.js.
-9. **[Session 09: Tối Ưu Mobile, Seed Data & Kịch Bản Demo](file:///c:/ute/WEB%20programming/Group/docs/roadmap/session-09-mobile-testing-demo-script.md)**
+9. **[Session 09: Tối Ưu Mobile, Seed Data & Kịch Bản Demo](roadmap/session-09-mobile-testing-demo-script.md)**
    - Tối ưu màn hình điện thoại, nạp dữ liệu mẫu tự động, kịch bản 5 bước thuyết trình điểm tối đa.

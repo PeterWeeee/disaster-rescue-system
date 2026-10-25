@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#coordinator-content})}">
+<body>
+
+<div id="coordinator-content" class="py-4">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-tower-broadcast text-danger me-2"></i> TRUNG TÂM ĐIỀU PHỐI CỨU NẠN (COORDINATOR DASHBOARD)
+                </h3>
+                <small class="text-muted">Theo dõi và phân công lực lượng cứu nạn thời gian thực</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success py-2 px-3"><i class="fa-solid fa-circle-dot me-1"></i> Trực ban hoạt động</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">SOS Chờ xử lý</h6>
+                                <h2 class="fw-bold mb-0">12</h2>
+                            </div>
+                            <i class="fa-solid fa-bell fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Đang điều phối</h6>
+                                <h2 class="fw-bold mb-0">5</h2>
+                            </div>
+                            <i class="fa-solid fa-truck-fast fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Đội cứu hộ sẵn sàng</h6>
+                                <h2 class="fw-bold mb-0">8</h2>
+                            </div>
+                            <i class="fa-solid fa-person-military-pointing fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Đã giải cứu hôm nay</h6>
+                                <h2 class="fw-bold mb-0">48</h2>
+                            </div>
+                            <i class="fa-solid fa-circle-check fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info py-3 shadow-sm border-0">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            Bạn đã đăng nhập với vai trò <strong><span sec:authentication="name">Coordinator</span></strong>. Giao diện toàn diện của phân hệ Điều phối viên sẽ được hoàn thiện trong <strong>Session 06</strong> (Bản đồ GPS, Thuật toán Haversine & Phân công nhiệm vụ).
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
