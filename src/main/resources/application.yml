@@ -2,7 +2,9 @@ spring:
   application:
     name: disaster-rescue-system
   profiles:
-    active: local
+    active: sqlserver
+  config:
+    import: "optional:classpath:application-secret.yml"
   servlet:
     multipart:
       max-file-size: 10MB
@@ -23,10 +25,11 @@ server:
     include-binding-errors: always
 
 # Cloudinary Storage Configuration
+# Các giá trị nhạy cảm được nạp tự động từ application-secret.yml (đã chặn bởi .gitignore)
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:odwf5uoi}
   api-key: ${CLOUDINARY_API_KEY:329355988118811}
-  api-secret: ${CLOUDINARY_API_SECRET:w6nY13mFiftdZCSg6Sqd0GdU4j0}
+  api-secret: ${CLOUDINARY_API_SECRET:}
 
 # Application & Emergency Hotlines Info
 app:

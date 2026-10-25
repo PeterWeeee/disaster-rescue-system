@@ -48,6 +48,7 @@ out/
 !**/src/test/**/out/
 
 # IDE - Eclipse
+bin/
 .apt_generated
 .classpath
 .factorypath
@@ -76,6 +77,7 @@ ehthumbs.db
 application-local.properties
 application-local.yml
 application-secret.*
+!application-secret.example.*
 
 # Heavy binary documentation files (uncomment if you want to push docx)
 *.docx
