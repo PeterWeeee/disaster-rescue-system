@@ -5,34 +5,38 @@
 
 <div id="map-content" class="py-4">
     <div class="container-fluid px-4">
+        <!-- Top Toolbar -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
             <div>
-                <h4 class="fw-bold mb-1"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Bản Đồ Cứu Nạn Trực Tuyến & Điểm Sơ Tán</h4>
-                <p class="text-muted small mb-0">Theo dõi phân bố các điểm kêu cứu khẩn cấp, vùng ngập lụt nguy hiểm và các trạm tiếp tế an toàn.</p>
+                <h4 class="fw-bold mb-1">
+                    <i class="fa-solid fa-map-location-dot text-danger me-2"></i>Bản Đồ Cứu Nạn Trực Tuyến & Điểm Sơ Tán
+                </h4>
+                <p class="text-muted small mb-0">Theo dõi phân bố các điểm kêu cứu khẩn cấp, vùng ngập lụt nguy hiểm và các trạm tiếp tế an toàn theo thời gian thực.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a th:href="@{/sos}" class="btn btn-danger btn-sm fw-bold">
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Gửi SOS khẩn cấp
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" id="btn-locate-me">
+                    <i class="fa-solid fa-crosshairs me-1"></i> Định vị vị trí của tôi
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-refresh-map">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i> Làm mới điểm SOS
+                </button>
+                <a th:href="@{/sos}" class="btn btn-danger btn-sm fw-bold pulse-button">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> GỬI SOS KHẨN CẤP
                 </a>
             </div>
         </div>
 
         <div class="row g-3">
+            <!-- Map Canvas -->
             <div class="col-lg-9">
-                <div class="card border-0 shadow-sm overflow-hidden" style="min-height: 550px;">
-                    <div id="leafletMap" class="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-secondary-subtle p-5 text-center" style="min-height: 550px;">
-                        <i class="fa-solid fa-earth-americas fa-4x text-muted mb-3"></i>
-                        <h5 class="fw-bold text-dark">Bản Đồ GIS Leaflet & OpenStreetMap</h5>
-                        <p class="text-muted small max-w-500 mb-3">
-                            Bản đồ tương tác thời gian thực sẽ hiển thị marker các ca SOS, trạm cứu hộ và đường đi di tản (sẽ được hoàn thiện đầy đủ trong Phiên làm việc #03).
-                        </p>
-                        <span class="badge bg-danger px-3 py-2">Sẵn sàng tích hợp WebSocket STOMP & Leaflet.js</span>
-                    </div>
+                <div class="card border-0 shadow-sm overflow-hidden" style="min-height: 600px;">
+                    <div id="liveMapCanvas" class="w-100" style="min-height: 600px; height: 600px; z-index: 1;"></div>
                 </div>
             </div>
 
-            <!-- Sidebar Info -->
+            <!-- Sidebar Info & Controls -->
             <div class="col-lg-3">
+                <!-- Map Legend -->
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-header bg-navy text-white fw-bold py-2">
                         <i class="fa-solid fa-layer-group me-1"></i> Chú Giải Bản Đồ
@@ -40,33 +44,47 @@
                     <div class="card-body p-3 small">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <span class="badge bg-danger rounded-circle p-2"> </span>
-                            <span><strong>Đỏ:</strong> Khẩn cấp đe dọa tính mạng</span>
+                            <span><strong>Đỏ (Đặc biệt):</strong> Ngập nóc, sạt lở, nguy kịch</span>
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <span class="badge bg-warning rounded-circle p-2"> </span>
-                            <span><strong>Cam:</strong> Nguy cấp cao (Có trẻ nhỏ, người già)</span>
+                            <span><strong>Cam (Nguy cấp cao):</strong> Có trẻ sơ sinh, người già, bệnh</span>
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <span class="badge bg-primary rounded-circle p-2"> </span>
-                            <span><strong>Xanh:</strong> Trạm cứu hộ / Xuồng ứng trực</span>
+                            <span><strong>Xanh dương:</strong> Cần hỗ trợ lương thực, cô lập</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-success rounded-circle p-2"> </span>
-                            <span><strong>Lục:</strong> Điểm sơ tán an toàn có thực phẩm</span>
+                            <span><strong>Xanh lá:</strong> Đã hoàn tất cứu nạn an toàn</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- Live SOS Summary -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-dark text-white fw-bold py-2 d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-tower-broadcast text-danger me-1"></i> Điểm Kêu Cứu Trực Tuyến</span>
+                        <span id="sos-badge-count" class="badge bg-danger">0 ca</span>
+                    </div>
+                    <div class="card-body p-2" style="max-height: 250px; overflow-y: auto;">
+                        <div id="sos-quick-list" class="list-group list-group-flush small">
+                            <div class="text-center text-muted py-3">Đang tải danh sách điểm cứu nạn...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Weather Warning -->
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-dark text-white fw-bold py-2">
-                        <i class="fa-solid fa-bullhorn text-warning me-1"></i> Tin Cảnh Báo Mới
+                    <div class="card-header bg-danger text-white fw-bold py-2">
+                        <i class="fa-solid fa-bullhorn me-1"></i> Tin Cảnh Báo Thiên Tai
                     </div>
                     <div class="card-body p-3 small">
-                        <div class="alert alert-warning py-2 px-3 mb-2 small">
-                            <strong>Lũ dâng nhanh:</strong> Vùng hạ lưu sông Hương mực nước báo động 3. Người dân di chuyển tài sản lên cao.
+                        <div class="alert alert-danger py-2 px-3 mb-2 small">
+                            <strong>Lũ lụt dâng nhanh:</strong> Mực nước các sông tại miền Trung đang xấp xỉ mức báo động 3. Người dân chủ động sơ tán đến điểm an toàn.
                         </div>
-                        <div class="alert alert-danger py-2 px-3 mb-0 small">
-                            <strong>Nguy cơ sạt lở:</strong> Cảnh báo nguy cơ lũ quét cao tại các xã miền núi.
+                        <div class="alert alert-warning py-2 px-3 mb-0 small">
+                            <strong>Nguy cơ sạt lở:</strong> Cảnh báo nguy cơ lũ quét, sạt lở đất nghiêm trọng tại các sườn đồi dốc.
                         </div>
                     </div>
                 </div>
@@ -74,6 +92,164 @@
         </div>
     </div>
 </div>
+
+<!-- Leaflet Live Map Integration Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const defaultCenter = [16.0544, 108.2022]; // Đà Nẵng / Miền Trung
+    const mapElement = document.getElementById("liveMapCanvas");
+    if (!mapElement) return;
+
+    const liveMap = L.map("liveMapCanvas").setView(defaultCenter, 11);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(liveMap);
+
+    let sosMarkersLayer = L.layerGroup().addTo(liveMap);
+    let userMarker = null;
+
+    // Tải danh sách các điểm SOS từ API
+    function loadSosMarkers() {
+        fetch("/api/sos")
+            .then(res => res.json())
+            .then(data => {
+                sosMarkersLayer.clearLayers();
+                const list = data.data || [];
+                const badgeCount = document.getElementById("sos-badge-count");
+                const quickList = document.getElementById("sos-quick-list");
+
+                if (badgeCount) badgeCount.innerText = list.length + " ca";
+
+                if (quickList) {
+                    if (list.length === 0) {
+                        quickList.innerHTML = '<div class="text-center text-muted py-3">Hiện tại chưa có ca cứu nạn nào được ghi nhận.</div>';
+                    } else {
+                        quickList.innerHTML = "";
+                    }
+                }
+
+                list.forEach(sos => {
+                    if (!sos.latitude || !sos.longitude) return;
+
+                    let markerColor = "#dc2626"; // Đỏ (CRITICAL)
+                    let urgencyBadge = '<span class="badge bg-danger">🔴 Đặc biệt nguy hiểm</span>';
+
+                    if (sos.status === "RESOLVED" || sos.status === "COMPLETED") {
+                        markerColor = "#16a34a";
+                        urgencyBadge = '<span class="badge bg-success">🟢 Đã hoàn tất</span>';
+                    } else if (sos.urgencyLevel === "HIGH") {
+                        markerColor = "#f59e0b";
+                        urgencyBadge = '<span class="badge bg-warning text-dark">🟠 Nguy cấp cao</span>';
+                    } else if (sos.urgencyLevel === "MEDIUM" || sos.urgencyLevel === "LOW") {
+                        markerColor = "#2563eb";
+                        urgencyBadge = '<span class="badge bg-primary">🔵 Cần hỗ trợ</span>';
+                    }
+
+                    // Circle marker với màu tương ứng
+                    const circle = L.circleMarker([sos.latitude, sos.longitude], {
+                        radius: (sos.urgencyLevel === "CRITICAL" && sos.status === "PENDING") ? 12 : 9,
+                        color: markerColor,
+                        fillColor: markerColor,
+                        fillOpacity: 0.8,
+                        weight: 2
+                    }).addTo(sosMarkersLayer);
+
+                    const popupContent = `
+                        <div style="min-width: 220px;">
+                            <div class="mb-1">${urgencyBadge}</div>
+                            <strong style="font-size: 1.05rem;">#SOS-${sos.id}: ${sos.contactName}</strong><br>
+                            <span class="text-muted"><i class="fa-solid fa-phone"></i> ${sos.contactPhone}</span><br>
+                            <span class="text-muted"><i class="fa-solid fa-users"></i> ${sos.peopleCount} người</span><br>
+                            <div class="small mt-1 text-secondary">${sos.addressDetail || "Không có ghi chú địa chỉ"}</div>
+                            <hr style="margin: 6px 0;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">${sos.status}</span>
+                                <a href="/sos/track/${sos.id}" class="btn btn-sm btn-danger text-white py-0 px-2" style="font-size: 0.8rem;">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    `;
+
+                    circle.bindPopup(popupContent);
+
+                    // Thêm vào sidebar quick list
+                    if (quickList && list.length <= 15) {
+                        const itemLink = document.createElement("a");
+                        itemLink.href = "javascript:void(0)";
+                        itemLink.className = "list-group-item list-group-item-action py-2 px-2";
+                        itemLink.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>#SOS-${sos.id} - ${sos.contactName}</strong>
+                                <span class="badge" style="background-color: ${markerColor}">${sos.urgencyLevel}</span>
+                            </div>
+                            <small class="text-muted text-truncate d-block">${sos.addressDetail || (sos.latitude + ', ' + sos.longitude)}</small>
+                        `;
+                        itemLink.onclick = function () {
+                            liveMap.setView([sos.latitude, sos.longitude], 15);
+                            circle.openPopup();
+                        };
+                        quickList.appendChild(itemLink);
+                    }
+                });
+            })
+            .catch(err => console.error("Lỗi tải markers SOS:", err));
+    }
+
+    // Nút làm mới bản đồ
+    const btnRefresh = document.getElementById("btn-refresh-map");
+    if (btnRefresh) {
+        btnRefresh.addEventListener("click", loadSosMarkers);
+    }
+
+    // Nút định vị tôi
+    const btnLocate = document.getElementById("btn-locate-me");
+    if (btnLocate) {
+        btnLocate.addEventListener("click", function () {
+            if (!navigator.geolocation) {
+                alert("Trình duyệt của bạn không hỗ trợ định vị GPS.");
+                return;
+            }
+            btnLocate.disabled = true;
+            btnLocate.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang định vị...';
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    btnLocate.disabled = false;
+                    btnLocate.innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i> Định vị vị trí của tôi';
+                    const userLat = pos.coords.latitude;
+                    const userLng = pos.coords.longitude;
+
+                    if (userMarker) {
+                        userMarker.setLatLng([userLat, userLng]);
+                    } else {
+                        userMarker = L.marker([userLat, userLng], {
+                            title: "Vị trí của bạn"
+                        }).addTo(liveMap);
+                        userMarker.bindPopup("<b>📍 Vị trí hiện tại của bạn</b>");
+                    }
+
+                    liveMap.setView([userLat, userLng], 14);
+                    userMarker.openPopup();
+                },
+                function (err) {
+                    btnLocate.disabled = false;
+                    btnLocate.innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i> Định vị vị trí của tôi';
+                    alert("Không thể lấy vị trí hiện tại: " + err.message);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        });
+    }
+
+    // Tải dữ liệu ban đầu
+    loadSosMarkers();
+
+    setTimeout(function () {
+        liveMap.invalidateSize();
+    }, 200);
+});
+</script>
 
 </body>
 </html>

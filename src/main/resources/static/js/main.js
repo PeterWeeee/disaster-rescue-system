@@ -38,14 +38,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 2. Quét GPS tự động ở Form SOS (/sos)
+    // 2. Quét GPS tự động ở Form SOS (/sos) - chỉ dùng fallback khi không có bản đồ Leaflet
+    const sosMapPresent = document.getElementById("sosMap");
     const btnGetLocation = document.getElementById("btn-get-location");
     const inputLat = document.getElementById("input-lat");
     const inputLng = document.getElementById("input-lng");
     const geoAlert = document.getElementById("geo-alert");
 
-    // Tự động điền nếu đã quét trước đó ở trang chủ
-    if (inputLat && inputLng) {
+    // Tự động điền nếu đã quét trước đó ở trang chủ (chỉ fallback nếu không có sosMap)
+    if (!sosMapPresent && inputLat && inputLng) {
         const savedLat = sessionStorage.getItem("user_last_lat");
         const savedLng = sessionStorage.getItem("user_last_lng");
         if (savedLat && savedLng && !inputLat.value) {
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    if (btnGetLocation && inputLat && inputLng) {
+    if (!sosMapPresent && btnGetLocation && inputLat && inputLng) {
         btnGetLocation.addEventListener("click", function () {
             if (!navigator.geolocation) {
                 if (geoAlert) {

@@ -30,14 +30,6 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/sos")
-    public String sosQuickRequest(Model model) {
-        model.addAttribute("appName", appName);
-        model.addAttribute("pageTitle", "Gửi Tín Hiệu Cứu Nạn Khẩn Cấp (SOS)");
-        model.addAttribute("rescueHotline", rescueHotline);
-        return "sos/request";
-    }
-
     @GetMapping("/map")
     public String liveMap(Model model) {
         model.addAttribute("appName", appName);
