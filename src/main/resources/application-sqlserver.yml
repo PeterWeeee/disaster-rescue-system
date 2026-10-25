@@ -1,0 +1,14 @@
+# Profile: sqlserver (Dành cho thành viên nhóm sử dụng Microsoft SQL Server)
+spring:
+  datasource:
+    url: jdbc:sqlserver://${MSSQL_HOST:localhost}:${MSSQL_PORT:1433};databaseName=${MSSQL_DB:cuunan_db};encrypt=true;trustServerCertificate=true
+    username: ${MSSQL_USER:sa}
+    password: ${MSSQL_PASSWORD:YourStrong@Password}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect

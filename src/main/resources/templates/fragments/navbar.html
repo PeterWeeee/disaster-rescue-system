@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<div th:fragment="navbar">
+    <!-- Top Emergency Hotline Bar -->
+    <div class="emergency-topbar py-1 text-white">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center small">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-danger text-uppercase fw-bold pulse-badge">
+                    <i class="fa-solid fa-tower-broadcast me-1"></i> Khẩn cấp 24/7
+                </span>
+                <span class="d-none d-md-inline text-light">Tổng đài cứu nạn quốc gia sẵn sàng tiếp nhận cuộc gọi</span>
+            </div>
+            <div class="d-flex align-items-center gap-3 fw-semibold">
+                <span><i class="fa-solid fa-phone text-warning me-1"></i> Cứu hộ: <a href="tel:112" class="text-white text-decoration-underline fw-bold">112</a></span>
+                <span><i class="fa-solid fa-fire-extinguisher text-danger me-1"></i> PCCC/Lụt: <a href="tel:114" class="text-white text-decoration-underline fw-bold">114</a></span>
+                <span><i class="fa-solid fa-truck-medical text-info me-1"></i> Cấp cứu: <a href="tel:115" class="text-white text-decoration-underline fw-bold">115</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-navy sticky-top shadow-sm">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+                <span class="brand-icon">
+                    <i class="fa-solid fa-shield-halved text-danger fa-lg"></i>
+                </span>
+                <span class="brand-text">
+                    <strong class="text-white tracking-wide">CỨUNẠN</strong><span class="text-danger fw-extrabold">24/7</span>
+                </span>
+            </a>
+
+            <!-- Mobile Toggler -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}"><i class="fa-solid fa-house me-1"></i> Trang Chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/map}"><i class="fa-solid fa-map-location-dot me-1"></i> Bản Đồ Trực Tuyến</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/map#shelters}"><i class="fa-solid fa-campground me-1"></i> Điểm Sơ Tán</a>
+                    </li>
+                    <li class="nav-item dropdown" sec:authorize="hasAnyRole('RESCUER', 'COORDINATOR', 'ADMIN')">
+                        <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-person-military-pointing me-1"></i> Tác Vụ Cứu Hộ
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li sec:authorize="hasRole('COORDINATOR') or hasRole('ADMIN')">
+                                <a class="dropdown-item" th:href="@{/coordinator/dashboard}">Điều phối SOS (Coordinator)</a>
+                            </li>
+                            <li sec:authorize="hasRole('RESCUER')">
+                                <a class="dropdown-item" th:href="@{/rescuer/missions}">Nhiệm vụ đội (Rescuer)</a>
+                            </li>
+                            <li sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item" th:href="@{/admin/dashboard}">Quản trị hệ thống (Admin)</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Action Buttons: SOS & Auth -->
+                <div class="d-flex align-items-center gap-2">
+                    <a th:href="@{/sos}" class="btn btn-sos pulse-button text-white fw-bold px-3 py-2 shadow">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> GỬI SOS KHẨN CẤP
+                    </a>
+
+                    <!-- Not Logged In -->
+                    <div sec:authorize="isAnonymous()" class="d-flex gap-2 ms-2">
+                        <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm px-3">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Đăng Nhập
+                        </a>
+                        <a th:href="@{/auth/register}" class="btn btn-primary btn-sm px-3">
+                            <i class="fa-solid fa-user-plus me-1"></i> Đăng Ký
+                        </a>
+                    </div>
+
+                    <!-- Logged In User -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown ms-2">
+                        <a class="btn btn-dark btn-sm dropdown-toggle d-flex align-items-center gap-2 border-secondary"
+                           href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-circle-user fa-lg text-info"></i>
+                            <span sec:authentication="name">Người dùng</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow">
+                            <li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-solid fa-id-card me-2"></i> Hồ sơ cá nhân</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/auth/logout}" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+</body>
+</html>

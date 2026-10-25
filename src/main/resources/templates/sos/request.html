@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#sos-content})}">
+<body>
+
+<div id="sos-content" class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Emergency Banner -->
+                <div class="alert alert-danger d-flex align-items-center gap-3 shadow-sm mb-4 border-2 border-danger">
+                    <i class="fa-solid fa-triangle-exclamation fa-2x text-danger animate-bounce"></i>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">BẠN ĐANG TRONG TÌNH TRẠNG NGUY CẤP?</h5>
+                        <p class="mb-0 small">
+                            Nếu tính mạng đang bị đe dọa ngay lập tức, hãy gọi trực tiếp <strong>112</strong> hoặc <strong>114</strong> đồng thời điền thông tin bên dưới để lực lượng cứu hộ xác định vị trí vệ tinh.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-danger text-white py-3">
+                        <h4 class="card-title fw-bold mb-0">
+                            <i class="fa-solid fa-life-ring me-2"></i> Phiếu Yêu Cầu Cứu Nạn Khẩn Cấp (SOS)
+                        </h4>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <form id="sosForm" method="post" enctype="multipart/form-data">
+                            <!-- 1. Mức độ khẩn cấp -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">
+                                    <i class="fa-solid fa-gauge-high text-danger me-1"></i> Mức độ khẩn cấp <span class="text-danger">*</span>
+                                </label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="urgencyLevel" id="urgency-critical" value="CRITICAL" checked>
+                                        <label class="btn btn-outline-danger w-100 p-3 text-start" for="urgency-critical">
+                                            <div class="fw-bold fs-6">🔴 ĐẶC BIỆT NGUY HIỂM</div>
+                                            <small class="d-block text-muted">Ngập tới nóc nhà, sạt lở sát vách, có người đuối nước</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="urgencyLevel" id="urgency-high" value="HIGH">
+                                        <label class="btn btn-outline-warning w-100 p-3 text-start" for="urgency-high">
+                                            <div class="fw-bold fs-6 text-dark">🟠 NGUY CẤP CAO</div>
+                                            <small class="d-block text-muted">Nước đang dâng nhanh, có người già, trẻ sơ sinh, người bệnh</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="urgencyLevel" id="urgency-medium" value="MEDIUM">
+                                        <label class="btn btn-outline-primary w-100 p-3 text-start" for="urgency-medium">
+                                            <div class="fw-bold fs-6">🔵 CẦN HỖ TRỢ</div>
+                                            <small class="d-block text-muted">Bị cô lập, cạn kiệt lương thực, nước uống, thuốc men</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Vị trí & Tọa độ GPS -->
+                            <div class="card bg-light border-0 p-3 mb-4 rounded">
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center">
+                                    <span><i class="fa-solid fa-location-dot text-danger me-1"></i> Tọa độ GPS & Vị trí hiện tại <span class="text-danger">*</span></span>
+                                    <button type="button" class="btn btn-sm btn-danger fw-semibold" id="btn-get-location">
+                                        <i class="fa-solid fa-crosshairs me-1"></i> Lấy GPS tự động
+                                    </button>
+                                </label>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Vĩ độ (Lat)</span>
+                                            <input type="number" step="any" class="form-control" name="latitude" id="input-lat" required placeholder="Vd: 16.0544">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Kinh độ (Lng)</span>
+                                            <input type="number" step="any" class="form-control" name="longitude" id="input-lng" required placeholder="Vd: 108.2022">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-0">
+                                    <input type="text" class="form-control form-control-sm" name="addressDetail" id="input-address"
+                                           placeholder="Mô tả mốc địa danh dễ nhận biết (Vd: Số nhà 12 ngõ 3, gần trạm biến áp, nóc nhà tôn xanh...)">
+                                </div>
+                                <div id="geo-alert" class="small mt-2 text-muted">
+                                    <i class="fa-solid fa-info-circle me-1"></i> Nhấn "Lấy GPS tự động" và cho phép trình duyệt truy cập vị trí của bạn.
+                                </div>
+                            </div>
+
+                            <!-- 3. Thông tin người cần cứu -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fa-solid fa-user me-1 text-secondary"></i> Họ và tên người liên hệ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="contactName" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fa-solid fa-phone me-1 text-secondary"></i> Số điện thoại liên hệ <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" name="contactPhone" required placeholder="0987654321">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fa-solid fa-phone-volume me-1 text-secondary"></i> Số điện thoại phụ (nếu có)</label>
+                                    <input type="tel" class="form-control" name="secondaryPhone" placeholder="Số người thân hoặc hàng xóm">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fa-solid fa-users me-1 text-secondary"></i> Tổng số người đang gặp nạn <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="peopleCount" min="1" value="1" required>
+                                </div>
+                            </div>
+
+                            <!-- 4. Tình trạng đặc biệt -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-block"><i class="fa-solid fa-triangle-exclamation me-1 text-warning"></i> Nhóm đối tượng ưu tiên cứu hộ đặc biệt:</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="hasElderly" id="checkElderly">
+                                    <label class="form-check-label fw-semibold" for="checkElderly">👵 Có người già / khuyết tật</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="hasChildren" id="checkChildren">
+                                    <label class="form-check-label fw-semibold" for="checkChildren">👶 Có trẻ em / trẻ sơ sinh</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="hasInjured" id="checkInjured">
+                                    <label class="form-check-label fw-semibold" for="checkInjured">🩹 Có người bị thương / cần cấp cứu y tế</label>
+                                </div>
+                            </div>
+
+                            <!-- 5. Ảnh hiện trường (Cloudinary) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fa-solid fa-camera text-primary me-1"></i> Ảnh chụp hiện trường (Nếu thiết bị cho phép)
+                                </label>
+                                <input type="file" class="form-control" name="photo" id="photoInput" accept="image/*" capture="environment">
+                                <small class="text-muted d-block mt-1">Ảnh sẽ được tối ưu tự động lên Cloudinary để cứu hộ nhận diện địa hình trước khi xuất kích.</small>
+                                <div id="imagePreview" class="mt-2 d-none">
+                                    <img src="" id="previewImg" class="img-thumbnail rounded" style="max-height: 180px;" alt="Ảnh hiện trường">
+                                </div>
+                            </div>
+
+                            <!-- 6. Mô tả thêm -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold"><i class="fa-solid fa-comment-dots me-1 text-secondary"></i> Mô tả tình hình chi tiết</label>
+                                <textarea class="form-control" name="description" rows="3" placeholder="Mực nước đang ngập đến đâu? Có nguồn điện hở không? Pin điện thoại còn bao nhiêu %?"></textarea>
+                            </div>
+
+                            <!-- Nút gửi -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg fw-bold py-3 pulse-button">
+                                    <i class="fa-solid fa-tower-broadcast me-2"></i> PHÁT TÍN HIỆU CỨU NẠN NGAY BÂY GIỜ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

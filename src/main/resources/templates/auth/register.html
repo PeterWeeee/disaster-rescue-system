@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#register-content})}">
+<body>
+
+<div id="register-content" class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-navy text-white text-center py-4">
+                        <i class="fa-solid fa-user-plus text-primary fa-2x mb-2"></i>
+                        <h4 class="fw-bold mb-0">ĐĂNG KÝ TÀI KHOẢN</h4>
+                        <small class="text-white-50">Dành cho Người Dân hoặc Tình Nguyện Viên Cứu Hộ</small>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <form th:action="@{/auth/register}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Họ và tên đầy đủ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="fullName" required placeholder="Vd: Nguyễn Văn A">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="username" required placeholder="tentaikhoan">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" name="phone" required placeholder="0987654321">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="password" required placeholder="Ít nhất 6 ký tự">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Vai trò đăng ký</label>
+                                <select class="form-select" name="role">
+                                    <option value="ROLE_CITIZEN" selected>Người dân (Cần theo dõi hoặc gửi trợ giúp)</option>
+                                    <option value="ROLE_RESCUER">Tình nguyện viên / Đội viên cứu hộ</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Địa chỉ thường trú</label>
+                                <input type="text" class="form-control" name="address" placeholder="Xã/Phường, Huyện/Quận, Tỉnh/TP">
+                            </div>
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary fw-bold py-2">
+                                    <i class="fa-solid fa-user-check me-1"></i> Hoàn Tất Đăng Ký
+                                </button>
+                            </div>
+                        </form>
+                        <div class="text-center small text-muted">
+                            Đã có tài khoản? <a th:href="@{/auth/login}" class="fw-bold text-primary">Đăng nhập ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

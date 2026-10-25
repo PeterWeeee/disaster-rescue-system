@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#home-content})}">
+<body>
+
+<div id="home-content">
+    <!-- Hero Emergency Section -->
+    <section class="hero-section text-white py-5 position-relative overflow-hidden">
+        <div class="hero-overlay"></div>
+        <div class="container position-relative py-5">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7 text-center text-lg-start">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger-subtle text-danger border border-danger-subtle mb-3">
+                        <span class="pulse-dot"></span>
+                        <small class="fw-bold text-uppercase tracking-wider">Hệ Thống Phản Ứng Khẩn Cấp Thiên Tai</small>
+                    </div>
+                    <h1 class="display-4 fw-extrabold mb-3 lh-sm text-shadow">
+                        CỨU NẠN KHẨN CẤP <br>
+                        <span class="text-danger-gradient">KẾT NỐI 24/7 THỜI GIAN THỰC</span>
+                    </h1>
+                    <p class="lead text-light mb-4 fs-5 opacity-90">
+                        Nền tảng hỗ trợ người dân vùng bão lũ, ngập lụt, sạt lở đất gửi tín hiệu kêu cứu kèm vị trí GPS chính xác chỉ với 1 chạm. Kết nối ngay lập tức với Đội cứu hộ gần nhất và Ban điều phối.
+                    </p>
+
+                    <!-- Main Action Buttons -->
+                    <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
+                        <a th:href="@{/sos}" class="btn btn-hero-sos text-white fw-bold d-flex align-items-center gap-3 px-4 py-3 shadow-lg">
+                            <i class="fa-solid fa-triangle-exclamation fa-2x pulse-icon"></i>
+                            <div class="text-start">
+                                <span class="d-block text-uppercase fw-extrabold fs-5">GỬI YÊU CẦU CỨU NẠN SOS</span>
+                                <small class="text-white-50 fw-normal">Định vị GPS tự động & gửi tức thì</small>
+                            </div>
+                        </a>
+                        <a th:href="@{/map}" class="btn btn-outline-light btn-lg d-flex align-items-center gap-2 px-4 py-3">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Bản Đồ Cứu Hộ Live</span>
+                        </a>
+                    </div>
+
+                    <!-- Rapid Hotlines Strip -->
+                    <div class="d-flex flex-wrap gap-3 align-items-center pt-2">
+                        <small class="text-light text-uppercase fw-semibold">Hotline cứu nạn:</small>
+                        <a href="tel:112" class="badge bg-danger text-white text-decoration-none fs-6 px-3 py-2">
+                            <i class="fa-solid fa-phone me-1"></i> 112 Quốc Gia
+                        </a>
+                        <a href="tel:114" class="badge bg-warning text-dark text-decoration-none fs-6 px-3 py-2">
+                            <i class="fa-solid fa-fire-extinguisher me-1"></i> 114 PCCC/Lụt
+                        </a>
+                        <a href="tel:115" class="badge bg-info text-dark text-decoration-none fs-6 px-3 py-2">
+                            <i class="fa-solid fa-truck-medical me-1"></i> 115 Cấp Cứu
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Graphic / Quick Geolocation Card -->
+                <div class="col-lg-5">
+                    <div class="card emergency-card border-0 shadow-lg text-dark">
+                        <div class="card-header bg-danger text-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold"><i class="fa-solid fa-location-crosshairs me-2"></i>Định Vị Vị Trí Của Bạn</span>
+                                <span class="badge bg-white text-danger fw-bold">GPS 1 Chạm</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div id="quick-geo-status" class="alert alert-secondary py-2 small mb-3">
+                                <i class="fa-solid fa-circle-info me-1"></i> Nhấn nút bên dưới để hệ thống quét tọa độ cứu nạn hiện tại của bạn.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Tọa độ GPS hiện tại:</label>
+                                <div class="input-group">
+                                    <input type="text" id="quick-latlng" class="form-control" placeholder="Chưa xác định tọa độ" readonly>
+                                    <button class="btn btn-outline-danger" type="button" id="btn-detect-gps">
+                                        <i class="fa-solid fa-crosshairs"></i> Quét GPS
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <a th:href="@{/sos}" class="btn btn-danger btn-lg fw-bold">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Đi Đến Form Cứu Nạn Khẩn Cấp
+                                </a>
+                            </div>
+                            <p class="text-center text-secondary small mt-3 mb-0">
+                                <i class="fa-solid fa-lock text-success me-1"></i> Dữ liệu vị trí chỉ dùng để điều phối đội cứu nạn nhanh nhất.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-danger-subtle text-danger fw-bold text-uppercase mb-2">Tính Năng Cốt Lõi</span>
+                <h2 class="fw-bold">Phản Ứng Nhanh - Cứu Người Kịp Thời</h2>
+                <p class="text-muted">Được thiết kế chuyên biệt để hoạt động mượt mà ngay cả khi kết nối mạng di động chập chờn.</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Card 1 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card feature-card h-100 border-0 shadow-sm p-3">
+                        <div class="feature-icon bg-danger-subtle text-danger mb-3">
+                            <i class="fa-solid fa-bell-slash fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">SOS 1 Chạm</h5>
+                        <p class="text-muted small mb-0">Tự động lấy tọa độ định vị GPS, đếm số người cần cứu, người già, trẻ nhỏ và gửi về trung tâm điều phối trong vài giây.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card feature-card h-100 border-0 shadow-sm p-3">
+                        <div class="feature-icon bg-warning-subtle text-warning mb-3">
+                            <i class="fa-solid fa-map-marked-alt fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Bản Đồ Nhiệt Cứu Nạn</h5>
+                        <p class="text-muted small mb-0">Bản đồ GIS thời gian thực hiển thị mật độ ca SOS, vùng ngập sâu, sạt lở cô lập để ưu tiên điều tiết lực lượng.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card feature-card h-100 border-0 shadow-sm p-3">
+                        <div class="feature-icon bg-primary-subtle text-primary mb-3">
+                            <i class="fa-solid fa-truck-fast fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Điều Phối Thông Minh</h5>
+                        <p class="text-muted small mb-0">Gán nhiệm vụ cứu hộ cho đội ứng trực gần nhất dựa trên khoảng cách địa lý và phương tiện chuyên dụng.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card feature-card h-100 border-0 shadow-sm p-3">
+                        <div class="feature-icon bg-success-subtle text-success mb-3">
+                            <i class="fa-solid fa-cloud-arrow-up fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Ảnh Hiện Trường Cloud</h5>
+                        <p class="text-muted small mb-0">Tích hợp Cloudinary tối ưu hóa dung lượng ảnh hiện trường, giúp đội cứu hộ chuẩn bị phao, xuồng trước khi tiếp cận.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Operational Workflow -->
+    <section class="py-5 bg-light border-top border-bottom">
+        <div class="container">
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase mb-2">Quy Trình Vận Hành</span>
+                <h2 class="fw-bold">4 Bước Cứu Nạn Nhanh Chóng</h2>
+            </div>
+
+            <div class="row g-4 text-center">
+                <div class="col-md-3">
+                    <div class="step-box p-3 bg-white rounded shadow-sm h-100">
+                        <div class="step-num text-danger fw-extrabold display-6 mb-2">01</div>
+                        <h6 class="fw-bold">Người Dân Bấm SOS</h6>
+                        <p class="text-muted small mb-0">Truy cập web bằng điện thoại, hệ thống tự bắt GPS và chụp ảnh hiện trường.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-box p-3 bg-white rounded shadow-sm h-100">
+                        <div class="step-num text-warning fw-extrabold display-6 mb-2">02</div>
+                        <h6 class="fw-bold">Bắn Tín Hiệu Realtime</h6>
+                        <p class="text-muted small mb-0">WebSocket phát tín hiệu lập tức lên Dashboard của Điều phối viên (Coordinator).</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-box p-3 bg-white rounded shadow-sm h-100">
+                        <div class="step-num text-primary fw-extrabold display-6 mb-2">03</div>
+                        <h6 class="fw-bold">Phân Công Đội Cứu Hộ</h6>
+                        <p class="text-muted small mb-0">Điều phối viên chọn đội cứu hộ (Rescuer) gần nhất để xuất kích tiếp cận mục tiêu.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-box p-3 bg-white rounded shadow-sm h-100">
+                        <div class="step-num text-success fw-extrabold display-6 mb-2">04</div>
+                        <h6 class="fw-bold">Nghiệm Thu & An Toàn</h6>
+                        <p class="text-muted small mb-0">Đội cứu hộ đưa người dân đến điểm sơ tán an toàn và cập nhật trạng thái hoàn thành.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>
