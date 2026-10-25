@@ -7,27 +7,28 @@
 - **Thời điểm cập nhật:** 25/10/2026
 - **Nhánh Git hiện tại:** `develop`
 - **Giai đoạn (Phase):** Phase 0 - Khởi tạo tài liệu kiến trúc & cấu hình dự án
-- **Trạng thái tổng quan:** Đã hoàn thành phân tích yêu cầu từ tài liệu nhóm, thiết lập Git, branch `develop`, hệ thống tài liệu AI Context & Handover. Chưa khởi tạo mã nguồn Spring Boot.
+- **Trạng thái tổng quan:** Đã hoàn thành cấu trúc nhánh Git (`main` chỉ chứa `.gitignore`, `develop` chứa toàn bộ tài liệu), tách lộ trình 9 phiên làm việc trong `docs/roadmap/`. Sẵn sàng bắt đầu Session 01.
 
 ---
 
 ## 2. Những Việc ĐÃ HOÀN THÀNH (Completed)
 - [x] Phân tích toàn bộ nghiệp vụ từ tài liệu `Nhom04_LTWEB.docx`.
 - [x] Tạo file `.gitignore` tiêu chuẩn cho Java Spring Boot, Maven/Gradle, IDEs và OS.
-- [x] Khởi tạo Git repository cục bộ và trỏ remote về `https://github.com/PeterWeeee/disaster-rescue-system.git`.
-- [x] Tạo branch `develop` (không làm việc trực tiếp trên `main`).
+- [x] Tạo branch `main` trên GitHub chỉ chứa file `.gitignore`.
+- [x] Tạo branch `develop` trên GitHub chứa toàn bộ tài liệu và lộ trình chi tiết.
+- [x] Tách lộ trình thành thư mục `docs/roadmap/` gồm 9 phiên làm việc độc lập.
 - [x] Xây dựng bộ tài liệu điều phối AI trong thư mục `docs/`:
   - `docs/PROJECT_CONTEXT.md` (Ngữ cảnh dự án & Kiến trúc)
   - `docs/HANDOVER_STATUS.md` (File này - Trạng thái & Bàn giao)
-  - `docs/ROADMAP_AI_SESSIONS.md` (Lộ trình chia nhỏ các phiên làm việc cho AI)
+  - `docs/ROADMAP_AI_SESSIONS.md` & `docs/roadmap/` (Lộ trình chi tiết 9 phiên)
   - `docs/DATABASE_SCHEMA.md` (Đặc tả Entity & Cấu hình song song MySQL + SQL Server)
   - `docs/API_AND_WEBSOCKET_SPECS.md` (Đặc tả REST & WebSocket)
 
 ---
 
 ## 3. Những Việc ĐANG LÀM DỞ DANG (In Progress)
-- [ ] Chờ User xem qua kế hoạch nội dung các file Markdown và xác nhận.
-- [ ] Push branch `develop` đầu tiên lên GitHub repo.
+- [ ] Xác nhận thông tin cấu hình SQL Server & Cloudinary từ người dùng.
+- [ ] Bắt đầu Session 01: Khởi tạo mã nguồn Spring Boot 3 & layout Thymeleaf.
 
 ---
 
@@ -51,5 +52,5 @@
 
 ## 6. Hướng Dẫn Nhanh Cho AI / Lập Trình Viên Mới Tiếp Quản
 1. Đọc nhanh file `docs/PROJECT_CONTEXT.md` để nắm kiến trúc và quy ước.
-2. Đọc file `docs/ROADMAP_AI_SESSIONS.md` để xác định nhiệm vụ của phiên làm việc.
+2. Mở file phiên làm việc cụ thể trong `docs/roadmap/` (ví dụ `docs/roadmap/session-01-setup-and-dual-db.md`).
 3. Khi hoàn thành công việc của phiên, cập nhật lại mục **"Những việc ĐÃ HOÀN THÀNH"** và **"Việc CẦN LÀM TIẾP THEO"** trong file này.
