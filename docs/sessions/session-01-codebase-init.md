@@ -11,9 +11,9 @@
    - Bổ sung đầy đủ: Web, Thymeleaf, Security, Data JPA, WebSocket (STOMP), Validation, Lombok, JWT 0.12.6, Cloudinary HTTP5 2.5.0, MySQL Connector, SQL Server JDBC, H2 Runtime.
 2. **Cấu hình đa CSDL & Cloudinary (`application.yml`):**
    - Cấu hình chung `application.yml` tích hợp định danh Cloudinary:
-     - Cloud Name: `odwf5uoi`
-     - API Key: `329355988118811`
-     - API Secret: `w6nY13mFiftdZCSg6Sqd0GdU4j0`
+     - Cloud Name: `your_cloud_name`
+     - API Key: `your_api_key`
+     - API Secret: `your_api_secret`
    - Cấu hình `application-mysql.yml` cho thành viên dùng MySQL.
    - Cấu hình `application-sqlserver.yml` cho thành viên dùng SQL Server.
    - Cấu hình `application-local.yml` (H2 In-Memory) giúp dev/test ngay không cần cài đặt DB daemon.
@@ -49,3 +49,4 @@
   - Đăng ký tài khoản người dân / cứu hộ (mã hóa mật khẩu BCrypt).
   - Đăng nhập, sinh mã JWT và lưu trữ trong Cookie / Authorization Header.
   - Phân quyền theo vai trò (`ROLE_CITIZEN`, `ROLE_RESCUER`, `ROLE_COORDINATOR`, `ROLE_ADMIN`).
+

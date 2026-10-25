@@ -20,7 +20,7 @@
 - [x] **SESSION 01 (PeterWeeee):**
   - [x] Tạo `pom.xml` chuẩn Spring Boot 3.3.5 (Java 17, Web, Thymeleaf, Security, JPA, WebSocket STOMP, Validation, Cloudinary HTTP5, MySQL, SQL Server, H2, JJWT).
   - [x] Cấu hình đa profile (`application.yml`, `application-local.yml`, `application-mysql.yml`, `application-sqlserver.yml`).
-  - [x] Cấu hình Cloudinary (`odwf5uoi`, `329355988118811`, `w6nY13mFiftdZCSg6Sqd0GdU4j0`) trong `application.yml` và bean `CloudinaryConfig.java`.
+  - [x] Cấu hình Cloudinary (sử dụng biến môi trường / `application-secret.yml`) trong `application.yml` và bean `CloudinaryConfig.java`.
   - [x] Base Layout Thymeleaf (`main.html`, `navbar.html`, `footer.html`, `head.html`).
 - [x] **SESSION 02 (Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
   - [x] Xây dựng trọn bộ 7 Entities JPA tương thích đa CSDL: `Role`, `User`, `RescueTeam`, `TeamMember`, `SosRequest`, `RescueAssignment`, `DisasterAlert`.
