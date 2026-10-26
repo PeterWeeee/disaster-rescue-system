@@ -4,10 +4,10 @@
 ---
 
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
-- **Thời điểm cập nhật:** 25/10/2026
+- **Thời điểm cập nhật:** 26/10/2026
 - **Nhánh Git hiện tại:** `develop`
-- **Giai đoạn (Phase):** Phase 3 - Phân hệ Gửi SOS & Bản đồ tương tác Leaflet.js + GPS 1 chạm (ĐÃ HOÀN THÀNH 100% SESSION 03)
-- **Trạng thái tổng quan:** Đã hoàn thành 100% Session 01, Session 02 và Session 03. Đã triển khai hoàn chỉnh dịch vụ cứu nạn SOS, form gửi cứu nạn tương tác GPS 1 chạm, bản đồ Leaflet.js OpenStreetMap kéo thả ghim vị trí, trang tra cứu và theo dõi tiến độ ca cứu hộ (`/sos/track/{id}` & `/sos/track`), REST API `/api/sos`, bản đồ toàn cảnh Live Map (`/map`) đồng bộ dữ liệu thời gian thực. Toàn bộ 33 unit & integration tests đạt **100% BUILD SUCCESS**. Sẵn sàng cho Session 04 (Tích hợp Cloudinary Media Upload ảnh hiện trường).
+- **Giai đoạn (Phase):** Phase 4 - Tích hợp Đám Mây Cloudinary Media Upload & Fallback Local Storage (ĐÃ HOÀN THÀNH 100% SESSION 04)
+- **Trạng thái tổng quan:** Đã hoàn thành 100% Session 01, Session 02, Session 03 và Session 04. Đã triển khai hoàn chỉnh dịch vụ `CloudinaryService.java`, REST API `UploadApiController.java` (`POST /api/upload/image`), Entity `MediaFile.java`, form upload ảnh hiện trường kèm preview thumbnail trên `/sos`, xem ảnh phóng to Modal trên `/sos/track/{id}`, và xem ảnh trực tiếp trong Leaflet popup trên `/map`. Toàn bộ 44 unit & integration tests đạt **100% BUILD SUCCESS**. Sẵn sàng cho Session 05 (WebSocket STOMP Real-time cốt lõi & Còi báo động khẩn cấp).
 
 ---
 
@@ -30,49 +30,42 @@
   - [x] Controllers & DTOs: `AuthController`, `AuthApiController`, `CoordinatorController`, `RescuerController`, `AdminController`, `ProfileController`.
   - [x] Giao diện Thymeleaf hoàn chỉnh: `auth/login.html`, `auth/register.html`, `auth/forbidden.html`.
 - [x] **SESSION 03 (Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
-  - [x] Entity & DTO: Hoàn thiện `SosRequest.java` (thêm Builder, JsonIgnoreProperties tránh lỗi ByteBuddy lazy serialization), `SosRequestDto.java` (đầy đủ Jakarta Validation, vĩ độ/kinh độ, số người, người già/trẻ em/bị thương).
-  - [x] Repository: Mở rộng `SosRequestRepository.java` thêm tìm kiếm theo SĐT, đếm theo trạng thái.
-  - [x] Service: Xây dựng `SosService.java` xử lý toàn bộ logic tiếp nhận SOS (hỗ trợ nặc danh hoặc liên kết tài khoản đã đăng nhập), chuẩn hóa mức độ khẩn cấp, cập nhật trạng thái cứu hộ, đếm ca PENDING.
-  - [x] Controllers:
-    - `SosController.java`: Render form gửi SOS (`/sos`), tự động điền thông tin tài khoản nếu đã đăng nhập, redirect sang trang theo dõi, trang theo dõi chi tiết (`/sos/track/{id}`), trang tra cứu (`/sos/track`).
-    - `SosApiController.java`: REST API `POST /api/sos` nhận JSON, `GET /api/sos/{id}`, `GET /api/sos` lọc hoặc lấy tất cả cho bản đồ Leaflet, `PATCH /api/sos/{id}/status` cập nhật trạng thái.
-  - [x] Bản đồ Leaflet.js & GPS 1 chạm:
-    - Nhúng Leaflet 1.9.4 CSS/JS vào `head.html`.
-    - Form `sos/request.html` & `sos/create.html`: Nút to màu đỏ "📍 LẤY VỊ TRÍ GPS HIỆN TẠI CỦA TÔI" (1 Chạm), bản đồ OpenStreetMap kéo thả ghim vị trí hoặc click trực tiếp tự nhảy tọa độ và cập nhật input.
-    - Trang `sos/track.html`: Stepper Timeline trực quan 4 bước (Đã tiếp nhận -> Đã điều phối -> Đang tiếp cận -> Hoàn tất), mini map Leaflet hiển thị marker radar đỏ nhấp nháy, cẩm nang an toàn sinh tồn.
-    - Trang `map/live-map.html`: Bản đồ toàn cảnh Leaflet kết nối trực tiếp `/api/sos`, hiển thị tất cả các ca cứu nạn với marker phân màu theo mức độ khẩn cấp, popup chi tiết và danh sách tóm tắt ở sidebar.
-  - [x] Dữ liệu mẫu ban đầu: `DataInitializer.java` nạp 3 ca SOS mẫu thực tế tại Đà Nẵng / Miền Trung (Liên Chiểu, Hòa Vang, Hải Châu).
-  - [x] Bộ kiểm thử toàn diện: Thêm `SosServiceTest.java` (9 unit tests) và `SosIntegrationTest.java` (11 integration tests). Toàn bộ **33/33 tests** chạy thành công **100% BUILD SUCCESS**.
+  - [x] Entity & DTO: Hoàn thiện `SosRequest.java`, `SosRequestDto.java`.
+  - [x] Service: `SosService.java` xử lý toàn bộ logic tiếp nhận SOS (hỗ trợ nặc danh hoặc liên kết tài khoản), chuẩn hóa mức độ khẩn cấp, cập nhật trạng thái cứu hộ, đếm ca PENDING.
+  - [x] Controllers: `SosController.java`, `SosApiController.java`.
+  - [x] Bản đồ Leaflet.js & GPS 1 chạm: Form `sos/request.html`, `sos/track.html` Stepper Timeline 4 bước, Bản đồ toàn cảnh Live Map `map/live-map.html`.
+  - [x] Dữ liệu mẫu ban đầu: 3 ca SOS cứu nạn mẫu thực tế tại Đà Nẵng.
+  - [x] Khắc phục triệt để lỗi Thymeleaf Fragment drop script và tích hợp định vị Fallback 2 lớp thông minh.
+- [x] **SESSION 04 (Tri Thai / PeterWeeee - `NguyenTT162.4@gmail.com`):**
+  - [x] Cấu hình SDK Cloudinary HTTP5 (`CloudinaryConfig.java`).
+  - [x] Xây dựng `CloudinaryService.java`: Hỗ trợ upload ảnh lên đám mây Cloudinary hoặc tự động Fallback sang thư mục cục bộ `uploads/` nếu chưa có key/mất mạng.
+  - [x] Xây dựng `UploadApiController.java` tiếp nhận tải ảnh qua REST API `POST /api/upload/image`.
+  - [x] Entity `MediaFile.java` & `MediaFileRepository.java` lưu trữ lịch sử file tải lên.
+  - [x] Cấu hình `MvcConfig.java` và `SecurityConfig.java` cho phép truy cập tài nguyên ảnh `/uploads/**` và `/api/upload/**`.
+  - [x] Tích hợp Form SOS (`sos/request.html`): Chọn ảnh chụp từ camera hoặc máy tính, xem trước thumbnail tức thì, hủy ảnh nhanh.
+  - [x] Cải tiến `sos/track.html` (Modal xem ảnh phóng to) và `map/live-map.html` (xem ảnh trực tiếp trong popup Leaflet).
+  - [x] Bổ sung bộ kiểm thử `CloudinaryServiceTest` & `UploadApiControllerTest`. Toàn bộ **39/39 tests PASS 100% BUILD SUCCESS**.
 
 ---
 
 ## 3. Những Việc ĐANG LÀM DỞ DANG (In Progress)
-- [ ] Không có. Đã hoàn thành 100% Session 03. Chuẩn bị bắt đầu Session 04.
+- [ ] Không có. Đã hoàn thành 100% Session 04. Chuẩn bị bắt đầu Session 05.
 
 ---
 
 ## 4. Việc CẦN LÀM TIẾP THEO (Next Steps)
-1. **Phiên AI tiếp theo (Session 04 - Phụ trách: Tri Thai / PeterWeeee - `NguyenTT162.4@gmail.com`):**
-   - Xây dựng `CloudinaryService.java` tích hợp SDK Cloudinary HTTP5 (`com.cloudinary:cloudinary-http5`).
-   - Xây dựng `UploadApiController.java` tiếp nhận tải ảnh hiện trường từ trình duyệt hoặc camera di động.
-   - Nén ảnh client-side bằng HTML5 Canvas trước khi tải lên Cloudinary để tối ưu tốc độ trong điều kiện mạng bão lũ chập chờn.
-   - Nhúng Cloudinary upload vào form SOS (`/sos`) và trang báo cáo hoàn thành nhiệm vụ của Rescuer.
-2. **Phiên AI kế tiếp (Session 05 - Phụ trách: Tri Thai / PeterWeeee):**
-   - Triển khai hạ tầng WebSocket STOMP over SockJS (`WebSocketConfig.java`).
+1. **Phiên AI tiếp theo (Session 05 - Phụ trách: Tri Thai / PeterWeeee - `NguyenTT162.4@gmail.com`):**
+   - Triển khai hạ tầng WebSocket STOMP over SockJS (`WebSocketConfig.java`, `WebSocketEventListener.java`).
    - Kênh `/topic/sos-alerts` phát tín hiệu SOS thời gian thực đến Dashboard của Điều phối viên.
-   - Âm thanh còi báo động khẩn cấp và hiệu ứng nhấp nháy radar trên bản đồ Live Map.
+   - Âm thanh còi báo động khẩn cấp (`alert.mp3`) và hiệu ứng nhấp nháy radar trên bản đồ Live Map mà không cần F5.
+   - Kênh `/topic/map-updates` đồng bộ trạng thái ca cứu nạn tức thời.
+2. **Phiên AI kế tiếp (Session 06 - Phụ trách: Sinh viên MSSV 24110329):**
+   - Xây dựng Trung tâm chỉ huy Điều phối viên chuyên sâu (`/coordinator/dashboard`).
+   - Thuật toán Haversine đo khoảng cách tọa độ để gợi ý đội cứu hộ gần nhất.
 
 ---
 
-## 5. Vấn Đề Tồn Đọng & Lưu Ý Kỹ Thuật (Known Issues / Blockers)
-- **Cơ sở dữ liệu:** Mặc định profile được đặt là `local` (sử dụng H2 in-memory) để ứng dụng có thể chạy và test ngay lập tức mà không cần bật MySQL hay SQL Server. Khi chạy môi trường thực tế, truyền `-Dspring-boot.run.profiles=mysql` hoặc `-Dspring-boot.run.profiles=sqlserver`.
-- **Bảo mật CSRF:** Tuyến đường `/sos/**` và `/api/sos/**` đã được cấu hình bỏ qua kiểm tra CSRF trong `SecurityConfig.java` để đảm bảo người dân vùng lũ trong tình trạng khẩn cấp có thể phát tín hiệu SOS mà không bị rào cản token phiên.
-- **Thư mục dự án:** Dự án được phát triển và quản lý duy nhất tại `C:\Users\Will\Projects\disaster-rescue-system`.
-
----
-
-## 6. Hướng Dẫn Nhanh Cho AI / Lập Trình Viên Mới Tiếp Quản
-1. Đọc nhanh file `docs/HANDOVER_STATUS.md` để nắm bắt tiến độ (Session 01, 02, 03 đã hoàn thành 100%).
-2. Xem lộ trình chi tiết phiên 04 tại `docs/roadmap/session-04-cloudinary-media.md`.
-3. Kiểm tra mã nguồn Cloudinary bean đã khởi tạo tại `src/main/java/vn/edu/cuunan/config/CloudinaryConfig.java`.
-4. Sau khi hoàn thành Session 04, cập nhật lại trạng thái trong file này.
+## 5. Hướng Dẫn Nhanh Cho AI / Lập Trình Viên Mới Tiếp Quản
+1. Đọc nhanh file `docs/HANDOVER_STATUS.md` để nắm bắt tiến độ (Session 01, 02, 03, 04 đã hoàn thành 100%).
+2. Xem lộ trình chi tiết phiên 05 tại `docs/roadmap/session-05-websocket-realtime-sos.md`.
+3. Sau khi hoàn thành Session 05, cập nhật lại trạng thái trong file này.

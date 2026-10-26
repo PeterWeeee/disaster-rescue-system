@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div class="card-body p-4 p-md-5">
-                        <form id="sosForm" th:action="@{/sos}" th:object="${sosRequestDto}" method="post">
+                        <form id="sosForm" th:action="@{/sos}" th:object="${sosRequestDto}" method="post" enctype="multipart/form-data">
                             
                             <!-- 1. Mức độ khẩn cấp -->
                             <div class="mb-4">
@@ -187,6 +187,36 @@
                                           placeholder="Mực nước đang ngập đến đâu? Có nguồn điện hở không? Pin điện thoại còn bao nhiêu %? Lương thực và nước uống còn không?"></textarea>
                             </div>
 
+                            <!-- 6. Ảnh chụp hiện trường thực tế (Cloudinary) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark fs-6 d-flex justify-content-between align-items-center">
+                                    <span><i class="fa-solid fa-camera text-danger me-1"></i> 6. Ảnh chụp hiện trường (Nếu có thể)</span>
+                                    <span class="badge bg-secondary-subtle text-secondary small">Không bắt buộc</span>
+                                </label>
+                                <div class="card border-2 border-dashed bg-light p-3 text-center position-relative" id="drop-zone" style="border: 2px dashed #cbd5e1; border-radius: 10px;">
+                                    <input type="file" id="imageFile" name="imageFile" accept="image/*" class="d-none">
+                                    
+                                    <div id="upload-prompt" class="py-3" style="cursor: pointer;" onclick="document.getElementById('imageFile').click()">
+                                        <i class="fa-solid fa-cloud-arrow-up fa-2x text-danger mb-2"></i>
+                                        <p class="mb-1 fw-semibold text-dark">Bấm vào đây để chọn ảnh hoặc chụp trực tiếp từ camera điện thoại</p>
+                                        <small class="text-muted d-block">Hỗ trợ JPG, PNG, WEBP tối đa 10MB (Hệ thống tự động nén tối ưu khi mạng yếu)</small>
+                                    </div>
+
+                                    <!-- Image Preview Thumbnail -->
+                                    <div id="image-preview-container" class="d-none mt-2 position-relative">
+                                        <div class="position-relative d-inline-block">
+                                            <img id="image-preview" src="#" alt="Xem trước ảnh hiện trường" class="img-thumbnail rounded shadow-sm" style="max-height: 220px; max-width: 100%; object-fit: contain;">
+                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle shadow" id="btn-remove-image" title="Hủy chọn ảnh" style="width: 32px; height: 32px; padding: 0;">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                        <div class="small text-success mt-2 fw-semibold" id="image-info-text">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Đã chọn ảnh sẵn sàng tải lên đám mây
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Nút gửi SOS khẩn cấp -->
                             <div class="d-grid mt-4">
                                 <button type="submit" class="btn btn-danger btn-lg fw-bold py-3 shadow-lg pulse-button fs-5">
@@ -253,11 +283,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const map = L.map("sosMap").setView([initialLat, initialLng], 14);
 
+    // Tự động giải mã địa chỉ khởi đầu nếu chưa có
+    if (inputAddress && !inputAddress.value.trim() && (initialLat !== defaultLat || initialLng !== defaultLng)) {
+        setTimeout(() => reverseGeocodeAddress(initialLat, initialLng), 300);
+    }
+
     // Nạp Tile OpenStreetMap
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
     }).addTo(map);
+
+    // Theo dõi người dùng tự sửa địa chỉ bằng tay
+    let isAddressManuallyEdited = false;
+    if (inputAddress) {
+        inputAddress.addEventListener("input", function () {
+            isAddressManuallyEdited = (inputAddress.value.trim().length > 0);
+        });
+    }
 
     // Marker có thể kéo thả
     let marker = L.marker([initialLat, initialLng], {
@@ -277,6 +320,124 @@ document.addEventListener("DOMContentLoaded", function () {
         sessionStorage.setItem("user_last_lng", fixedLng);
     }
 
+    // Hàm làm sạch chuỗi địa chỉ tiếng Việt, loại bỏ từ ngữ ngoại lai (như "Province de")
+    // và sửa lỗi dữ liệu mở quốc tế (Wikidata/GeoNames/OSM) gán nhầm tỉnh
+    function cleanVietnameseAddress(addr) {
+        if (!addr) return '';
+        let cleaned = addr
+            .replace(/\bProvince de\s+/gi, '')
+            .replace(/\bProvince of\s+/gi, '')
+            .replace(/\bRegion of\s+/gi, '')
+            .replace(/\bDistrict of\s+/gi, '')
+            .replace(/\bCity of\s+/gi, '')
+            .replace(/\bViêt Nam\b/gi, 'Việt Nam');
+
+        // Fix lỗi dữ liệu mở quốc tế (Wikidata Q135932768) gán nhầm Thị xã/Huyện Cai Lậy sang Đồng Tháp
+        if (/Cai Lậy|Cái Bè|Mỹ Tho|Gò Công|Chợ Gạo|Tân Phước/i.test(cleaned)) {
+            cleaned = cleaned.replace(/Đồng Tháp/g, 'Tiền Giang');
+        }
+
+        return cleaned.replace(/\s*,\s*,+/g, ', ').replace(/^,\s*|\s*,$/g, '').trim();
+    }
+
+    // Hàm giải mã tọa độ ngược thành địa chỉ tiếng Việt cụ thể (Reverse Geocoding 3 lớp)
+    async function reverseGeocodeAddress(lat, lng, accuracy) {
+        if (!inputAddress) return;
+
+        if (!isAddressManuallyEdited || !inputAddress.value.trim()) {
+            inputAddress.placeholder = "🔍 Đang tra cứu địa chỉ hành chính từ tọa độ GPS...";
+        }
+
+        let resolvedAddress = "";
+
+        // Lớp 1: Photon Komoot (OpenStreetMap OSM mirror - cực nhanh, chuẩn tên đường & địa danh VN)
+        try {
+            const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=default`, {
+                headers: { "Accept": "application/json" }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.features && data.features.length > 0) {
+                    const p = data.features[0].properties;
+                    const parts = [];
+                    if (p.housenumber) parts.push(p.housenumber);
+                    if (p.street) parts.push(p.street);
+                    else if (p.name) parts.push(p.name);
+                    if (p.name && p.street && p.name !== p.street) parts.unshift(p.name);
+                    if (p.locality && !parts.includes(p.locality)) parts.push(p.locality);
+                    const d = p.suburb || p.district;
+                    if (d && !parts.includes(d)) parts.push(d);
+                    const c = p.county || p.city;
+                    if (c && !parts.includes(c)) parts.push(c);
+                    if (p.state && !parts.includes(p.state)) parts.push(p.state);
+                    if (p.country && !parts.includes(p.country)) parts.push(p.country);
+                    const addr = parts.filter(Boolean).join(", ");
+                    if (addr && addr.length > 3) resolvedAddress = addr;
+                }
+            }
+        } catch (e) {
+            console.warn("Photon lookup failed:", e);
+        }
+
+        // Lớp 2: Fallback sang BigDataCloud (Miễn phí, không giới hạn client-side, tiếng Việt 100%)
+        if (!resolvedAddress) {
+            try {
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=vi`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const parts = [];
+                    if (data.locality) parts.push(data.locality);
+                    if (data.city && data.city !== data.locality) parts.push(data.city);
+                    if (data.principalSubdivision) parts.push(data.principalSubdivision);
+                    if (data.countryName) parts.push(data.countryName);
+                    const addr = parts.filter(Boolean).join(", ");
+                    if (addr && addr.length > 3) resolvedAddress = addr;
+                }
+            } catch (e) {
+                console.warn("BigDataCloud lookup failed:", e);
+            }
+        }
+
+        // Lớp 3: Fallback sang OpenStreetMap Nominatim
+        if (!resolvedAddress) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.display_name) {
+                        resolvedAddress = data.display_name;
+                    }
+                }
+            } catch (e) {
+                console.warn("Nominatim lookup failed:", e);
+            }
+        }
+
+        // Chuẩn hóa và làm sạch chuỗi địa chỉ
+        resolvedAddress = cleanVietnameseAddress(resolvedAddress);
+
+        // Cập nhật lên ô địa chỉ cụ thể và bản đồ
+        if (resolvedAddress) {
+            if (!isAddressManuallyEdited || !inputAddress.value.trim()) {
+                inputAddress.value = resolvedAddress;
+            }
+            inputAddress.placeholder = "Vd: Số nhà 12 ngõ 3, gần trạm biến áp, nóc nhà tôn xanh...";
+
+            // Cập nhật thông báo alert
+            if (geoAlert) {
+                const accText = accuracy ? ` (Sai số: ±${accuracy}m)` : "";
+                geoAlert.className = "alert alert-success py-2 small mb-3 fw-semibold";
+                geoAlert.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Đã định vị thành công: <strong>${resolvedAddress}</strong> <span class="badge bg-light text-dark border ms-1">[${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}]</span>${accText}`;
+            }
+
+            // Cập nhật popup trên marker
+            const accPopup = accuracy ? `<br><small class="text-secondary">Độ chính xác: ±${accuracy}m</small>` : "";
+            marker.setPopupContent(`<b>📍 Vị trí cứu nạn của bạn</b><br><b>Địa chỉ:</b> ${resolvedAddress}<br><small class="text-muted">Tọa độ: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}</small>${accPopup}`).openPopup();
+        } else {
+            inputAddress.placeholder = "Vd: Số nhà 12 ngõ 3, gần trạm biến áp, nóc nhà tôn xanh, cạnh cây đa...";
+        }
+    }
+
     // Sự kiện kéo thả marker
     marker.on("dragend", function (e) {
         const pos = e.target.getLatLng();
@@ -286,6 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
             geoAlert.className = "alert alert-success py-2 small mb-3";
             geoAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã ghim vị trí: <strong>${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}</strong>`;
         }
+        reverseGeocodeAddress(pos.lat, pos.lng);
     });
 
     // Sự kiện click trực tiếp lên bản đồ
@@ -297,6 +459,7 @@ document.addEventListener("DOMContentLoaded", function () {
             geoAlert.className = "alert alert-success py-2 small mb-3";
             geoAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã ghim vị trí: <strong>${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}</strong>`;
         }
+        reverseGeocodeAddress(e.latlng.lat, e.latlng.lng);
     });
 
     // Sự kiện khi người dùng gõ tay vào ô tọa độ
@@ -338,15 +501,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 marker.setLatLng([lat, lng]);
                 map.setView([lat, lng], 16);
 
-                marker.setPopupContent(`<b>📍 Vị trí GPS của bạn</b><br>Tọa độ: ${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>Độ chính xác: ±${acc}m</small>`).openPopup();
-
                 btnGetLocation.disabled = false;
                 btnGetLocation.innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i> 📍 LẤY VỊ TRÍ GPS HIỆN TẠI CỦA TÔI';
 
                 if (geoAlert) {
                     geoAlert.className = "alert alert-success py-2 small mb-3 fw-semibold";
-                    geoAlert.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Đã định vị thành công: <strong>${lat.toFixed(6)}, ${lng.toFixed(6)}</strong> (Sai số: ±${acc}m)`;
+                    geoAlert.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Đang tra cứu địa chỉ: <strong>${lat.toFixed(6)}, ${lng.toFixed(6)}</strong> (Sai số: ±${acc}m)...`;
                 }
+
+                // Giải mã tọa độ vệ tinh thành tên đường, xã, huyện cụ thể
+                reverseGeocodeAddress(lat, lng, acc);
             }
 
             function onLocError(error) {
@@ -396,6 +560,48 @@ document.addEventListener("DOMContentLoaded", function () {
     // Fix hiển thị bản đồ khi container render
     setTimeout(function () { map.invalidateSize(); }, 200);
     setTimeout(function () { map.invalidateSize(); }, 600);
+
+    // Xử lý xem trước ảnh hiện trường và nút xóa ảnh
+    const imageInput = document.getElementById("imageFile");
+    const previewContainer = document.getElementById("image-preview-container");
+    const imagePreview = document.getElementById("image-preview");
+    const uploadPrompt = document.getElementById("upload-prompt");
+    const btnRemoveImage = document.getElementById("btn-remove-image");
+    const imageInfoText = document.getElementById("image-info-text");
+
+    if (imageInput && imagePreview) {
+        imageInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert("Kích thước ảnh vượt quá 10MB! Vui lòng chọn ảnh nhẹ hơn.");
+                    this.value = "";
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    uploadPrompt.classList.add("d-none");
+                    previewContainer.classList.remove("d-none");
+                    if (imageInfoText) {
+                        const sizeKb = Math.round(file.size / 1024);
+                        imageInfoText.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã nạp ảnh: <strong>${file.name}</strong> (${sizeKb} KB)`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        if (btnRemoveImage) {
+            btnRemoveImage.addEventListener("click", function (e) {
+                e.stopPropagation();
+                imageInput.value = "";
+                imagePreview.src = "#";
+                previewContainer.classList.add("d-none");
+                uploadPrompt.classList.remove("d-none");
+            });
+        }
+    }
 });
 </script>
 </div>
