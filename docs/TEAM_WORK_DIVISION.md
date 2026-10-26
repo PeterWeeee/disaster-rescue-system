@@ -36,58 +36,57 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
 └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
 ```
 
-### Chi tiết phân công từng phiên:
+### Chi tiết phân công từng phiên & Trạng thái hoàn thành:
 
 ### 👤 Thành viên 1: Tri Thai (PeterWeeee)
-- **Session 01 (Đã hoàn thành):** 
+- **Session 01 (✅ Đã hoàn thành):** 
   - Khởi tạo mã nguồn Spring Boot 3.3.5, Java 17, Maven.
   - Cấu hình song song đa cơ sở dữ liệu (`application-mysql.yml`, `application-sqlserver.yml`, `application-local.yml`).
   - Base Layout Thymeleaf + Bootstrap 5 (Header, Navbar, Footer, Fragment).
   - Tích hợp tài khoản Cloudinary thực tế.
-- **Session 04:**
+- **Session 04 (✅ Đã hoàn thành):**
   - Tích hợp Cloudinary Media Upload (`CloudinaryService`, `UploadApiController`).
-  - Xử lý kéo thả upload ảnh hiện trường, nén ảnh client-side qua HTML5 Canvas trước khi gửi.
-- **Session 05:**
+  - Xử lý kéo thả upload ảnh hiện trường, preview thumbnail và modal xem ảnh phóng to.
+- **Session 05 (✅ Đã hoàn thành):**
   - Xây dựng hạ tầng WebSocket Real-time cốt lõi (`WebSocketConfig`, STOMP over SockJS).
   - Kênh `/topic/sos-alerts` bắn sự kiện cứu nạn tức thì không cần F5.
-  - Âm thanh chuông báo khẩn cấp và hiệu ứng marker đỏ radar nhấp nháy trên bản đồ thời gian thực.
+  - Âm thanh chuông báo khẩn cấp và hiệu ứng cập nhật marker bản đồ thời gian thực.
 
 ---
 
 ### 👤 Thành viên 2: Võ Văn Thịnh (`vovanthinh2006@gmail.com`)
-- **Session 02:**
+- **Session 02 (✅ Đã hoàn thành):**
   - Cấu hình Spring Security 6 với cơ chế Stateless JWT kết hợp Thymeleaf SSR (lưu token an toàn trong HttpOnly Cookie).
   - Xây dựng Entity `User.java`, `Role.java`, `UserRepository`, `RoleRepository`.
   - Triển khai `JwtUtils`, `JwtAuthenticationFilter`, `CustomUserDetailsService`.
   - Giao diện đăng nhập (`/login`) và đăng ký (`/register`) có mã hóa mật khẩu bằng BCrypt.
   - Phân quyền các route cho 4 vai trò.
-- **Session 03:**
+- **Session 03 (✅ Đã hoàn thành):**
   - Xây dựng phân hệ Gửi cứu nạn khẩn cấp SOS (`SosRequest.java`, `SosService`, `SosController`).
-  - Tích hợp HTML5 Geolocation API lấy tọa độ GPS chính xác với 1 chạm.
+  - Tích hợp HTML5 Geolocation API lấy tọa độ GPS chính xác với 1 chạm và Reverse geocoding 3 cấp tiếng Việt.
   - Nhúng bản đồ tương tác Leaflet.js + OpenStreetMap (kéo thả ghim vị trí, tự điền kinh độ/vĩ độ).
   - Giao diện người dân theo dõi trạng thái ca cứu hộ (`templates/sos/track.html`).
-- **Session 09 (Phối hợp):**
+- **Session 09 (⏳ Đang chuẩn bị):**
   - Tối ưu giao diện Responsive 100% chuẩn Mobile First cho người dân gửi SOS trên điện thoại.
 
 ---
 
 ### 👤 Thành viên 3: Sinh viên MSSV 24110329 (`24110329@student.hcmute.edu.vn`)
-- **Session 06:**
+- **Session 06 (✅ Đã hoàn thành):**
   - Xây dựng Trung tâm chỉ huy Điều phối viên (`ROLE_COORDINATOR` - `/coordinator/dashboard`).
-  - Entity `RescueTeam.java`, `TeamMember.java`, `RescueAssignment.java`.
   - Lập trình **Thuật toán Haversine Formula** tính khoảng cách địa lý theo tọa độ để gợi ý đội cứu hộ gần nhất.
-  - Giao diện điều phối ca cứu hộ, chỉ định đội và cập nhật trạng thái sang `DISPATCHED`.
-- **Session 07:**
-  - Xây dựng Phân hệ Tác nghiệp Đội cứu hộ (`ROLE_RESCUER` - `/rescuer/**`).
-  - Giao diện Đội trưởng nhận nhiệm vụ / từ chối kèm lý do.
+  - Giao diện điều phối ca cứu hộ dạng Split-Screen, chỉ định đội và cập nhật trạng thái sang `DISPATCHED`.
+- **Session 07 (✅ Đã hoàn thành):**
+  - Xây dựng Phân hệ Tác nghiệp Đội cứu hộ (`ROLE_RESCUER` - `/rescuer/missions`).
+  - Giao diện Đội trưởng nhận nhiệm vụ / từ chối kèm lý do (tự động trả về hàng chờ PENDING).
   - Đội viên cập nhật tiến độ di chuyển hiện trường (`IN_PROGRESS` -> `COMPLETED`).
-  - Tải ảnh nghiệm thu hiện trường và hoàn tất ca cứu nạn.
-- **Session 08:**
-  - Xây dựng Phân hệ Quản trị hệ thống (`ROLE_ADMIN` - `/admin/**`).
-  - Quản lý danh sách tài khoản người dùng, phân quyền và quản lý danh sách đội cứu hộ.
-  - Chức năng phát sóng khẩn cấp diện rộng (Broadcast Emergency Alert) đẩy popup cảnh báo toàn màn hình qua WebSocket.
-  - Báo cáo thống kê trực quan với biểu đồ Chart.js (tỷ lệ giải cứu thành công, thời gian đáp ứng).
-- **Session 09 (Phối hợp):**
+  - Tải ảnh nghiệm thu hiện trường lên Cloudinary/Local và hoàn tất ca cứu nạn sang `RESOLVED`.
+- **Session 08 (✅ Đã hoàn thành):**
+  - Xây dựng Phân hệ Quản trị hệ thống (`ROLE_ADMIN` - `/admin/dashboard`).
+  - Quản lý danh sách tài khoản người dùng (khóa/mở khóa, đổi role) và quản lý danh sách đội cứu hộ.
+  - Chức năng phát sóng khẩn cấp diện rộng (Broadcast Emergency Alert) đẩy popup cảnh báo toàn màn hình qua WebSocket kèm còi báo động.
+  - Báo cáo thống kê trực quan với biểu đồ Chart.js từ 100% dữ liệu thực CSDL.
+- **Session 09 (⏳ Đang chuẩn bị):**
   - Chuẩn bị Data Seeder (10 ca SOS mẫu, 4 đội cứu hộ, tọa độ vùng ngập lụt miền Trung/TP.HCM) và kịch bản thuyết trình bảo vệ đồ án.
 
 ---
@@ -96,23 +95,23 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
 
 Để lịch sử git đẹp và đồng đều trên GitHub, nhóm tuân thủ lộ trình commit theo bảng sau:
 
-| STT Commit | Session | Tác giả Commit | Email tác giả | Thông điệp Commit chuẩn (Message) |
-| :---: | :---: | :--- | :--- | :--- |
-| `01` | 01 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat: complete session 01 - spring boot setup, dual db, cloudinary config, and thymeleaf layout` *(Đã xong)* |
-| `02` | 02 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(security): implement user role entity, spring security 6, and jwt filter` |
-| `03` | 02 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(auth): complete login register thymeleaf pages and httponly cookie authentication` |
-| `04` | 03 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(sos): implement sos request entity, repository, and geolocation 1-touch service` |
-| `05` | 03 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(map): integrate leaflet js map for sos marker and citizen tracking page` |
-| `06` | 04 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(cloudinary): implement media upload api, client-side canvas compression, and preview` |
-| `07` | 05 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(websocket): configure stomp broker, sos real-time alerts channel, and sound alarms` |
-| `08` | 05 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(realtime): update live map markers dynamically via websocket topic` |
-| `09` | 06 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(coordinator): create rescue team entities and implement haversine nearest team algorithm` |
-| `10` | 06 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(dispatch): build coordinator live dashboard and dispatching operations` |
-| `11` | 07 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(rescuer): implement mission acceptance, status transition, and completion photo report` |
-| `12` | 08 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(admin): build user management, emergency broadcast popup, and chartjs analytics` |
-| `13` | 09 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `style(mobile): optimize responsive design and touch controls for mobile screens` |
-| `14` | 09 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `test(seed): add full realistic demo data seeder and presentation test script` |
-| `15` | 09 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `chore: finalize project, verify all unit tests, and prepare release on main branch` |
+| STT Commit | Session | Tác giả Commit | Email tác giả | Thông điệp Commit chuẩn (Message) | Trạng thái |
+| :---: | :---: | :--- | :--- | :--- | :---: |
+| `01` | 01 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat: complete session 01 - spring boot setup, dual db, cloudinary config, and thymeleaf layout` | ✅ Đã xong |
+| `02` | 02 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(security): implement user role entity, spring security 6, and jwt filter` | ✅ Đã xong |
+| `03` | 02 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(auth): complete login register thymeleaf pages and httponly cookie authentication` | ✅ Đã xong |
+| `04` | 03 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(sos): implement sos request entity, repository, and geolocation 1-touch service` | ✅ Đã xong |
+| `05` | 03 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `feat(map): integrate leaflet js map for sos marker and citizen tracking page` | ✅ Đã xong |
+| `06` | 04 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(cloudinary): implement media upload api, client-side canvas compression, and preview` | ✅ Đã xong |
+| `07` | 05 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(websocket): configure stomp broker, sos real-time alerts channel, and sound alarms` | ✅ Đã xong |
+| `08` | 05 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(realtime): update live map markers dynamically via websocket topic` | ✅ Đã xong |
+| `09` | 06 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(coordinator): create rescue team entities and implement haversine nearest team algorithm` | ✅ Đã xong |
+| `10` | 06 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(dispatch): build coordinator live dashboard and dispatching operations` | ✅ Đã xong |
+| `11` | 07 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(rescuer): implement mission acceptance, status transition, and completion photo report` | ✅ Đã xong |
+| `12` | 08 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(admin): build user management, emergency broadcast popup, and chartjs analytics` | ✅ Đã xong |
+| `13` | 09 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `style(mobile): optimize responsive design and touch controls for mobile screens` | ⏳ Đang làm |
+| `14` | 09 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `test(seed): add full realistic demo data seeder and presentation test script` | ⏳ Đang làm |
+| `15` | 09 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `chore: finalize project, verify all unit tests, and prepare release on main branch` | ⏳ Đang làm |
 
 ---
 
