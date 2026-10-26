@@ -58,7 +58,8 @@ public class RescuerApiController {
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
             res.put("message", "Đã chấp nhận nhiệm vụ cứu nạn #" + id);
-            res.put("assignment", assignment);
+            res.put("assignmentId", assignment.getId());
+            res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
@@ -75,7 +76,8 @@ public class RescuerApiController {
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
             res.put("message", "Đã từ chối nhiệm vụ #" + id + ", ca cứu nạn đã được trả về hàng chờ điều phối");
-            res.put("assignment", assignment);
+            res.put("assignmentId", assignment.getId());
+            res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
@@ -91,7 +93,8 @@ public class RescuerApiController {
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
             res.put("message", "Đội đang tiếp cận hiện trường nhiệm vụ #" + id);
-            res.put("assignment", assignment);
+            res.put("assignmentId", assignment.getId());
+            res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
@@ -109,12 +112,34 @@ public class RescuerApiController {
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
             res.put("message", "Chúc mừng! Báo cáo hoàn tất ca cứu nạn #" + id + " thành công!");
-            res.put("assignment", assignment);
+            res.put("assignmentId", assignment.getId());
+            res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi tải ảnh hoặc hoàn thành nhiệm vụ: " + ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/assignments/{id}/location")
+    public ResponseEntity<?> updateLocation(@PathVariable("id") Long id,
+                                            @RequestBody Map<String, Double> payload,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        Double lat = payload.get("latitude");
+        Double lng = payload.get("longitude");
+        if (lat == null || lng == null) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Thiếu tọa độ GPS"));
+        }
+        try {
+            User user = userDetails.getUser();
+            Map<String, Object> result = rescuerService.updateTeamLocation(id, user, lat, lng);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         }
     }
 }

@@ -16,6 +16,9 @@ import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.security.CustomUserDetails;
 import vn.edu.cuunan.service.CloudinaryService;
 import vn.edu.cuunan.service.SosService;
+import vn.edu.cuunan.entity.RescueTeam;
+import vn.edu.cuunan.repository.RescueAssignmentRepository;
+import vn.edu.cuunan.util.GeoUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +32,7 @@ public class SosController {
 
     private final SosService sosService;
     private final CloudinaryService cloudinaryService;
+    private final RescueAssignmentRepository rescueAssignmentRepository;
 
     @Value("${app.hotlines.rescue:112}")
     private String rescueHotline;
@@ -39,15 +43,18 @@ public class SosController {
     @Value("${app.hotlines.medical:115}")
     private String medicalHotline;
 
-    public SosController(SosService sosService, CloudinaryService cloudinaryService) {
+    public SosController(SosService sosService,
+                         CloudinaryService cloudinaryService,
+                         RescueAssignmentRepository rescueAssignmentRepository) {
         this.sosService = sosService;
         this.cloudinaryService = cloudinaryService;
+        this.rescueAssignmentRepository = rescueAssignmentRepository;
     }
 
     /**
      * Hiển thị Form gửi tín hiệu cứu nạn khẩn cấp.
      */
-    @GetMapping
+    @GetMapping({"", "/request"})
     public String sosForm(@RequestParam(value = "lat", required = false) Double lat,
                           @RequestParam(value = "lng", required = false) Double lng,
                           @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -123,6 +130,7 @@ public class SosController {
     /**
      * Trang theo dõi tiến độ chi tiết của 1 ca SOS theo ID.
      */
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     @GetMapping("/track/{id}")
     public String trackDetail(@PathVariable("id") Long id, Model model) {
         populateHotlines(model);
@@ -139,6 +147,24 @@ public class SosController {
         model.addAttribute("sos", sos);
         model.addAttribute("pageTitle", "Theo Dõi Tiến Độ Cứu Hộ #SOS-" + sos.getId());
         model.addAttribute("stepIndex", calculateStepIndex(sos.getStatus()));
+
+        rescueAssignmentRepository.findTopBySosRequestIdOrderByAssignedAtDesc(sos.getId()).ifPresent(assignment -> {
+            model.addAttribute("assignment", assignment);
+            if (assignment.getTeam() != null) {
+                RescueTeam team = assignment.getTeam();
+                model.addAttribute("assignedTeam", team);
+                model.addAttribute("teamName", team.getTeamName());
+                model.addAttribute("teamPhone", team.getContactPhone());
+                model.addAttribute("teamMemberCount", team.getMemberCount());
+                model.addAttribute("teamLat", team.getCurrentLatitude());
+                model.addAttribute("teamLng", team.getCurrentLongitude());
+                if (sos.getLatitude() != null && sos.getLongitude() != null
+                        && team.getCurrentLatitude() != null && team.getCurrentLongitude() != null) {
+                    double dist = GeoUtils.calculateDistance(sos.getLatitude(), sos.getLongitude(), team.getCurrentLatitude(), team.getCurrentLongitude());
+                    model.addAttribute("distanceKm", Math.round(dist * 100.0) / 100.0);
+                }
+            }
+        });
 
         return "sos/track";
     }

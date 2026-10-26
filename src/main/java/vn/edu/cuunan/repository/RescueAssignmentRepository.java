@@ -1,5 +1,6 @@
 package vn.edu.cuunan.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,10 @@ public interface RescueAssignmentRepository extends JpaRepository<RescueAssignme
     List<RescueAssignment> findByTeamIdOrderByAssignedAtDesc(Long teamId);
     List<RescueAssignment> findBySosRequestId(Long sosRequestId);
     List<RescueAssignment> findBySosRequestIdOrderByAssignedAtDesc(Long sosRequestId);
+
+    @EntityGraph(attributePaths = {"team"})
     Optional<RescueAssignment> findTopBySosRequestIdOrderByAssignedAtDesc(Long sosRequestId);
+
     long countByStatus(String status);
 
     @Query("SELECT ra FROM RescueAssignment ra JOIN FETCH ra.sosRequest WHERE ra.team.id = :teamId ORDER BY ra.assignedAt DESC")

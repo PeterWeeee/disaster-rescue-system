@@ -1,9 +1,11 @@
 package vn.edu.cuunan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "rescue_teams")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class RescueTeam extends BaseEntity {
 
     @Id
@@ -15,6 +17,7 @@ public class RescueTeam extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "role"})
     private User leader;
 
     @Column(name = "contact_phone", nullable = false, length = 20)

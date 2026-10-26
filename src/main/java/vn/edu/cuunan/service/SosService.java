@@ -88,6 +88,13 @@ public class SosService {
             message.put("longitude", saved.getLongitude());
             message.put("urgencyLevel", saved.getUrgencyLevel());
             message.put("status", saved.getStatus());
+            message.put("contactName", saved.getContactName());
+            message.put("contactPhone", saved.getContactPhone());
+            message.put("addressDetail", saved.getAddressDetail());
+            message.put("peopleCount", saved.getPeopleCount());
+            message.put("hasElderly", saved.getHasElderly());
+            message.put("hasChildren", saved.getHasChildren());
+            message.put("description", saved.getDescription());
             message.put("createdAt", saved.getCreatedAt());
             messagingTemplate.convertAndSend("/topic/sos-alerts", message);
         }

@@ -1,11 +1,13 @@
 package vn.edu.cuunan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "rescue_assignments")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class RescueAssignment {
 
     @Id
@@ -14,14 +16,17 @@ public class RescueAssignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sos_request_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SosRequest sosRequest;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private RescueTeam team;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_by")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "role"})
     private User assignedBy;
 
     @Column(length = 30)

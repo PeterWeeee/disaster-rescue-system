@@ -188,6 +188,21 @@
                                     <div th:if="${a.sosRequest.imageUrl}" class="mb-2">
                                         <img th:src="${a.sosRequest.imageUrl}" class="img-fluid rounded border" style="max-height: 150px; object-fit: cover;" alt="Hiện trường" />
                                     </div>
+
+                                    <div th:if="${a.status == 'IN_PROGRESS'}" class="p-2 mb-2 rounded bg-light border border-primary">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-bold text-primary">
+                                                <i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Định vị GPS thời gian thực:
+                                            </span>
+                                            <span class="badge bg-success" id="gpsStatusBadge">ĐANG TRUYỀN TÍN HIỆU</span>
+                                        </div>
+                                        <div class="small text-muted mb-1">
+                                            Tọa độ đội hiện tại: <strong id="rescuerCoordText">[<span th:text="${myTeam != null ? myTeam.currentLatitude : '--'}"></span>, <span th:text="${myTeam != null ? myTeam.currentLongitude : '--'}"></span>]</strong>
+                                        </div>
+                                        <div class="small text-dark">
+                                            Khoảng cách đến nạn nhân: <strong class="text-danger fs-6" id="rescuerDistText">Đang theo dõi...</strong>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="pt-3 border-top d-flex gap-2">
@@ -249,7 +264,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Modal Từ Chối Nhiệm Vụ -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
@@ -310,12 +324,41 @@
             </div>
         </div>
     </div>
-</div>
 
 <script th:inline="javascript">
     const currentRescueTeamId = /*[[${myTeam != null ? myTeam.id : null}]]*/ null;
 
     document.addEventListener("DOMContentLoaded", function () {
+        // Tự động kích hoạt GPS watchPosition khi có nhiệm vụ đang thực hiện (IN_PROGRESS)
+        const inProgressMissions = document.querySelectorAll('.btn-open-complete');
+        if (inProgressMissions.length > 0 && navigator.geolocation) {
+            const assignmentId = inProgressMissions[0].dataset.id;
+            navigator.geolocation.watchPosition(function(pos) {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                fetch(`/api/rescuer/assignments/${assignmentId}/location`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ latitude: lat, longitude: lng })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const coordEl = document.getElementById('rescuerCoordText');
+                        if (coordEl) coordEl.textContent = `[${lat.toFixed(5)}, ${lng.toFixed(5)}]`;
+                        const distEl = document.getElementById('rescuerDistText');
+                        if (distEl) distEl.textContent = `${data.distanceKm} km`;
+                    }
+                })
+                .catch(err => console.warn('Lỗi gửi GPS:', err));
+            }, function(err) {
+                console.warn('GPS Watch error:', err);
+            }, {
+                enableHighAccuracy: false,
+                maximumAge: 1000,
+                timeout: 10000
+            });
+        }
         document.addEventListener('rescue:assignment', function (event) {
             const assignment = event.detail || {};
             if (currentRescueTeamId && String(assignment.teamId) === String(currentRescueTeamId)) {
@@ -461,6 +504,7 @@
         });
     }
 </script>
+</div>
 
 </body>
 </html>

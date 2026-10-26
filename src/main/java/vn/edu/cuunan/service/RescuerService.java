@@ -12,6 +12,7 @@ import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.entity.TeamMember;
 import vn.edu.cuunan.entity.User;
+import vn.edu.cuunan.util.GeoUtils;
 import vn.edu.cuunan.repository.RescueAssignmentRepository;
 import vn.edu.cuunan.repository.RescueTeamRepository;
 import vn.edu.cuunan.repository.SosRequestRepository;
@@ -100,6 +101,11 @@ public class RescuerService {
     @Transactional
     public RescueAssignment acceptAssignment(Long assignmentId, User user) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
+
+        if ("ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
+            log.info("Nhiệm vụ #{} đã ở trạng thái ACCEPTED", assignmentId);
+            return assignment;
+        }
 
         if (!"PENDING".equalsIgnoreCase(assignment.getStatus())) {
             throw new IllegalStateException("Nhiệm vụ này đã được xử lý (trạng thái: " + assignment.getStatus() + ")");
@@ -193,8 +199,9 @@ public class RescuerService {
     public RescueAssignment completeAssignment(Long assignmentId, User user, String reportNotes, MultipartFile reportImage) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
 
-        if (!"IN_PROGRESS".equalsIgnoreCase(assignment.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể hoàn tất nhiệm vụ đang ở trạng thái IN_PROGRESS!");
+        if (!"IN_PROGRESS".equalsIgnoreCase(assignment.getStatus())
+                && !"ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể hoàn tất nhiệm vụ đang thực hiện (ACCEPTED hoặc IN_PROGRESS)!");
         }
 
         // 1. Tải ảnh nghiệm thu lên Cloudinary / Fallback local (nếu có đính kèm ảnh)
@@ -275,5 +282,39 @@ public class RescuerService {
         } catch (Exception ex) {
             log.warn("Lỗi gửi thông báo WebSocket cập nhật bản đồ: {}", ex.getMessage());
         }
+    }
+
+    /**
+     * Cập nhật vị trí GPS thời gian thực của đội cứu hộ và phát WebSocket đến nạn nhân.
+     */
+    @Transactional
+    public Map<String, Object> updateTeamLocation(Long assignmentId, User user, Double lat, Double lng) {
+        RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
+        RescueTeam team = assignment.getTeam();
+        SosRequest sos = assignment.getSosRequest();
+
+        team.setCurrentLatitude(lat);
+        team.setCurrentLongitude(lng);
+        rescueTeamRepository.save(team);
+
+        double distanceKm = GeoUtils.calculateDistance(lat, lng, sos.getLatitude(), sos.getLongitude());
+        distanceKm = Math.round(distanceKm * 100.0) / 100.0;
+
+        Map<String, Object> locationUpdate = new HashMap<>();
+        locationUpdate.put("type", "LOCATION_UPDATE");
+        locationUpdate.put("sosId", sos.getId());
+        locationUpdate.put("teamId", team.getId());
+        locationUpdate.put("teamName", team.getTeamName());
+        locationUpdate.put("latitude", lat);
+        locationUpdate.put("longitude", lng);
+        locationUpdate.put("distanceKm", distanceKm);
+
+        if (messagingTemplate != null) {
+            messagingTemplate.convertAndSend("/topic/map-updates", locationUpdate);
+        }
+
+        Map<String, Object> response = new HashMap<>(locationUpdate);
+        response.put("success", true);
+        return response;
     }
 }

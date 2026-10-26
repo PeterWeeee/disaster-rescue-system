@@ -64,6 +64,7 @@ public class SecurityConfig {
                 // Công khai hoàn toàn (Public)
                 .requestMatchers(
                     "/",
+                    "/error",
                     "/map",
                     "/map/**",
                     "/alerts/**",
