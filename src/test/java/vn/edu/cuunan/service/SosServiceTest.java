@@ -91,7 +91,7 @@ class SosServiceTest {
 
         verify(userRepository, never()).findById(any());
         verify(sosRequestRepository, times(1)).save(any(SosRequest.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/sos-alerts"), any());
+        verify(messagingTemplate).convertAndSend(eq("/topic/sos-alerts"), any(Object.class));
     }
 
     @Test

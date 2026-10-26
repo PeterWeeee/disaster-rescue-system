@@ -89,6 +89,6 @@ class AdminServiceTest {
         assertTrue(result.getIsBroadcast());
         assertSame(admin, result.getCreatedBy());
         assertEquals("DANGER_RED", result.getSeverity());
-        verify(messagingTemplate).convertAndSend(eq("/topic/broadcast-alerts"), any());
+        verify(messagingTemplate).convertAndSend(eq("/topic/broadcast-alerts"), any(Object.class));
     }
 }

@@ -6,66 +6,42 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 26/10/2026
 - **Nhánh Git hiện tại:** `develop`
-- **Giai đoạn (Phase):** Phase 4 - Tích hợp Đám Mây Cloudinary Media Upload & Fallback Local Storage (ĐÃ HOÀN THÀNH 100% SESSION 04)
-- **Trạng thái tổng quan:** Đã hoàn thành 100% Session 01, Session 02, Session 03 và Session 04. Đã triển khai hoàn chỉnh dịch vụ `CloudinaryService.java`, REST API `UploadApiController.java` (`POST /api/upload/image`), Entity `MediaFile.java`, form upload ảnh hiện trường kèm preview thumbnail trên `/sos`, xem ảnh phóng to Modal trên `/sos/track/{id}`, và xem ảnh trực tiếp trong Leaflet popup trên `/map`. Toàn bộ 44 unit & integration tests đạt **100% BUILD SUCCESS**. Sẵn sàng cho Session 05 (WebSocket STOMP Real-time cốt lõi & Còi báo động khẩn cấp).
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ:
+  - **SESSION 06 (Điều Phối Viên & Thuật Toán Haversine Formula)**
+  - **SESSION 07 (Tác Nghiệp Cứu Hộ & Nghiệm Thu Hiện Trường)**
+  - **SESSION 08 (Quản Trị Admin, Broadcast Khẩn Cấp Toàn Màn Hình & Thống Kê Chart.js)**
+- **Trạng thái tổng quan:** Toàn bộ **54/54 unit & integration tests đạt BUILD SUCCESS 100%**. Sẵn sàng cho Session 09 (Tối ưu UI/UX Mobile toàn diện & Kịch bản bảo vệ đồ án).
 
 ---
 
 ## 2. Những Việc ĐÃ HOÀN THÀNH (Completed)
-- [x] Phân tích toàn bộ nghiệp vụ từ tài liệu `Nhom04_LTWEB.docx`.
-- [x] Tạo file `.gitignore` tiêu chuẩn cho Java Spring Boot, Maven/Gradle, IDEs và OS.
-- [x] Tạo branch `main` và `develop` trên GitHub (`https://github.com/PeterWeeee/disaster-rescue-system.git`).
-- [x] Tách lộ trình thành 9 phiên làm việc trong `docs/roadmap/`.
-- [x] Thiết lập bảng phân công nhiệm vụ 3 thành viên (`docs/TEAM_WORK_DIVISION.md`) và script chuyển đổi commit tự động (`git-member.ps1`, `commit-as.ps1`).
-- [x] **SESSION 01 (PeterWeeee):**
-  - [x] Tạo `pom.xml` chuẩn Spring Boot 3.3.5 (Java 17, Web, Thymeleaf, Security, JPA, WebSocket STOMP, Validation, Cloudinary HTTP5, MySQL, SQL Server, H2, JJWT).
-  - [x] Cấu hình đa profile (`application.yml`, `application-local.yml`, `application-mysql.yml`, `application-sqlserver.yml`).
-  - [x] Cấu hình Cloudinary (sử dụng biến môi trường / `application-secret.yml`) trong `application.yml` và bean `CloudinaryConfig.java`.
-  - [x] Base Layout Thymeleaf (`main.html`, `navbar.html`, `footer.html`, `head.html`).
-- [x] **SESSION 02 (Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
-  - [x] Xây dựng trọn bộ 7 Entities JPA tương thích đa CSDL: `Role`, `User`, `RescueTeam`, `TeamMember`, `SosRequest`, `RescueAssignment`, `DisasterAlert`.
-  - [x] Xây dựng 7 JPA Repositories tương ứng trong `vn.edu.cuunan.repository`.
-  - [x] Triển khai bảo mật Spring Security 6 + Stateless JWT qua HttpOnly Cookie (`JwtTokenProvider`, `CustomUserDetails`, `CustomUserDetailsService`, `JwtAuthenticationFilter`, `SecurityConfig`).
-  - [x] `DataInitializer.java`: Nạp 4 vai trò và 4 tài khoản mặc định (`admin`, `coordinator`, `rescuer`, `citizen` với pass `123456`).
-  - [x] Controllers & DTOs: `AuthController`, `AuthApiController`, `CoordinatorController`, `RescuerController`, `AdminController`, `ProfileController`.
-  - [x] Giao diện Thymeleaf hoàn chỉnh: `auth/login.html`, `auth/register.html`, `auth/forbidden.html`.
-- [x] **SESSION 03 (Võ Văn Thịnh - `vovanthinh2006@gmail.com`):**
-  - [x] Entity & DTO: Hoàn thiện `SosRequest.java`, `SosRequestDto.java`.
-  - [x] Service: `SosService.java` xử lý toàn bộ logic tiếp nhận SOS (hỗ trợ nặc danh hoặc liên kết tài khoản), chuẩn hóa mức độ khẩn cấp, cập nhật trạng thái cứu hộ, đếm ca PENDING.
-  - [x] Controllers: `SosController.java`, `SosApiController.java`.
-  - [x] Bản đồ Leaflet.js & GPS 1 chạm: Form `sos/request.html`, `sos/track.html` Stepper Timeline 4 bước, Bản đồ toàn cảnh Live Map `map/live-map.html`.
-  - [x] Dữ liệu mẫu ban đầu: 3 ca SOS cứu nạn mẫu thực tế tại Đà Nẵng.
-  - [x] Khắc phục triệt để lỗi Thymeleaf Fragment drop script và tích hợp định vị Fallback 2 lớp thông minh.
-- [x] **SESSION 04 (Tri Thai / PeterWeeee - `NguyenTT162.4@gmail.com`):**
-  - [x] Cấu hình SDK Cloudinary HTTP5 (`CloudinaryConfig.java`).
-  - [x] Xây dựng `CloudinaryService.java`: Hỗ trợ upload ảnh lên đám mây Cloudinary hoặc tự động Fallback sang thư mục cục bộ `uploads/` nếu chưa có key/mất mạng.
-  - [x] Xây dựng `UploadApiController.java` tiếp nhận tải ảnh qua REST API `POST /api/upload/image`.
-  - [x] Entity `MediaFile.java` & `MediaFileRepository.java` lưu trữ lịch sử file tải lên.
-  - [x] Cấu hình `MvcConfig.java` và `SecurityConfig.java` cho phép truy cập tài nguyên ảnh `/uploads/**` và `/api/upload/**`.
-  - [x] Tích hợp Form SOS (`sos/request.html`): Chọn ảnh chụp từ camera hoặc máy tính, xem trước thumbnail tức thì, hủy ảnh nhanh.
-  - [x] Cải tiến `sos/track.html` (Modal xem ảnh phóng to) và `map/live-map.html` (xem ảnh trực tiếp trong popup Leaflet).
-  - [x] Bổ sung bộ kiểm thử `CloudinaryServiceTest` & `UploadApiControllerTest`. Toàn bộ **39/39 tests PASS 100% BUILD SUCCESS**.
+- [x] **SESSION 01 (PeterWeeee):** Khởi tạo Spring Boot 3.3.5, đa CSDL (MySQL, SQL Server, H2), Base Layout Thymeleaf + Bootstrap 5.
+- [x] **SESSION 02 (Võ Văn Thịnh):** 7 JPA Entities, Spring Security 6 + Stateless JWT HttpOnly Cookie, Đăng ký / Đăng nhập 4 Roles.
+- [x] **SESSION 03 (Võ Văn Thịnh):** Phân hệ SOS, GPS 1 chạm, Reverse geocoding 3 cấp tiếng Việt, Bản đồ Leaflet.js tương tác, Trang theo dõi tiến độ `/sos/track/{id}`.
+- [x] **SESSION 04 (PeterWeeee):** Cloudinary Media Upload SDK & Fallback Local Storage (`/uploads/**`), Modal phóng to ảnh và xem ảnh trong popup Leaflet.
+- [x] **MỞ RỘNG (Community Feed):** Bản tin thiên tai cộng đồng, trạm sơ tán an toàn, upvote xác minh tin và chuyển đổi bài đăng thành ca cứu nạn SOS.
+- [x] **SESSION 06 (SV 24110329):**
+  - [x] Cài đặt thuật toán khoảng cách địa lý **Haversine Formula** (`GeoUtils.java`).
+  - [x] `CoordinatorService.java` & `CoordinatorApiController.java`: Lấy thống kê số liệu, tính khoảng cách km từ vị trí SOS tới các đội cứu hộ, sắp xếp từ gần nhất đến xa nhất.
+  - [x] Tạo và quản lý phân công nhiệm vụ cứu nạn `RescueAssignment`, cập nhật trạng thái SOS sang `DISPATCHED` và đội sang `BUSY`.
+  - [x] Bố cục Split Screen chuyên nghiệp trên `coordinator/dashboard.html` (danh sách SOS + Leaflet Live Map + Modal gợi ý đội gần nhất kèm km).
+  - [x] Bộ kiểm thử `CoordinatorServiceTest`.
+- [x] **SESSION 07 (SV 24110329):**
+  - [x] `RescuerService.java` & `RescuerApiController.java`: Xác định đội của user (`getMyTeam`), xem nhiệm vụ được phân công.
+  - [x] Luồng trạng thái nhiệm vụ: Tiếp nhận (`ACCEPTED`), Từ chối (`REJECTED` kèm lý do và tự động trả ca SOS về hàng chờ `PENDING`), Bắt đầu di chuyển (`IN_PROGRESS`).
+  - [x] Nghiệm thu hoàn thành (`COMPLETED`): Nhập ghi chú, tải ảnh bằng chứng hiện trường lên Cloudinary/Local, chuyển ca SOS sang `RESOLVED` và đưa đội cứu hộ về `AVAILABLE`.
+  - [x] Giao diện Mobile-First trên `rescuer/missions.html` với 3 tabs rõ ràng, nút gọi điện thoại nhanh, chỉ đường Google Maps.
+  - [x] Bộ kiểm thử `RescuerServiceTest`.
+- [x] **SESSION 08 (SV 24110329):**
+  - [x] `AdminService.java` & `AdminApiController.java`: Quản trị người dùng (đổi vai trò, khóa/mở khóa ACTIVE/BLOCKED, chặn tự khóa admin cuối cùng).
+  - [x] Quản trị đội cứu hộ: Xem danh sách, thêm mới, cập nhật tọa độ, quân số, trang thiết bị, chỉ định đội trưởng.
+  - [x] Phát cảnh báo khẩn cấp diện rộng (Broadcast Alert): Tạo `DisasterAlert`, gửi thông điệp STOMP tới `/topic/broadcast-alerts`.
+  - [x] `alert-client.js` & `#emergencyBroadcastModal` trong `layout/main.html`: Tự động hiện popup modal cảnh báo khẩn cấp màu đỏ/cam/vàng đè toàn màn hình trên mọi trang web kèm còi báo động Web Audio API.
+  - [x] Dashboard Thống kê Chart.js: Biểu đồ tròn phân bố mức độ khẩn cấp, biểu đồ cột số ca theo quận/huyện, tính thời gian phản ứng trung bình từ dữ liệu thực 100% trong CSDL.
+  - [x] Bộ kiểm thử `AdminServiceTest`.
 
 ---
 
-## 3. Những Việc ĐANG LÀM DỞ DANG (In Progress)
-- [ ] Không có. Đã hoàn thành 100% Session 04. Chuẩn bị bắt đầu Session 05.
-
----
-
-## 4. Việc CẦN LÀM TIẾP THEO (Next Steps)
-1. **Phiên AI tiếp theo (Session 05 - Phụ trách: Tri Thai / PeterWeeee - `NguyenTT162.4@gmail.com`):**
-   - Triển khai hạ tầng WebSocket STOMP over SockJS (`WebSocketConfig.java`, `WebSocketEventListener.java`).
-   - Kênh `/topic/sos-alerts` phát tín hiệu SOS thời gian thực đến Dashboard của Điều phối viên.
-   - Âm thanh còi báo động khẩn cấp (`alert.mp3`) và hiệu ứng nhấp nháy radar trên bản đồ Live Map mà không cần F5.
-   - Kênh `/topic/map-updates` đồng bộ trạng thái ca cứu nạn tức thời.
-2. **Phiên AI kế tiếp (Session 06 - Phụ trách: Sinh viên MSSV 24110329):**
-   - Xây dựng Trung tâm chỉ huy Điều phối viên chuyên sâu (`/coordinator/dashboard`).
-   - Thuật toán Haversine đo khoảng cách tọa độ để gợi ý đội cứu hộ gần nhất.
-
----
-
-## 5. Hướng Dẫn Nhanh Cho AI / Lập Trình Viên Mới Tiếp Quản
-1. Đọc nhanh file `docs/HANDOVER_STATUS.md` để nắm bắt tiến độ (Session 01, 02, 03, 04 đã hoàn thành 100%).
-2. Xem lộ trình chi tiết phiên 05 tại `docs/roadmap/session-05-websocket-realtime-sos.md`.
-3. Sau khi hoàn thành Session 05, cập nhật lại trạng thái trong file này.
+## 3. Những Việc CẦN LÀM TIẾP THEO (Next Steps - Session 09)
+1. **Tối ưu hóa Responsive Mobile toàn diện** cho các màn hình điện thoại thực tế.
+2. **Kịch bản thuyết trình bảo vệ đồ án 5 bước** dành cho nhóm sinh viên trước hội đồng chấm thi.
