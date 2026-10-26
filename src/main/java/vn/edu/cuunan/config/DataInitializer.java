@@ -6,9 +6,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.cuunan.entity.RescueAssignment;
+import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.Role;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.entity.User;
+import vn.edu.cuunan.repository.RescueAssignmentRepository;
+import vn.edu.cuunan.repository.RescueTeamRepository;
 import vn.edu.cuunan.repository.RoleRepository;
 import vn.edu.cuunan.repository.SosRequestRepository;
 import vn.edu.cuunan.repository.UserRepository;
@@ -23,15 +27,21 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final SosRequestRepository sosRequestRepository;
+    private final RescueTeamRepository rescueTeamRepository;
+    private final RescueAssignmentRepository rescueAssignmentRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
                            SosRequestRepository sosRequestRepository,
+                           RescueTeamRepository rescueTeamRepository,
+                           RescueAssignmentRepository rescueAssignmentRepository,
                            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.sosRequestRepository = sosRequestRepository;
+        this.rescueTeamRepository = rescueTeamRepository;
+        this.rescueAssignmentRepository = rescueAssignmentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -45,14 +55,58 @@ public class DataInitializer implements CommandLineRunner {
         Role citizenRole = getOrCreateRole("ROLE_CITIZEN");
 
         // 2. Khởi tạo các tài khoản mặc định phục vụ kiểm thử & vận hành (mật khẩu mặc định: 123456)
-        getOrCreateUser("admin", "123456", "Quản Trị Viên Hệ Thống", "0900000001", "admin@cuunan247.vn", adminRole);
-        getOrCreateUser("coordinator", "123456", "Điều Phối Viên TT Chỉ Huy", "0900000002", "coord@cuunan247.vn", coordRole);
-        getOrCreateUser("rescuer", "123456", "Đội Trưởng Cứu Hộ Hải Châu", "0900000003", "rescuer@cuunan247.vn", rescuerRole);
+        User adminUser = getOrCreateUser("admin", "123456", "Quản Trị Viên Hệ Thống", "0900000001", "admin@cuunan247.vn", adminRole);
+        User coordUser = getOrCreateUser("coordinator", "123456", "Điều Phối Viên TT Chỉ Huy", "0900000002", "coord@cuunan247.vn", coordRole);
+        User rescuerUser = getOrCreateUser("rescuer", "123456", "Đội Trưởng Cứu Hộ Hải Châu", "0900000003", "rescuer@cuunan247.vn", rescuerRole);
         User citizenUser = getOrCreateUser("citizen", "123456", "Nguyễn Văn Dân", "0900000004", "dan@cuunan247.vn", citizenRole);
 
-        // 3. Khởi tạo một số ca SOS mẫu thực tế tại Đà Nẵng / Miền Trung phục vụ hiển thị bản đồ Leaflet
+        // 3. Khởi tạo Đội cứu hộ mẫu nếu chưa có
+        RescueTeam teamHaiChau = null;
+        if (rescueTeamRepository.count() == 0) {
+            teamHaiChau = rescueTeamRepository.save(new RescueTeam(
+                    null,
+                    "Đội Cứu Hộ Hải Châu (Xuồng máy)",
+                    rescuerUser,
+                    "0900000003",
+                    16.0678,
+                    108.2208,
+                    6,
+                    "2 xuồng cao su gắn máy, 15 áo phao, túi sơ cứu y tế",
+                    "AVAILABLE"
+            ));
+
+            rescueTeamRepository.save(new RescueTeam(
+                    null,
+                    "Đội Tình Nguyện Cứu Trợ Sơn Trà",
+                    null,
+                    "0905556677",
+                    16.1022,
+                    108.2450,
+                    4,
+                    "1 xuồng nhôm, áo phao, đèn pin công suất cao",
+                    "AVAILABLE"
+            ));
+
+            rescueTeamRepository.save(new RescueTeam(
+                    null,
+                    "Lực Lượng Cơ Động Cứu Nạn Hòa Vang",
+                    null,
+                    "0909988776",
+                    15.9800,
+                    108.1800,
+                    8,
+                    "Xe lội nước đặc chủng, máy bơm công suất lớn",
+                    "AVAILABLE"
+            ));
+
+            log.info(">>> Khởi tạo 3 Đội cứu hộ mẫu kèm tọa độ GPS thành công!");
+        } else {
+            teamHaiChau = rescueTeamRepository.findAll().get(0);
+        }
+
+        // 4. Khởi tạo một số ca SOS mẫu thực tế tại Đà Nẵng / Miền Trung phục vụ hiển thị bản đồ Leaflet
         if (sosRequestRepository.count() == 0) {
-            sosRequestRepository.save(SosRequest.builder()
+            SosRequest sos1 = sosRequestRepository.save(SosRequest.builder()
                     .sender(citizenUser)
                     .contactName("Trần Thị Bé")
                     .contactPhone("0912345678")
@@ -69,7 +123,7 @@ public class DataInitializer implements CommandLineRunner {
                     .status("PENDING")
                     .build());
 
-            sosRequestRepository.save(SosRequest.builder()
+            SosRequest sos2 = sosRequestRepository.save(SosRequest.builder()
                     .sender(null)
                     .contactName("Lê Văn Hùng")
                     .contactPhone("0988776655")
@@ -102,7 +156,21 @@ public class DataInitializer implements CommandLineRunner {
                     .resolvedAt(LocalDateTime.now().minusHours(2))
                     .build());
 
-            log.info(">>> Khởi tạo 3 ca SOS cứu nạn mẫu thực tế trên bản đồ thành công!");
+            // 5. Khởi tạo 1 nhiệm vụ mẫu đã điều phối cho Đội Hải Châu để test giao diện Rescuer
+            if (teamHaiChau != null && rescueAssignmentRepository.count() == 0) {
+                RescueAssignment initialAssignment = new RescueAssignment();
+                initialAssignment.setSosRequest(sos2);
+                initialAssignment.setTeam(teamHaiChau);
+                initialAssignment.setAssignedBy(coordUser);
+                initialAssignment.setStatus("PENDING");
+                initialAssignment.setAssignedAt(LocalDateTime.now().minusMinutes(15));
+                initialAssignment.setReportNotes("Chỉ đạo điều phối: Ưu tiên tiếp cận người bị thương trước");
+                rescueAssignmentRepository.save(initialAssignment);
+                teamHaiChau.setStatus("BUSY");
+                rescueTeamRepository.save(teamHaiChau);
+            }
+
+            log.info(">>> Khởi tạo các ca SOS cứu nạn và phân công nhiệm vụ mẫu thành công!");
         }
 
         log.info(">>> Khởi tạo dữ liệu người dùng & vai trò ban đầu thành công!");

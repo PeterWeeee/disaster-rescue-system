@@ -102,7 +102,7 @@ class CoordinatorServiceTest {
         RescueTeam nearTeam = new RescueTeam(1L, "Đội Gần", null, "0901", 16.065, 108.205, 5, "Xuồng", "AVAILABLE");
         RescueTeam farTeam = new RescueTeam(2L, "Đội Xa", null, "0902", 16.200, 108.350, 4, "Xe lội nước", "AVAILABLE");
 
-        when(rescueTeamRepository.findByStatusNot("OFFLINE")).thenReturn(List.of(farTeam, nearTeam));
+        when(rescueTeamRepository.findByStatus("AVAILABLE")).thenReturn(List.of(farTeam, nearTeam));
 
         List<RescueTeamDistanceDto> teams = coordinatorService.getAvailableTeamsWithDistance(1L);
 

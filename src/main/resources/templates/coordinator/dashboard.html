@@ -310,6 +310,28 @@
     document.addEventListener("DOMContentLoaded", function () {
         initCoordinatorMap();
 
+        document.addEventListener('rescue:new-sos', function (event) {
+            const sos = event.detail;
+            if (!sos || !sos.id) return;
+            renderSosMarkers([{ ...sos, addressDetail: sos.address }]);
+            if (map && Number.isFinite(Number(sos.latitude)) && Number.isFinite(Number(sos.longitude))) {
+                map.panTo([Number(sos.latitude), Number(sos.longitude)]);
+            }
+        });
+
+        document.addEventListener('rescue:map-update', function (event) {
+            const update = event.detail || {};
+            const marker = sosMarkers[update.sosId];
+            if (!marker) return;
+            const color = update.status === 'RESOLVED' ? '#198754'
+                : (update.status === 'DISPATCHED' || update.status === 'IN_PROGRESS' ? '#fd7e14' : '#dc3545');
+            marker.setIcon(L.divIcon({
+                className: 'custom-sos-marker',
+                html: `<div style="background-color:${color};width:22px;height:22px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold">!</div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+            }));
+        });
+
         document.addEventListener('click', function(e) {
             const focusBtn = e.target.closest('.btn-focus-map');
             if (focusBtn) {

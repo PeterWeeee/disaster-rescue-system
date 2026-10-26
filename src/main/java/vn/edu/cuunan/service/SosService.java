@@ -2,6 +2,8 @@ package vn.edu.cuunan.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.dto.SosRequestDto;
@@ -12,6 +14,7 @@ import vn.edu.cuunan.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,10 +24,18 @@ public class SosService {
 
     private final SosRequestRepository sosRequestRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public SosService(SosRequestRepository sosRequestRepository, UserRepository userRepository) {
+        this(sosRequestRepository, userRepository, null);
+    }
+
+    @Autowired
+    public SosService(SosRequestRepository sosRequestRepository, UserRepository userRepository,
+                      @Autowired(required = false) SimpMessagingTemplate messagingTemplate) {
         this.sosRequestRepository = sosRequestRepository;
         this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     /**
@@ -69,6 +80,17 @@ public class SosService {
         log.info(">>> TIẾP NHẬN SOS #{}: người liên hệ '{}', SĐT '{}', vị trí [{}, {}], mức độ '{}', số người: {}",
                 saved.getId(), saved.getContactName(), saved.getContactPhone(),
                 saved.getLatitude(), saved.getLongitude(), saved.getUrgencyLevel(), saved.getPeopleCount());
+
+        if (messagingTemplate != null) {
+            Map<String, Object> message = new java.util.LinkedHashMap<>();
+            message.put("id", saved.getId());
+            message.put("latitude", saved.getLatitude());
+            message.put("longitude", saved.getLongitude());
+            message.put("urgencyLevel", saved.getUrgencyLevel());
+            message.put("status", saved.getStatus());
+            message.put("createdAt", saved.getCreatedAt());
+            messagingTemplate.convertAndSend("/topic/sos-alerts", message);
+        }
 
         return saved;
     }
@@ -147,6 +169,10 @@ public class SosService {
 
         SosRequest updated = sosRequestRepository.save(sos);
         log.info(">>> CẬP NHẬT TRẠNG THÁI SOS #{}: -> {}", id, upperStatus);
+        if (messagingTemplate != null) {
+            messagingTemplate.convertAndSend("/topic/map-updates", Map.of(
+                "type", "STATUS_CHANGE", "sosId", updated.getId(), "status", updated.getStatus()));
+        }
         return updated;
     }
 

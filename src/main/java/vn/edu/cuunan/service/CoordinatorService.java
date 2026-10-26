@@ -92,7 +92,7 @@ public class CoordinatorService {
         SosRequest sos = sosRequestRepository.findById(sosId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + sosId));
 
-        List<RescueTeam> teams = rescueTeamRepository.findByStatusNot("OFFLINE");
+        List<RescueTeam> teams = rescueTeamRepository.findByStatus("AVAILABLE");
         List<RescueTeamDistanceDto> result = new ArrayList<>();
 
         for (RescueTeam team : teams) {
@@ -132,15 +132,15 @@ public class CoordinatorService {
         SosRequest sos = sosRequestRepository.findById(dto.getSosRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + dto.getSosRequestId()));
 
-        if ("RESOLVED".equalsIgnoreCase(sos.getStatus()) || "CANCELLED".equalsIgnoreCase(sos.getStatus())) {
-            throw new IllegalStateException("Ca cứu hộ #" + sos.getId() + " đã kết thúc hoặc đã bị hủy, không thể phân công!");
+        if (!"PENDING".equalsIgnoreCase(sos.getStatus())) {
+            throw new IllegalStateException("Ca SOS phải ở trạng thái PENDING trước khi phân công (hiện tại: " + sos.getStatus() + ")");
         }
 
         RescueTeam team = rescueTeamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đội cứu hộ #" + dto.getTeamId()));
 
-        if ("OFFLINE".equalsIgnoreCase(team.getStatus())) {
-            throw new IllegalStateException("Đội cứu hộ '" + team.getTeamName() + "' hiện đang không hoạt động (Offline)!");
+        if (!"AVAILABLE".equalsIgnoreCase(team.getStatus())) {
+            throw new IllegalStateException("Đội cứu hộ '" + team.getTeamName() + "' hiện không sẵn sàng nhận nhiệm vụ!");
         }
 
         User coordinator = null;
@@ -201,7 +201,9 @@ public class CoordinatorService {
             assignmentMsg.put("contactPhone", sos.getContactPhone());
             assignmentMsg.put("address", sos.getAddressDetail());
             assignmentMsg.put("urgency", sos.getUrgencyLevel());
-            messagingTemplate.convertAndSend("/topic/assignments", assignmentMsg);
+            if (team.getLeader() != null && team.getLeader().getUsername() != null) {
+                messagingTemplate.convertAndSendToUser(team.getLeader().getUsername(), "/queue/assignments", assignmentMsg);
+            }
         } catch (Exception ex) {
             log.warn("Lỗi khi gửi WebSocket notification: {}", ex.getMessage());
         }

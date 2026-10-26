@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import vn.edu.cuunan.dto.SosRequestDto;
 import vn.edu.cuunan.entity.Role;
 import vn.edu.cuunan.entity.SosRequest;
@@ -31,6 +32,9 @@ class SosServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private SosService sosService;
@@ -87,6 +91,7 @@ class SosServiceTest {
 
         verify(userRepository, never()).findById(any());
         verify(sosRequestRepository, times(1)).save(any(SosRequest.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/sos-alerts"), any());
     }
 
     @Test

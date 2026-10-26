@@ -6,24 +6,63 @@
 
 <div id="admin-content" class="py-4">
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold text-navy mb-0">
-                    <i class="fa-solid fa-screwdriver-wrench text-primary me-2"></i> TRUNG TÂM QUẢN TRỊ HỆ THỐNG (ADMIN PORTAL)
-                </h3>
-                <small class="text-muted">Quản lý người dùng, phân quyền, cấu hình đội cứu hộ và phát cảnh báo Broadcast</small>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-danger py-2 px-3"><i class="fa-solid fa-lock me-1"></i> Quyền Quản Trị Cao Nhất</span>
-            </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div><h2 class="fw-bold text-navy mb-1"><i class="fa-solid fa-shield-halved text-danger me-2"></i>Trung tâm quản trị</h2><div class="text-muted">Tài khoản, đội cứu hộ, cảnh báo và số liệu vận hành</div></div>
+            <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#broadcastModal"><i class="fa-solid fa-tower-broadcast me-2"></i>Phát cảnh báo khẩn cấp</button>
         </div>
-
-        <div class="alert alert-danger py-3 shadow-sm border-0">
-            <i class="fa-solid fa-shield-halved me-2"></i>
-            Bạn đã đăng nhập với vai trò <strong><span sec:authentication="name">Admin</span></strong>. Phân hệ Quản trị toàn diện sẽ được hoàn thiện trong <strong>Session 08</strong> (Quản lý User & Đội cứu hộ, Broadcast WebSocket cảnh báo khẩn cấp toàn màn hình, thống kê Chart.js).
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đã giải quyết</div><div class="fs-3 fw-bold text-success" th:text="${stats.resolvedCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Thời gian xử lý TB</div><div class="fs-3 fw-bold"><span th:text="${stats.averageResponseMinutes}">0</span><small class="fs-6"> phút</small></div></div></div></div>
+        </div>
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Phân bố mức độ SOS</div><div class="card-body"><canvas id="urgencyChart" height="220"></canvas></div></div></div>
+            <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Ca cứu nạn theo khu vực</div><div class="card-body"><canvas id="regionChart" height="220"></canvas></div></div></div>
+        </div>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-bold"><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản</div>
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr th:each="user : ${users}" th:attr="data-user-id=${user.id}"><td><strong th:text="${user.fullName}">Tên</strong><div class="small text-muted" th:text="${user.username}">username</div></td><td><span th:text="${user.phone}">SĐT</span><div class="small text-muted" th:text="${user.email}">email</div></td>
+                    <td><select class="form-select form-select-sm user-role"><option value="ROLE_CITIZEN" th:selected="${user.role != null and user.role.name == 'ROLE_CITIZEN'}">Người dân</option><option value="ROLE_RESCUER" th:selected="${user.role != null and user.role.name == 'ROLE_RESCUER'}">Cứu hộ</option><option value="ROLE_COORDINATOR" th:selected="${user.role != null and user.role.name == 'ROLE_COORDINATOR'}">Điều phối</option><option value="ROLE_ADMIN" th:selected="${user.role != null and user.role.name == 'ROLE_ADMIN'}">Quản trị</option></select></td>
+                    <td><select class="form-select form-select-sm user-status"><option value="ACTIVE" th:selected="${user.status == 'ACTIVE'}">Hoạt động</option><option value="BLOCKED" th:selected="${user.status == 'BLOCKED'}">Đã khóa</option></select></td><td><button class="btn btn-sm btn-outline-primary btn-save-user">Lưu</button></td></tr>
+            </tbody></table></div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tên đội</th><th>Đội trưởng</th><th>Liên hệ</th><th>Quân số</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr th:each="team : ${teams}" th:attr="data-team-id=${team.id}"><td><strong th:text="${team.teamName}">Đội</strong><div class="small text-muted" th:text="${team.equipmentNotes}">Thiết bị</div></td><td th:text="${team.leader != null ? team.leader.fullName : 'Chưa chỉ định'}">—</td><td th:text="${team.contactPhone}">SĐT</td><td th:text="${team.memberCount}">0</td><td><span class="badge" th:classappend="${team.status == 'AVAILABLE' ? 'bg-success' : (team.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}" th:text="${team.status}">AVAILABLE</span></td><td><button class="btn btn-sm btn-outline-secondary" th:attr="data-team-id=${team.id}" onclick="editTeamFromRow(this)">Sửa</button></td></tr>
+            </tbody></table></div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="broadcastModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Phát cảnh báo khẩn cấp toàn hệ thống</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
+    <div class="mb-3"><label class="form-label">Tiêu đề</label><input id="alertTitle" class="form-control" maxlength="200"></div><div class="mb-3"><label class="form-label">Nội dung hướng dẫn</label><textarea id="alertContent" class="form-control" rows="4"></textarea></div>
+    <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Mức độ</label><select id="alertSeverity" class="form-select"><option value="DANGER_RED">Nguy hiểm — đỏ</option><option value="WARNING_ORANGE">Cảnh báo — cam</option><option value="NOTICE_YELLOW">Thông báo — vàng</option></select></div><div class="col-md-6 mb-3"><label class="form-label">Khu vực ảnh hưởng</label><input id="alertRegion" class="form-control"></div></div><div class="small text-muted">Cảnh báo được lưu và gửi tức thời đến các trang đang kết nối.</div>
+    </div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button id="sendBroadcast" class="btn btn-danger fw-bold">Phát cảnh báo</button></div></div></div></div>
+
+<div class="modal fade" id="teamModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="teamModalTitle">Thêm đội cứu hộ</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input id="teamId" type="hidden"><div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Tên đội</label><input id="teamName" class="form-control"></div><div class="col-md-6"><label class="form-label">Số điện thoại</label><input id="teamPhone" class="form-control"></div><div class="col-md-6"><label class="form-label">Đội trưởng</label><select id="teamLeader" class="form-select"><option value="">Chưa chỉ định</option><option th:each="rescuer : ${rescuerUsers}" th:value="${rescuer.id}" th:text="${rescuer.fullName + ' (' + rescuer.username + ')'}"></option></select></div>
+    <div class="col-md-3"><label class="form-label">Vĩ độ</label><input id="teamLat" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Kinh độ</label><input id="teamLng" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Quân số</label><input id="teamCount" type="number" min="0" class="form-control" value="0"></div><div class="col-md-4"><label class="form-label">Trạng thái</label><select id="teamStatus" class="form-select"><option>AVAILABLE</option><option>BUSY</option><option>OFFLINE</option></select></div><div class="col-12"><label class="form-label">Trang thiết bị</label><textarea id="teamEquipment" class="form-control" rows="2"></textarea></div>
+    </div></div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" id="saveTeam">Lưu đội</button></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const adminStats = /*[[${stats}]]*/ {};
+    const teamsForEditing = /*[[${teams}]]*/ [];
+    const urgency = adminStats.byUrgency || {};
+    new Chart(document.getElementById('urgencyChart'), {type:'doughnut',data:{labels:['Nguy cấp','Khẩn cấp','Trung bình','Thấp'],datasets:[{data:[urgency.CRITICAL||0,urgency.HIGH||0,urgency.MEDIUM||0,urgency.LOW||0],backgroundColor:['#dc3545','#fd7e14','#0dcaf0','#6c757d']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+    const regions = adminStats.byRegion || {};
+    new Chart(document.getElementById('regionChart'), {type:'bar',data:{labels:Object.keys(regions),datasets:[{label:'Số ca SOS',data:Object.values(regions),backgroundColor:'#0d6efd',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+    document.querySelectorAll('.btn-save-user').forEach(button => button.addEventListener('click', async () => {const row=button.closest('tr');try{const response=await fetch(`/api/admin/users/${row.dataset.userId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:row.querySelector('.user-role').value,status:row.querySelector('.user-status').value})});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể cập nhật tài khoản');alert('Đã cập nhật. Thay đổi quyền có hiệu lực từ yêu cầu tiếp theo.');}catch(error){alert(error.message);}}));
+    function openTeamForm(team){document.getElementById('teamModalTitle').textContent=team?'Cập nhật đội cứu hộ':'Thêm đội cứu hộ';document.getElementById('teamId').value=team?.id||'';document.getElementById('teamName').value=team?.teamName||'';document.getElementById('teamPhone').value=team?.contactPhone||'';document.getElementById('teamLeader').value=team?.leader?.id||'';document.getElementById('teamLat').value=team?.currentLatitude??'';document.getElementById('teamLng').value=team?.currentLongitude??'';document.getElementById('teamCount').value=team?.memberCount??0;document.getElementById('teamStatus').value=team?.status||'AVAILABLE';document.getElementById('teamEquipment').value=team?.equipmentNotes||'';bootstrap.Modal.getOrCreateInstance(document.getElementById('teamModal')).show();}
+    function editTeamFromRow(button){const team=teamsForEditing.find(item=>String(item.id)===button.dataset.teamId);if(team)openTeamForm(team);}
+    document.getElementById('saveTeam').addEventListener('click',async()=>{const id=document.getElementById('teamId').value;const value=id=>document.getElementById(id).value;const payload={teamName:value('teamName'),contactPhone:value('teamPhone'),leaderId:value('teamLeader')||null,currentLatitude:value('teamLat')===''?null:Number(value('teamLat')),currentLongitude:value('teamLng')===''?null:Number(value('teamLng')),memberCount:Number(value('teamCount')),status:value('teamStatus'),equipmentNotes:value('teamEquipment')};try{const response=await fetch(id?`/api/admin/teams/${id}`:'/api/admin/teams',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể lưu đội');location.reload();}catch(error){alert(error.message);}});
+    document.getElementById('sendBroadcast').addEventListener('click',async()=>{const value=id=>document.getElementById(id).value;const payload={title:value('alertTitle'),content:value('alertContent'),severity:value('alertSeverity'),affectedRegion:value('alertRegion')};if(!payload.title.trim()||!payload.content.trim()){alert('Vui lòng nhập tiêu đề và nội dung cảnh báo.');return;}const button=document.getElementById('sendBroadcast');button.disabled=true;try{const response=await fetch('/api/admin/broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể phát cảnh báo');bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();alert('Đã lưu và gửi cảnh báo đến các trang đang kết nối.');document.getElementById('alertTitle').value='';document.getElementById('alertContent').value='';}catch(error){alert(error.message);}finally{button.disabled=false;}});
+</script>
 
 </body>
 </html>
