@@ -68,11 +68,22 @@ public class RescuerService {
             return Optional.of(memberships.get(0).getTeam());
         }
 
+        // 3. Fallback cho Admin hoặc tài khoản cứu hộ chưa kịp liên kết:
+        // Lấy đội đầu tiên để giao diện giám sát không bị trống trơn
+        if (user.getRole() != null && ("ROLE_ADMIN".equalsIgnoreCase(user.getRole().getName())
+                || "ROLE_RESCUER".equalsIgnoreCase(user.getRole().getName()))) {
+            List<RescueTeam> allTeams = rescueTeamRepository.findAll();
+            if (!allTeams.isEmpty()) {
+                return Optional.of(allTeams.get(0));
+            }
+        }
+
         return Optional.empty();
     }
 
     /**
      * Lấy toàn bộ danh sách nhiệm vụ được phân công cho đội của người dùng.
+     * Dùng JOIN FETCH để tải sosRequest trong cùng transaction, tránh LazyInitializationException khi render Thymeleaf.
      */
     @Transactional(readOnly = true)
     public List<RescueAssignment> getMyAssignments(User user) {
@@ -80,7 +91,7 @@ public class RescuerService {
         if (teamOpt.isEmpty()) {
             return Collections.emptyList();
         }
-        return rescueAssignmentRepository.findByTeamIdOrderByAssignedAtDesc(teamOpt.get().getId());
+        return rescueAssignmentRepository.findByTeamIdWithSosRequest(teamOpt.get().getId());
     }
 
     /**
