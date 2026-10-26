@@ -1,6 +1,6 @@
 # PHIÊN LÀM VIỆC #05: WEBSOCKET REAL-TIME CỐT LÕI (SOS & LIVE MAP)
 > **Trạng thái:** ✅ ĐÃ HOÀN THÀNH  
-> **Người thực hiện:** PeterWeeee (Kiến trúc) & SV 24110329 (Tích hợp thực địa)  
+> **Người thực hiện:** PeterWeeee (Kiến trúc & Triển khai toàn bộ)  
 > **Thời điểm hoàn thành:** 26/10/2026  
 > **Nhánh thực hiện:** `develop`
 
