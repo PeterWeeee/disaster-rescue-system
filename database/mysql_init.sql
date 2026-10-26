@@ -2,7 +2,7 @@
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: mysql_init.sql
--- MỤC ĐÍCH: TẠO DATABASE, TABLES VÀ SEED DATA DÀNH CHO MYSQL
+-- MỤC ĐÍCH: TẠO DATABASE, 11 BẢNG CHUẨN VÀ SEED DATA DÀNH CHO MYSQL
 -- =========================================================================
 
 -- 1. Tạo Database
@@ -122,39 +122,65 @@ CREATE TABLE IF NOT EXISTS `disaster_alerts` (
     CONSTRAINT `fk_alerts_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 9. Nạp Dữ Liệu Mẫu (Seed Data)
-INSERT IGNORE INTO `roles` (`name`) VALUES 
-('ROLE_ADMIN'), ('ROLE_COORDINATOR'), ('ROLE_RESCUER'), ('ROLE_CITIZEN');
+-- 9. Bảng Điểm sơ tán, tạm lánh (evacuation_shelters)
+CREATE TABLE IF NOT EXISTS `evacuation_shelters` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(200) NOT NULL,
+    `address` VARCHAR(255) NULL,
+    `latitude` DOUBLE NULL,
+    `longitude` DOUBLE NULL,
+    `total_capacity` INT DEFAULT 300,
+    `current_occupancy` INT DEFAULT 0,
+    `contact_phone` VARCHAR(30) NULL,
+    `status` VARCHAR(30) DEFAULT 'OPEN',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Nạp Users mẫu (Mật khẩu: 123456)
-INSERT IGNORE INTO `users` (`username`, `password`, `full_name`, `phone`, `email`, `role_id`, `status`)
-SELECT 'admin', '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Quản Trị Viên Hệ Thống', '0901112233', 'admin@cuunan247.vn', id, 'ACTIVE'
-FROM `roles` WHERE `name` = 'ROLE_ADMIN' LIMIT 1;
+-- 10. Bảng Bài đăng cộng đồng (community_posts)
+CREATE TABLE IF NOT EXISTS `community_posts` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NULL,
+    `author_name` VARCHAR(150) NOT NULL,
+    `hazard_type` VARCHAR(50) NOT NULL DEFAULT 'OTHER',
+    `content` TEXT NOT NULL,
+    `location_name` VARCHAR(255) NULL,
+    `latitude` DOUBLE NULL,
+    `longitude` DOUBLE NULL,
+    `image_url` VARCHAR(500) NULL,
+    `verification_status` VARCHAR(30) DEFAULT 'PENDING',
+    `upvote_count` INT DEFAULT 0,
+    `comment_count` INT DEFAULT 0,
+    `sos_request_id` BIGINT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_posts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `fk_posts_sos` FOREIGN KEY (`sos_request_id`) REFERENCES `sos_requests` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO `users` (`username`, `password`, `full_name`, `phone`, `email`, `role_id`, `status`)
-SELECT 'dieuphoi01', '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Trần Điều Phối', '0902223344', 'coordinator01@cuunan247.vn', id, 'ACTIVE'
-FROM `roles` WHERE `name` = 'ROLE_COORDINATOR' LIMIT 1;
+-- 11. Bảng Bình chọn bài đăng (post_upvotes)
+CREATE TABLE IF NOT EXISTS `post_upvotes` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_post_user` (`post_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO `users` (`username`, `password`, `full_name`, `phone`, `email`, `role_id`, `status`)
-SELECT 'doitruong01', '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Lê Văn Cứu Hộ', '0903334455', 'rescuer01@cuunan247.vn', id, 'ACTIVE'
-FROM `roles` WHERE `name` = 'ROLE_RESCUER' LIMIT 1;
-
-INSERT IGNORE INTO `users` (`username`, `password`, `full_name`, `phone`, `email`, `role_id`, `status`)
-SELECT 'nguoidan01', '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Nguyễn Văn An', '0904445566', 'dan01@gmail.com', id, 'ACTIVE'
-FROM `roles` WHERE `name` = 'ROLE_CITIZEN' LIMIT 1;
-
--- Nạp Đội cứu hộ mẫu
-INSERT IGNORE INTO `rescue_teams` (`team_name`, `leader_id`, `contact_phone`, `current_latitude`, `current_longitude`, `member_count`, `equipment_notes`, `status`)
-SELECT 'Đội Cứu Nạn Xuồng Cao Su Số 1', id, '0903334455', 16.0748, 108.2240, 6, '2 xuồng máy cao su, 15 áo phao cứu sinh, 2 phao tròn, túi cứu thương chuyên sâu', 'AVAILABLE'
-FROM `users` WHERE `username` = 'doitruong01' LIMIT 1;
-
--- Nạp Yêu cầu cứu nạn SOS mẫu
-INSERT IGNORE INTO `sos_requests` (`contact_name`, `contact_phone`, `latitude`, `longitude`, `address_detail`, `urgency_level`, `people_count`, `has_elderly`, `has_children`, `has_injured`, `description`, `status`)
-VALUES 
-('Bà Trần Thị Bích', '0988776655', 16.0678, 108.2140, 'Số 45 Đường Trưng Nữ Vương, ngập nước ngang ngực', 'CRITICAL', 4, 1, 1, 0, 'Nước lũ đang dâng cao gần tới gác lửng, nhà có 1 cụ già 82 tuổi liệt giường và bé sơ sinh 6 tháng tuổi. Cần xuồng tiếp cận gấp!', 'PENDING'),
-('Nguyễn Hoàng Nam', '0977665544', 16.0544, 108.2022, 'Khu dân cư ven sông Cẩm Lệ', 'HIGH', 3, 0, 0, 1, 'Đang bị cô lập do ngập sâu 1.5m, một người bị ngã trẹo chân khi dọn đồ cần băng nẹp y tế và lương thực.', 'PENDING');
-
--- Nạp Cảnh báo thiên tai mẫu
-INSERT IGNORE INTO `disaster_alerts` (`title`, `content`, `severity`, `affected_region`, `is_broadcast`, `created_by`)
-SELECT 'Lũ khẩn cấp trên các lưu vực sông', 'Do ảnh hưởng của bão số 6, mực nước sông lên nhanh đạt mức báo động 3. Người dân các khu vực thấp trũng khẩn trương di dời tài sản và liên hệ lực lượng ứng trực qua hotline 112.', 'DANGER_RED', 'Thành phố Đà Nẵng, Tỉnh Quảng Nam, Tỉnh Thừa Thiên Huế', 1, id
-FROM `users` WHERE `username` = 'admin' LIMIT 1;
+-- 12. Bảng Tệp đính kèm (media_files)
+CREATE TABLE IF NOT EXISTS `media_files` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `file_name` VARCHAR(255) NOT NULL,
+    `original_name` VARCHAR(255) NULL,
+    `file_url` VARCHAR(1000) NOT NULL,
+    `file_size` BIGINT NULL,
+    `content_type` VARCHAR(100) NULL,
+    `storage_type` VARCHAR(30) DEFAULT 'LOCAL',
+    `public_id` VARCHAR(255) NULL,
+    `sos_id` BIGINT NULL,
+    `uploaded_by` BIGINT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_media_sos` FOREIGN KEY (`sos_id`) REFERENCES `sos_requests` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_media_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

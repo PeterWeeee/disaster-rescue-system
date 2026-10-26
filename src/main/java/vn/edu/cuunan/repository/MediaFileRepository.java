@@ -13,4 +13,6 @@ public interface MediaFileRepository extends JpaRepository<MediaFile, Long> {
     List<MediaFile> findBySosRequestOrderByCreatedAtDesc(SosRequest sosRequest);
 
     List<MediaFile> findBySosRequestIdOrderByCreatedAtDesc(Long sosId);
+
+    boolean existsByFileName(String fileName);
 }

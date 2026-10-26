@@ -14,9 +14,9 @@ public class SosRequest extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "role"})
     private User sender;
 
     @Column(name = "contact_name", nullable = false, length = 150)

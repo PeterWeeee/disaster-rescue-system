@@ -6,9 +6,12 @@ import vn.edu.cuunan.entity.CommunityPost;
 import vn.edu.cuunan.entity.HazardType;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CommunityPostRepository extends JpaRepository<CommunityPost, Long> {
     List<CommunityPost> findAllByOrderByCreatedAtDesc();
     List<CommunityPost> findByHazardTypeOrderByCreatedAtDesc(HazardType hazardType);
+    boolean existsByContent(String content);
+    Optional<CommunityPost> findFirstByContent(String content);
 }

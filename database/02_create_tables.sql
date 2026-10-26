@@ -153,3 +153,86 @@ BEGIN
     PRINT N'>>> Đã tạo bảng disaster_alerts';
 END
 GO
+
+-- 8. Bảng Điểm sơ tán, tạm lánh (evacuation_shelters)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'evacuation_shelters')
+BEGIN
+    CREATE TABLE [dbo].[evacuation_shelters] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [name] NVARCHAR(200) NOT NULL,
+        [address] NVARCHAR(255) NULL,
+        [latitude] FLOAT NULL,
+        [longitude] FLOAT NULL,
+        [total_capacity] INT DEFAULT 300,
+        [current_occupancy] INT DEFAULT 0,
+        [contact_phone] VARCHAR(30) NULL,
+        [status] VARCHAR(30) DEFAULT 'OPEN', -- OPEN, FULL, CLOSED
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        [updated_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP
+    );
+    PRINT N'>>> Đã tạo bảng evacuation_shelters';
+END
+GO
+
+-- 9. Bảng Bài đăng cộng đồng (community_posts)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'community_posts')
+BEGIN
+    CREATE TABLE [dbo].[community_posts] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [user_id] BIGINT NULL,
+        [author_name] NVARCHAR(150) NOT NULL,
+        [hazard_type] VARCHAR(50) NOT NULL DEFAULT 'OTHER', -- LANDSLIDE, FLOOD, ISOLATED, TREE_FALL, STORM, OTHER
+        [content] NVARCHAR(MAX) NOT NULL,
+        [location_name] NVARCHAR(255) NULL,
+        [latitude] FLOAT NULL,
+        [longitude] FLOAT NULL,
+        [image_url] VARCHAR(500) NULL,
+        [verification_status] VARCHAR(30) DEFAULT 'PENDING', -- PENDING, VERIFIED, REJECTED
+        [upvote_count] INT DEFAULT 0,
+        [comment_count] INT DEFAULT 0,
+        [sos_request_id] BIGINT NULL,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        [updated_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [FK_posts_user] FOREIGN KEY ([user_id]) REFERENCES [dbo].[users]([id]) ON DELETE SET NULL,
+        CONSTRAINT [FK_posts_sos] FOREIGN KEY ([sos_request_id]) REFERENCES [dbo].[sos_requests]([id]) ON DELETE SET NULL
+    );
+    PRINT N'>>> Đã tạo bảng community_posts';
+END
+GO
+
+-- 10. Bảng Bình chọn bài đăng cộng đồng (post_upvotes)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'post_upvotes')
+BEGIN
+    CREATE TABLE [dbo].[post_upvotes] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [post_id] BIGINT NOT NULL,
+        [user_id] BIGINT NOT NULL,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [UQ_post_user] UNIQUE ([post_id], [user_id])
+    );
+    PRINT N'>>> Đã tạo bảng post_upvotes';
+END
+GO
+
+-- 11. Bảng Tệp đa phương tiện đính kèm (media_files)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'media_files')
+BEGIN
+    CREATE TABLE [dbo].[media_files] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [file_name] VARCHAR(255) NOT NULL,
+        [original_name] VARCHAR(255) NULL,
+        [file_url] VARCHAR(1000) NOT NULL,
+        [file_size] BIGINT NULL,
+        [content_type] VARCHAR(100) NULL,
+        [storage_type] VARCHAR(30) DEFAULT 'LOCAL', -- CLOUDINARY, LOCAL
+        [public_id] VARCHAR(255) NULL,
+        [sos_id] BIGINT NULL,
+        [uploaded_by] BIGINT NULL,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        [updated_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [FK_media_sos] FOREIGN KEY ([sos_id]) REFERENCES [dbo].[sos_requests]([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_media_user] FOREIGN KEY ([uploaded_by]) REFERENCES [dbo].[users]([id]) ON DELETE SET NULL
+    );
+    PRINT N'>>> Đã tạo bảng media_files';
+END
+GO

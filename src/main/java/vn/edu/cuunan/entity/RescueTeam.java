@@ -15,7 +15,7 @@ public class RescueTeam extends BaseEntity {
     @Column(name = "team_name", nullable = false, length = 150)
     private String teamName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "leader_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "role"})
     private User leader;
