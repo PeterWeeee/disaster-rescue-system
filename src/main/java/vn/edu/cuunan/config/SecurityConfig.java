@@ -52,7 +52,7 @@ public class SecurityConfig {
                 "/h2-console/**",
                 "/auth/**",
                 "/sos",
-                    "/sos/**"
+                "/sos/**"
             ))
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -73,12 +73,14 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
+                    "/uploads/**",
                     "/webjars/**",
                     "/h2-console/**",
                     "/ws/**",
                     "/api/auth/**",
                     "/api/sos",
-                    "/api/sos/**"
+                    "/api/sos/**",
+                    "/api/upload/**"
                 ).permitAll()
 
                 // Phân hệ Điều Phối Viên (Coordinator & Admin)

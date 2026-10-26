@@ -119,7 +119,15 @@ public class SosService {
      */
     @Transactional(readOnly = true)
     public List<SosRequest> getSosByPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return List.of();
+        }
         return sosRequestRepository.findByContactPhoneOrderByCreatedAtDesc(phone.trim());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SosRequest> findByContactPhone(String phone) {
+        return getSosByPhone(phone);
     }
 
     /**

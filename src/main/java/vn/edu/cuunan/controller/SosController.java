@@ -9,10 +9,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.cuunan.dto.SosRequestDto;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.security.CustomUserDetails;
+import vn.edu.cuunan.service.CloudinaryService;
 import vn.edu.cuunan.service.SosService;
 
 import java.util.Collections;
@@ -26,6 +28,7 @@ public class SosController {
     private static final Logger log = LoggerFactory.getLogger(SosController.class);
 
     private final SosService sosService;
+    private final CloudinaryService cloudinaryService;
 
     @Value("${app.hotlines.rescue:112}")
     private String rescueHotline;
@@ -36,8 +39,9 @@ public class SosController {
     @Value("${app.hotlines.medical:115}")
     private String medicalHotline;
 
-    public SosController(SosService sosService) {
+    public SosController(SosService sosService, CloudinaryService cloudinaryService) {
         this.sosService = sosService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     /**
@@ -77,11 +81,12 @@ public class SosController {
     }
 
     /**
-     * Tiếp nhận phiếu gửi cứu nạn từ form Thymeleaf.
+     * Tiếp nhận phiếu gửi cứu nạn từ form Thymeleaf (hỗ trợ upload ảnh hiện trường).
      */
     @PostMapping
     public String submitSos(@Valid @ModelAttribute("sosRequestDto") SosRequestDto dto,
                             BindingResult bindingResult,
+                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                             @AuthenticationPrincipal CustomUserDetails userDetails,
                             Model model,
                             RedirectAttributes redirectAttributes) {
@@ -93,6 +98,13 @@ public class SosController {
         }
 
         try {
+            // Tải ảnh hiện trường lên Cloudinary (hoặc local fallback) nếu có đính kèm
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String uploadedUrl = cloudinaryService.uploadImage(imageFile, "sos_images");
+                dto.setImageUrl(uploadedUrl);
+                log.info("Đã gắn link ảnh hiện trường vào phiếu SOS: {}", uploadedUrl);
+            }
+
             Long senderId = (userDetails != null) ? userDetails.getId() : null;
             SosRequest saved = sosService.createSosRequest(dto, senderId);
 
@@ -140,23 +152,31 @@ public class SosController {
                               @AuthenticationPrincipal CustomUserDetails userDetails,
                               Model model) {
         populateHotlines(model);
-        model.addAttribute("pageTitle", "Tra Cứu Tiến Độ Cứu Hộ");
+        model.addAttribute("pageTitle", "Tra Cứu Tiến Độ Ca Cứu Hộ");
 
+        // 1. Tìm theo mã số trực tiếp
         if (code != null && !code.trim().isEmpty()) {
-            String cleanCode = code.replaceAll("[^0-9]", "");
-            if (!cleanCode.isEmpty()) {
-                return "redirect:/sos/track/" + cleanCode;
-            }
+            String cleanCode = code.trim().toUpperCase().replace("#SOS-", "").replace("SOS-", "").replace("#", "");
+            try {
+                Long id = Long.parseLong(cleanCode);
+                return "redirect:/sos/track/" + id;
+            } catch (NumberFormatException ignored) {}
         }
 
-        if (phone != null && !phone.trim().isEmpty()) {
-            List<SosRequest> results = sosService.getSosByPhone(phone.trim());
+        // 2. Tìm theo số điện thoại
+        String searchPhone = phone;
+        if ((searchPhone == null || searchPhone.trim().isEmpty()) && userDetails != null && userDetails.getUser() != null) {
+            searchPhone = userDetails.getUser().getPhone();
+        }
+
+        if (searchPhone != null && !searchPhone.trim().isEmpty()) {
+            List<SosRequest> results = sosService.findByContactPhone(searchPhone.trim());
             model.addAttribute("results", results);
-            model.addAttribute("searchedPhone", phone.trim());
-        } else if (userDetails != null) {
-            List<SosRequest> userRequests = sosService.getSosBySender(userDetails.getId());
-            model.addAttribute("results", userRequests);
-            model.addAttribute("userTrackList", true);
+            model.addAttribute("searchResults", results);
+            model.addAttribute("searchedPhone", searchPhone.trim());
+        } else {
+            model.addAttribute("results", Collections.emptyList());
+            model.addAttribute("searchResults", Collections.emptyList());
         }
 
         return "sos/track";
@@ -169,8 +189,7 @@ public class SosController {
             case "DISPATCHED" -> 2;
             case "IN_PROGRESS" -> 3;
             case "RESOLVED", "COMPLETED" -> 4;
-            case "CANCELLED" -> -1;
-            default -> 1;
+            default -> 0; // CANCELLED
         };
     }
 

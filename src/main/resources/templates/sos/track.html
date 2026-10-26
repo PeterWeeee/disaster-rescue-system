@@ -302,6 +302,21 @@
                                 <small class="text-secondary fw-semibold d-block">Mô tả tình hình hiện trường:</small>
                                 <p class="mb-0 text-muted fst-italic" th:text="${sos.description}"></p>
                             </div>
+
+                            <!-- Hiện thị ảnh hiện trường nếu có -->
+                            <div class="mt-3" th:if="${sos.imageUrl}">
+                                <small class="text-secondary fw-semibold d-block mb-1">
+                                    <i class="fa-solid fa-camera text-danger me-1"></i> Ảnh hiện trường đính kèm:
+                                </small>
+                                <div class="position-relative d-inline-block">
+                                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#imageZoomModal">
+                                        <img th:src="${sos.imageUrl}" alt="Ảnh hiện trường" class="img-thumbnail rounded shadow-sm hover-zoom" style="max-height: 180px; max-width: 100%; object-fit: cover; cursor: pointer;">
+                                    </a>
+                                    <span class="badge bg-dark bg-opacity-75 position-absolute bottom-0 start-0 m-1">
+                                        <i class="fa-solid fa-expand me-1"></i> Bấm để phóng to
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -407,6 +422,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200);
 });
 </script>
+    <!-- Modal Phóng To Ảnh Hiện Trường -->
+    <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-hidden="true" th:if="${sos != null and sos.imageUrl != null}">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-navy text-white py-2">
+                    <h6 class="modal-title"><i class="fa-solid fa-camera me-2 text-danger"></i> Ảnh Hiện Trường Ca Cứu Hộ #SOS-[[${sos.id}]]</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center bg-dark">
+                    <img th:src="${sos.imageUrl}" alt="Ảnh hiện trường phóng to" class="img-fluid" style="max-height: 80vh; object-fit: contain;">
+                </div>
+                <div class="modal-footer py-1 justify-content-between small text-muted">
+                    <span>Thời điểm ghi nhận: <strong th:text="${#temporals.format(sos.createdAt, 'HH:mm dd/MM/yyyy')}"></strong></span>
+                    <a th:href="${sos.imageUrl}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>
