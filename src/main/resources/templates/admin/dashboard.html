@@ -37,7 +37,6 @@
             </tbody></table></div>
         </div>
     </div>
-</div>
 
 <div class="modal fade" id="broadcastModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Phát cảnh báo khẩn cấp toàn hệ thống</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
     <div class="mb-3"><label class="form-label">Tiêu đề</label><input id="alertTitle" class="form-control" maxlength="200"></div><div class="mb-3"><label class="form-label">Nội dung hướng dẫn</label><textarea id="alertContent" class="form-control" rows="4"></textarea></div>
@@ -63,6 +62,7 @@
     document.getElementById('saveTeam').addEventListener('click',async()=>{const id=document.getElementById('teamId').value;const value=id=>document.getElementById(id).value;const payload={teamName:value('teamName'),contactPhone:value('teamPhone'),leaderId:value('teamLeader')||null,currentLatitude:value('teamLat')===''?null:Number(value('teamLat')),currentLongitude:value('teamLng')===''?null:Number(value('teamLng')),memberCount:Number(value('teamCount')),status:value('teamStatus'),equipmentNotes:value('teamEquipment')};try{const response=await fetch(id?`/api/admin/teams/${id}`:'/api/admin/teams',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể lưu đội');location.reload();}catch(error){alert(error.message);}});
     document.getElementById('sendBroadcast').addEventListener('click',async()=>{const value=id=>document.getElementById(id).value;const payload={title:value('alertTitle'),content:value('alertContent'),severity:value('alertSeverity'),affectedRegion:value('alertRegion')};if(!payload.title.trim()||!payload.content.trim()){alert('Vui lòng nhập tiêu đề và nội dung cảnh báo.');return;}const button=document.getElementById('sendBroadcast');button.disabled=true;try{const response=await fetch('/api/admin/broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể phát cảnh báo');bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();alert('Đã lưu và gửi cảnh báo đến các trang đang kết nối.');document.getElementById('alertTitle').value='';document.getElementById('alertContent').value='';}catch(error){alert(error.message);}finally{button.disabled=false;}});
 </script>
+</div>
 
 </body>
 </html>

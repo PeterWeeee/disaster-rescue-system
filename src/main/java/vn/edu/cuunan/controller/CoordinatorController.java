@@ -31,6 +31,8 @@ public class CoordinatorController {
         model.addAttribute("sosList", coordinatorService.getSosRequests(status));
         model.addAttribute("currentStatusFilter", status);
         model.addAttribute("rescueTeams", rescueTeamRepository.findAll());
+        model.addAttribute("sosMapPins", coordinatorService.getSosMapPins(status));
+        model.addAttribute("teamMapPins", coordinatorService.getRescueTeamMapPins());
         return "coordinator/dashboard";
     }
 }

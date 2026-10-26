@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.cuunan.dto.AssignTaskRequestDto;
 import vn.edu.cuunan.dto.RescueTeamDistanceDto;
 import vn.edu.cuunan.entity.RescueAssignment;
-import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.repository.RescueTeamRepository;
 import vn.edu.cuunan.security.CustomUserDetails;
@@ -79,8 +78,8 @@ public class CoordinatorApiController {
     @GetMapping("/map-data")
     public ResponseEntity<Map<String, Object>> getMapData() {
         Map<String, Object> data = new HashMap<>();
-        data.put("sosRequests", coordinatorService.getSosRequests("ALL"));
-        data.put("rescueTeams", rescueTeamRepository.findAll());
+        data.put("sosRequests", coordinatorService.getSosMapPins("ALL"));
+        data.put("rescueTeams", coordinatorService.getRescueTeamMapPins());
         return ResponseEntity.ok(data);
     }
 }

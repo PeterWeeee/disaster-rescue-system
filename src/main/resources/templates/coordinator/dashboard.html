@@ -202,11 +202,22 @@
                                         <a th:href="@{'/sos/track/' + ${sos.id}}" target="_blank" class="btn btn-xs btn-outline-info btn-sm">
                                             <i class="fa-solid fa-eye me-1"></i> Chi tiết
                                         </a>
-                                        <button th:if="${sos.status != 'RESOLVED' and sos.status != 'CANCELLED'}"
+                                        <button th:if="${sos.status == 'PENDING'}"
                                                 class="btn btn-xs btn-danger btn-sm fw-bold btn-dispatch"
                                                 th:attr="data-id=${sos.id}, data-name=${sos.contactName}, data-lat=${sos.latitude}, data-lng=${sos.longitude}">
                                             <i class="fa-solid fa-paper-plane me-1"></i> Điều phối đội
                                         </button>
+                                        <button th:if="${sos.status == 'DISPATCHED'}"
+                                                class="btn btn-xs btn-outline-warning btn-sm fw-bold btn-dispatch text-dark"
+                                                th:attr="data-id=${sos.id}, data-name=${sos.contactName}, data-lat=${sos.latitude}, data-lng=${sos.longitude}">
+                                            <i class="fa-solid fa-rotate me-1"></i> Đổi đội
+                                        </button>
+                                        <span th:if="${sos.status == 'IN_PROGRESS'}" class="badge bg-primary py-1 px-2 d-flex align-items-center">
+                                            <i class="fa-solid fa-truck-fast me-1"></i> Đang tiếp cận
+                                        </span>
+                                        <span th:if="${sos.status == 'RESOLVED'}" class="badge bg-success py-1 px-2 d-flex align-items-center">
+                                            <i class="fa-solid fa-check me-1"></i> Hoàn thành
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -234,7 +245,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Modal Điều Phối Nhiệm Vụ (Dispatch Modal) -->
 <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
@@ -292,20 +302,15 @@
     </div>
 </div>
 
-<!-- Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script th:inline="javascript">
+<script th:inline="none">
     let map = null;
     let sosMarkers = {};
     let teamMarkers = {};
+    let teamLines = {};
     let selectedSosId = null;
     let selectedTeamId = null;
 
-    // Danh sách đội cứu hộ nạp từ Thymeleaf
-    const initialRescueTeams = /*[[${rescueTeams}]]*/ [];
-    const initialSosList = /*[[${sosList}]]*/ [];
+    // Dữ liệu được nạp tự động qua API /api/coordinator/map-data
 
     document.addEventListener("DOMContentLoaded", function () {
         initCoordinatorMap();
@@ -321,15 +326,116 @@
 
         document.addEventListener('rescue:map-update', function (event) {
             const update = event.detail || {};
-            const marker = sosMarkers[update.sosId];
-            if (!marker) return;
-            const color = update.status === 'RESOLVED' ? '#198754'
-                : (update.status === 'DISPATCHED' || update.status === 'IN_PROGRESS' ? '#fd7e14' : '#dc3545');
-            marker.setIcon(L.divIcon({
-                className: 'custom-sos-marker',
-                html: `<div style="background-color:${color};width:22px;height:22px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold">!</div>`,
-                iconSize: [22, 22], iconAnchor: [11, 11]
-            }));
+
+            // 1. Cập nhật vị trí GPS thời gian thực của Đội cứu hộ (LOCATION_UPDATE)
+            if (update.type === 'LOCATION_UPDATE') {
+                const teamId = update.teamId;
+                const sosId = update.sosId;
+                const newLat = Number(update.latitude);
+                const newLng = Number(update.longitude);
+                const dist = update.distanceKm;
+
+                if (!isNaN(newLat) && !isNaN(newLng)) {
+                    // Cập nhật vị trí Marker Đội cứu hộ trên Bản đồ Tác chiến
+                    if (teamMarkers[teamId]) {
+                        teamMarkers[teamId].setLatLng([newLat, newLng]);
+                        teamMarkers[teamId].setPopupContent(`
+                            <div style="min-width: 180px;">
+                                <div class="fw-bold text-primary mb-1"><i class="fa-solid fa-truck-medical me-1"></i> ${update.teamName || 'Đội Cứu Hộ'}</div>
+                                <div><strong>Trạng thái:</strong> <span class="badge bg-warning text-dark">ĐANG TIẾP CẬN</span></div>
+                                <div><strong>Tọa độ:</strong> [${newLat.toFixed(5)}, ${newLng.toFixed(5)}]</div>
+                                <div><strong>Khoảng cách tới ca #${sosId}:</strong> <span class="text-danger fw-bold">${dist} km</span></div>
+                                <div class="small text-success mt-1"><i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Cập nhật GPS Live</div>
+                            </div>
+                        `);
+                    } else if (map) {
+                        const teamIcon = L.divIcon({
+                            className: 'custom-team-marker',
+                            html: `<div style="background-color: #0d6efd; width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;">
+                                <i class="fa-solid fa-truck-medical"></i>
+                            </div>`,
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14]
+                        });
+                        teamMarkers[teamId] = L.marker([newLat, newLng], { icon: teamIcon }).addTo(map);
+                    }
+
+                    // Vẽ hoặc cập nhật đường nối tiếp cận
+                    if (sosMarkers[sosId] && map) {
+                        const sosLatLng = sosMarkers[sosId].getLatLng();
+                        if (!teamLines[teamId]) {
+                            teamLines[teamId] = L.polyline([[sosLatLng.lat, sosLatLng.lng], [newLat, newLng]], {
+                                color: '#0d6efd',
+                                weight: 3,
+                                dashArray: '6, 8',
+                                opacity: 0.85
+                            }).addTo(map);
+                            teamLines[teamId].bindTooltip(`${update.teamName || 'Đội cứu hộ'}: cách ${dist} km`, { sticky: true });
+                        } else {
+                            teamLines[teamId].setLatLngs([[sosLatLng.lat, sosLatLng.lng], [newLat, newLng]]);
+                            teamLines[teamId].setTooltipContent(`${update.teamName || 'Đội cứu hộ'}: cách ${dist} km`);
+                        }
+                    }
+
+                    // Cập nhật thông tin thẻ SOS ở cột danh sách bên trái
+                    const card = document.getElementById('sos-card-' + sosId);
+                    if (card) {
+                        let liveGpsEl = card.querySelector('.live-approach-badge');
+                        if (!liveGpsEl) {
+                            liveGpsEl = document.createElement('div');
+                            liveGpsEl.className = 'live-approach-badge alert alert-primary py-1 px-2 small mb-2 mt-1 border-0 shadow-sm';
+                            const addrEl = card.querySelector('.text-truncate-2');
+                            if (addrEl) {
+                                addrEl.insertAdjacentElement('afterend', liveGpsEl);
+                            } else {
+                                card.querySelector('.card-body').appendChild(liveGpsEl);
+                            }
+                        }
+                        liveGpsEl.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-truck-fast text-primary me-1"></i> <strong>${update.teamName}</strong></span>
+                                <span class="badge bg-danger fs-6">${dist} km</span>
+                            </div>
+                            <div class="small text-muted mt-1"><i class="fa-solid fa-satellite-dish fa-spin text-success me-1"></i> Tọa độ live: [${newLat.toFixed(5)}, ${newLng.toFixed(5)}]</div>
+                        `;
+
+                        const badges = card.querySelectorAll('.badge');
+                        if (badges.length > 1) {
+                            badges[1].className = 'badge ms-1 bg-primary';
+                            badges[1].textContent = 'IN_PROGRESS';
+                        }
+                    }
+                }
+                return;
+            }
+
+            // 2. Cập nhật khi đổi trạng thái (STATUS_CHANGE hoặc ASSIGNED)
+            if (update.sosId) {
+                const marker = sosMarkers[update.sosId];
+                const status = update.status;
+                if (marker && status) {
+                    const color = status === 'RESOLVED' ? '#198754'
+                        : (status === 'DISPATCHED' || status === 'IN_PROGRESS' ? '#0d6efd' : '#dc3545');
+                    marker.setIcon(L.divIcon({
+                        className: 'custom-sos-marker',
+                        html: `<div style="background-color:${color};width:22px;height:22px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold">!</div>`,
+                        iconSize: [22, 22], iconAnchor: [11, 11]
+                    }));
+                }
+
+                const card = document.getElementById('sos-card-' + update.sosId);
+                if (card && status) {
+                    const badges = card.querySelectorAll('.badge');
+                    if (badges.length > 1) {
+                        badges[1].className = 'badge ms-1 ' + (status === 'RESOLVED' ? 'bg-success' : (status === 'IN_PROGRESS' ? 'bg-primary' : 'bg-warning text-dark'));
+                        badges[1].textContent = status;
+                    }
+                    if (status === 'RESOLVED' && teamLines[update.teamId]) {
+                        map.removeLayer(teamLines[update.teamId]);
+                        delete teamLines[update.teamId];
+                    }
+                }
+            }
         });
 
         document.addEventListener('click', function(e) {
@@ -347,6 +453,12 @@
     });
 
     function initCoordinatorMap() {
+        const mapEl = document.getElementById('coordinatorMap');
+        if (!mapEl || typeof L === 'undefined') {
+            console.warn('Map container coordinatorMap or Leaflet library not found.');
+            return;
+        }
+
         // Tọa độ trung tâm mặc định (Đà Nẵng / Miền Trung)
         const defaultCenter = [16.0544, 108.2022];
         map = L.map('coordinatorMap').setView(defaultCenter, 12);
@@ -356,11 +468,27 @@
             attribution: '© OpenStreetMap contributors | CứuNạn 24/7'
         }).addTo(map);
 
-        // Vẽ các ca SOS lên bản đồ
-        renderSosMarkers(initialSosList);
+        setTimeout(() => {
+            if (map) map.invalidateSize();
+        }, 250);
 
-        // Vẽ các đội cứu hộ lên bản đồ
-        renderTeamMarkers(initialRescueTeams);
+        // Tải dữ liệu ban đầu từ API
+        fetch('/api/coordinator/map-data')
+            .then(res => res.json())
+            .then(data => {
+                if (data.sosRequests) renderSosMarkers(data.sosRequests);
+                if (data.rescueTeams) renderTeamMarkers(data.rescueTeams);
+
+                if (data.sosRequests && data.sosRequests.length > 0) {
+                    const validPoints = data.sosRequests
+                        .filter(s => s.latitude && s.longitude)
+                        .map(s => [s.latitude, s.longitude]);
+                    if (validPoints.length > 0) {
+                        map.fitBounds(validPoints, { padding: [40, 40], maxZoom: 14 });
+                    }
+                }
+            })
+            .catch(err => console.warn('Lỗi tải dữ liệu bản đồ tác chiến:', err));
     }
 
     function renderSosMarkers(sosList) {
@@ -393,9 +521,19 @@
                     <div><strong>Số người:</strong> ${sos.peopleCount || 1} người</div>
                     <div class="text-muted small">${sos.addressDetail || ''}</div>
                     <hr class="my-1">
-                    <button class="btn btn-xs btn-danger w-100 btn-sm mt-1" onclick="openDispatchModal(${sos.id}, '${(sos.contactName || '').replace(/'/g, "\\'")}', ${sos.latitude}, ${sos.longitude})">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Điều phối đội
-                    </button>
+                    ${sos.status === 'PENDING' ? `
+                        <button class="btn btn-xs btn-danger w-100 btn-sm mt-1" onclick="openDispatchModal(${sos.id}, '${(sos.contactName || '').replace(/'/g, "\\'")}', ${sos.latitude}, ${sos.longitude})">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Điều phối đội
+                        </button>
+                    ` : sos.status === 'DISPATCHED' ? `
+                        <button class="btn btn-xs btn-warning text-dark w-100 btn-sm mt-1 fw-bold" onclick="openDispatchModal(${sos.id}, '${(sos.contactName || '').replace(/'/g, "\\'")}', ${sos.latitude}, ${sos.longitude})">
+                            <i class="fa-solid fa-rotate me-1"></i> Đổi đội điều phối
+                        </button>
+                    ` : sos.status === 'IN_PROGRESS' ? `
+                        <div class="badge bg-primary text-white w-100 py-1 mt-1 text-center"><i class="fa-solid fa-truck-fast me-1"></i> Đội đang tiếp cận</div>
+                    ` : `
+                        <div class="badge bg-success text-white w-100 py-1 mt-1 text-center"><i class="fa-solid fa-check me-1"></i> Đã hoàn thành cứu hộ</div>
+                    `}
                 </div>
             `;
             marker.bindPopup(popupContent);
@@ -459,7 +597,13 @@
         container.innerHTML = '';
         loading.style.display = 'block';
 
-        const modal = new bootstrap.Modal(document.getElementById('dispatchModal'));
+        const modalEl = document.getElementById('dispatchModal');
+        const modal = (typeof bootstrap !== 'undefined' && bootstrap.Modal) ? bootstrap.Modal.getOrCreateInstance(modalEl) : null;
+        if (modal) {
+            modal.show();
+        } else {
+            console.error('Bootstrap Modal is not available');
+        }
         modal.show();
 
         // Gọi API lấy danh sách đội cứu hộ kèm khoảng cách Haversine
@@ -560,7 +704,14 @@
             btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Điều Động';
         });
     }
+
+    // Export to window to guarantee inline onclick access
+    window.openDispatchModal = openDispatchModal;
+    window.selectTeam = selectTeam;
+    window.submitDispatch = submitDispatch;
+    window.focusOnMap = focusOnMap;
 </script>
+</div>
 
 </body>
 </html>

@@ -244,6 +244,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Tải dữ liệu ban đầu
     loadSosMarkers();
 
+    // Lắng nghe cập nhật WebSocket thời gian thực
+    document.addEventListener('rescue:map-update', function () {
+        loadSosMarkers();
+    });
+
     setTimeout(function () {
         liveMap.invalidateSize();
     }, 200);

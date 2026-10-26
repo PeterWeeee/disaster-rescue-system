@@ -125,15 +125,15 @@ public class CoordinatorService {
     }
 
     /**
-     * Phân công nhiệm vụ cứu nạn cho Đội cứu hộ.
+     * Phân công nhiệm vụ cứu nạn cho Đội cứu hộ (Hỗ trợ ca PENDING và đổi đội cho ca DISPATCHED).
      */
     @Transactional
     public RescueAssignment assignSosToTeam(AssignTaskRequestDto dto, Long coordinatorUserId) {
         SosRequest sos = sosRequestRepository.findById(dto.getSosRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + dto.getSosRequestId()));
 
-        if (!"PENDING".equalsIgnoreCase(sos.getStatus())) {
-            throw new IllegalStateException("Ca SOS phải ở trạng thái PENDING trước khi phân công (hiện tại: " + sos.getStatus() + ")");
+        if (!"PENDING".equalsIgnoreCase(sos.getStatus()) && !"DISPATCHED".equalsIgnoreCase(sos.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể điều phối ca SOS đang ở trạng thái PENDING hoặc DISPATCHED (hiện tại: " + sos.getStatus() + ")");
         }
 
         RescueTeam team = rescueTeamRepository.findById(dto.getTeamId())
@@ -141,6 +141,24 @@ public class CoordinatorService {
 
         if (!"AVAILABLE".equalsIgnoreCase(team.getStatus())) {
             throw new IllegalStateException("Đội cứu hộ '" + team.getTeamName() + "' hiện không sẵn sàng nhận nhiệm vụ!");
+        }
+
+        // Nếu ca SOS đang ở trạng thái DISPATCHED (đổi đội điều phối): Hủy phân công cũ đang PENDING
+        if ("DISPATCHED".equalsIgnoreCase(sos.getStatus())) {
+            List<RescueAssignment> oldAssignments = rescueAssignmentRepository.findBySosRequestId(sos.getId());
+            for (RescueAssignment old : oldAssignments) {
+                if ("PENDING".equalsIgnoreCase(old.getStatus())) {
+                    old.setStatus("REPLACED");
+                    old.setRejectionReason("Điều phối viên chuyển phân công sang đội khác");
+                    rescueAssignmentRepository.save(old);
+
+                    RescueTeam oldTeam = old.getTeam();
+                    if (oldTeam != null && !oldTeam.getId().equals(team.getId())) {
+                        oldTeam.setStatus("AVAILABLE");
+                        rescueTeamRepository.save(oldTeam);
+                    }
+                }
+            }
         }
 
         User coordinator = null;
@@ -207,5 +225,44 @@ public class CoordinatorService {
         } catch (Exception ex) {
             log.warn("Lỗi khi gửi WebSocket notification: {}", ex.getMessage());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getSosMapPins(String statusFilter) {
+        List<SosRequest> list = getSosRequests(statusFilter);
+        List<Map<String, Object>> pins = new ArrayList<>();
+        for (SosRequest sos : list) {
+            Map<String, Object> pin = new HashMap<>();
+            pin.put("id", sos.getId());
+            pin.put("contactName", sos.getContactName());
+            pin.put("contactPhone", sos.getContactPhone());
+            pin.put("peopleCount", sos.getPeopleCount());
+            pin.put("urgencyLevel", sos.getUrgencyLevel());
+            pin.put("status", sos.getStatus());
+            pin.put("addressDetail", sos.getAddressDetail());
+            pin.put("latitude", sos.getLatitude());
+            pin.put("longitude", sos.getLongitude());
+            pins.add(pin);
+        }
+        return pins;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getRescueTeamMapPins() {
+        List<RescueTeam> teams = rescueTeamRepository.findAll();
+        List<Map<String, Object>> pins = new ArrayList<>();
+        for (RescueTeam team : teams) {
+            Map<String, Object> pin = new HashMap<>();
+            pin.put("id", team.getId());
+            pin.put("teamName", team.getTeamName());
+            pin.put("status", team.getStatus());
+            pin.put("contactPhone", team.getContactPhone());
+            pin.put("memberCount", team.getMemberCount());
+            pin.put("equipmentNotes", team.getEquipmentNotes());
+            pin.put("currentLatitude", team.getCurrentLatitude());
+            pin.put("currentLongitude", team.getCurrentLongitude());
+            pins.add(pin);
+        }
+        return pins;
     }
 }
