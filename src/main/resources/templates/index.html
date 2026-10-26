@@ -8,81 +8,51 @@
     <section class="hero-section text-white py-5 position-relative overflow-hidden">
         <div class="hero-overlay"></div>
         <div class="container position-relative py-5">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-7 text-center text-lg-start">
-                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger-subtle text-danger border border-danger-subtle mb-3">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-8 text-center">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-danger text-white border border-danger-subtle mb-3 shadow-sm">
                         <span class="pulse-dot"></span>
-                        <small class="fw-bold text-uppercase tracking-wider">Hệ Thống Phản Ứng Khẩn Cấp Thiên Tai</small>
+                        <small class="fw-bold text-uppercase tracking-wider">Hệ Thống Phản Ứng Khẩn Cấp Thiên Tai Quốc Gia 24/7</small>
                     </div>
                     <h1 class="display-4 fw-extrabold mb-3 lh-sm text-shadow">
                         CỨU NẠN KHẨN CẤP <br>
                         <span class="text-danger-gradient">KẾT NỐI 24/7 THỜI GIAN THỰC</span>
                     </h1>
-                    <p class="lead text-light mb-4 fs-5 opacity-90">
+                    <p class="lead text-light mb-4 fs-5 opacity-90 mx-auto" style="max-width: 720px;">
                         Nền tảng hỗ trợ người dân vùng bão lũ, ngập lụt, sạt lở đất gửi tín hiệu kêu cứu kèm vị trí GPS chính xác chỉ với 1 chạm. Kết nối ngay lập tức với Đội cứu hộ gần nhất và Ban điều phối.
                     </p>
 
                     <!-- Main Action Buttons -->
-                    <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
-                        <a th:href="@{/sos}" class="btn btn-hero-sos text-white fw-bold d-flex align-items-center gap-3 px-4 py-3 shadow-lg">
+                    <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+                        <a th:href="@{/sos}" class="btn btn-hero-sos text-white fw-bold d-inline-flex align-items-center gap-3 px-4 py-3 shadow-lg">
                             <i class="fa-solid fa-triangle-exclamation fa-2x pulse-icon"></i>
                             <div class="text-start">
                                 <span class="d-block text-uppercase fw-extrabold fs-5">GỬI YÊU CẦU CỨU NẠN SOS</span>
-                                <small class="text-white-50 fw-normal">Định vị GPS tự động & gửi tức thì</small>
+                                <small class="text-white-50 fw-normal">Định vị GPS tự động & gửi trong 10 giây</small>
                             </div>
                         </a>
-                        <a th:href="@{/map}" class="btn btn-outline-light btn-lg d-flex align-items-center gap-2 px-4 py-3">
-                            <i class="fa-solid fa-map-location-dot"></i>
+                        <a th:href="@{/feed}" class="btn btn-outline-light btn-lg d-inline-flex align-items-center gap-2 px-4 py-3 fw-bold">
+                            <i class="fa-solid fa-newspaper text-warning"></i>
+                            <span>Bảng Tin Cộng Đồng</span>
+                        </a>
+                        <a th:href="@{/map}" class="btn btn-outline-light btn-lg d-inline-flex align-items-center gap-2 px-4 py-3 fw-bold">
+                            <i class="fa-solid fa-map-location-dot text-info"></i>
                             <span>Bản Đồ Cứu Hộ Live</span>
                         </a>
                     </div>
 
                     <!-- Rapid Hotlines Strip -->
-                    <div class="d-flex flex-wrap gap-3 align-items-center pt-2">
-                        <small class="text-light text-uppercase fw-semibold">Hotline cứu nạn:</small>
-                        <a href="tel:112" class="badge bg-danger text-white text-decoration-none fs-6 px-3 py-2">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center pt-2">
+                        <small class="text-light text-uppercase fw-semibold me-2">Hotline cứu trợ khẩn cấp:</small>
+                        <a href="tel:112" class="badge bg-danger text-white text-decoration-none fs-6 px-3 py-2 shadow-xs">
                             <i class="fa-solid fa-phone me-1"></i> 112 Quốc Gia
                         </a>
-                        <a href="tel:114" class="badge bg-warning text-dark text-decoration-none fs-6 px-3 py-2">
+                        <a href="tel:114" class="badge bg-warning text-dark text-decoration-none fs-6 px-3 py-2 shadow-xs">
                             <i class="fa-solid fa-fire-extinguisher me-1"></i> 114 PCCC/Lụt
                         </a>
-                        <a href="tel:115" class="badge bg-info text-dark text-decoration-none fs-6 px-3 py-2">
+                        <a href="tel:115" class="badge bg-info text-dark text-decoration-none fs-6 px-3 py-2 shadow-xs">
                             <i class="fa-solid fa-truck-medical me-1"></i> 115 Cấp Cứu
                         </a>
-                    </div>
-                </div>
-
-                <!-- Hero Graphic / Quick Geolocation Card -->
-                <div class="col-lg-5">
-                    <div class="card emergency-card border-0 shadow-lg text-dark">
-                        <div class="card-header bg-danger text-white py-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold"><i class="fa-solid fa-location-crosshairs me-2"></i>Định Vị Vị Trí Của Bạn</span>
-                                <span class="badge bg-white text-danger fw-bold">GPS 1 Chạm</span>
-                            </div>
-                        </div>
-                        <div class="card-body p-4">
-                            <div id="quick-geo-status" class="alert alert-secondary py-2 small mb-3">
-                                <i class="fa-solid fa-circle-info me-1"></i> Nhấn nút bên dưới để hệ thống quét tọa độ cứu nạn hiện tại của bạn.
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">Tọa độ GPS hiện tại:</label>
-                                <div class="input-group">
-                                    <input type="text" id="quick-latlng" class="form-control" placeholder="Chưa xác định tọa độ" readonly>
-                                    <button class="btn btn-outline-danger" type="button" id="btn-detect-gps">
-                                        <i class="fa-solid fa-crosshairs"></i> Quét GPS
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-grid">
-                                <a th:href="@{/sos}" id="btn-goto-sos" class="btn btn-danger btn-lg fw-bold">
-                                    <i class="fa-solid fa-paper-plane me-2"></i> Đi Đến Form Cứu Nạn Khẩn Cấp
-                                </a>
-                            </div>
-                            <p class="text-center text-secondary small mt-3 mb-0">
-                                <i class="fa-solid fa-lock text-success me-1"></i> Dữ liệu vị trí chỉ dùng để điều phối đội cứu nạn nhanh nhất.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>

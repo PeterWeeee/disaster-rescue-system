@@ -87,3 +87,6 @@ application-secret.*
 *.tmp
 *.bak
 *.swp
+
+# Local uploads directory
+uploads/
