@@ -115,4 +115,14 @@ class SecurityIntegrationTest {
                         .cookie(new Cookie("jwt_token", coordToken)))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("DoD 7: Cổng quyên góp cho phép gửi biểu mẫu POST công khai không bị chặn 403 CSRF")
+    void testDonationSubmitWithoutCsrf() throws Exception {
+        mockMvc.perform(post("/donations/submit")
+                        .param("amount", "200000")
+                        .param("paymentMethod", "VIETQR"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/donations/pay/**"));
+    }
 }
