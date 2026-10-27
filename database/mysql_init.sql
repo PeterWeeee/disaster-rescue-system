@@ -189,3 +189,63 @@ CREATE TABLE IF NOT EXISTS `media_files` (
     CONSTRAINT `fk_media_sos` FOREIGN KEY (`sos_id`) REFERENCES `sos_requests` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_media_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Bảng Thông báo người dùng (notifications)
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `recipient_id` BIGINT NOT NULL,
+    `title` VARCHAR(200) NOT NULL,
+    `message` TEXT NOT NULL,
+    `type` VARCHAR(50) DEFAULT 'SYSTEM',
+    `target_url` VARCHAR(255) NULL,
+    `is_read` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_notifications_recipient` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. Bảng Nhật ký hoạt động kiểm toán (activity_logs)
+CREATE TABLE IF NOT EXISTS `activity_logs` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NULL,
+    `action` VARCHAR(80) NOT NULL,
+    `target_entity` VARCHAR(150) NULL,
+    `details` TEXT NULL,
+    `ip_address` VARCHAR(50) NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_activity_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14. Bảng Kho trang thiết bị cứu hộ (rescue_equipment)
+CREATE TABLE IF NOT EXISTS `rescue_equipment` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `team_id` BIGINT NOT NULL,
+    `equipment_code` VARCHAR(50) NOT NULL,
+    `equipment_name` VARCHAR(150) NOT NULL,
+    `category` VARCHAR(50) DEFAULT 'SAFETY',
+    `unit` VARCHAR(30) DEFAULT 'chiếc',
+    `total_quantity` INT DEFAULT 0,
+    `available_quantity` INT DEFAULT 0,
+    `dispatched_quantity` INT DEFAULT 0,
+    `damaged_quantity` INT DEFAULT 0,
+    `notes` TEXT NULL,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_rescue_equipment_team` FOREIGN KEY (`team_id`) REFERENCES `rescue_teams` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Bảng Cấp phát trang thiết bị cho nhiệm vụ (equipment_assignments)
+CREATE TABLE IF NOT EXISTS `equipment_assignments` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `rescue_assignment_id` BIGINT NOT NULL,
+    `equipment_id` BIGINT NOT NULL,
+    `quantity_dispatched` INT DEFAULT 0,
+    `quantity_returned` INT DEFAULT 0,
+    `quantity_damaged` INT DEFAULT 0,
+    `quantity_lost` INT DEFAULT 0,
+    `quantity_consumed` INT DEFAULT 0,
+    `status` VARCHAR(30) DEFAULT 'DISPATCHED',
+    `returned_at` DATETIME NULL,
+    `notes` TEXT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_eq_assign_assignment` FOREIGN KEY (`rescue_assignment_id`) REFERENCES `rescue_assignments` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_eq_assign_equipment` FOREIGN KEY (`equipment_id`) REFERENCES `rescue_equipment` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

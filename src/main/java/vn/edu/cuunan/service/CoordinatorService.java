@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.dto.AssignTaskRequestDto;
 import vn.edu.cuunan.dto.RescueTeamDistanceDto;
+import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
 import vn.edu.cuunan.entity.RescueAssignment;
 import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.SosRequest;
@@ -32,18 +33,36 @@ public class CoordinatorService {
     private final RescueAssignmentRepository rescueAssignmentRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final ActivityLogService activityLogService;
+    private final TerrainAnalysisService terrainAnalysisService;
+
+    public CoordinatorService(SosRequestRepository sosRequestRepository,
+                              RescueTeamRepository rescueTeamRepository,
+                              RescueAssignmentRepository rescueAssignmentRepository,
+                              UserRepository userRepository,
+                              SimpMessagingTemplate messagingTemplate) {
+        this(sosRequestRepository, rescueTeamRepository, rescueAssignmentRepository, userRepository,
+             messagingTemplate, null, null, new TerrainAnalysisService());
+    }
 
     @Autowired
     public CoordinatorService(SosRequestRepository sosRequestRepository,
                               RescueTeamRepository rescueTeamRepository,
                               RescueAssignmentRepository rescueAssignmentRepository,
                               UserRepository userRepository,
-                              @Autowired(required = false) SimpMessagingTemplate messagingTemplate) {
+                              @Autowired(required = false) SimpMessagingTemplate messagingTemplate,
+                              @Autowired(required = false) NotificationService notificationService,
+                              @Autowired(required = false) ActivityLogService activityLogService,
+                              @Autowired(required = false) TerrainAnalysisService terrainAnalysisService) {
         this.sosRequestRepository = sosRequestRepository;
         this.rescueTeamRepository = rescueTeamRepository;
         this.rescueAssignmentRepository = rescueAssignmentRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
+        this.activityLogService = activityLogService;
+        this.terrainAnalysisService = terrainAnalysisService != null ? terrainAnalysisService : new TerrainAnalysisService();
     }
 
     /**
@@ -138,9 +157,12 @@ public class CoordinatorService {
     public List<SosRequest> getSosRequests(String statusFilter, String provinceCode) {
         List<SosRequest> list;
         if (statusFilter == null || statusFilter.trim().isEmpty() || "ALL".equalsIgnoreCase(statusFilter)) {
-            list = sosRequestRepository.findAllByOrderByCreatedAtDesc();
+            // Điều phối viên chỉ quản lý các ca đang chờ hoặc đang cứu nạn (không lưu giữ/hiển thị ca đã hoàn thành)
+            list = sosRequestRepository.findByStatusInOrderByCreatedAtDesc(List.of("PENDING", "DISPATCHED", "IN_PROGRESS"));
+        } else if ("RESOLVED".equalsIgnoreCase(statusFilter)) {
+            list = Collections.emptyList();
         } else {
-            list = sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.trim().toUpperCase());
+            list = sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.toUpperCase());
         }
 
         ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);
@@ -154,8 +176,13 @@ public class CoordinatorService {
     }
 
     /**
-     * Lấy danh sách các Đội cứu hộ theo khu vực tỉnh/thành.
+     * Lấy danh sách đội cứu hộ kèm thông tin đội trưởng, lọc theo tỉnh/thành.
      */
+    @Transactional(readOnly = true)
+    public List<RescueTeam> getRescueTeams() {
+        return getRescueTeams("ALL");
+    }
+
     @Transactional(readOnly = true)
     public List<RescueTeam> getRescueTeams(String provinceCode) {
         List<RescueTeam> teams = rescueTeamRepository.findAll();
@@ -169,34 +196,54 @@ public class CoordinatorService {
     }
 
     /**
-     * Gợi ý danh sách đội cứu hộ kèm khoảng cách Haversine (tính từ vị trí ca SOS).
+     * Tính toán khoảng cách (Haversine) từ tọa độ ca SOS tới tất cả các đội cứu hộ.
+     */
+    @Transactional(readOnly = true)
+    public List<RescueTeamDistanceDto> calculateTeamsDistanceToSos(Long sosRequestId) {
+        SosRequest sos = sosRequestRepository.findById(sosRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + sosRequestId));
+
+        List<RescueTeam> teams = rescueTeamRepository.findAll();
+        return toDistanceDtos(sos, teams);
+    }
+
+    /**
+     * Gợi ý danh sách đội cứu hộ đang AVAILABLE kèm khoảng cách Haversine (tính từ vị trí ca SOS).
      * Sắp xếp tăng dần theo khoảng cách (gần nhất lên đầu).
      */
     @Transactional(readOnly = true)
-    public List<RescueTeamDistanceDto> getAvailableTeamsWithDistance(Long sosId) {
-        SosRequest sos = sosRequestRepository.findById(sosId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + sosId));
+    public List<RescueTeamDistanceDto> getAvailableTeamsWithDistance(Long sosRequestId) {
+        SosRequest sos = sosRequestRepository.findById(sosRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + sosRequestId));
 
         List<RescueTeam> teams = rescueTeamRepository.findByStatus("AVAILABLE");
+        return toDistanceDtos(sos, teams);
+    }
+
+    private List<RescueTeamDistanceDto> toDistanceDtos(SosRequest sos, List<RescueTeam> teams) {
         List<RescueTeamDistanceDto> result = new ArrayList<>();
+        double sosLat = sos.getLatitude();
+        double sosLng = sos.getLongitude();
 
         for (RescueTeam team : teams) {
-            double distanceKm = GeoUtils.calculateDistance(
-                    sos.getLatitude(), sos.getLongitude(),
-                    team.getCurrentLatitude(), team.getCurrentLongitude()
-            );
-
-            String leaderName = (team.getLeader() != null) ? team.getLeader().getFullName() : "Chưa chỉ định";
+            double distanceKm = -1.0;
+            if (team.getCurrentLatitude() != null && team.getCurrentLongitude() != null) {
+                distanceKm = GeoUtils.calculateDistance(
+                        sosLat, sosLng,
+                        team.getCurrentLatitude(), team.getCurrentLongitude()
+                );
+            }
 
             RescueTeamDistanceDto dto = RescueTeamDistanceDto.builder()
+                    .teamId(team.getId())
                     .id(team.getId())
                     .teamName(team.getTeamName())
-                    .leaderName(leaderName)
                     .contactPhone(team.getContactPhone())
-                    .currentLatitude(team.getCurrentLatitude())
-                    .currentLongitude(team.getCurrentLongitude())
+                    .leaderName(team.getLeader() != null ? team.getLeader().getFullName() : "Chưa chỉ định")
                     .memberCount(team.getMemberCount())
                     .equipmentNotes(team.getEquipmentNotes())
+                    .currentLatitude(team.getCurrentLatitude())
+                    .currentLongitude(team.getCurrentLongitude())
                     .status(team.getStatus())
                     .distanceKm(distanceKm)
                     .build();
@@ -204,7 +251,6 @@ public class CoordinatorService {
             result.add(dto);
         }
 
-        // Sắp xếp các đội theo khoảng cách km từ gần nhất đến xa nhất
         result.sort(Comparator.comparingDouble(RescueTeamDistanceDto::getDistanceKm));
         return result;
     }
@@ -267,7 +313,7 @@ public class CoordinatorService {
         sos.setStatus("DISPATCHED");
         sosRequestRepository.save(sos);
 
-        // Cập nhật trạng thái đội thành BUSY (nếu đang AVAILABLE)
+        // Cập nhật trạng thái đội thành BUSY
         if ("AVAILABLE".equalsIgnoreCase(team.getStatus())) {
             team.setStatus("BUSY");
             rescueTeamRepository.save(team);
@@ -276,7 +322,23 @@ public class CoordinatorService {
         log.info(">>> ĐIỀU PHỐI THÀNH CÔNG: Ca SOS #{} -> Đội '{}' (Mã phân công #{})",
                 sos.getId(), team.getTeamName(), savedAssignment.getId());
 
-        // Gửi thông báo WebSocket Realtime (nếu có)
+        // Gửi thông báo cho Đội cứu hộ
+        if (notificationService != null) {
+            notificationService.sendToTeam(team,
+                    "Nhiệm vụ cứu nạn mới: Ca SOS #" + sos.getId(),
+                    "Bạn nhận lệnh cứu nạn tại: " + (sos.getAddressDetail() != null ? sos.getAddressDetail() : "Chưa có địa chỉ")
+                            + " - Mức độ: " + sos.getUrgencyLevel() + " (" + sos.getPeopleCount() + " người). Vui lòng vào bàn tác nghiệp để xác nhận.",
+                    "MISSION_NEW",
+                    "/rescuer/missions");
+        }
+
+        // Ghi nhật ký kiểm toán
+        if (activityLogService != null) {
+            activityLogService.log(coordinator, "DISPATCH_MISSION", "Nhiệm vụ #" + savedAssignment.getId(),
+                    "Điều phối ca SOS #" + sos.getId() + " cho đội " + team.getTeamName(), null);
+        }
+
+        // Gửi thông báo WebSocket Realtime
         sendRealtimeNotifications(savedAssignment, sos, team);
 
         return savedAssignment;
@@ -287,7 +349,6 @@ public class CoordinatorService {
             return;
         }
         try {
-            // 1. Cập nhật trạng thái ca cứu hộ trên bản đồ điều phối chung
             Map<String, Object> mapUpdate = new HashMap<>();
             mapUpdate.put("type", "ASSIGNED");
             mapUpdate.put("sosId", sos.getId());
@@ -295,7 +356,6 @@ public class CoordinatorService {
             mapUpdate.put("teamName", team.getTeamName());
             messagingTemplate.convertAndSend("/topic/map-updates", mapUpdate);
 
-            // 2. Bắn thông báo nhận việc cho đội cứu hộ
             Map<String, Object> assignmentMsg = new HashMap<>();
             assignmentMsg.put("assignmentId", assignment.getId());
             assignmentMsg.put("teamId", team.getId());
@@ -310,6 +370,13 @@ public class CoordinatorService {
         } catch (Exception ex) {
             log.warn("Lỗi khi gửi WebSocket notification: {}", ex.getMessage());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public RouteTerrainAnalysisDto getMissionRoute(Long assignmentId) {
+        RescueAssignment assignment = rescueAssignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ #" + assignmentId));
+        return terrainAnalysisService.analyzeRouteAndTerrain(assignment.getTeam(), assignment.getSosRequest(), assignmentId);
     }
 
     @Transactional(readOnly = true)

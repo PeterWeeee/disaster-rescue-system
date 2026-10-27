@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#notification-content})}">
+<head>
+    <title th:text="${pageTitle}">Thông Báo Hệ Thống</title>
+</head>
+<body>
+
+<div id="notification-content" class="py-4">
+    <div class="container" style="max-width: 900px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-bell text-warning me-2"></i> THÔNG BÁO HỆ THỐNG
+                </h3>
+                <small class="text-muted">Lịch sử thông báo điều phối, cảnh báo nhiệm vụ và tác nghiệp hiện trường</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button id="pageMarkAllReadBtn" class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-check-double me-1"></i> Đánh dấu tất cả đã đọc
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">
+                    <i class="fa-solid fa-rotate me-1"></i> Làm mới
+                </button>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-navy">
+                    <i class="fa-solid fa-list me-2"></i> Danh sách thông báo
+                    <span class="badge bg-danger rounded-pill ms-2" th:if="${unreadCount > 0}" th:text="${unreadCount + ' chưa đọc'}"></span>
+                </span>
+                <span class="text-muted small" th:text="${'Tổng cộng: ' + totalElements + ' thông báo'}"></span>
+            </div>
+
+            <div class="list-group list-group-flush" id="notificationPageList">
+                <div th:if="${notifications.empty}" class="text-center py-5 text-muted">
+                    <i class="fa-regular fa-bell-slash fa-3x mb-3 text-secondary opacity-50 d-block"></i>
+                    <h5>Bạn chưa có thông báo nào</h5>
+                    <p class="small text-muted mb-0">Khi có lệnh điều động, ca SOS mới hoặc cập nhật nhiệm vụ, thông báo sẽ hiển thị tại đây.</p>
+                </div>
+
+                <div th:each="n : ${notifications}"
+                     class="list-group-item p-3 d-flex justify-content-between align-items-start gap-3"
+                     th:classappend="${!n.read ? 'bg-light border-start border-4 border-primary' : 'bg-white'}"
+                     th:attr="data-id=${n.id}">
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="p-2 rounded-circle mt-1"
+                             th:classappend="${n.type == 'MISSION_NEW' ? 'bg-danger text-white' : (n.type == 'MISSION_STATUS' ? 'bg-primary text-white' : (n.type == 'EQUIPMENT_ALERT' ? 'bg-warning text-dark' : 'bg-info text-white'))}">
+                            <i class="fa-solid"
+                               th:classappend="${n.type == 'MISSION_NEW' ? 'fa-triangle-exclamation' : (n.type == 'MISSION_STATUS' ? 'fa-person-running' : (n.type == 'EQUIPMENT_ALERT' ? 'fa-boxes-stacked' : 'fa-bell'))}"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="fw-bold mb-0 text-navy" th:text="${n.title}">Tiêu đề</h6>
+                                <span class="badge"
+                                      th:classappend="${n.type == 'MISSION_NEW' ? 'bg-danger' : (n.type == 'MISSION_STATUS' ? 'bg-primary' : 'bg-secondary')}"
+                                      th:text="${n.type == 'MISSION_NEW' ? 'Nhiệm vụ mới' : (n.type == 'MISSION_STATUS' ? 'Tiến độ nhiệm vụ' : (n.type == 'SOS_NEW' ? 'Ca SOS mới' : (n.type == 'EQUIPMENT_ALERT' ? 'Trang bị' : 'Thông báo')))}">TYPE</span>
+                                <span th:if="${!n.read}" class="badge bg-warning text-dark" style="font-size: 0.65rem;">MỚI</span>
+                            </div>
+                            <p class="mb-2 text-dark small" style="white-space: pre-line;" th:text="${n.message}">Nội dung</p>
+                            <div class="d-flex align-items-center gap-3 small text-muted">
+                                <span><i class="fa-regular fa-clock me-1"></i> <span th:text="${#temporals.format(n.createdAt, 'HH:mm - dd/MM/yyyy')}"></span></span>
+                                <a th:if="${n.targetUrl != null}" th:href="${n.targetUrl}" class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-bold">
+                                    Chi tiết <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button th:if="${!n.read}" class="btn btn-sm btn-outline-secondary btn-mark-single-read" th:attr="data-id=${n.id}" title="Đánh dấu đã đọc">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="card-footer bg-white py-3">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/notifications(page=${currentPage - 1})}">Trước</a>
+                        </li>
+                        <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
+                            class="page-item" th:classappend="${p == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/notifications(page=${p})}" th:text="${p + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/notifications(page=${currentPage + 1})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.btn-mark-single-read').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                try {
+                    const res = await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+                    if (res.ok) {
+                        location.reload();
+                    }
+                } catch (e) {
+                    alert('Lỗi cập nhật');
+                }
+            });
+        });
+
+        const pageMarkAllBtn = document.getElementById('pageMarkAllReadBtn');
+        if (pageMarkAllBtn) {
+            pageMarkAllBtn.addEventListener('click', async () => {
+                try {
+                    const res = await fetch('/api/notifications/read-all', { method: 'PUT' });
+                    if (res.ok) {
+                        location.reload();
+                    }
+                } catch (e) {
+                    alert('Lỗi cập nhật');
+                }
+            });
+        }
+    </script>
+</div>
+
+</body>
+</html>

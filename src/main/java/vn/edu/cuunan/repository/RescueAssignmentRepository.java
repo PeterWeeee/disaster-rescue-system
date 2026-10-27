@@ -13,6 +13,11 @@ import java.util.Optional;
 @Repository
 public interface RescueAssignmentRepository extends JpaRepository<RescueAssignment, Long> {
     List<RescueAssignment> findByTeamIdOrderByAssignedAtDesc(Long teamId);
+
+    default List<RescueAssignment> findByTeamId(Long teamId) {
+        return findByTeamIdOrderByAssignedAtDesc(teamId);
+    }
+
     List<RescueAssignment> findBySosRequestId(Long sosRequestId);
     List<RescueAssignment> findBySosRequestIdOrderByAssignedAtDesc(Long sosRequestId);
 

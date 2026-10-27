@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import vn.edu.cuunan.security.CustomAccessDeniedHandler;
 import vn.edu.cuunan.security.JwtAuthenticationEntryPoint;
@@ -46,7 +47,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers(
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers(
                 "/api/**",
                 "/ws/**",
                 "/h2-console/**",
@@ -81,7 +84,10 @@ public class SecurityConfig {
                     "/api/auth/**",
                     "/api/sos",
                     "/api/sos/**",
-                    "/api/upload/**"
+                    "/api/upload/**",
+                    "/feed",
+                    "/feed/**",
+                    "/api/feed/**"
                 ).permitAll()
 
                 // Phân hệ Điều Phối Viên (Coordinator & Admin)

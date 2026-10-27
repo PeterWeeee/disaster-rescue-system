@@ -76,6 +76,7 @@ public class TeamMember {
         this.user = user;
     }
 
+    public String getRoleInTeam() { return memberRole; }
     public String getMemberRole() {
         return memberRole;
     }

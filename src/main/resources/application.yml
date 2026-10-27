@@ -5,7 +5,15 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
   config:
     import: "optional:classpath:application-secret.yml"
+  thymeleaf:
+    encoding: UTF-8
+    servlet:
+      produce-partial-output-while-processing: false
   servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB

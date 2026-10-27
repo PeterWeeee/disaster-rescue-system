@@ -9,8 +9,8 @@
     --color-emergency-hover: #b91c1c;
     --color-warning: #f59e0b;       /* Caution Amber */
     --color-success: #16a34a;       /* Safe Zone Green */
-    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 body {

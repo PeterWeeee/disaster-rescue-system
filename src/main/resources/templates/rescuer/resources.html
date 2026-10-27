@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#resources-content})}">
+<head>
+    <title th:text="${pageTitle}">Thống Kê Quân Số & Kho Trang Bị</title>
+</head>
+<body>
+
+<div id="resources-content" class="py-4">
+    <div class="container-fluid px-3 px-lg-4" style="max-width: 1280px;">
+
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-boxes-stacked text-warning me-2"></i> THỐNG KÊ QUÂN SỐ & KHO TRANG BỊ CỨU HỘ
+                </h3>
+                <small class="text-muted">Giám sát năng lực tác chiến thực tế, tình trạng sẵn sàng của đội viên và trang thiết bị</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge py-2 px-3 shadow-sm fs-7"
+                      th:classappend="${myTeam != null and myTeam.status == 'AVAILABLE' ? 'bg-success' : 'bg-warning text-dark'}"
+                      th:text="${myTeam != null ? 'ĐỘI: ' + myTeam.teamName + ' (' + myTeam.status + ')' : 'CHƯA GẮN ĐỘI'}">
+                </span>
+                <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                    <i class="fa-solid fa-rotate me-1"></i> Làm mới số liệu
+                </button>
+            </div>
+        </div>
+
+        <div th:if="${myTeam == null}" class="alert alert-warning border-0 shadow-sm mb-4">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Tài khoản của bạn chưa được liên kết với Đội cứu hộ nào để quản lý kho quân trang.
+        </div>
+
+        <div th:if="${myTeam != null}">
+            <!-- 4 SUMMARY CARDS: QUÂN SỐ & TRANG BỊ -->
+            <div class="row g-3 mb-4">
+                <!-- 1. Quân số sẵn sàng -->
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-4 border-success">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Quân số sẵn sàng</span>
+                                <div class="bg-success-subtle text-success p-2 rounded-circle">
+                                    <i class="fa-solid fa-user-check fa-lg"></i>
+                                </div>
+                            </div>
+                            <h2 class="fw-bold text-success mb-0">
+                                <span th:text="${resources.readyMembers}">0</span>
+                                <small class="fs-6 text-muted">/ <span th:text="${resources.totalMembers}">0</span> người</small>
+                            </h2>
+                            <small class="text-muted d-block mt-1">Đội viên đang ở trạng thái trực sẵn sàng</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Quân số đang làm nhiệm vụ -->
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-4 border-primary">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Đang cứu hộ</span>
+                                <div class="bg-primary-subtle text-primary p-2 rounded-circle">
+                                    <i class="fa-solid fa-person-running fa-lg"></i>
+                                </div>
+                            </div>
+                            <h2 class="fw-bold text-primary mb-0">
+                                <span th:text="${resources.onMissionMembers}">0</span>
+                                <small class="fs-6 text-muted">người</small>
+                            </h2>
+                            <small class="text-muted d-block mt-1">Đang trực tiếp tiếp cận hiện trường SOS</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Trang bị khả dụng xuất kho -->
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-4 border-info">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Trang bị sẵn sàng</span>
+                                <div class="bg-info-subtle text-info p-2 rounded-circle">
+                                    <i class="fa-solid fa-boxes-stacked fa-lg"></i>
+                                </div>
+                            </div>
+                            <h2 class="fw-bold text-navy mb-0">
+                                <span th:text="${resources.availableEquipmentUnits}">0</span>
+                                <small class="fs-6 text-muted">/ <span th:text="${resources.totalEquipmentUnits}">0</span> món</small>
+                            </h2>
+                            <small class="text-muted d-block mt-1">Đã sẵn sàng cấp phát cho ca tiếp theo</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Trang bị cấp phát & hư hỏng -->
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-4 border-warning">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Đang dùng / Hư hỏng</span>
+                                <div class="bg-warning-subtle text-warning p-2 rounded-circle">
+                                    <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                                </div>
+                            </div>
+                            <h2 class="fw-bold text-dark mb-0">
+                                <span class="text-primary" th:text="${resources.dispatchedEquipmentUnits}">0</span>
+                                <span class="fs-6 text-muted">đang cấp phát | </span>
+                                <span class="text-danger" th:text="${resources.damagedEquipmentUnits}">0</span>
+                                <span class="fs-6 text-muted">hư hỏng</span>
+                            </h2>
+                            <small class="text-muted d-block mt-1">Cần theo dõi thu hồi & bảo dưỡng định kỳ</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW: 2 CHÍNH: DANH SÁCH QUÂN SỐ VÀ DANH MỤC TRANG BỊ -->
+            <div class="row g-4 mb-4">
+                <!-- 1. Danh sách thành viên đội -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-navy">
+                                <i class="fa-solid fa-users text-primary me-2"></i> Danh Sách Quân Số Đội (<span th:text="${resources.totalMembers}">0</span>)
+                            </span>
+                            <span class="badge bg-light text-dark border">
+                                Sẵn sàng: <strong class="text-success" th:text="${resources.readyMembers}"></strong>
+                            </span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Họ và Tên</th>
+                                        <th>Vai trò</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Tình trạng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="m : ${resources.members}">
+                                        <td>
+                                            <div class="fw-bold text-navy" th:text="${m.fullName}">Nguyễn Văn A</div>
+                                            <small th:if="${m.currentMissionDescription != null}" class="text-primary d-block">
+                                                <i class="fa-solid fa-spinner fa-spin me-1"></i> <span th:text="${m.currentMissionDescription}"></span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${m.roleInTeam == 'Đội trưởng' ? 'bg-danger' : 'bg-secondary'}"
+                                                  th:text="${m.roleInTeam}">Đội viên</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="'tel:' + ${m.phone}" class="text-decoration-none small text-dark">
+                                                <i class="fa-solid fa-phone me-1 text-success"></i> <span th:text="${m.phone}">090...</span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${m.readinessStatus == 'READY' ? 'bg-success' : (m.readinessStatus == 'ON_MISSION' ? 'bg-primary' : 'bg-secondary')}"
+                                                  th:text="${m.readinessStatus == 'READY' ? 'SẴN SÀNG' : (m.readinessStatus == 'ON_MISSION' ? 'ĐANG CỨU HỘ' : 'NGHỈ PHÉP')}">
+                                                SẴN SÀNG
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Danh mục kho trang thiết bị -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span class="fw-bold text-navy">
+                                <i class="fa-solid fa-toolbox text-warning me-2"></i> Kho Trang Thiết Bị Cứu Nạn
+                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" id="eqSearchInput" class="form-control form-control-sm" placeholder="Tìm trang bị..." style="max-width: 180px;">
+                                <select id="eqCategoryFilter" class="form-select form-select-sm" style="max-width: 140px;">
+                                    <option value="ALL">Tất cả nhóm</option>
+                                    <option value="SAFETY">An toàn cứu sinh</option>
+                                    <option value="MEDICAL">Y tế & Sơ cứu</option>
+                                    <option value="GEAR">Công binh & Cơ động</option>
+                                    <option value="SUPPLY">Nhu yếu phẩm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="equipmentTable">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Tên Trang Bị</th>
+                                        <th>Phân loại</th>
+                                        <th class="text-center">Tổng</th>
+                                        <th class="text-center">Khả dụng</th>
+                                        <th class="text-center">Đang cấp</th>
+                                        <th class="text-center">Hư hỏng</th>
+                                        <th>Tình trạng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${resources.equipmentList}" th:attr="data-category=${item.category}">
+                                        <td>
+                                            <strong class="text-navy" th:text="${item.equipmentName}">Áo phao cứu sinh</strong>
+                                            <small class="text-muted d-block" th:if="${item.notes != null}" th:text="${item.notes}">Chuẩn hàng hải</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border small" th:text="${item.category}">SAFETY</span>
+                                        </td>
+                                        <td class="text-center fw-bold" th:text="${item.totalQuantity + ' ' + item.unit}">25 chiếc</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success-subtle text-success fs-7 fw-bold px-2 py-1"
+                                                  th:text="${item.availableQuantity + ' ' + item.unit}">25 chiếc</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary-subtle text-primary px-2 py-1"
+                                                  th:text="${item.dispatchedQuantity + ' ' + item.unit}">0 chiếc</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${item.damagedQuantity > 0}" class="badge bg-danger px-2 py-1"
+                                                  th:text="${item.damagedQuantity + ' ' + item.unit}">1 chiếc</span>
+                                            <span th:if="${item.damagedQuantity == 0}" class="text-muted small">0</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${item.availableQuantity == 0}" class="badge bg-danger">Hết kho</span>
+                                            <span th:if="${item.availableQuantity > 0 and item.availableQuantity < 5}" class="badge bg-warning text-dark">Sắp hết</span>
+                                            <span th:if="${item.availableQuantity >= 5}" class="badge bg-success">Đầy đủ</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUY TRÌNH HƯỚNG DẪN KIỂM KÊ -->
+            <div class="card border-0 bg-light rounded-3 shadow-sm p-4">
+                <h5 class="fw-bold text-navy mb-2"><i class="fa-solid fa-circle-info text-primary me-2"></i>Quy Trình Cấp Phát & Thu Hồi Quân Trang:</h5>
+                <ol class="small text-muted mb-0 ps-3">
+                    <li class="mb-1"><strong>Khi xuất kích:</strong> Đội trưởng / đội viên chọn danh mục trang bị tại mục <em>Nhiệm vụ cứu hộ -> Phân Tích Địa Hình & Xuất Kích</em>. Hệ thống sẽ tự động trừ kho khả dụng và chuyển sang trạng thái <em>Đang cấp phát</em>.</li>
+                    <li class="mb-1"><strong>Trong quá trình thực địa:</strong> Toàn bộ trang bị xuất kho gắn liền với mã nhiệm vụ và không thể cấp phát âm.</li>
+                    <li><strong>Khi hoàn tất nhiệm vụ:</strong> Kiểm kê thực tế và báo cáo số lượng nguyên vẹn (hoàn kho), số lượng hư hỏng (chuyển bảo trì) và vật tư tiêu hao để hoàn tất quy trình an toàn dữ liệu.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('eqSearchInput');
+        const catFilter = document.getElementById('eqCategoryFilter');
+        const rows = document.querySelectorAll('#equipmentTable tbody tr');
+
+        function filterTable() {
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            const cat = catFilter ? catFilter.value : 'ALL';
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const rowCat = row.getAttribute('data-category');
+                const matchText = text.includes(query);
+                const matchCat = (cat === 'ALL' || rowCat === cat);
+
+                if (matchText && matchCat) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterTable);
+        if (catFilter) catFilter.addEventListener('change', filterTable);
+    </script>
+</div>
+
+</body>
+</html>

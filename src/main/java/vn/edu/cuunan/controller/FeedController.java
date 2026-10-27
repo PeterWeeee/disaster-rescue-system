@@ -28,28 +28,27 @@ public class FeedController {
 
     @GetMapping
     public String showFeed(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails == null || userDetails.getUser() == null) {
-            return "redirect:/auth/login?redirect=/feed";
-        }
-
-        User currentUser = userDetails.getUser();
-        model.addAttribute("currentUser", currentUser);
         model.addAttribute("posts", feedService.getRecentPosts());
         model.addAttribute("shelters", feedService.getAllShelters());
         model.addAttribute("hazardTypes", HazardType.values());
 
-        // Lấy đơn cứu hộ đang hoạt động của người dùng (nếu có)
+        User currentUser = userDetails != null ? userDetails.getUser() : null;
+        model.addAttribute("currentUser", currentUser);
+
+        // Chỉ tra cứu đơn cứu hộ cá nhân khi người dùng đã đăng nhập.
         SosRequest activeSos = null;
-        if (currentUser.getId() != null) {
-            List<SosRequest> userRequests = sosService.getSosBySender(currentUser.getId());
-            if (!userRequests.isEmpty()) {
-                activeSos = userRequests.get(0);
+        if (currentUser != null) {
+            if (currentUser.getId() != null) {
+                List<SosRequest> userRequests = sosService.getSosBySender(currentUser.getId());
+                if (!userRequests.isEmpty()) {
+                    activeSos = userRequests.get(0);
+                }
             }
-        }
-        if (activeSos == null && currentUser.getPhone() != null) {
-            List<SosRequest> phoneRequests = sosService.getSosByPhone(currentUser.getPhone());
-            if (!phoneRequests.isEmpty()) {
-                activeSos = phoneRequests.get(0);
+            if (activeSos == null && currentUser.getPhone() != null) {
+                List<SosRequest> phoneRequests = sosService.getSosByPhone(currentUser.getPhone());
+                if (!phoneRequests.isEmpty()) {
+                    activeSos = phoneRequests.get(0);
+                }
             }
         }
         model.addAttribute("activeSos", activeSos);

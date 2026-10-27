@@ -25,17 +25,28 @@ public class SosService {
     private final SosRequestRepository sosRequestRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final ActivityLogService activityLogService;
 
     public SosService(SosRequestRepository sosRequestRepository, UserRepository userRepository) {
-        this(sosRequestRepository, userRepository, null);
+        this(sosRequestRepository, userRepository, null, null, null);
+    }
+
+    public SosService(SosRequestRepository sosRequestRepository, UserRepository userRepository,
+                      SimpMessagingTemplate messagingTemplate) {
+        this(sosRequestRepository, userRepository, messagingTemplate, null, null);
     }
 
     @Autowired
     public SosService(SosRequestRepository sosRequestRepository, UserRepository userRepository,
-                      @Autowired(required = false) SimpMessagingTemplate messagingTemplate) {
+                      @Autowired(required = false) SimpMessagingTemplate messagingTemplate,
+                      @Autowired(required = false) NotificationService notificationService,
+                      @Autowired(required = false) ActivityLogService activityLogService) {
         this.sosRequestRepository = sosRequestRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
+        this.activityLogService = activityLogService;
     }
 
     /**
@@ -80,6 +91,23 @@ public class SosService {
         log.info(">>> TIẾP NHẬN SOS #{}: người liên hệ '{}', SĐT '{}', vị trí [{}, {}], mức độ '{}', số người: {}",
                 saved.getId(), saved.getContactName(), saved.getContactPhone(),
                 saved.getLatitude(), saved.getLongitude(), saved.getUrgencyLevel(), saved.getPeopleCount());
+
+        // Bắn thông báo cho Điều phối viên
+        if (notificationService != null) {
+            String addr = saved.getAddressDetail() != null ? saved.getAddressDetail() : "Chưa có địa chỉ chi tiết";
+            notificationService.sendToRole("ROLE_COORDINATOR",
+                    "Ca cứu nạn SOS mới #" + saved.getId() + " (" + saved.getUrgencyLevel() + ")",
+                    "Người gửi: " + saved.getContactName() + " (" + saved.getContactPhone() + ") tại "
+                            + addr + ". Số người: " + saved.getPeopleCount() + ". Cần điều phối ngay!",
+                    "SOS_NEW",
+                    "/coordinator/dashboard");
+        }
+
+        // Ghi nhật ký kiểm toán
+        if (activityLogService != null) {
+            activityLogService.log(sender, "CREATE_SOS", "Ca SOS #" + saved.getId(),
+                    "Tạo yêu cầu cứu nạn khẩn cấp mức " + saved.getUrgencyLevel() + " tại " + saved.getAddressDetail(), null);
+        }
 
         if (messagingTemplate != null) {
             Map<String, Object> message = new java.util.LinkedHashMap<>();
@@ -132,7 +160,23 @@ public class SosService {
      */
     @Transactional(readOnly = true)
     public List<SosRequest> getSosByStatus(String status) {
-        return sosRequestRepository.findByStatusOrderByCreatedAtDesc(status);
+        if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
+            return getAllSosRequests();
+        }
+        return sosRequestRepository.findByStatusOrderByCreatedAtDesc(status.trim().toUpperCase());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SosRequest> getRequestsByStatus(String status) {
+        return getSosByStatus(status);
+    }
+
+    /**
+     * Lấy danh sách tất cả yêu cầu cứu nạn đang chờ xử lý (PENDING), sắp xếp mới nhất trước.
+     */
+    @Transactional(readOnly = true)
+    public List<SosRequest> getPendingRequests() {
+        return sosRequestRepository.findByStatusOrderByCreatedAtDesc("PENDING");
     }
 
     /**
@@ -141,6 +185,11 @@ public class SosService {
     @Transactional(readOnly = true)
     public List<SosRequest> getSosBySender(Long senderId) {
         return sosRequestRepository.findBySenderIdOrderByCreatedAtDesc(senderId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SosRequest> getRequestsByUser(Long userId) {
+        return getSosBySender(userId);
     }
 
     /**
@@ -166,8 +215,12 @@ public class SosService {
     public SosRequest updateSosStatus(Long id, String newStatus) {
         SosRequest sos = getSosById(id);
         String upperStatus = newStatus.trim().toUpperCase();
-        sos.setStatus(upperStatus);
 
+        if (!isValidStatus(upperStatus)) {
+            throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
+        }
+
+        sos.setStatus(upperStatus);
         if ("RESOLVED".equals(upperStatus) || "COMPLETED".equals(upperStatus)) {
             sos.setResolvedAt(LocalDateTime.now());
         } else {
@@ -176,11 +229,21 @@ public class SosService {
 
         SosRequest updated = sosRequestRepository.save(sos);
         log.info(">>> CẬP NHẬT TRẠNG THÁI SOS #{}: -> {}", id, upperStatus);
+
         if (messagingTemplate != null) {
-            messagingTemplate.convertAndSend("/topic/map-updates", Map.of(
-                "type", "STATUS_CHANGE", "sosId", updated.getId(), "status", updated.getStatus()));
+            Map<String, Object> update = new java.util.LinkedHashMap<>();
+            update.put("id", id);
+            update.put("status", upperStatus);
+            update.put("resolvedAt", updated.getResolvedAt());
+            messagingTemplate.convertAndSend("/topic/sos-status", update);
         }
+
         return updated;
+    }
+
+    @Transactional
+    public SosRequest updateStatus(Long id, String newStatus) {
+        return updateSosStatus(id, newStatus);
     }
 
     /**
@@ -199,14 +262,27 @@ public class SosService {
         return sosRequestRepository.countByStatus(status);
     }
 
-    private String normalizeUrgencyLevel(String urgencyLevel) {
-        if (urgencyLevel == null) {
-            return "HIGH";
+    /**
+     * Chuẩn hóa mức độ khẩn cấp (mặc định MEDIUM nếu rỗng/sai định dạng).
+     */
+    private String normalizeUrgencyLevel(String urgency) {
+        if (urgency == null || urgency.trim().isEmpty()) {
+            return "MEDIUM";
         }
-        String u = urgencyLevel.trim().toUpperCase();
-        return switch (u) {
-            case "CRITICAL", "HIGH", "MEDIUM", "LOW" -> u;
-            default -> "HIGH";
+        String upper = urgency.trim().toUpperCase();
+        return switch (upper) {
+            case "LOW", "MEDIUM", "HIGH", "CRITICAL" -> upper;
+            default -> "MEDIUM";
+        };
+    }
+
+    /**
+     * Kiểm tra trạng thái hợp lệ của yêu cầu cứu nạn.
+     */
+    private boolean isValidStatus(String status) {
+        return switch (status) {
+            case "PENDING", "DISPATCHED", "IN_PROGRESS", "RESOLVED", "COMPLETED", "CANCELLED" -> true;
+            default -> false;
         };
     }
 }

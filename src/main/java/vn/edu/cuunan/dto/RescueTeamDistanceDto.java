@@ -44,6 +44,7 @@ public class RescueTeamDistanceDto {
         private String status;
         private Double distanceKm;
 
+        public Builder teamId(Long teamId) { this.id = teamId; return this; }
         public Builder id(Long id) {
             this.id = id;
             return this;

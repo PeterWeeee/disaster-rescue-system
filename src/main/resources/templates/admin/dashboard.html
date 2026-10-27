@@ -23,7 +23,7 @@
             <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Ca cứu nạn theo khu vực</div><div class="card-body"><canvas id="regionChart" height="220"></canvas></div></div></div>
         </div>
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white fw-bold"><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản</div>
+            <div class="card-header bg-white fw-bold" id="users-section"><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản</div>
             <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr></thead><tbody>
                 <tr th:each="user : ${users}" th:attr="data-user-id=${user.id}"><td><strong th:text="${user.fullName}">Tên</strong><div class="small text-muted" th:text="${user.username}">username</div></td><td><span th:text="${user.phone}">SĐT</span><div class="small text-muted" th:text="${user.email}">email</div></td>
                     <td><select class="form-select form-select-sm user-role"><option value="ROLE_CITIZEN" th:selected="${user.role != null and user.role.name == 'ROLE_CITIZEN'}">Người dân</option><option value="ROLE_RESCUER" th:selected="${user.role != null and user.role.name == 'ROLE_RESCUER'}">Cứu hộ</option><option value="ROLE_COORDINATOR" th:selected="${user.role != null and user.role.name == 'ROLE_COORDINATOR'}">Điều phối</option><option value="ROLE_ADMIN" th:selected="${user.role != null and user.role.name == 'ROLE_ADMIN'}">Quản trị</option></select></td>
@@ -31,7 +31,7 @@
             </tbody></table></div>
         </div>
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
+            <div class="card-header bg-white d-flex justify-content-between align-items-center" id="teams-section"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
             <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tên đội</th><th>Đội trưởng</th><th>Liên hệ</th><th>Quân số</th><th>Trạng thái</th><th></th></tr></thead><tbody>
                 <tr th:each="team : ${teams}" th:attr="data-team-id=${team.id}"><td><strong th:text="${team.teamName}">Đội</strong><div class="small text-muted" th:text="${team.equipmentNotes}">Thiết bị</div></td><td th:text="${team.leader != null ? team.leader.fullName : 'Chưa chỉ định'}">—</td><td th:text="${team.contactPhone}">SĐT</td><td th:text="${team.memberCount}">0</td><td><span class="badge" th:classappend="${team.status == 'AVAILABLE' ? 'bg-success' : (team.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}" th:text="${team.status}">AVAILABLE</span></td><td><button class="btn btn-sm btn-outline-secondary" th:attr="data-team-id=${team.id}" onclick="editTeamFromRow(this)">Sửa</button></td></tr>
             </tbody></table></div>

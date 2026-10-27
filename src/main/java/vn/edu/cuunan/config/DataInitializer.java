@@ -30,6 +30,9 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityPostRepository communityPostRepository;
     private final PostUpvoteRepository postUpvoteRepository;
     private final MediaFileRepository mediaFileRepository;
+    private final RescueEquipmentRepository rescueEquipmentRepository;
+    private final NotificationRepository notificationRepository;
+    private final ActivityLogRepository activityLogRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository,
@@ -43,6 +46,9 @@ public class DataInitializer implements CommandLineRunner {
                            CommunityPostRepository communityPostRepository,
                            PostUpvoteRepository postUpvoteRepository,
                            MediaFileRepository mediaFileRepository,
+                           RescueEquipmentRepository rescueEquipmentRepository,
+                           NotificationRepository notificationRepository,
+                           ActivityLogRepository activityLogRepository,
                            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -55,6 +61,9 @@ public class DataInitializer implements CommandLineRunner {
         this.communityPostRepository = communityPostRepository;
         this.postUpvoteRepository = postUpvoteRepository;
         this.mediaFileRepository = mediaFileRepository;
+        this.rescueEquipmentRepository = rescueEquipmentRepository;
+        this.notificationRepository = notificationRepository;
+        this.activityLogRepository = activityLogRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -513,6 +522,36 @@ public class DataInitializer implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80",
                 312400L, "image/jpeg");
 
+        // 12. Khởi tạo Trang thiết bị cứu hộ (RescueEquipment) cho các đội
+        for (RescueTeam t : rescueTeamRepository.findAll()) {
+            initStandardEquipment(t);
+        }
+
+        // 13. Khởi tạo Thông báo mẫu (Notifications)
+        if (notificationRepository.count() == 0) {
+            User coordDn = userRepository.findByUsername("coord_danang").orElse(null);
+            if (coordDn != null) {
+                notificationRepository.save(new vn.edu.cuunan.entity.Notification(
+                        coordDn, "Tiếp nhận ca SOS #1 mới",
+                        "Có yêu cầu cứu nạn khẩn cấp tại Mẹ Suốt, Liên Chiểu, Đà Nẵng cần điều phối.",
+                        "SOS_NEW", "/coordinator/dashboard"));
+            }
+            User rescuerDn = userRepository.findByUsername("rescuer_dn01").orElse(null);
+            if (rescuerDn != null) {
+                notificationRepository.save(new vn.edu.cuunan.entity.Notification(
+                        rescuerDn, "Lệnh phân công nhiệm vụ mới",
+                        "Bạn nhận lệnh cứu nạn ca SOS #1 tại K456 Tôn Đức Thắng, Đà Nẵng. Mức độ: CRITICAL.",
+                        "MISSION_NEW", "/rescuer/missions"));
+            }
+        }
+
+        // 14. Khởi tạo Nhật ký hoạt động kiểm toán (ActivityLogs)
+        if (activityLogRepository.count() == 0) {
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    adminUser, "SYSTEM_INIT", "System",
+                    "Khởi tạo toàn bộ dữ liệu mẫu hệ thống cứu nạn 24/7 miền Trung thành công", "127.0.0.1"));
+        }
+
         log.info("==========================================================================");
         log.info(">>> [HOÀN THÀNH SEED DỮ LIỆU MIỀN TRUNG]:");
         log.info("    + 4 Roles chuẩn");
@@ -524,7 +563,22 @@ public class DataInitializer implements CommandLineRunner {
         log.info("    + {} Cảnh báo thiên tai khẩn cấp", disasterAlertRepository.count());
         log.info("    + {} Điểm sơ tán tạm lánh an toàn", evacuationShelterRepository.count());
         log.info("    + {} Bài đăng cộng đồng và bình chọn", communityPostRepository.count());
+        log.info("    + {} Loại trang thiết bị cứu hộ được kiểm kê", rescueEquipmentRepository.count());
+        log.info("    + {} Thông báo và nhật ký kiểm toán", notificationRepository.count() + activityLogRepository.count());
         log.info("==========================================================================");
+    }
+
+    private void initStandardEquipment(RescueTeam team) {
+        if (rescueEquipmentRepository.countByTeam(team) == 0) {
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "AO_PHAO", "Áo phao cứu sinh tiêu chuẩn", "SAFETY", "chiếc", 25, "Phao cứu sinh chuẩn hàng hải"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "PHAO_TRON", "Phao tròn cứu hộ có dây ném 30m", "SAFETY", "chiếc", 10, "Phao ném nổi mặt nước"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "DEN_PIN", "Đèn pin rọi cứu nạn chống nước siêu sáng", "SAFETY", "chiếc", 12, "Đèn LED sạc điện 5000mAh"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "TUI_SO_CUU", "Túi sơ cứu y tế khẩn cấp (băng garo, sát khuẩn)", "MEDICAL", "bộ", 8, "Chuẩn y tế dã chiến"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "BO_DAM", "Bộ đàm liên lạc Motorola cự ly 5km", "GEAR", "bộ", 10, "Tần số khẩn cấp quốc gia"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "DAY_CUU_HO", "Dây thừng cứu nạn chịu lực (50m)", "GEAR", "cuộn", 8, "Tải trọng chịu lực 2 tấn"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "XUONG_CAO_SU", "Xuồng cứu nạn cao su 6 người", "GEAR", "chiếc", 2, "Kèm 2 mái chèo cơ động"));
+            rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "LUONG_KHO", "Lương khô quân đội & nước lọc đóng chai", "SUPPLY", "thùng", 30, "Hạn dùng 2028"));
+        }
     }
 
     private Role getOrCreateRole(String roleName) {

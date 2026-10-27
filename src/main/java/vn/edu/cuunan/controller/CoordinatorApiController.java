@@ -46,6 +46,17 @@ public class CoordinatorApiController {
         return ResponseEntity.ok(coordinatorService.getAvailableTeamsWithDistance(sosId));
     }
 
+    @GetMapping("/assignments/{id}/route")
+    public ResponseEntity<?> getAssignmentRoute(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.ok(coordinatorService.getMissionRoute(id));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi tải thông tin lộ trình: " + ex.getMessage()));
+        }
+    }
+
     @PostMapping("/assign")
     public ResponseEntity<?> assignTeam(@Valid @RequestBody AssignTaskRequestDto dto,
                                         @AuthenticationPrincipal CustomUserDetails userDetails) {

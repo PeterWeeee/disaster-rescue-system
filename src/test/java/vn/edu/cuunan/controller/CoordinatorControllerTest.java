@@ -11,7 +11,10 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.FileWriter;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -30,6 +33,8 @@ class CoordinatorControllerTest {
                 .andReturn();
 
         String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("TRUNG TÂM ĐIỀU PHỐI CỨU NẠN"), "Tiêu đề tiếng Việt chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
         try (FileWriter fw = new FileWriter("target/rendered_dashboard.html")) {
             fw.write(html);
         }
@@ -44,6 +49,8 @@ class CoordinatorControllerTest {
                 .andReturn();
 
         String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("Trung tâm quản trị"), "Tiêu đề tiếng Việt chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
         System.out.println("Rendered Admin Dashboard HTML length: " + html.length());
     }
 
@@ -55,6 +62,19 @@ class CoordinatorControllerTest {
                 .andReturn();
 
         String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("TÁC NGHIỆP CỨU HỘ HIỆN TRƯỜNG"), "Tiêu đề tiếng Việt chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
         System.out.println("Rendered Rescuer Missions HTML length: " + html.length());
+    }
+
+    @Test
+    void testLogoutViaGetAndPost() throws Exception {
+        mockMvc.perform(get("/auth/logout"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/login?logout=true"));
+
+        mockMvc.perform(post("/auth/logout"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/login?logout=true"));
     }
 }

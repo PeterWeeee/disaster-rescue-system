@@ -14,6 +14,10 @@ public interface RescueTeamRepository extends JpaRepository<RescueTeam, Long> {
     @EntityGraph(attributePaths = "leader")
     List<RescueTeam> findAll();
 
+    default List<RescueTeam> findAllWithLeader() {
+        return findAll();
+    }
+
     List<RescueTeam> findByStatus(String status);
     List<RescueTeam> findByStatusNot(String status);
     Optional<RescueTeam> findByLeaderId(Long leaderId);
@@ -21,4 +25,3 @@ public interface RescueTeamRepository extends JpaRepository<RescueTeam, Long> {
     Optional<RescueTeam> findByTeamName(String teamName);
     long countByStatus(String status);
 }
-

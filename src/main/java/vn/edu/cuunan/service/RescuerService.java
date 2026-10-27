@@ -35,6 +35,8 @@ public class RescuerService {
     private final CloudinaryService cloudinaryService;
     private final TerrainAnalysisService terrainAnalysisService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final ActivityLogService activityLogService;
 
     public RescuerService(RescueAssignmentRepository rescueAssignmentRepository,
                           RescueTeamRepository rescueTeamRepository,
@@ -43,7 +45,18 @@ public class RescuerService {
                           CloudinaryService cloudinaryService,
                           SimpMessagingTemplate messagingTemplate) {
         this(rescueAssignmentRepository, rescueTeamRepository, sosRequestRepository,
-             teamMemberRepository, cloudinaryService, new TerrainAnalysisService(), messagingTemplate);
+             teamMemberRepository, cloudinaryService, new TerrainAnalysisService(), messagingTemplate, null, null);
+    }
+
+    public RescuerService(RescueAssignmentRepository rescueAssignmentRepository,
+                          RescueTeamRepository rescueTeamRepository,
+                          SosRequestRepository sosRequestRepository,
+                          TeamMemberRepository teamMemberRepository,
+                          CloudinaryService cloudinaryService,
+                          TerrainAnalysisService terrainAnalysisService,
+                          SimpMessagingTemplate messagingTemplate) {
+        this(rescueAssignmentRepository, rescueTeamRepository, sosRequestRepository,
+             teamMemberRepository, cloudinaryService, terrainAnalysisService, messagingTemplate, null, null);
     }
 
     @Autowired
@@ -53,7 +66,9 @@ public class RescuerService {
                           TeamMemberRepository teamMemberRepository,
                           CloudinaryService cloudinaryService,
                           TerrainAnalysisService terrainAnalysisService,
-                          @Autowired(required = false) SimpMessagingTemplate messagingTemplate) {
+                          @Autowired(required = false) SimpMessagingTemplate messagingTemplate,
+                          @Autowired(required = false) NotificationService notificationService,
+                          @Autowired(required = false) ActivityLogService activityLogService) {
         this.rescueAssignmentRepository = rescueAssignmentRepository;
         this.rescueTeamRepository = rescueTeamRepository;
         this.sosRequestRepository = sosRequestRepository;
@@ -61,10 +76,12 @@ public class RescuerService {
         this.cloudinaryService = cloudinaryService;
         this.terrainAnalysisService = terrainAnalysisService;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
+        this.activityLogService = activityLogService;
     }
 
     /**
-     * Xác định đội cứu hộ mà tài khoản người dùng đang tham gia (là Đội trưởng hoặc Thành viên).
+     * XĂ¡c Ä‘á»‹nh Ä‘á»™i cá»©u há»™ mĂ  tĂ i khoáº£n ngÆ°á»i dĂ¹ng Ä‘ang tham gia (lĂ  Äá»™i trÆ°á»Ÿng hoáº·c ThĂ nh viĂªn).
      */
     @Transactional(readOnly = true)
     public Optional<RescueTeam> getMyTeam(User user) {
@@ -72,20 +89,19 @@ public class RescuerService {
             return Optional.empty();
         }
 
-        // 1. Kiểm tra có phải Đội trưởng không
+        // 1. Kiá»ƒm tra cĂ³ pháº£i Äá»™i trÆ°á»Ÿng khĂ´ng
         Optional<RescueTeam> leaderTeam = rescueTeamRepository.findByLeaderId(user.getId());
         if (leaderTeam.isPresent()) {
             return leaderTeam;
         }
 
-        // 2. Kiểm tra có phải thành viên đội không
+        // 2. Kiá»ƒm tra cĂ³ pháº£i thĂ nh viĂªn Ä‘á»™i khĂ´ng
         List<TeamMember> memberships = teamMemberRepository.findByUserId(user.getId());
         if (!memberships.isEmpty() && memberships.get(0).getTeam() != null) {
             return Optional.of(memberships.get(0).getTeam());
         }
 
-        // 3. Fallback cho Admin hoặc tài khoản cứu hộ chưa kịp liên kết:
-        // Lấy đội đầu tiên để giao diện giám sát không bị trống trơn
+        // 3. Fallback cho Admin hoáº·c tĂ i khoáº£n cá»©u há»™ chÆ°a ká»‹p liĂªn káº¿t:
         if (user.getRole() != null && ("ROLE_ADMIN".equalsIgnoreCase(user.getRole().getName())
                 || "ROLE_RESCUER".equalsIgnoreCase(user.getRole().getName()))) {
             List<RescueTeam> allTeams = rescueTeamRepository.findAll();
@@ -98,8 +114,7 @@ public class RescuerService {
     }
 
     /**
-     * Lấy toàn bộ danh sách nhiệm vụ được phân công cho đội của người dùng.
-     * Dùng JOIN FETCH để tải sosRequest trong cùng transaction, tránh LazyInitializationException khi render Thymeleaf.
+     * Láº¥y toĂ n bá»™ danh sĂ¡ch nhiá»‡m vá»¥ Ä‘Æ°á»£c phĂ¢n cĂ´ng cho Ä‘á»™i cá»§a ngÆ°á»i dĂ¹ng.
      */
     @Transactional(readOnly = true)
     public List<RescueAssignment> getMyAssignments(User user) {
@@ -111,61 +126,84 @@ public class RescuerService {
     }
 
     /**
-     * Chấp nhận nhiệm vụ cứu nạn (từ PENDING -> ACCEPTED).
+     * Cháº¥p nháº­n nhiá»‡m vá»¥ cá»©u náº¡n (tá»« PENDING -> ACCEPTED).
      */
     @Transactional
     public RescueAssignment acceptAssignment(Long assignmentId, User user) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
 
         if ("ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
-            log.info("Nhiệm vụ #{} đã ở trạng thái ACCEPTED", assignmentId);
+            log.info("Nhiá»‡m vá»¥ #{} Ä‘Ă£ á»Ÿ tráº¡ng thĂ¡i ACCEPTED", assignmentId);
             return assignment;
         }
 
         if (!"PENDING".equalsIgnoreCase(assignment.getStatus())) {
-            throw new IllegalStateException("Nhiệm vụ này đã được xử lý (trạng thái: " + assignment.getStatus() + ")");
+            throw new IllegalStateException("Nhiá»‡m vá»¥ nĂ y Ä‘Ă£ Ä‘Æ°á»£c xá»­ lĂ½ (tráº¡ng thĂ¡i: " + assignment.getStatus() + ")");
         }
 
         assignment.setStatus("ACCEPTED");
         assignment.setAcceptedAt(LocalDateTime.now());
 
-        // Ca SOS chuyển sang trạng thái IN_PROGRESS
+        // Ca SOS chuyá»ƒn sang tráº¡ng thĂ¡i IN_PROGRESS
         SosRequest sos = assignment.getSosRequest();
         sos.setStatus("IN_PROGRESS");
         sosRequestRepository.save(sos);
 
-        // Đội chuyển sang trạng thái BUSY
+        // Äá»™i chuyá»ƒn sang tráº¡ng thĂ¡i BUSY
         RescueTeam team = assignment.getTeam();
         team.setStatus("BUSY");
         rescueTeamRepository.save(team);
 
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
-        log.info(">>> ĐỘI '{}' ĐÃ CHẤP NHẬN NHIỆM VỤ #{} (Ca SOS #{})",
+        log.info(">>> Äá»˜I '{}' ÄĂƒ CHáº¤P NHáº¬N NHIá»†M Vá»¤ #{} (Ca SOS #{})",
                 team.getTeamName(), assignmentId, sos.getId());
+
+        // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
+        if (notificationService != null) {
+            if (assignment.getAssignedBy() != null) {
+                notificationService.sendToUser(assignment.getAssignedBy(),
+                        "Äá»™i Ä‘Ă£ cháº¥p nháº­n nhiá»‡m vá»¥ #" + assignmentId,
+                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ cháº¥p nháº­n tiáº¿p nháº­n ca cá»©u náº¡n #" + sos.getId() + " (" + sos.getContactName() + ").",
+                        "MISSION_STATUS",
+                        "/coordinator/dashboard");
+            } else {
+                notificationService.sendToRole("ROLE_COORDINATOR",
+                        "Äá»™i Ä‘Ă£ cháº¥p nháº­n nhiá»‡m vá»¥ #" + assignmentId,
+                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ cháº¥p nháº­n tiáº¿p nháº­n ca cá»©u náº¡n #" + sos.getId() + " (" + sos.getContactName() + ").",
+                        "MISSION_STATUS",
+                        "/coordinator/dashboard");
+            }
+        }
+
+        // Ghi nháº­t kĂ½ kiá»ƒm toĂ¡n
+        if (activityLogService != null) {
+            activityLogService.log(user, "ACCEPT_MISSION", "Nhiá»‡m vá»¥ #" + assignmentId,
+                    "Äá»™i " + team.getTeamName() + " cháº¥p nháº­n ca cá»©u náº¡n #" + sos.getId(), null);
+        }
 
         sendMapUpdateNotification(sos.getId(), "IN_PROGRESS", team.getTeamName());
         return saved;
     }
 
     /**
-     * Từ chối nhiệm vụ cứu nạn (chuyển sang REJECTED, trả ca SOS về PENDING để Coordinator gán lại).
+     * Tá»« chá»‘i nhiá»‡m vá»¥ cá»©u náº¡n (chuyá»ƒn sang REJECTED, tráº£ ca SOS vá» PENDING Ä‘á»ƒ Coordinator gĂ¡n láº¡i).
      */
     @Transactional
     public RescueAssignment rejectAssignment(Long assignmentId, User user, String reason) {
         if (reason == null || reason.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng cung cấp lý do từ chối nhiệm vụ!");
+            throw new IllegalArgumentException("Vui lĂ²ng cung cáº¥p lĂ½ do tá»« chá»‘i nhiá»‡m vá»¥!");
         }
 
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
 
         if (!"PENDING".equalsIgnoreCase(assignment.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể từ chối nhiệm vụ khi đang ở trạng thái chờ xác nhận!");
+            throw new IllegalStateException("Chá»‰ cĂ³ thá»ƒ tá»« chá»‘i nhiá»‡m vá»¥ khi Ä‘ang á»Ÿ tráº¡ng thĂ¡i chá» xĂ¡c nháº­n!");
         }
 
         assignment.setStatus("REJECTED");
         assignment.setRejectionReason(reason.trim());
 
-        // Trả ca SOS về PENDING để Coordinator tiếp tục điều phối đội khác
+        // Tráº£ ca SOS vá» PENDING Ä‘á»ƒ Coordinator tiáº¿p tá»¥c Ä‘iá»u phá»‘i Ä‘á»™i khĂ¡c
         SosRequest sos = assignment.getSosRequest();
         sos.setStatus("PENDING");
         sosRequestRepository.save(sos);
@@ -175,15 +213,38 @@ public class RescuerService {
         rescueTeamRepository.save(team);
 
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
-        log.info(">>> ĐỘI '{}' TỪ CHỐI NHIỆM VỤ #{}: Lý do '{}'",
+        log.info(">>> Äá»˜I '{}' Tá»ª CHá»I NHIá»†M Vá»¤ #{}: LĂ½ do '{}'",
                 assignment.getTeam().getTeamName(), assignmentId, reason);
+
+        // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
+        if (notificationService != null) {
+            if (assignment.getAssignedBy() != null) {
+                notificationService.sendToUser(assignment.getAssignedBy(),
+                        "Äá»™i tá»« chá»‘i nhiá»‡m vá»¥ #" + assignmentId,
+                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ tá»« chá»‘i ca #" + sos.getId() + ". LĂ½ do: " + reason.trim(),
+                        "MISSION_STATUS",
+                        "/coordinator/dashboard");
+            } else {
+                notificationService.sendToRole("ROLE_COORDINATOR",
+                        "Äá»™i tá»« chá»‘i nhiá»‡m vá»¥ #" + assignmentId,
+                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ tá»« chá»‘i ca #" + sos.getId() + ". LĂ½ do: " + reason.trim(),
+                        "MISSION_STATUS",
+                        "/coordinator/dashboard");
+            }
+        }
+
+        // Ghi nháº­t kĂ½ kiá»ƒm toĂ¡n
+        if (activityLogService != null) {
+            activityLogService.log(user, "REJECT_MISSION", "Nhiá»‡m vá»¥ #" + assignmentId,
+                    "Äá»™i " + team.getTeamName() + " tá»« chá»‘i ca #" + sos.getId() + ". LĂ½ do: " + reason.trim(), null);
+        }
 
         sendMapUpdateNotification(sos.getId(), "PENDING", null);
         return saved;
     }
 
     /**
-     * Bắt đầu di chuyển / tiếp cận hiện trường.
+     * Báº¯t Ä‘áº§u di chuyá»ƒn / tiáº¿p cáº­n hiá»‡n trÆ°á»ng.
      */
     @Transactional(readOnly = true)
     public RouteTerrainAnalysisDto getRouteAndTerrainAnalysis(Long assignmentId, User user) {
@@ -202,7 +263,7 @@ public class RescuerService {
 
         if (!"ACCEPTED".equalsIgnoreCase(assignment.getStatus())
                 && !"IN_PROGRESS".equalsIgnoreCase(assignment.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể bắt đầu di chuyển sau khi đội đã chấp nhận nhiệm vụ!");
+            throw new IllegalStateException("Chá»‰ cĂ³ thá»ƒ báº¯t Ä‘áº§u di chuyá»ƒn sau khi Ä‘á»™i Ä‘Ă£ cháº¥p nháº­n nhiá»‡m vá»¥!");
         }
 
         assignment.setStatus("IN_PROGRESS");
@@ -215,7 +276,7 @@ public class RescuerService {
             }
             if (dto.getCustomNotes() != null && !dto.getCustomNotes().isBlank()) {
                 String existing = assignment.getReportNotes() != null ? assignment.getReportNotes() + " | " : "";
-                assignment.setReportNotes(existing + "Ghi chú xuất kích: " + dto.getCustomNotes().trim());
+                assignment.setReportNotes(existing + "Ghi chĂº xuáº¥t kĂ­ch: " + dto.getCustomNotes().trim());
             }
             if (dto.getRouteDistanceKm() != null) {
                 assignment.setRouteDistanceKm(dto.getRouteDistanceKm());
@@ -233,8 +294,28 @@ public class RescuerService {
         sosRequestRepository.save(sos);
 
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
-        log.info(">>> ĐỘI '{}' ĐANG TIẾP CẬN HIỆN TRƯỜNG NHIỆM VỤ #{} (Phương tiện: {}, Trang bị: {})",
+        log.info(">>> Äá»˜I '{}' ÄANG TIáº¾P Cáº¬N HIá»†N TRÆ¯á»œNG NHIá»†M Vá»¤ #{} (PhÆ°Æ¡ng tiá»‡n: {}, Trang bá»‹: {})",
                 assignment.getTeam().getTeamName(), assignmentId, assignment.getVehicleType(), assignment.getSelectedEquipment());
+
+        // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
+        if (notificationService != null) {
+            String noticeMsg = "Äá»™i '" + assignment.getTeam().getTeamName() + "' Ä‘Ă£ xuáº¥t kĂ­ch tiáº¿p cáº­n ca SOS #"
+                    + sos.getId() + " (" + sos.getContactName() + "). Cá»± ly: "
+                    + (assignment.getRouteDistanceKm() != null ? assignment.getRouteDistanceKm() + " km" : "Ä‘ang tĂ­nh toĂ¡n") + ".";
+            if (assignment.getAssignedBy() != null) {
+                notificationService.sendToUser(assignment.getAssignedBy(),
+                        "Äá»™i xuáº¥t kĂ­ch nhiá»‡m vá»¥ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+            } else {
+                notificationService.sendToRole("ROLE_COORDINATOR",
+                        "Äá»™i xuáº¥t kĂ­ch nhiá»‡m vá»¥ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+            }
+        }
+
+        // Ghi nháº­t kĂ½ kiá»ƒm toĂ¡n
+        if (activityLogService != null) {
+            activityLogService.log(user, "START_MISSION", "Nhiá»‡m vá»¥ #" + assignmentId,
+                    "Äá»™i " + assignment.getTeam().getTeamName() + " xuáº¥t kĂ­ch tiáº¿p cáº­n ca #" + sos.getId(), null);
+        }
 
         sendMissionStartNotification(saved);
         return saved;
@@ -256,12 +337,12 @@ public class RescuerService {
             payload.put("terrainType", assignment.getTerrainType());
             messagingTemplate.convertAndSend("/topic/map-updates", payload);
         } catch (Exception ex) {
-            log.warn("Lỗi gửi thông báo WebSocket xuất kích: {}", ex.getMessage());
+            log.warn("Lá»—i gá»­i thĂ´ng bĂ¡o WebSocket xuáº¥t kĂ­ch: {}", ex.getMessage());
         }
     }
 
     /**
-     * Báo cáo hoàn thành nhiệm vụ và nghiệm thu hiện trường cứu hộ (tải ảnh bằng chứng).
+     * BĂ¡o cĂ¡o hoĂ n thĂ nh nhiá»‡m vá»¥ vĂ  nghiá»‡m thu hiá»‡n trÆ°á»ng cá»©u há»™ (táº£i áº£nh báº±ng chá»©ng).
      */
     @Transactional
     public RescueAssignment completeAssignment(Long assignmentId, User user, String reportNotes, MultipartFile reportImage) {
@@ -269,10 +350,10 @@ public class RescuerService {
 
         if (!"IN_PROGRESS".equalsIgnoreCase(assignment.getStatus())
                 && !"ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể hoàn tất nhiệm vụ đang thực hiện (ACCEPTED hoặc IN_PROGRESS)!");
+            throw new IllegalStateException("Chá»‰ cĂ³ thá»ƒ hoĂ n táº¥t nhiá»‡m vá»¥ Ä‘ang thá»±c hiá»‡n (ACCEPTED hoáº·c IN_PROGRESS)!");
         }
 
-        // 1. Tải ảnh nghiệm thu lên Cloudinary / Fallback local (nếu có đính kèm ảnh)
+        // 1. Táº£i áº£nh nghiá»‡m thu lĂªn Cloudinary / Fallback local (náº¿u cĂ³ Ä‘Ă­nh kĂ¨m áº£nh)
         if (reportImage != null && !reportImage.isEmpty()) {
             String uploadedUrl = cloudinaryService.uploadImage(reportImage, "rescue_reports");
             assignment.setReportImageUrl(uploadedUrl);
@@ -284,37 +365,64 @@ public class RescuerService {
             assignment.setReportNotes(reportNotes.trim());
         }
 
-        // 2. Chuyển trạng thái ca SOS thành RESOLVED
+        // 2. Chuyá»ƒn tráº¡ng thĂ¡i ca SOS thĂ nh RESOLVED
         SosRequest sos = assignment.getSosRequest();
         sos.setStatus("RESOLVED");
         sos.setResolvedAt(LocalDateTime.now());
         sosRequestRepository.save(sos);
 
-        // 3. Đưa đội cứu hộ trở về trạng thái AVAILABLE
+        // 3. ÄÆ°a Ä‘á»™i cá»©u há»™ trá»Ÿ vá» tráº¡ng thĂ¡i AVAILABLE
         RescueTeam team = assignment.getTeam();
         team.setStatus("AVAILABLE");
         rescueTeamRepository.save(team);
 
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
-        log.info(">>> HOÀN TẤT CỨU NẠN: Ca SOS #{} đã được đội '{}' giải cứu an toàn!",
+        log.info(">>> HOĂ€N Táº¤T Cá»¨U Náº N: Ca SOS #{} Ä‘Ă£ Ä‘Æ°á»£c Ä‘á»™i '{}' giáº£i cá»©u an toĂ n!",
                 sos.getId(), team.getTeamName());
+
+        // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
+        if (notificationService != null) {
+            String noticeMsg = "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ hoĂ n thĂ nh xuáº¥t sáº¯c ca cá»©u náº¡n #"
+                    + sos.getId() + " (" + sos.getContactName() + ").";
+            if (assignment.getAssignedBy() != null) {
+                notificationService.sendToUser(assignment.getAssignedBy(),
+                        "Nhiá»‡m vá»¥ #" + assignmentId + " Ä‘Ă£ hoĂ n thĂ nh", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+            }
+            notificationService.sendToRole("ROLE_COORDINATOR",
+                    "Ca SOS #" + sos.getId() + " Ä‘Ă£ hoĂ n táº¥t", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+
+            // Náº¿u ngÆ°á»i gá»­i SOS cĂ³ tĂ i khoáº£n trong há»‡ thá»‘ng -> thĂ´ng bĂ¡o cho ngÆ°á»i gá»­i
+            if (sos.getSender() != null) {
+                notificationService.sendToUser(sos.getSender(),
+                        "YĂªu cáº§u cá»©u náº¡n #" + sos.getId() + " Ä‘Ă£ Ä‘Æ°á»£c xá»­ lĂ½ an toĂ n",
+                        "Äá»™i cá»©u há»™ " + team.getTeamName() + " Ä‘Ă£ hoĂ n táº¥t cĂ´ng tĂ¡c giáº£i cá»©u vĂ  há»— trá»£ báº¡n.",
+                        "SOS_STATUS",
+                        "/sos/track/" + sos.getId());
+            }
+        }
+
+        // Ghi nháº­t kĂ½ kiá»ƒm toĂ¡n
+        if (activityLogService != null) {
+            activityLogService.log(user, "COMPLETE_MISSION", "Nhiá»‡m vá»¥ #" + assignmentId,
+                    "Äá»™i " + team.getTeamName() + " hoĂ n thĂ nh cá»©u náº¡n ca #" + sos.getId(), null);
+        }
 
         sendMapUpdateNotification(sos.getId(), "RESOLVED", team.getTeamName());
         return saved;
     }
 
     /**
-     * Kiểm tra và xác thực quyền thao tác trên nhiệm vụ.
+     * Kiá»ƒm tra vĂ  xĂ¡c thá»±c quyá»n thao tĂ¡c trĂªn nhiá»‡m vá»¥.
      */
     private RescueAssignment findAndValidateAssignmentAccess(Long assignmentId, User user) {
         RescueAssignment assignment = rescueAssignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ #" + assignmentId));
+                .orElseThrow(() -> new IllegalArgumentException("KhĂ´ng tĂ¬m tháº¥y nhiá»‡m vá»¥ #" + assignmentId));
 
         if (user == null || user.getId() == null) {
-            throw new IllegalStateException("Người dùng chưa được xác thực danh tính!");
+            throw new IllegalStateException("NgÆ°á»i dĂ¹ng chÆ°a Ä‘Æ°á»£c xĂ¡c thá»±c danh tĂ­nh!");
         }
 
-        // Nếu là ADMIN thì có toàn quyền điều hành
+        // Náº¿u lĂ  ADMIN thĂ¬ cĂ³ toĂ n quyá»n Ä‘iá»u hĂ nh
         if (user.getRole() != null && "ROLE_ADMIN".equalsIgnoreCase(user.getRole().getName())) {
             return assignment;
         }
@@ -325,12 +433,12 @@ public class RescuerService {
             return assignment;
         }
 
-        // Kiểm tra thành viên đội
+        // Kiá»ƒm tra thĂ nh viĂªn Ä‘á»™i
         boolean isMember = teamMemberRepository.findByUserId(user.getId()).stream()
                 .anyMatch(tm -> tm.getTeam() != null && tm.getTeam().getId().equals(team.getId()));
 
         if (!isMember) {
-            throw new IllegalStateException("Bạn không thuộc Đội cứu hộ '" + team.getTeamName() + "' để thao tác nhiệm vụ này!");
+            throw new IllegalStateException("Báº¡n khĂ´ng thuá»™c Äá»™i cá»©u há»™ '" + team.getTeamName() + "' Ä‘á»ƒ thao tĂ¡c nhiá»‡m vá»¥ nĂ y!");
         }
 
         return assignment;
@@ -348,12 +456,12 @@ public class RescuerService {
             }
             messagingTemplate.convertAndSend("/topic/map-updates", update);
         } catch (Exception ex) {
-            log.warn("Lỗi gửi thông báo WebSocket cập nhật bản đồ: {}", ex.getMessage());
+            log.warn("Lá»—i gá»­i thĂ´ng bĂ¡o WebSocket cáº­p nháº­t báº£n Ä‘á»“: {}", ex.getMessage());
         }
     }
 
     /**
-     * Cập nhật vị trí GPS thời gian thực của đội cứu hộ và phát WebSocket đến nạn nhân.
+     * Cáº­p nháº­t vá»‹ trĂ­ GPS thá»i gian thá»±c cá»§a Ä‘á»™i cá»©u há»™ vĂ  phĂ¡t WebSocket Ä‘áº¿n náº¡n nhĂ¢n.
      */
     @Transactional
     public Map<String, Object> updateTeamLocation(Long assignmentId, User user, Double lat, Double lng) {
