@@ -78,6 +78,12 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
+        <!-- Spring Boot Starter Mail for OTP & Password Reset -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Cloudinary Media Storage -->
         <dependency>
             <groupId>com.cloudinary</groupId>

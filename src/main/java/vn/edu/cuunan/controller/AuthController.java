@@ -37,7 +37,8 @@ public class AuthController {
     public String loginPage(Model model,
                             @RequestParam(value = "error", required = false) String error,
                             @RequestParam(value = "logout", required = false) String logout,
-                            @RequestParam(value = "registered", required = false) String registered) {
+                            @RequestParam(value = "registered", required = false) String registered,
+                            @RequestParam(value = "passwordReset", required = false) String passwordReset) {
         model.addAttribute("appName", appName);
         model.addAttribute("pageTitle", "Đăng Nhập - CứuNạn 24/7");
 
@@ -52,7 +53,10 @@ public class AuthController {
             model.addAttribute("successMessage", "Bạn đã đăng xuất tài khoản an toàn.");
         }
         if (registered != null) {
-            model.addAttribute("successMessage", "Đăng ký thành công! Vui lòng đăng nhập.");
+            model.addAttribute("successMessage", "Kích hoạt tài khoản thành công! Vui lòng đăng nhập.");
+        }
+        if (passwordReset != null) {
+            model.addAttribute("successMessage", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
         }
 
         return "auth/login";
@@ -103,13 +107,103 @@ public class AuthController {
     public String handleRegister(@ModelAttribute RegisterRequestDto registerDto,
                                  RedirectAttributes redirectAttributes) {
         try {
-            authService.register(registerDto);
-            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.");
-            return "redirect:/auth/login?registered=true";
+            // Đăng ký và sinh mã OTP gửi về Email
+            authService.register(registerDto, true);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Mã OTP xác thực 6 chữ số đã được gửi đến email " + registerDto.getEmail() + ". Vui lòng nhập mã để kích hoạt tài khoản!");
+            return "redirect:/auth/verify-otp?email=" + registerDto.getEmail();
         } catch (Exception ex) {
             log.warn("Đăng ký tài khoản thất bại: {}", ex.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/auth/register";
+        }
+    }
+
+    @GetMapping("/verify-otp")
+    public String verifyOtpPage(@RequestParam(value = "email", required = false) String email,
+                                @RequestParam(value = "resend", required = false) String resend,
+                                Model model) {
+        model.addAttribute("appName", appName);
+        model.addAttribute("pageTitle", "Xác Thực Kích Hoạt Tài Khoản - CứuNạn 24/7");
+        model.addAttribute("email", email);
+        if (resend != null) {
+            model.addAttribute("successMessage", "Đã gửi lại mã OTP mới đến email của bạn.");
+        }
+        return "auth/verify-otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String handleVerifyOtp(@RequestParam("email") String email,
+                                  @RequestParam("otpCode") String otpCode,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            authService.activateAccount(email, otpCode);
+            redirectAttributes.addFlashAttribute("successMessage", "Kích hoạt tài khoản thành công! Bạn có thể đăng nhập ngay.");
+            return "redirect:/auth/login?registered=true";
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/auth/verify-otp?email=" + email;
+        }
+    }
+
+    @PostMapping("/resend-otp")
+    public String handleResendOtp(@RequestParam("email") String email,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            authService.resendRegistrationOtp(email);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP thành công. Vui lòng kiểm tra email!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/auth/verify-otp?email=" + email;
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage(Model model) {
+        model.addAttribute("appName", appName);
+        model.addAttribute("pageTitle", "Quên Mật Khẩu - CứuNạn 24/7");
+        return "auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String handleForgotPassword(@RequestParam("email") String email,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            authService.initiateForgotPassword(email);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Mã OTP khôi phục mật khẩu đã được gửi đến email " + email + ". Vui lòng kiểm tra hộp thư!");
+            return "redirect:/auth/reset-password?email=" + email;
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/auth/forgot-password";
+        }
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam(value = "email", required = false) String email,
+                                    Model model) {
+        model.addAttribute("appName", appName);
+        model.addAttribute("pageTitle", "Đặt Lại Mật Khẩu Mới - CứuNạn 24/7");
+        model.addAttribute("email", email);
+        return "auth/reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String handleResetPassword(@RequestParam("email") String email,
+                                      @RequestParam("otpCode") String otpCode,
+                                      @RequestParam("newPassword") String newPassword,
+                                      @RequestParam("confirmPassword") String confirmPassword,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            if (!newPassword.equals(confirmPassword)) {
+                throw new IllegalArgumentException("Mật khẩu xác nhận không khớp!");
+            }
+            authService.resetPassword(email, otpCode, newPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
+            return "redirect:/auth/login?passwordReset=true";
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/auth/reset-password?email=" + email;
         }
     }
 
