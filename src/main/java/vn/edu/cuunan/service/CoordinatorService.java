@@ -17,6 +17,7 @@ import vn.edu.cuunan.repository.RescueTeamRepository;
 import vn.edu.cuunan.repository.SosRequestRepository;
 import vn.edu.cuunan.repository.UserRepository;
 import vn.edu.cuunan.util.GeoUtils;
+import vn.edu.cuunan.util.ProvinceRegion;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,20 +47,68 @@ public class CoordinatorService {
     }
 
     /**
-     * Thống kê tổng hợp số liệu cho Dashboard Điều phối viên.
+     * Thống kê tổng hợp số liệu cho Dashboard Điều phối viên theo toàn vùng hoặc từng tỉnh/thành.
      */
     @Transactional(readOnly = true)
     public Map<String, Object> getDashboardStats() {
-        Map<String, Object> stats = new HashMap<>();
-        long pending = sosRequestRepository.countByStatus("PENDING");
-        long dispatched = sosRequestRepository.countByStatus("DISPATCHED");
-        long inProgress = sosRequestRepository.countByStatus("IN_PROGRESS");
-        long resolved = sosRequestRepository.countByStatus("RESOLVED");
-        long availableTeams = rescueTeamRepository.countByStatus("AVAILABLE");
-        long busyTeams = rescueTeamRepository.countByStatus("BUSY");
-        long totalTeams = rescueTeamRepository.count();
-        Long rescuedPeople = sosRequestRepository.sumRescuedPeople();
+        return getDashboardStats("ALL");
+    }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> getDashboardStats(String provinceCode) {
+        ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);
+        if (region == ProvinceRegion.ALL) {
+            Map<String, Object> stats = new HashMap<>();
+            long pending = sosRequestRepository.countByStatus("PENDING");
+            long dispatched = sosRequestRepository.countByStatus("DISPATCHED");
+            long inProgress = sosRequestRepository.countByStatus("IN_PROGRESS");
+            long resolved = sosRequestRepository.countByStatus("RESOLVED");
+            long availableTeams = rescueTeamRepository.countByStatus("AVAILABLE");
+            long busyTeams = rescueTeamRepository.countByStatus("BUSY");
+            long totalTeams = rescueTeamRepository.count();
+            Long rescuedPeople = sosRequestRepository.sumRescuedPeople();
+
+            stats.put("pendingCount", pending);
+            stats.put("dispatchedCount", dispatched);
+            stats.put("inProgressCount", inProgress);
+            stats.put("resolvedCount", resolved);
+            stats.put("availableTeamsCount", availableTeams);
+            stats.put("busyTeamsCount", busyTeams);
+            stats.put("totalTeamsCount", totalTeams);
+            stats.put("rescuedPeopleCount", rescuedPeople != null ? rescuedPeople : 0L);
+            stats.put("regionName", region.getName());
+            stats.put("regionCode", region.getCode());
+            stats.put("centerLat", region.getCenterLat());
+            stats.put("centerLng", region.getCenterLng());
+            stats.put("defaultZoom", region.getDefaultZoom());
+            return stats;
+        }
+
+        List<SosRequest> allSos = sosRequestRepository.findAll();
+        List<SosRequest> filteredSos = allSos.stream()
+                .filter(s -> region.matches(s.getAddressDetail()) || region.matches(s.getDescription()))
+                .toList();
+
+        List<RescueTeam> allTeams = rescueTeamRepository.findAll();
+        List<RescueTeam> filteredTeams = allTeams.stream()
+                .filter(t -> region.matches(t.getTeamName()) || (t.getLeader() != null && region.matches(t.getLeader().getAddress())))
+                .toList();
+
+        long pending = filteredSos.stream().filter(s -> "PENDING".equalsIgnoreCase(s.getStatus())).count();
+        long dispatched = filteredSos.stream().filter(s -> "DISPATCHED".equalsIgnoreCase(s.getStatus())).count();
+        long inProgress = filteredSos.stream().filter(s -> "IN_PROGRESS".equalsIgnoreCase(s.getStatus())).count();
+        long resolved = filteredSos.stream().filter(s -> "RESOLVED".equalsIgnoreCase(s.getStatus())).count();
+
+        long availableTeams = filteredTeams.stream().filter(t -> "AVAILABLE".equalsIgnoreCase(t.getStatus())).count();
+        long busyTeams = filteredTeams.stream().filter(t -> "BUSY".equalsIgnoreCase(t.getStatus())).count();
+        long totalTeams = filteredTeams.size();
+
+        long rescuedPeople = filteredSos.stream()
+                .filter(s -> "RESOLVED".equalsIgnoreCase(s.getStatus()))
+                .mapToLong(s -> s.getPeopleCount() != null ? s.getPeopleCount() : 0)
+                .sum();
+
+        Map<String, Object> stats = new HashMap<>();
         stats.put("pendingCount", pending);
         stats.put("dispatchedCount", dispatched);
         stats.put("inProgressCount", inProgress);
@@ -67,20 +116,56 @@ public class CoordinatorService {
         stats.put("availableTeamsCount", availableTeams);
         stats.put("busyTeamsCount", busyTeams);
         stats.put("totalTeamsCount", totalTeams);
-        stats.put("rescuedPeopleCount", rescuedPeople != null ? rescuedPeople : 0L);
+        stats.put("rescuedPeopleCount", rescuedPeople);
+        stats.put("regionName", region.getName());
+        stats.put("regionCode", region.getCode());
+        stats.put("centerLat", region.getCenterLat());
+        stats.put("centerLng", region.getCenterLng());
+        stats.put("defaultZoom", region.getDefaultZoom());
 
         return stats;
     }
 
     /**
-     * Lấy danh sách các ca SOS theo bộ lọc trạng thái.
+     * Lấy danh sách các ca SOS theo bộ lọc trạng thái và khu vực tỉnh/thành.
      */
     @Transactional(readOnly = true)
     public List<SosRequest> getSosRequests(String statusFilter) {
+        return getSosRequests(statusFilter, "ALL");
+    }
+
+    @Transactional(readOnly = true)
+    public List<SosRequest> getSosRequests(String statusFilter, String provinceCode) {
+        List<SosRequest> list;
         if (statusFilter == null || statusFilter.trim().isEmpty() || "ALL".equalsIgnoreCase(statusFilter)) {
-            return sosRequestRepository.findAllByOrderByCreatedAtDesc();
+            list = sosRequestRepository.findAllByOrderByCreatedAtDesc();
+        } else {
+            list = sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.trim().toUpperCase());
         }
-        return sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.trim().toUpperCase());
+
+        ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);
+        if (region == ProvinceRegion.ALL) {
+            return list;
+        }
+
+        return list.stream()
+                .filter(s -> region.matches(s.getAddressDetail()) || region.matches(s.getDescription()))
+                .toList();
+    }
+
+    /**
+     * Lấy danh sách các Đội cứu hộ theo khu vực tỉnh/thành.
+     */
+    @Transactional(readOnly = true)
+    public List<RescueTeam> getRescueTeams(String provinceCode) {
+        List<RescueTeam> teams = rescueTeamRepository.findAll();
+        ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);
+        if (region == ProvinceRegion.ALL) {
+            return teams;
+        }
+        return teams.stream()
+                .filter(t -> region.matches(t.getTeamName()) || (t.getLeader() != null && region.matches(t.getLeader().getAddress())))
+                .toList();
     }
 
     /**
@@ -229,7 +314,12 @@ public class CoordinatorService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getSosMapPins(String statusFilter) {
-        List<SosRequest> list = getSosRequests(statusFilter);
+        return getSosMapPins(statusFilter, "ALL");
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getSosMapPins(String statusFilter, String provinceCode) {
+        List<SosRequest> list = getSosRequests(statusFilter, provinceCode);
         List<Map<String, Object>> pins = new ArrayList<>();
         for (SosRequest sos : list) {
             Map<String, Object> pin = new HashMap<>();
@@ -249,7 +339,12 @@ public class CoordinatorService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getRescueTeamMapPins() {
-        List<RescueTeam> teams = rescueTeamRepository.findAll();
+        return getRescueTeamMapPins("ALL");
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getRescueTeamMapPins(String provinceCode) {
+        List<RescueTeam> teams = getRescueTeams(provinceCode);
         List<Map<String, Object>> pins = new ArrayList<>();
         for (RescueTeam team : teams) {
             Map<String, Object> pin = new HashMap<>();

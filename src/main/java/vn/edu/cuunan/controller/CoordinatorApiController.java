@@ -76,10 +76,15 @@ public class CoordinatorApiController {
     }
 
     @GetMapping("/map-data")
-    public ResponseEntity<Map<String, Object>> getMapData() {
+    public ResponseEntity<Map<String, Object>> getMapData(@RequestParam(value = "province", required = false, defaultValue = "ALL") String province) {
         Map<String, Object> data = new HashMap<>();
-        data.put("sosRequests", coordinatorService.getSosMapPins("ALL"));
-        data.put("rescueTeams", coordinatorService.getRescueTeamMapPins());
+        data.put("sosRequests", coordinatorService.getSosMapPins("ALL", province));
+        data.put("rescueTeams", coordinatorService.getRescueTeamMapPins(province));
+        vn.edu.cuunan.util.ProvinceRegion region = vn.edu.cuunan.util.ProvinceRegion.fromCode(province);
+        data.put("centerLat", region.getCenterLat());
+        data.put("centerLng", region.getCenterLng());
+        data.put("defaultZoom", region.getDefaultZoom());
+        data.put("regionName", region.getName());
         return ResponseEntity.ok(data);
     }
 }

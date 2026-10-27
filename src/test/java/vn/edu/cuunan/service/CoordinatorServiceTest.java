@@ -152,4 +152,48 @@ class CoordinatorServiceTest {
         verify(sosRequestRepository).save(sos);
         verify(rescueTeamRepository).save(team);
     }
+
+    @Test
+    @DisplayName("Lọc danh sách SOS và thống kê theo Tỉnh/Vùng động")
+    void testFilterSosAndStatsByProvince() {
+        SosRequest sosDN = SosRequest.builder()
+                .id(1L)
+                .contactName("Trần Văn A")
+                .addressDetail("Số 45 đường Mẹ Suốt, Liên Chiểu, Đà Nẵng")
+                .status("PENDING")
+                .peopleCount(4)
+                .build();
+        SosRequest sosGL = SosRequest.builder()
+                .id(2L)
+                .contactName("Siu H'Búp")
+                .addressDetail("Xã Ia Dêr, Huyện Ia Grai, Gia Lai")
+                .status("DISPATCHED")
+                .peopleCount(3)
+                .build();
+
+        when(sosRequestRepository.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(sosDN, sosGL));
+        when(sosRequestRepository.findAll()).thenReturn(List.of(sosDN, sosGL));
+
+        RescueTeam teamDN = new RescueTeam(1L, "Đội Cứu Hộ Hải Châu (Đà Nẵng)", null, "0901", 16.06, 108.22, 6, "Xuồng", "AVAILABLE");
+        RescueTeam teamGL = new RescueTeam(2L, "Đội Cứu Hộ Gia Lai 01", null, "0902", 13.98, 108.00, 5, "Xe 4x4", "AVAILABLE");
+        when(rescueTeamRepository.findAll()).thenReturn(List.of(teamDN, teamGL));
+
+        // 1. Khi chọn DA_NANG
+        List<SosRequest> filteredDN = coordinatorService.getSosRequests("ALL", "DA_NANG");
+        assertEquals(1, filteredDN.size());
+        assertEquals("Trần Văn A", filteredDN.get(0).getContactName());
+
+        List<RescueTeam> teamsDN = coordinatorService.getRescueTeams("DA_NANG");
+        assertEquals(1, teamsDN.size());
+        assertEquals("Đội Cứu Hộ Hải Châu (Đà Nẵng)", teamsDN.get(0).getTeamName());
+
+        Map<String, Object> statsDN = coordinatorService.getDashboardStats("DA_NANG");
+        assertEquals(1L, statsDN.get("pendingCount"));
+        assertEquals(0L, statsDN.get("dispatchedCount"));
+        assertEquals(1L, statsDN.get("totalTeamsCount"));
+
+        // 2. Khi chọn ALL
+        List<SosRequest> allSos = coordinatorService.getSosRequests("ALL", "ALL");
+        assertEquals(2, allSos.size());
+    }
 }
