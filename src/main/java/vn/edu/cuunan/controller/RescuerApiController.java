@@ -7,6 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.cuunan.dto.RejectAssignmentDto;
+import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
+import vn.edu.cuunan.dto.StartMissionRequestDto;
 import vn.edu.cuunan.entity.RescueAssignment;
 import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.User;
@@ -84,20 +86,40 @@ public class RescuerApiController {
         }
     }
 
+    @GetMapping("/assignments/{id}/route-terrain-analysis")
+    public ResponseEntity<?> getRouteTerrainAnalysis(@PathVariable("id") Long id,
+                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails != null ? userDetails.getUser() : null;
+            RouteTerrainAnalysisDto analysis = rescuerService.getRouteAndTerrainAnalysis(id, user);
+            return ResponseEntity.ok(analysis);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phân tích địa hình: " + ex.getMessage()));
+        }
+    }
+
     @PostMapping("/assignments/{id}/start")
     public ResponseEntity<?> startMoving(@PathVariable("id") Long id,
+                                         @RequestBody(required = false) StartMissionRequestDto dto,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
-            User user = userDetails.getUser();
-            RescueAssignment assignment = rescuerService.startMoving(id, user);
+            User user = userDetails != null ? userDetails.getUser() : null;
+            RescueAssignment assignment = rescuerService.startMoving(id, user, dto);
+
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
-            res.put("message", "Đội đang tiếp cận hiện trường nhiệm vụ #" + id);
+            res.put("message", "Đội đã xuất kích và đang tiếp cận hiện trường nhiệm vụ #" + id);
             res.put("assignmentId", assignment.getId());
             res.put("status", assignment.getStatus());
+            res.put("vehicleType", assignment.getVehicleType());
+            res.put("selectedEquipment", assignment.getSelectedEquipment());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi nội bộ: " + ex.getMessage()));
         }
     }
 

@@ -126,6 +126,11 @@ BEGIN
         [completed_at] DATETIME2 NULL,
         [report_notes] NVARCHAR(MAX) NULL,
         [report_image_url] VARCHAR(500) NULL,
+        [vehicle_type] VARCHAR(50) NULL,
+        [selected_equipment] NVARCHAR(MAX) NULL,
+        [terrain_type] VARCHAR(50) NULL,
+        [route_distance_km] FLOAT NULL,
+        [route_duration_minutes] INT NULL,
         CONSTRAINT [FK_assign_sos] FOREIGN KEY ([sos_request_id]) REFERENCES [dbo].[sos_requests]([id]),
         CONSTRAINT [FK_assign_team] FOREIGN KEY ([team_id]) REFERENCES [dbo].[rescue_teams]([id]),
         CONSTRAINT [FK_assign_by] FOREIGN KEY ([assigned_by]) REFERENCES [dbo].[users]([id])

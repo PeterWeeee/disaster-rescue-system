@@ -7,6 +7,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
+import vn.edu.cuunan.dto.StartMissionRequestDto;
 import vn.edu.cuunan.entity.RescueAssignment;
 import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.SosRequest;
@@ -31,7 +33,18 @@ public class RescuerService {
     private final SosRequestRepository sosRequestRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final CloudinaryService cloudinaryService;
+    private final TerrainAnalysisService terrainAnalysisService;
     private final SimpMessagingTemplate messagingTemplate;
+
+    public RescuerService(RescueAssignmentRepository rescueAssignmentRepository,
+                          RescueTeamRepository rescueTeamRepository,
+                          SosRequestRepository sosRequestRepository,
+                          TeamMemberRepository teamMemberRepository,
+                          CloudinaryService cloudinaryService,
+                          SimpMessagingTemplate messagingTemplate) {
+        this(rescueAssignmentRepository, rescueTeamRepository, sosRequestRepository,
+             teamMemberRepository, cloudinaryService, new TerrainAnalysisService(), messagingTemplate);
+    }
 
     @Autowired
     public RescuerService(RescueAssignmentRepository rescueAssignmentRepository,
@@ -39,12 +52,14 @@ public class RescuerService {
                           SosRequestRepository sosRequestRepository,
                           TeamMemberRepository teamMemberRepository,
                           CloudinaryService cloudinaryService,
+                          TerrainAnalysisService terrainAnalysisService,
                           @Autowired(required = false) SimpMessagingTemplate messagingTemplate) {
         this.rescueAssignmentRepository = rescueAssignmentRepository;
         this.rescueTeamRepository = rescueTeamRepository;
         this.sosRequestRepository = sosRequestRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.cloudinaryService = cloudinaryService;
+        this.terrainAnalysisService = terrainAnalysisService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -170,8 +185,19 @@ public class RescuerService {
     /**
      * Bắt đầu di chuyển / tiếp cận hiện trường.
      */
+    @Transactional(readOnly = true)
+    public RouteTerrainAnalysisDto getRouteAndTerrainAnalysis(Long assignmentId, User user) {
+        RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
+        return terrainAnalysisService.analyzeRouteAndTerrain(assignment.getTeam(), assignment.getSosRequest(), assignmentId);
+    }
+
     @Transactional
     public RescueAssignment startMoving(Long assignmentId, User user) {
+        return startMoving(assignmentId, user, null);
+    }
+
+    @Transactional
+    public RescueAssignment startMoving(Long assignmentId, User user, StartMissionRequestDto dto) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
 
         if (!"ACCEPTED".equalsIgnoreCase(assignment.getStatus())
@@ -180,16 +206,58 @@ public class RescuerService {
         }
 
         assignment.setStatus("IN_PROGRESS");
+        if (dto != null) {
+            if (dto.getVehicleType() != null && !dto.getVehicleType().isBlank()) {
+                assignment.setVehicleType(dto.getVehicleType().trim());
+            }
+            if (dto.getSelectedEquipment() != null && !dto.getSelectedEquipment().isEmpty()) {
+                assignment.setSelectedEquipment(String.join(", ", dto.getSelectedEquipment()));
+            }
+            if (dto.getCustomNotes() != null && !dto.getCustomNotes().isBlank()) {
+                String existing = assignment.getReportNotes() != null ? assignment.getReportNotes() + " | " : "";
+                assignment.setReportNotes(existing + "Ghi chú xuất kích: " + dto.getCustomNotes().trim());
+            }
+            if (dto.getRouteDistanceKm() != null) {
+                assignment.setRouteDistanceKm(dto.getRouteDistanceKm());
+            }
+            if (dto.getRouteDurationMinutes() != null) {
+                assignment.setRouteDurationMinutes(dto.getRouteDurationMinutes());
+            }
+            if (dto.getTerrainType() != null) {
+                assignment.setTerrainType(dto.getTerrainType());
+            }
+        }
+
         SosRequest sos = assignment.getSosRequest();
         sos.setStatus("IN_PROGRESS");
         sosRequestRepository.save(sos);
 
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
-        log.info(">>> ĐỘI '{}' ĐANG TIẾP CẬN HIỆN TRƯỜNG NHIỆM VỤ #{}",
-                assignment.getTeam().getTeamName(), assignmentId);
+        log.info(">>> ĐỘI '{}' ĐANG TIẾP CẬN HIỆN TRƯỜNG NHIỆM VỤ #{} (Phương tiện: {}, Trang bị: {})",
+                assignment.getTeam().getTeamName(), assignmentId, assignment.getVehicleType(), assignment.getSelectedEquipment());
 
-        sendMapUpdateNotification(sos.getId(), "IN_PROGRESS", assignment.getTeam().getTeamName());
+        sendMissionStartNotification(saved);
         return saved;
+    }
+
+    private void sendMissionStartNotification(RescueAssignment assignment) {
+        if (messagingTemplate == null) return;
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "MISSION_START");
+            payload.put("sosId", assignment.getSosRequest().getId());
+            payload.put("teamId", assignment.getTeam().getId());
+            payload.put("teamName", assignment.getTeam().getTeamName());
+            payload.put("status", "IN_PROGRESS");
+            payload.put("vehicleType", assignment.getVehicleType());
+            payload.put("selectedEquipment", assignment.getSelectedEquipment());
+            payload.put("distanceKm", assignment.getRouteDistanceKm());
+            payload.put("durationMinutes", assignment.getRouteDurationMinutes());
+            payload.put("terrainType", assignment.getTerrainType());
+            messagingTemplate.convertAndSend("/topic/map-updates", payload);
+        } catch (Exception ex) {
+            log.warn("Lỗi gửi thông báo WebSocket xuất kích: {}", ex.getMessage());
+        }
     }
 
     /**

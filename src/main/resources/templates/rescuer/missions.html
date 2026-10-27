@@ -203,15 +203,43 @@
                                             Khoảng cách đến nạn nhân: <strong class="text-danger fs-6" id="rescuerDistText">Đang theo dõi...</strong>
                                         </div>
                                     </div>
+
+                                    <!-- Hiển thị phương tiện & trang thiết bị đã chọn khi IN_PROGRESS -->
+                                    <div th:if="${a.status == 'IN_PROGRESS' and (a.vehicleType != null or a.selectedEquipment != null)}" class="p-2 mb-2 rounded bg-white border border-info shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-bold text-navy">
+                                                <i class="fa-solid fa-shield-halved text-primary me-1"></i> Phương tiện & Trang bị đã chọn:
+                                            </span>
+                                            <span th:if="${a.terrainType != null}" class="badge bg-secondary-subtle text-secondary-emphasis border">
+                                                <span th:text="${a.terrainType == 'FLOOD_DEEP' ? 'Vùng ngập sâu/lũ quét' : (a.terrainType == 'LANDSLIDE_MOUNTAIN' ? 'Miền núi/sạt lở' : (a.terrainType == 'URBAN_INUNDATION' ? 'Đô thị ngập cục bộ' : 'Đường bộ bình thường'))}"></span>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1 align-items-center mb-1">
+                                            <span th:if="${a.vehicleType != null}" class="badge bg-primary">
+                                                <i class="fa-solid fa-truck-fast me-1"></i>
+                                                <span th:text="${a.vehicleType == 'BOAT_MOTOR' ? 'Xuồng máy cứu hộ cao tốc' : (a.vehicleType == 'BOAT_RUBBER' ? 'Thuyền phao cao su' : (a.vehicleType == 'TRUCK_4X4' ? 'Xe gầm cao 2 cầu 4x4' : (a.vehicleType == 'AMBULANCE_SPECIAL' ? 'Xe cứu thương lội nước' : a.vehicleType)))}"></span>
+                                            </span>
+                                            <span th:if="${a.routeDistanceKm != null}" class="badge bg-light text-dark border">
+                                                <i class="fa-solid fa-route me-1"></i> <strong th:text="${a.routeDistanceKm}"></strong> km
+                                            </span>
+                                            <span th:if="${a.routeDurationMinutes != null}" class="badge bg-light text-dark border">
+                                                <i class="fa-regular fa-clock me-1"></i> ~<strong th:text="${a.routeDurationMinutes}"></strong> phút
+                                            </span>
+                                        </div>
+                                        <div th:if="${a.selectedEquipment != null and !#strings.isEmpty(a.selectedEquipment)}" class="small text-secondary">
+                                            <i class="fa-solid fa-toolbox me-1 text-primary"></i> <span class="fw-semibold text-dark" th:text="${a.selectedEquipment}"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="pt-3 border-top d-flex gap-2">
                                     <button th:if="${a.status == 'ACCEPTED'}" 
-                                            class="btn btn-warning btn-sm w-50 fw-bold btn-start-moving"
-                                            th:attr="data-id=${a.id}">
-                                        <i class="fa-solid fa-truck-fast me-1"></i> Đang tiếp cận
+                                            class="btn btn-primary btn-sm w-100 fw-bold py-2 btn-open-prepare"
+                                            th:attr="data-id=${a.id}, data-name=${a.sosRequest.contactName}">
+                                        <i class="fa-solid fa-truck-ramp-box me-1"></i> Phân Tích Địa Hình & Xuất Kích
                                     </button>
-                                    <button class="btn btn-success btn-sm w-100 fw-bold py-2 btn-open-complete"
+                                    <button th:if="${a.status == 'IN_PROGRESS'}"
+                                            class="btn btn-success btn-sm w-100 fw-bold py-2 btn-open-complete"
                                             th:attr="data-id=${a.id}, data-name=${a.sosRequest.contactName}">
                                         <i class="fa-solid fa-flag-checkered me-1"></i> Báo Cáo Hoàn Thành Cứu Nạn
                                     </button>
@@ -264,6 +292,108 @@
             </div>
         </div>
     </div>
+
+<!-- Modal Phân Tích Địa Hình & Chuẩn Bị Trang Bị Xuất Kích -->
+<div class="modal fade" id="prepareModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-navy text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-truck-ramp-box me-2 text-warning"></i> Phân Tích Địa Hình & Chuẩn Bị Xuất Kích
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="prepAssignmentId" />
+
+                <!-- Loading State -->
+                <div id="prepLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h6 class="fw-bold text-navy">Đang phân tích dữ liệu địa hình OSRM & GIS...</h6>
+                    <p class="text-muted small mb-0">Hệ thống đang đối soát dữ liệu cự ly đường bộ, ngập lụt và gợi ý trang thiết bị phù hợp.</p>
+                </div>
+
+                <!-- Analysis Content -->
+                <div id="prepContent" style="display: none;">
+                    <!-- Thông tin nạn nhân & Phân tích cự ly địa hình -->
+                    <div class="card border-0 bg-light p-3 mb-3 rounded-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">
+                                <i class="fa-solid fa-user me-1 text-danger"></i> Nạn nhân: <strong id="prepCitizenName" class="text-navy"></strong>
+                            </span>
+                            <span id="prepTerrainBadge" class="badge bg-primary px-3 py-2 fs-7">
+                                Đang tải...
+                            </span>
+                        </div>
+                        <div class="row g-2 text-center mt-1">
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Cự ly thực tế</small>
+                                    <strong class="fs-5 text-danger" id="prepDistanceText">-- km</strong>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Thời gian dự kiến</small>
+                                    <strong class="fs-5 text-primary" id="prepDurationText">-- phút</strong>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Chế độ định tuyến</small>
+                                    <span class="badge bg-info-subtle text-info-emphasis mt-1" id="prepRouteSource">OSRM Route</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 small text-muted fst-italic">
+                            <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                            <span id="prepTerrainDesc"></span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Chọn Phương Tiện Cơ Động -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-navy mb-2">
+                            <i class="fa-solid fa-truck-fast text-primary me-1"></i> 1. Lựa chọn Phương tiện Cơ động Tiếp cận:
+                        </label>
+                        <div class="row g-2" id="prepVehicleOptions">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Checklist Trang Thiết Bị Cứu Nạn -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-navy mb-0">
+                                <i class="fa-solid fa-toolbox text-warning me-1"></i> 2. Danh mục Trang thiết bị Cứu nạn (Đã gợi ý theo tình hình):
+                            </label>
+                            <span class="badge bg-light text-dark border" id="prepEquipmentCountBadge">0 món</span>
+                        </div>
+                        <div class="p-3 bg-white border rounded-3" style="max-height: 250px; overflow-y: auto;" id="prepEquipmentList">
+                            <!-- Populated via JS grouped or listed with checkmarks -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Ghi Chú Khi Xuất Kích -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-navy small">
+                            <i class="fa-regular fa-comment-dots text-secondary me-1"></i> 3. Ghi chú xuất quân (Tùy chọn):
+                        </label>
+                        <textarea class="form-control" id="prepNotes" rows="2" placeholder="Ví dụ: Đội gồm 4 đồng chí, mang theo thêm bình oxy cá nhân dự phòng..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light" id="prepFooter" style="display: none;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" id="btnSubmitStartMission" onclick="submitStartMission()">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Từ Chối Nhiệm Vụ -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
@@ -324,6 +454,7 @@
             </div>
         </div>
     </div>
+</div>
 
 <script th:inline="javascript">
     const currentRescueTeamId = /*[[${myTeam != null ? myTeam.id : null}]]*/ null;
@@ -387,11 +518,12 @@
                 return;
             }
 
-            // Bắt đầu di chuyển
-            const startBtn = e.target.closest('.btn-start-moving');
-            if (startBtn) {
-                const id = startBtn.dataset.id;
-                startMoving(id);
+            // Mở modal chuẩn bị & phân tích địa hình trước khi xuất kích
+            const prepBtn = e.target.closest('.btn-open-prepare') || e.target.closest('.btn-start-moving');
+            if (prepBtn) {
+                const id = prepBtn.dataset.id;
+                const name = prepBtn.dataset.name;
+                openPrepareModal(id, name);
                 return;
             }
 
@@ -451,7 +583,165 @@
         .catch(err => alert('Lỗi kết nối: ' + err.message));
     }
 
-    function startMoving(id) {
+        function openPrepareModal(id, name) {
+        document.getElementById('prepAssignmentId').value = id;
+        document.getElementById('prepCitizenName').innerText = name || 'Nạn nhân';
+        document.getElementById('prepLoading').style.display = 'block';
+        document.getElementById('prepContent').style.display = 'none';
+        document.getElementById('prepFooter').style.display = 'none';
+        document.getElementById('prepNotes').value = '';
+
+        const modalEl = document.getElementById('prepareModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        fetch(`/api/rescuer/assignments/${id}/route-terrain-analysis`)
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(errData => {
+                        throw new Error(errData.message || ('Lỗi máy chủ: HTTP ' + res.status));
+                    });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success === false) {
+                    alert('Không thể tải dữ liệu phân tích: ' + (data.message || 'Lỗi không xác định'));
+                    modal.hide();
+                    return;
+                }
+                renderPrepareData(data);
+                document.getElementById('prepLoading').style.display = 'none';
+                document.getElementById('prepContent').style.display = 'block';
+                document.getElementById('prepFooter').style.display = 'flex';
+            })
+            .catch(err => {
+                alert('Không thể tải dữ liệu phân tích: ' + err.message);
+                modal.hide();
+            });
+    }
+
+    function renderPrepareData(data) {
+        // Phân tích địa hình & cự ly
+        const terrainBadge = document.getElementById('prepTerrainBadge');
+        terrainBadge.textContent = data.terrainTitle || data.terrainType;
+        if (data.terrainType === 'FLOOD_DEEP') {
+            terrainBadge.className = 'badge bg-danger px-3 py-2 fs-7';
+        } else if (data.terrainType === 'LANDSLIDE_MOUNTAIN') {
+            terrainBadge.className = 'badge bg-warning text-dark px-3 py-2 fs-7';
+        } else if (data.terrainType === 'URBAN_INUNDATION') {
+            terrainBadge.className = 'badge bg-primary px-3 py-2 fs-7';
+        } else {
+            terrainBadge.className = 'badge bg-success px-3 py-2 fs-7';
+        }
+
+        document.getElementById('prepDistanceText').textContent = (data.routeDistanceKm != null ? data.routeDistanceKm : '--') + ' km';
+        document.getElementById('prepDurationText').textContent = '~' + (data.routeDurationMinutes != null ? data.routeDurationMinutes : '--') + ' phút';
+        document.getElementById('prepRouteSource').textContent = data.routeGeometryGeoJson ? 'OSRM Trực tuyến' : 'Ước tính Haversine';
+        document.getElementById('prepTerrainDesc').textContent = data.terrainDescription || '';
+
+        // Lựa chọn phương tiện
+        const vehicleContainer = document.getElementById('prepVehicleOptions');
+        vehicleContainer.innerHTML = '';
+        const vehicles = data.recommendedVehicles || [];
+        if (vehicles.length > 0) {
+            vehicles.forEach((v, idx) => {
+                const isChecked = v.recommended ? 'checked' : (idx === 0 ? 'checked' : '');
+                const borderCls = v.recommended ? 'border-primary shadow-sm bg-primary-subtle' : 'border-secondary-subtle';
+                const badgeRec = v.recommended ? '<span class="badge bg-success ms-1"><i class="fa-solid fa-thumbs-up me-1"></i> Khuyên dùng</span>' : '';
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-6';
+                col.innerHTML = `
+                    <div class="card p-2 border ${borderCls} h-100">
+                        <div class="form-check">
+                            <input class="form-check-input vehicle-radio" type="radio" name="vehicleSelection" id="veh_${v.id}" value="${v.id}" ${isChecked}>
+                            <label class="form-check-label fw-bold text-navy" for="veh_${v.id}">
+                                <i class="${v.icon} me-1 text-primary"></i> ${v.name} ${badgeRec}
+                            </label>
+                            <div class="small text-secondary mt-1">${v.description}</div>
+                        </div>
+                    </div>
+                `;
+                vehicleContainer.appendChild(col);
+            });
+        }
+
+        // Checklist trang bị
+        const eqContainer = document.getElementById('prepEquipmentList');
+        eqContainer.innerHTML = '';
+        const equipments = data.recommendedEquipment || [];
+        if (equipments.length > 0) {
+            let count = 0;
+            equipments.forEach(item => {
+                count++;
+                const isChecked = item.defaultChecked ? 'checked' : '';
+                const isMandatoryBadge = item.mandatory ? '<span class="badge bg-danger ms-1">Bắt buộc</span>' : '';
+                const row = document.createElement('div');
+                row.className = 'form-check mb-2 pb-1 border-bottom d-flex align-items-center justify-content-between';
+                row.innerHTML = `
+                    <div>
+                        <input class="form-check-input prep-eq-checkbox" type="checkbox" value="${item.name}" id="eq_${item.id}" ${isChecked}>
+                        <label class="form-check-label ms-1" for="eq_${item.id}">
+                            <i class="${item.icon} me-1 text-primary"></i> <strong>${item.name}</strong> ${isMandatoryBadge}
+                            <span class="badge bg-light text-dark border ms-1">${item.categoryName || item.category}</span>
+                        </label>
+                    </div>
+                `;
+                eqContainer.appendChild(row);
+            });
+            document.getElementById('prepEquipmentCountBadge').textContent = `${count} thiết bị`;
+        } else {
+            eqContainer.innerHTML = '<p class="text-muted small mb-0">Không có thiết bị đặc biệt nào được yêu cầu.</p>';
+            document.getElementById('prepEquipmentCountBadge').textContent = '0 món';
+        }
+    }
+
+    function submitStartMission() {
+        const id = document.getElementById('prepAssignmentId').value;
+        const selectedVehRadio = document.querySelector('input[name="vehicleSelection"]:checked');
+        const vehicleType = selectedVehRadio ? selectedVehRadio.value : null;
+
+        const checkedEquipments = [];
+        document.querySelectorAll('.prep-eq-checkbox:checked').forEach(cb => {
+            checkedEquipments.push(cb.value);
+        });
+        const selectedEquipment = checkedEquipments.join(', ');
+
+        const notes = document.getElementById('prepNotes').value;
+
+        const btn = document.getElementById('btnSubmitStartMission');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xác nhận xuất kích...';
+
+        fetch(`/api/rescuer/assignments/${id}/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                vehicleType: vehicleType,
+                selectedEquipment: checkedEquipments,
+                customNotes: notes
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Đã xuất kích thành công! Hệ thống đang truyền tín hiệu GPS đến nạn nhân.');
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận';
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận';
+        });
+    }
+
+function startMoving(id) {
         fetch(`/api/rescuer/assignments/${id}/start`, {
             method: 'POST'
         })

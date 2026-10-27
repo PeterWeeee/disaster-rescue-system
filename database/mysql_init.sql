@@ -102,6 +102,11 @@ CREATE TABLE IF NOT EXISTS `rescue_assignments` (
     `completed_at` DATETIME NULL,
     `report_notes` TEXT NULL,
     `report_image_url` VARCHAR(500) NULL,
+  `vehicle_type` VARCHAR(50) NULL,
+  `selected_equipment` TEXT NULL,
+  `terrain_type` VARCHAR(50) NULL,
+  `route_distance_km` DOUBLE NULL,
+  `route_duration_minutes` INT NULL,
     CONSTRAINT `fk_assign_sos` FOREIGN KEY (`sos_request_id`) REFERENCES `sos_requests` (`id`),
     CONSTRAINT `fk_assign_team` FOREIGN KEY (`team_id`) REFERENCES `rescue_teams` (`id`),
     CONSTRAINT `fk_assign_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`id`)

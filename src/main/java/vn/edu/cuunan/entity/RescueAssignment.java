@@ -50,6 +50,21 @@ public class RescueAssignment {
     @Column(name = "report_image_url", length = 500)
     private String reportImageUrl;
 
+    @Column(name = "vehicle_type", length = 50)
+    private String vehicleType;
+
+    @Column(name = "selected_equipment", columnDefinition = "TEXT")
+    private String selectedEquipment;
+
+    @Column(name = "terrain_type", length = 50)
+    private String terrainType;
+
+    @Column(name = "route_distance_km")
+    private Double routeDistanceKm;
+
+    @Column(name = "route_duration_minutes")
+    private Integer routeDurationMinutes;
+
     public RescueAssignment() {
     }
 
@@ -146,5 +161,45 @@ public class RescueAssignment {
 
     public void setReportImageUrl(String reportImageUrl) {
         this.reportImageUrl = reportImageUrl;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getSelectedEquipment() {
+        return selectedEquipment;
+    }
+
+    public void setSelectedEquipment(String selectedEquipment) {
+        this.selectedEquipment = selectedEquipment;
+    }
+
+    public String getTerrainType() {
+        return terrainType;
+    }
+
+    public void setTerrainType(String terrainType) {
+        this.terrainType = terrainType;
+    }
+
+    public Double getRouteDistanceKm() {
+        return routeDistanceKm;
+    }
+
+    public void setRouteDistanceKm(Double routeDistanceKm) {
+        this.routeDistanceKm = routeDistanceKm;
+    }
+
+    public Integer getRouteDurationMinutes() {
+        return routeDurationMinutes;
+    }
+
+    public void setRouteDurationMinutes(Integer routeDurationMinutes) {
+        this.routeDurationMinutes = routeDurationMinutes;
     }
 }

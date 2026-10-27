@@ -150,6 +150,9 @@ public class SosController {
 
         rescueAssignmentRepository.findTopBySosRequestIdOrderByAssignedAtDesc(sos.getId()).ifPresent(assignment -> {
             model.addAttribute("assignment", assignment);
+            model.addAttribute("vehicleType", assignment.getVehicleType());
+            model.addAttribute("selectedEquipment", assignment.getSelectedEquipment());
+            model.addAttribute("terrainType", assignment.getTerrainType());
             if (assignment.getTeam() != null) {
                 RescueTeam team = assignment.getTeam();
                 model.addAttribute("assignedTeam", team);
