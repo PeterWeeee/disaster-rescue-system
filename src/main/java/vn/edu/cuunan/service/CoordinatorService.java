@@ -157,12 +157,9 @@ public class CoordinatorService {
     public List<SosRequest> getSosRequests(String statusFilter, String provinceCode) {
         List<SosRequest> list;
         if (statusFilter == null || statusFilter.trim().isEmpty() || "ALL".equalsIgnoreCase(statusFilter)) {
-            // Điều phối viên chỉ quản lý các ca đang chờ hoặc đang cứu nạn (không lưu giữ/hiển thị ca đã hoàn thành)
-            list = sosRequestRepository.findByStatusInOrderByCreatedAtDesc(List.of("PENDING", "DISPATCHED", "IN_PROGRESS"));
-        } else if ("RESOLVED".equalsIgnoreCase(statusFilter)) {
-            list = Collections.emptyList();
+            list = sosRequestRepository.findAllByOrderByCreatedAtDesc();
         } else {
-            list = sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.toUpperCase());
+            list = sosRequestRepository.findByStatusOrderByCreatedAtDesc(statusFilter.trim().toUpperCase());
         }
 
         ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/main :: layout(${pageTitle}, ~{::#coordinator-content})}">
@@ -124,11 +124,14 @@
                            th:class="'btn ' + (${currentStatusFilter == 'IN_PROGRESS' ? 'btn-info text-white active' : 'btn-outline-info'})">
                             <i class="fa-solid fa-person-digging me-1"></i> Đang tiếp cận
                         </a>
+                        <a th:href="@{/coordinator/dashboard(status='RESOLVED', province=${currentProvince})}"
+                           th:class="'btn ' + (${currentStatusFilter == 'RESOLVED' ? 'btn-success active' : 'btn-outline-success'})">
+                            <i class="fa-solid fa-check me-1"></i> Đã hoàn thành
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Split Screen: Left (SOS List) + Right (Leaflet Live Map) -->
         <div class="row g-3">
             <!-- Left Column: SOS List (40%) -->
