@@ -6,19 +6,55 @@
 
 <div id="donation-content">
 
+    <!-- CSS tùy biến riêng cho trang Quyên góp & Cứu trợ -->
+    <style>
+        .donation-hero {
+            background: linear-gradient(135deg, #09111e 0%, #0f172a 40%, #1e293b 70%, #7f1d1d 100%) !important;
+            color: #ffffff !important;
+        }
+        .donation-stat-card {
+            background-color: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff !important;
+        }
+        .btn-quick-amount {
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-quick-amount.active {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .payment-method-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+        }
+        .payment-method-card:hover {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+
     <!-- Hero Banner Cứu Trợ -->
-    <section class="py-5 bg-gradient text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #991b1b 100%);">
+    <section class="py-5 donation-hero position-relative">
         <div class="container py-4">
             <div class="row align-items-center">
                 <div class="col-lg-8 mx-auto text-center">
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill text-uppercase fw-bold mb-3 shadow-sm">
-                        <i class="fa-solid fa-heart-pulse me-1 text-danger"></i> Quỹ Cứu Trợ Khẩn Cấp Thiên Tai & Bão Lũ
+                    <span class="badge bg-danger text-white border border-danger-subtle px-3 py-2 rounded-pill text-uppercase fw-bold mb-3 shadow-sm">
+                        <i class="fa-solid fa-heart-pulse me-1 text-white"></i> Quỹ Cứu Trợ Khẩn Cấp Thiên Tai & Bão Lũ
                     </span>
-                    <h1 class="display-4 fw-extrabold text-white mb-3">
+                    <h1 class="display-4 fw-extrabold text-white mb-3" style="text-shadow: 0 2px 10px rgba(0,0,0,0.6);">
                         CHUNG TAY HƯỚNG VỀ <br>
                         <span class="text-warning">ĐỒNG BÀO VÙNG BÃO LŨ</span>
                     </h1>
-                    <p class="lead text-light opacity-90 mx-auto" style="max-width: 700px;">
+                    <p class="lead text-light opacity-90 mx-auto" style="max-width: 700px; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
                         Mỗi đóng góp dù nhỏ nhất của quý vị là nguồn sống, chiếc áo phao, gói lương khô và cano cứu nạn tiếp cận kịp thời bà con đang bị cô lập giữa dòng nước xiết.
                     </p>
                 </div>
@@ -27,28 +63,32 @@
             <!-- Stats Bar -->
             <div class="row g-3 mt-4 justify-content-center">
                 <div class="col-md-4 col-sm-6">
-                    <div class="card bg-white bg-opacity-10 border-0 shadow-sm text-center p-3 rounded-4 backdrop-blur">
+                    <div class="card donation-stat-card shadow-sm text-center p-3 rounded-4">
                         <small class="text-white-50 text-uppercase fw-bold">Tổng tiền tiếp nhận</small>
                         <h3 class="fw-extrabold text-warning my-1" th:text="${#numbers.formatDecimal(stats.totalAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
                             0 ₫
                         </h3>
-                        <small class="text-light">Minh bạch thời gian thực</small>
+                        <small class="text-light opacity-90">
+                            <i class="fa-solid fa-bolt text-warning me-1"></i>Minh bạch thời gian thực
+                        </small>
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-6">
-                    <div class="card bg-white bg-opacity-10 border-0 shadow-sm text-center p-3 rounded-4 backdrop-blur">
+                    <div class="card donation-stat-card shadow-sm text-center p-3 rounded-4">
                         <small class="text-white-50 text-uppercase fw-bold">Lượt ủng hộ</small>
                         <h3 class="fw-extrabold text-white my-1" th:text="${stats.totalCount + ' lượt'}">
                             0 lượt
                         </h3>
-                        <small class="text-success-emphasis text-light">Triệu trái tim hướng về vùng lũ</small>
+                        <small class="text-light opacity-90">
+                            <i class="fa-solid fa-heart text-danger me-1"></i>Triệu trái tim hướng về vùng lũ
+                        </small>
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
-                    <div class="card bg-white bg-opacity-10 border-0 shadow-sm p-3 rounded-4 backdrop-blur">
+                    <div class="card donation-stat-card shadow-sm p-3 rounded-4">
                         <div class="d-flex justify-content-between text-white-50 small fw-bold mb-1">
                             <span>MỤC TIÊU KHẨN CẤP</span>
-                            <span th:text="${#numbers.formatDecimal(stats.targetAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">500,000,000 ₫</span>
+                            <span class="text-white fw-bold" th:text="${#numbers.formatDecimal(stats.targetAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">500,000,000 ₫</span>
                         </div>
                         <div class="progress" style="height: 12px; background-color: rgba(255,255,255,0.2);">
                             <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
@@ -99,14 +139,14 @@
                                     <span class="text-danger">*</span>
                                 </label>
 
-                                <!-- Fast amount badges -->
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="50000">50,000 ₫</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="100000">100,000 ₫</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount active" data-val="200000">200,000 ₫</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="500000">500,000 ₫</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="1000000">1,000,000 ₫</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="2000000">2,000,000 ₫</button>
+                                <!-- Fast amount buttons -->
+                                <div class="d-flex flex-wrap gap-2 mb-3" id="quickAmountContainer">
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="50000" onclick="selectAmount('50000', this)">50,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="100000" onclick="selectAmount('100000', this)">100,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount active" data-val="200000" onclick="selectAmount('200000', this)">200,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="500000" onclick="selectAmount('500000', this)">500,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="1000000" onclick="selectAmount('1000000', this)">1,000,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="2000000" onclick="selectAmount('2000000', this)">2,000,000 ₫</button>
                                 </div>
 
                                 <div class="input-group input-group-lg">
@@ -180,7 +220,7 @@
                                 <div class="row g-3">
                                     <!-- VNPay Option -->
                                     <div class="col-md-4">
-                                        <label class="payment-method-card d-block p-3 border rounded-3 text-center cursor-pointer h-100 position-relative">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
                                             <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
                                                    th:field="*{paymentMethod}" value="VNPAY" checked>
                                             <div class="fw-bold text-primary mb-1 mt-2">
@@ -193,7 +233,7 @@
 
                                     <!-- VietQR Option -->
                                     <div class="col-md-4">
-                                        <label class="payment-method-card d-block p-3 border rounded-3 text-center cursor-pointer h-100 position-relative">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
                                             <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
                                                    th:field="*{paymentMethod}" value="VIETQR">
                                             <div class="fw-bold text-success mb-1 mt-2">
@@ -206,7 +246,7 @@
 
                                     <!-- MoMo Option -->
                                     <div class="col-md-4">
-                                        <label class="payment-method-card d-block p-3 border rounded-3 text-center cursor-pointer h-100 position-relative">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
                                             <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
                                                    th:field="*{paymentMethod}" value="MOMO">
                                             <div class="fw-bold text-danger mb-1 mt-2">
@@ -297,50 +337,46 @@
         </div>
     </section>
 
-</div>
-
-<!-- Script hỗ trợ chọn nhanh số tiền và highlight radio card -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const amountInput = document.getElementById('amountInput');
-        const quickBtns = document.querySelectorAll('.btn-quick-amount');
-
-        // Set initial amount if empty
-        if (!amountInput.value) {
-            amountInput.value = '200000';
+    <!-- JavaScript nằm BÊN TRONG id="donation-content" để Thymeleaf nạp đầy đủ vào layout -->
+    <script>
+        function selectAmount(val, element) {
+            const input = document.getElementById('amountInput');
+            if (input) {
+                input.value = val;
+            }
+            document.querySelectorAll('.btn-quick-amount').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            });
+            if (element) {
+                element.classList.remove('btn-outline-secondary');
+                element.classList.add('active', 'btn-primary');
+            }
         }
 
-        quickBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                quickBtns.forEach(b => b.classList.remove('active', 'btn-primary'));
-                quickBtns.forEach(b => b.classList.add('btn-outline-secondary'));
-
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('active', 'btn-primary');
-
-                amountInput.value = this.getAttribute('data-val');
-            });
-        });
-
-        amountInput.addEventListener('input', function () {
-            quickBtns.forEach(b => {
-                if (b.getAttribute('data-val') === amountInput.value) {
-                    b.classList.remove('btn-outline-secondary');
-                    b.classList.add('active', 'btn-primary');
-                } else {
-                    b.classList.remove('active', 'btn-primary');
-                    b.classList.add('btn-outline-secondary');
+        document.addEventListener('DOMContentLoaded', function () {
+            const amountInput = document.getElementById('amountInput');
+            if (amountInput) {
+                if (!amountInput.value) {
+                    amountInput.value = '200000';
                 }
-            });
+                amountInput.addEventListener('input', function () {
+                    const currentVal = this.value;
+                    document.querySelectorAll('.btn-quick-amount').forEach(btn => {
+                        if (btn.getAttribute('data-val') === currentVal) {
+                            btn.classList.remove('btn-outline-secondary');
+                            btn.classList.add('active', 'btn-primary');
+                        } else {
+                            btn.classList.remove('active', 'btn-primary');
+                            btn.classList.add('btn-outline-secondary');
+                        }
+                    });
+                });
+            }
         });
-    });
-</script>
+    </script>
 
-<style>
-    .cursor-pointer { cursor: pointer; }
-    .payment-method-card:hover { border-color: #ef4444 !important; background-color: #fef2f2; }
-    .btn-quick-amount.active { background-color: #0f172a !important; color: #fff !important; border-color: #0f172a !important; }
-</style>
+</div>
 
 </body>
 </html>

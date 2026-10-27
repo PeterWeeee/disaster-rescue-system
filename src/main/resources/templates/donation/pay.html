@@ -107,37 +107,40 @@
             </div>
         </div>
     </div>
-</div>
 
-<script th:inline="javascript">
-    function copyText(elementId) {
-        const text = document.getElementById(elementId).innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Đã sao chép: ' + text);
-        }).catch(err => {
-            console.error('Không thể sao chép: ', err);
-        });
-    }
+    <!-- Script đặt bên trong #pay-content để Thymeleaf nạp vào layout -->
+    <script th:inline="javascript">
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Đã sao chép: ' + text);
+            }).catch(err => {
+                console.error('Không thể sao chép: ', err);
+            });
+        }
 
-    // Tự động kiểm tra trạng thái thanh toán mỗi 3 giây
-    const txCode = /*[[${donation.transactionCode}]]*/ '';
-    if (txCode) {
-        const pollInterval = setInterval(async () => {
-            try {
-                const res = await fetch('/api/donations/status/' + encodeURIComponent(txCode));
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.status === 'SUCCESS') {
-                        clearInterval(pollInterval);
-                        window.location.href = '/donations/success?code=' + encodeURIComponent(txCode);
+        // Tự động kiểm tra trạng thái thanh toán mỗi 3 giây
+        const txCode = /*[[${donation.transactionCode}]]*/ '';
+        if (txCode) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/donations/status/' + encodeURIComponent(txCode));
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.status === 'SUCCESS') {
+                            clearInterval(pollInterval);
+                            window.location.href = '/donations/success?code=' + encodeURIComponent(txCode);
+                        }
                     }
+                } catch (e) {
+                    // Ignore network errors during poll
                 }
-            } catch (e) {
-                // Ignore network errors during poll
-            }
-        }, 3000);
-    }
-</script>
+            }, 3000);
+        }
+    </script>
+</div>
 
 </body>
 </html>
