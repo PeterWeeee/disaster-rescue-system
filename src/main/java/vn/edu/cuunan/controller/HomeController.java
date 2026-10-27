@@ -1,6 +1,8 @@
 package vn.edu.cuunan.controller;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +23,17 @@ public class HomeController {
     private String medicalHotline;
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Authentication authentication, Model model) {
+        // Nếu người dùng đã đăng nhập với vai trò Điều phối viên, chuyển hướng thẳng vào Bàn điều phối
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
+            boolean isCoordinator = authentication.getAuthorities().stream()
+                    .anyMatch(a -> "ROLE_COORDINATOR".equals(a.getAuthority()));
+            if (isCoordinator) {
+                return "redirect:/coordinator/dashboard";
+            }
+        }
+
         model.addAttribute("appName", appName);
         model.addAttribute("pageTitle", "CứuNạn 24/7 - Hệ Thống Cứu Hộ & Cứu Nạn Khẩn Cấp");
         model.addAttribute("rescueHotline", rescueHotline);

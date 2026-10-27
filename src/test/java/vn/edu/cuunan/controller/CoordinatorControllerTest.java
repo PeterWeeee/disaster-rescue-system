@@ -77,4 +77,12 @@ class CoordinatorControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/auth/login?logout=true"));
     }
+
+    @Test
+    @WithMockUser(username = "coordinator", roles = {"COORDINATOR"})
+    void testCoordinatorHomeRedirect() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/coordinator/dashboard"));
+    }
 }
