@@ -18,6 +18,10 @@
                 <small class="text-muted">Giám sát các ca khẩn cấp và điều động đội cứu hộ theo khoảng cách địa lý (Haversine)</small>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <a href="#budget-requests-section" class="btn btn-sm btn-outline-warning text-dark fw-bold bg-warning-subtle border-warning shadow-sm">
+                    <i class="fa-solid fa-vault text-warning me-1"></i> Quỹ Khả Dụng: <span th:text="${generalFund.formattedAvailableGeneralFund}">500.000.000 ₫</span>
+                    <span th:if="${pendingBudgetRequestsCount > 0}" class="badge bg-danger ms-1" th:text="${pendingBudgetRequestsCount} + ' chờ duyệt'">2 chờ duyệt</span>
+                </a>
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 shadow-sm">
                     <i class="fa-solid fa-map-location-dot me-1"></i> <span th:text="${selectedRegion.name}">Toàn Miền Trung</span>
                 </span>
@@ -503,11 +507,13 @@
                                     <td class="text-end pe-3" th:id="'actions-cell-' + ${req.id}">
                                         <div th:if="${req.status == 'PENDING'}" class="btn-group btn-group-sm">
                                             <button type="button" class="btn btn-success fw-bold"
-                                                    th:onclick="'approveBudget(' + ${req.id} + ', '' + ${req.formattedAmount} + '', '' + ${#strings.escapeJavaScript(req.rescueTeam.teamName)} + '')'">
+                                                    th:attr="data-id=${req.id},data-amount=${req.formattedAmount},data-team=${req.rescueTeam.teamName}"
+                                                    onclick="handleApproveClick(this)">
                                                 <i class="fa-solid fa-check me-1"></i> Đồng Ý Cấp
                                             </button>
                                             <button type="button" class="btn btn-outline-danger"
-                                                    th:onclick="'openRejectModal(' + ${req.id} + ', '' + ${#strings.escapeJavaScript(req.rescueTeam.teamName)} + '', '' + ${req.formattedAmount} + '')'">
+                                                    th:attr="data-id=${req.id},data-amount=${req.formattedAmount},data-team=${req.rescueTeam.teamName}"
+                                                    onclick="handleRejectClick(this)">
                                                 <i class="fa-solid fa-ban me-1"></i> Từ Chối
                                             </button>
                                         </div>
@@ -573,6 +579,37 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <button type="button" class="btn btn-danger fw-bold px-4" id="btnConfirmDispatch" disabled onclick="submitDispatch()">
                     <i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Điều Động
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Từ Chối Tiếp Tế Ngân Sách -->
+<div class="modal fade" id="rejectBudgetModal" tabindex="-1" aria-labelledby="rejectBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="rejectBudgetModalLabel">
+                    <i class="fa-solid fa-ban me-2"></i> TỪ CHỐI TIẾP TẾ NGÂN SÁCH <span id="rejectModalReqId"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-light border small mb-3">
+                    <div><strong>Đội đề xuất:</strong> <span id="rejectModalTeamName" class="fw-bold text-navy"></span></div>
+                    <div><strong>Số tiền đề xuất:</strong> <span id="rejectModalAmount" class="text-danger fw-bold"></span></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy small">Lý Do Từ Chối <span class="text-danger">*</span></label>
+                    <textarea id="rejectReasonInput" class="form-control" rows="3"
+                              placeholder="Nhập lý do từ chối (VD: Ưu tiên phân bổ cho khu vực ngập sâu hơn, đề nghị đội tận dụng kho trang bị sẵn có...)" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btnConfirmRejectBudget" class="btn btn-danger fw-bold" onclick="submitRejectBudget()">
+                    <i class="fa-solid fa-ban me-1"></i> Xác Nhận Từ Chối
                 </button>
             </div>
         </div>
@@ -999,6 +1036,20 @@
     window.submitDispatch = submitDispatch;
     window.focusOnMap = focusOnMap;
 
+    function handleApproveClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const amount = btn.getAttribute('data-amount');
+        const team = btn.getAttribute('data-team');
+        approveBudget(id, amount, team);
+    }
+
+    function handleRejectClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const amount = btn.getAttribute('data-amount');
+        const team = btn.getAttribute('data-team');
+        openRejectModal(id, team, amount);
+    }
+
     let currentRejectRequestId = null;
 
     function approveBudget(requestId, amount, teamName) {
@@ -1028,25 +1079,36 @@
 
     function openRejectModal(requestId, teamName, amount) {
         currentRejectRequestId = requestId;
-        document.getElementById('rejectModalReqId').textContent = '#' + requestId;
-        document.getElementById('rejectModalTeamName').textContent = teamName;
-        document.getElementById('rejectModalAmount').textContent = amount;
-        document.getElementById('rejectReasonInput').value = '';
-        const modal = new bootstrap.Modal(document.getElementById('rejectBudgetModal'));
-        modal.show();
+        const idEl = document.getElementById('rejectModalReqId');
+        if (idEl) idEl.textContent = '#' + requestId;
+        const teamEl = document.getElementById('rejectModalTeamName');
+        if (teamEl) teamEl.textContent = teamName;
+        const amountEl = document.getElementById('rejectModalAmount');
+        if (amountEl) amountEl.textContent = amount;
+        const reasonEl = document.getElementById('rejectReasonInput');
+        if (reasonEl) reasonEl.value = '';
+
+        const modalEl = document.getElementById('rejectBudgetModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
     }
 
     function submitRejectBudget() {
         if (!currentRejectRequestId) return;
-        const reason = document.getElementById('rejectReasonInput').value.trim();
+        const reasonInput = document.getElementById('rejectReasonInput');
+        const reason = reasonInput ? reasonInput.value.trim() : '';
         if (!reason) {
             alert('Vui lòng nhập lý do từ chối yêu cầu tiếp tế ngân sách!');
             return;
         }
 
         const btn = document.getElementById('btnConfirmRejectBudget');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...';
+        }
 
         fetch('/api/coordinator/budget-requests/' + currentRejectRequestId + '/reject', {
             method: 'POST',
@@ -1062,17 +1124,23 @@
                 location.reload();
             } else {
                 alert('Lỗi: ' + (data.message || 'Không thể từ chối yêu cầu'));
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Xác Nhận Từ Chối';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Xác Nhận Từ Chối';
+                }
             }
         })
         .catch(err => {
             alert('Lỗi kết nối máy chủ: ' + err.message);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Xác Nhận Từ Chối';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Xác Nhận Từ Chối';
+            }
         });
     }
 
+    window.handleApproveClick = handleApproveClick;
+    window.handleRejectClick = handleRejectClick;
     window.approveBudget = approveBudget;
     window.openRejectModal = openRejectModal;
     window.submitRejectBudget = submitRejectBudget;
