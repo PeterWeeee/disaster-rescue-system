@@ -75,8 +75,16 @@
 
                 <!-- Action Buttons: SOS & Auth -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/sos}" class="btn btn-sos pulse-button text-white fw-bold px-3 py-2 shadow">
+                    <!-- Nút SOS chỉ hiển thị cho người dân/khách chưa đăng nhập -->
+                    <a sec:authorize="!hasAnyRole('COORDINATOR', 'ADMIN', 'RESCUER')" th:href="@{/sos}" class="btn btn-sos pulse-button text-white fw-bold px-3 py-2 shadow">
                         <i class="fa-solid fa-triangle-exclamation me-1"></i> GỬI SOS KHẨN CẤP
+                    </a>
+                    <!-- Lối tắt nghiệp vụ chuyên trách cho điều phối viên và đội cứu hộ -->
+                    <a sec:authorize="hasRole('COORDINATOR')" th:href="@{/coordinator/dashboard}" class="btn btn-warning fw-bold px-3 py-2 shadow-sm text-dark">
+                        <i class="fa-solid fa-tower-broadcast me-1"></i> BÀN ĐIỀU PHỐI
+                    </a>
+                    <a sec:authorize="hasRole('RESCUER')" th:href="@{/rescuer/missions}" class="btn btn-info fw-bold px-3 py-2 shadow-sm text-dark">
+                        <i class="fa-solid fa-person-military-pointing me-1"></i> NHIỆM VỤ ĐỘI
                     </a>
 
                     <!-- Not Logged In -->
