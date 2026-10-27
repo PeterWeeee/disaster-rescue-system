@@ -162,14 +162,14 @@ public class RescuerService {
         if (notificationService != null) {
             if (assignment.getAssignedBy() != null) {
                 notificationService.sendToUser(assignment.getAssignedBy(),
-                        "Äá»™i Ä‘Ă£ cháº¥p nháº­n nhiá»‡m vá»¥ #" + assignmentId,
-                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ cháº¥p nháº­n tiáº¿p nháº­n ca cá»©u náº¡n #" + sos.getId() + " (" + sos.getContactName() + ").",
+                        "Đội đã chấp nhận nhiệm vụ #" + assignmentId,
+                        "Đội '" + team.getTeamName() + "' đã chấp nhận ca cứu nạn #" + sos.getId() + " (" + sos.getContactName() + ").",
                         "MISSION_STATUS",
                         "/coordinator/dashboard");
             } else {
                 notificationService.sendToRole("ROLE_COORDINATOR",
-                        "Äá»™i Ä‘Ă£ cháº¥p nháº­n nhiá»‡m vá»¥ #" + assignmentId,
-                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ cháº¥p nháº­n tiáº¿p nháº­n ca cá»©u náº¡n #" + sos.getId() + " (" + sos.getContactName() + ").",
+                        "Đội đã chấp nhận nhiệm vụ #" + assignmentId,
+                        "Đội '" + team.getTeamName() + "' đã chấp nhận ca cứu nạn #" + sos.getId() + " (" + sos.getContactName() + ").",
                         "MISSION_STATUS",
                         "/coordinator/dashboard");
             }
@@ -220,14 +220,14 @@ public class RescuerService {
         if (notificationService != null) {
             if (assignment.getAssignedBy() != null) {
                 notificationService.sendToUser(assignment.getAssignedBy(),
-                        "Äá»™i tá»« chá»‘i nhiá»‡m vá»¥ #" + assignmentId,
-                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ tá»« chá»‘i ca #" + sos.getId() + ". LĂ½ do: " + reason.trim(),
+                        "Đội từ chối nhiệm vụ #" + assignmentId,
+                        "Đội '" + team.getTeamName() + "' đã từ chối ca #" + sos.getId() + ". Lý do: " + reason.trim(),
                         "MISSION_STATUS",
                         "/coordinator/dashboard");
             } else {
                 notificationService.sendToRole("ROLE_COORDINATOR",
-                        "Äá»™i tá»« chá»‘i nhiá»‡m vá»¥ #" + assignmentId,
-                        "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ tá»« chá»‘i ca #" + sos.getId() + ". LĂ½ do: " + reason.trim(),
+                        "Đội từ chối nhiệm vụ #" + assignmentId,
+                        "Đội '" + team.getTeamName() + "' đã từ chối ca #" + sos.getId() + ". Lý do: " + reason.trim(),
                         "MISSION_STATUS",
                         "/coordinator/dashboard");
             }
@@ -299,15 +299,15 @@ public class RescuerService {
 
         // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
         if (notificationService != null) {
-            String noticeMsg = "Äá»™i '" + assignment.getTeam().getTeamName() + "' Ä‘Ă£ xuáº¥t kĂ­ch tiáº¿p cáº­n ca SOS #"
-                    + sos.getId() + " (" + sos.getContactName() + "). Cá»± ly: "
-                    + (assignment.getRouteDistanceKm() != null ? assignment.getRouteDistanceKm() + " km" : "Ä‘ang tĂ­nh toĂ¡n") + ".";
+            String noticeMsg = "Đội '" + assignment.getTeam().getTeamName() + "' đã xuất kích tiếp cận ca SOS #"
+                    + sos.getId() + " (" + sos.getContactName() + "). Cự ly: "
+                    + (assignment.getRouteDistanceKm() != null ? assignment.getRouteDistanceKm() + " km" : "đang tính toán") + ".";
             if (assignment.getAssignedBy() != null) {
                 notificationService.sendToUser(assignment.getAssignedBy(),
-                        "Äá»™i xuáº¥t kĂ­ch nhiá»‡m vá»¥ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+                        "Đội xuất kích nhiệm vụ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
             } else {
                 notificationService.sendToRole("ROLE_COORDINATOR",
-                        "Äá»™i xuáº¥t kĂ­ch nhiá»‡m vá»¥ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+                        "Đội xuất kích nhiệm vụ #" + assignmentId, noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
             }
         }
 
@@ -382,20 +382,20 @@ public class RescuerService {
 
         // ThĂ´ng bĂ¡o cho Äiá»u phá»‘i viĂªn
         if (notificationService != null) {
-            String noticeMsg = "Äá»™i '" + team.getTeamName() + "' Ä‘Ă£ hoĂ n thĂ nh xuáº¥t sáº¯c ca cá»©u náº¡n #"
+            String noticeMsg = "Đội '" + team.getTeamName() + "' đã hoàn thành xuất sắc ca cứu nạn #"
                     + sos.getId() + " (" + sos.getContactName() + ").";
             if (assignment.getAssignedBy() != null) {
                 notificationService.sendToUser(assignment.getAssignedBy(),
-                        "Nhiá»‡m vá»¥ #" + assignmentId + " Ä‘Ă£ hoĂ n thĂ nh", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+                        "Nhiệm vụ #" + assignmentId + " đã hoàn thành", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
             }
             notificationService.sendToRole("ROLE_COORDINATOR",
-                    "Ca SOS #" + sos.getId() + " Ä‘Ă£ hoĂ n táº¥t", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
+                    "Ca SOS #" + sos.getId() + " đã hoàn tất", noticeMsg, "MISSION_STATUS", "/coordinator/dashboard");
 
             // Náº¿u ngÆ°á»i gá»­i SOS cĂ³ tĂ i khoáº£n trong há»‡ thá»‘ng -> thĂ´ng bĂ¡o cho ngÆ°á»i gá»­i
             if (sos.getSender() != null) {
                 notificationService.sendToUser(sos.getSender(),
-                        "YĂªu cáº§u cá»©u náº¡n #" + sos.getId() + " Ä‘Ă£ Ä‘Æ°á»£c xá»­ lĂ½ an toĂ n",
-                        "Äá»™i cá»©u há»™ " + team.getTeamName() + " Ä‘Ă£ hoĂ n táº¥t cĂ´ng tĂ¡c giáº£i cá»©u vĂ  há»— trá»£ báº¡n.",
+                        "Yêu cầu cứu nạn #" + sos.getId() + " đã được xử lý an toàn",
+                        "Đội cứu hộ " + team.getTeamName() + " đã hoàn tất công tác giải cứu và hỗ trợ bạn.",
                         "SOS_STATUS",
                         "/sos/track/" + sos.getId());
             }

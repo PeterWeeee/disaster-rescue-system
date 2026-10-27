@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cloudinary.version>2.5.0</cloudinary.version>
         <jjwt.version>0.12.6</jjwt.version>
     </properties>
