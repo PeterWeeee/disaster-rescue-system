@@ -42,6 +42,45 @@ class CoordinatorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "coordinator", roles = {"COORDINATOR"})
+    void testRenderTeams() throws Exception {
+        MvcResult result = mockMvc.perform(get("/coordinator/teams"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("QUẢN LÝ CÁC ĐỘI CỨU HỘ & QUÂN TRANG"), "Tiêu đề quản lý đội cứu hộ chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
+        System.out.println("Rendered Teams HTML length: " + html.length());
+    }
+
+    @Test
+    @WithMockUser(username = "coordinator", roles = {"COORDINATOR"})
+    void testRenderMissions() throws Exception {
+        MvcResult result = mockMvc.perform(get("/coordinator/missions"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("THEO DÕI CỨU HỘ & LỘ TRÌNH TÁC CHIẾN"), "Tiêu đề theo dõi cứu hộ & lộ trình chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
+        System.out.println("Rendered Missions HTML length: " + html.length());
+    }
+
+    @Test
+    @WithMockUser(username = "coordinator", roles = {"COORDINATOR"})
+    void testRenderBudget() throws Exception {
+        MvcResult result = mockMvc.perform(get("/coordinator/budget"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("QUẢN LÝ TIẾP TẾ NGÂN SÁCH & QUỸ CỨU TRỢ TỔ CHỨC"), "Tiêu đề quỹ cứu trợ & tiếp tế ngân sách chuẩn");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
+        System.out.println("Rendered Budget HTML length: " + html.length());
+    }
+
+    @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testRenderAdminDashboard() throws Exception {
         MvcResult result = mockMvc.perform(get("/admin/dashboard"))

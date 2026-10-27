@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#missions-content})}">
+<head>
+    <title th:text="${pageTitle}">Theo Dõi Cứu Hộ & Lộ Trình</title>
+</head>
+<body>
+
+<div id="missions-content" class="py-3">
+    <div class="container-fluid px-3 px-lg-4">
+        <!-- Header & Toolbar -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-route text-info me-2"></i> THEO DÕI CỨU HỘ & LỘ TRÌNH TÁC CHIẾN
+                </h3>
+                <small class="text-muted">Giám sát thời gian thực lộ trình điều động, phương tiện xuất kích, khoảng cách và báo cáo hiện trường ca SOS</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/coordinator/dashboard(province=${currentProvince})}" class="btn btn-sm btn-outline-danger shadow-sm">
+                    <i class="fa-solid fa-tower-broadcast me-1"></i> TT Điều Phối
+                </a>
+                <a th:href="@{/coordinator/teams(province=${currentProvince})}" class="btn btn-sm btn-outline-primary shadow-sm">
+                    <i class="fa-solid fa-truck-medical me-1"></i> Quản Lý Đội Cứu Hộ
+                </a>
+                <a th:href="@{/coordinator/budget(province=${currentProvince})}" class="btn btn-sm btn-outline-warning text-dark fw-bold bg-warning-subtle border-warning shadow-sm">
+                    <i class="fa-solid fa-vault text-warning me-1"></i> Quỹ Cứu Trợ & Tiếp Tế
+                </a>
+                <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fa-solid fa-rotate me-1"></i> Làm mới
+                </button>
+            </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm bg-primary text-white rounded-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase small fw-bold opacity-75">Đang Thực Địa (Active)</div>
+                                <h3 class="fw-bold mb-0" th:text="${stats.inProgressCount}">0</h3>
+                            </div>
+                            <i class="fa-solid fa-person-running fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm bg-success text-white rounded-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase small fw-bold opacity-75">Đã Cứu An Toàn</div>
+                                <h3 class="fw-bold mb-0">
+                                    <span th:text="${stats.rescuedPeopleCount}">0</span> người
+                                </h3>
+                            </div>
+                            <i class="fa-solid fa-circle-check fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm bg-warning text-dark rounded-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase small fw-bold opacity-75">Chờ Xuất Kích</div>
+                                <h3 class="fw-bold mb-0" th:text="${stats.dispatchedCount + stats.pendingCount}">0</h3>
+                            </div>
+                            <i class="fa-solid fa-truck-fast fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm bg-navy text-white rounded-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase small fw-bold opacity-75">Đội Sẵn Sàng</div>
+                                <h3 class="fw-bold mb-0">
+                                    <span th:text="${stats.availableTeamsCount}">0</span>/<span th:text="${stats.totalTeamsCount}">0</span>
+                                </h3>
+                            </div>
+                            <i class="fa-solid fa-users-line fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="card border-0 shadow-sm mb-3 rounded-3 bg-white">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <!-- Dropdown Khu Vực -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label small fw-bold text-navy mb-0 text-nowrap" for="missionsProvinceSelect">
+                                <i class="fa-solid fa-map-location-dot text-danger me-1"></i> Khu vực:
+                            </label>
+                            <select id="missionsProvinceSelect" class="form-select form-select-sm fw-bold border-danger text-navy shadow-sm" style="min-width: 220px;" onchange="onFilterChange()">
+                                <option th:each="p : ${provinces}"
+                                        th:value="${p.code}"
+                                        th:text="${p.name}"
+                                        th:selected="${p.code == currentProvince}">
+                                    Toàn Miền Trung
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Dropdown Trạng Thái -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label small fw-bold text-navy mb-0 text-nowrap" for="missionsStatusSelect">
+                                <i class="fa-solid fa-filter text-primary me-1"></i> Trạng thái:
+                            </label>
+                            <select id="missionsStatusSelect" class="form-select form-select-sm fw-bold border-primary text-navy shadow-sm" style="min-width: 180px;" onchange="onFilterChange()">
+                                <option value="ALL" th:selected="${currentStatusFilter == 'ALL'}">Tất cả nhiệm vụ</option>
+                                <option value="PENDING" th:selected="${currentStatusFilter == 'PENDING'}">Chờ đội nhận lệnh</option>
+                                <option value="ACCEPTED" th:selected="${currentStatusFilter == 'ACCEPTED'}">Đã nhận lệnh</option>
+                                <option value="IN_PROGRESS" th:selected="${currentStatusFilter == 'IN_PROGRESS'}">Đang thực địa / Di chuyển</option>
+                                <option value="COMPLETED" th:selected="${currentStatusFilter == 'COMPLETED'}">Cứu hộ thành công</option>
+                                <option value="REJECTED" th:selected="${currentStatusFilter == 'REJECTED'}">Đội từ chối nhận</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ô Tìm Kiếm Nhanh -->
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="min-width: 280px;">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="missionSearchInput" class="form-control border-start-0" placeholder="Tìm tên nạn nhân, đội cứu hộ, địa chỉ..." onkeyup="filterMissionTable()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BẢN ĐỒ LỘ TRÌNH GIS THỜI GIAN THỰC -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-navy fs-6">
+                    <i class="fa-solid fa-map-location-dot text-danger me-2"></i> Bản Đồ Lộ Trình Điều Động Cứu Hộ Thời Gian Thực
+                </span>
+                <div class="small text-muted d-flex align-items-center gap-3">
+                    <span><i class="fa-solid fa-circle text-danger me-1"></i> Ca SOS cần cứu</span>
+                    <span><i class="fa-solid fa-circle text-primary me-1"></i> Vị trí Đội cứu hộ</span>
+                    <span><i class="fa-solid fa-arrow-right text-info me-1"></i> Đường dẫn lộ trình</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="missionsMap"
+                     th:attr="data-province=${currentProvince}, data-lat=${selectedRegion.centerLat}, data-lng=${selectedRegion.centerLng}, data-zoom=${selectedRegion.defaultZoom}"
+                     style="height: 480px; width: 100%; border-radius: 0 0 8px 8px;"></div>
+            </div>
+        </div>
+
+        <!-- BẢNG TOÀN BỘ CÁC NHIỆM VỤ PHÂN CÔNG & LỘ TRÌNH -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 px-3 border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-navy fs-6">
+                    <i class="fa-solid fa-list-check text-primary me-2"></i> Danh Sách Lộ Trình & Nhiệm Vụ Phân Công (<span th:text="${assignments != null ? assignments.size() : 0}">0</span>)
+                </span>
+                <span class="badge bg-light text-muted border" th:text="${'Khu vực: ' + selectedRegion.name}">Toàn Miền Trung</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="assignmentsTable">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Mã NV</th>
+                            <th>Ca Cứu Nạn SOS</th>
+                            <th>Đội Cứu Hộ Đảm Trách</th>
+                            <th>Phương Tiện & Quân Trang</th>
+                            <th>Lộ Trình & Cự Ly</th>
+                            <th>Thời Gian</th>
+                            <th>Trạng Thái</th>
+                            <th>Báo Cáo Hiện Trường</th>
+                            <th class="text-end pe-3">Định Vị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${assignments == null or assignments.isEmpty()}">
+                            <td colspan="9" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-circle-info me-1"></i> Không tìm thấy nhiệm vụ điều động nào trong khu vực và trạng thái đã chọn.
+                            </td>
+                        </tr>
+                        <tr th:each="asg : ${assignments}" class="mission-row"
+                            th:attr="data-id=${asg.id},
+                                     data-sos-name=${asg.sosRequest != null ? asg.sosRequest.contactName : ''},
+                                     data-sos-phone=${asg.sosRequest != null ? asg.sosRequest.contactPhone : ''},
+                                     data-sos-addr=${asg.sosRequest != null ? asg.sosRequest.addressDetail : ''},
+                                     data-team-name=${asg.team != null ? asg.team.teamName : ''},
+                                     data-sos-lat=${asg.sosRequest != null ? asg.sosRequest.latitude : ''},
+                                     data-sos-lng=${asg.sosRequest != null ? asg.sosRequest.longitude : ''},
+                                     data-team-lat=${asg.team != null ? asg.team.currentLatitude : ''},
+                                     data-team-lng=${asg.team != null ? asg.team.currentLongitude : ''},
+                                     data-distance=${asg.routeDistanceKm != null ? asg.routeDistanceKm : ''},
+                                     data-vehicle=${asg.vehicleType != null ? asg.vehicleType : ''}">
+                            <td>
+                                <strong class="text-navy" th:text="${'#' + asg.id}">#1</strong>
+                            </td>
+                            <td>
+                                <div th:if="${asg.sosRequest != null}">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <strong class="text-dark" th:text="${asg.sosRequest.contactName}">Nguyễn Văn A</strong>
+                                        <span class="badge bg-danger" th:if="${asg.sosRequest.urgencyLevel == 'CRITICAL'}">ĐẶC BIỆT KHẨN</span>
+                                        <span class="badge bg-warning text-dark" th:if="${asg.sosRequest.urgencyLevel == 'HIGH'}">KHẨN CẤP</span>
+                                        <span class="badge bg-secondary" th:if="${asg.sosRequest.urgencyLevel != 'CRITICAL' and asg.sosRequest.urgencyLevel != 'HIGH'}" th:text="${asg.sosRequest.urgencyLevel}">TRUNG BÌNH</span>
+                                    </div>
+                                    <div class="small">
+                                        <a th:href="'tel:' + ${asg.sosRequest.contactPhone}" class="text-decoration-none fw-semibold text-primary">
+                                            <i class="fa-solid fa-phone me-1"></i><span th:text="${asg.sosRequest.contactPhone}">0900000000</span>
+                                        </a>
+                                        <span class="text-muted ms-2" th:if="${asg.sosRequest.peopleCount != null}">
+                                            <i class="fa-solid fa-user-group me-1"></i><span th:text="${asg.sosRequest.peopleCount}">1</span> người
+                                        </span>
+                                    </div>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 260px;" th:text="${asg.sosRequest.addressDetail}">Địa chỉ</small>
+                                </div>
+                                <div th:if="${asg.sosRequest == null}" class="text-muted small">Không có dữ liệu SOS</div>
+                            </td>
+                            <td>
+                                <div th:if="${asg.team != null}">
+                                    <strong class="text-navy" th:text="${asg.team.teamName}">Đội Cứu Hộ</strong>
+                                    <div class="small text-muted">
+                                        Đội trưởng: <span class="fw-semibold text-dark" th:text="${asg.team.leader != null ? asg.team.leader.fullName : 'Chưa gán'}">Trần B</span>
+                                    </div>
+                                    <div class="small">
+                                        <a th:href="'tel:' + ${asg.team.contactPhone}" class="text-decoration-none text-muted">
+                                            <i class="fa-solid fa-phone me-1"></i><span th:text="${asg.team.contactPhone}">0911111111</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-info-subtle text-dark border border-info fw-semibold" th:if="${asg.vehicleType != null and !asg.vehicleType.isEmpty()}">
+                                        <i class="fa-solid fa-ship me-1 text-info"></i><span th:text="${asg.vehicleType}">Xuồng cứu sinh</span>
+                                    </span>
+                                    <span class="badge bg-light text-muted border" th:if="${asg.vehicleType == null or asg.vehicleType.isEmpty()}">Tiêu chuẩn</span>
+                                </div>
+                                <div class="mt-1" th:if="${asg.selectedEquipment != null and !asg.selectedEquipment.isEmpty()}">
+                                    <small class="text-muted" th:text="${asg.selectedEquipment}">Phao, dây thừng</small>
+                                </div>
+                                <div class="mt-1" th:if="${asg.terrainType != null and !asg.terrainType.isEmpty()}">
+                                    <span class="badge bg-secondary-subtle text-dark" th:text="${'Địa hình: ' + asg.terrainType}">Đồng bằng</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="fw-bold text-danger">
+                                        <i class="fa-solid fa-compass me-1"></i><span th:text="${asg.routeDistanceKm != null ? asg.routeDistanceKm + ' km' : '---'}">5.2 km</span>
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block" th:if="${asg.routeDurationMinutes != null}">
+                                    <i class="fa-solid fa-stopwatch me-1"></i> Dự kiến: <strong th:text="${asg.routeDurationMinutes}">15</strong> phút
+                                </small>
+                            </td>
+                            <td>
+                                <div class="small text-muted">
+                                    <div>Phân công: <span th:text="${#temporals.format(asg.assignedAt, 'dd/MM HH:mm')}">27/10 10:00</span></div>
+                                    <div th:if="${asg.acceptedAt != null}">Tiếp nhận: <span th:text="${#temporals.format(asg.acceptedAt, 'dd/MM HH:mm')}">27/10 10:05</span></div>
+                                    <div th:if="${asg.completedAt != null}" class="text-success fw-semibold">Xong: <span th:text="${#temporals.format(asg.completedAt, 'dd/MM HH:mm')}">27/10 11:30</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge py-2 px-3"
+                                      th:classappend="${asg.status == 'COMPLETED' ? 'bg-success' : (asg.status == 'IN_PROGRESS' ? 'bg-primary' : (asg.status == 'ACCEPTED' ? 'bg-info text-dark' : (asg.status == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark')))}"
+                                      th:text="${asg.status == 'COMPLETED' ? 'HOÀN THÀNH' : (asg.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : (asg.status == 'ACCEPTED' ? 'ĐÃ NHẬN LỆNH' : (asg.status == 'REJECTED' ? 'TỪ CHỐI' : 'CHỜ ĐỘI NHẬN')))}">
+                                    CHỜ TIẾP NHẬN
+                                </span>
+                                <div th:if="${asg.status == 'REJECTED' and asg.rejectionReason != null}" class="small text-danger mt-1">
+                                    <small th:text="${'Lý do: ' + asg.rejectionReason}"></small>
+                                </div>
+                            </td>
+                            <td style="max-width: 220px;">
+                                <div th:if="${asg.reportNotes != null and !asg.reportNotes.isEmpty()}" class="small text-dark mb-1">
+                                    <i class="fa-solid fa-comment-dots text-muted me-1"></i><span th:text="${asg.reportNotes}">Đã đưa 3 nạn nhân đến nơi an toàn</span>
+                                </div>
+                                <div th:if="${asg.reportImageUrl != null and !asg.reportImageUrl.isEmpty()}">
+                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 fw-semibold"
+                                            th:attr="data-img=${asg.reportImageUrl}, data-notes=${asg.reportNotes != null ? asg.reportNotes : 'Ảnh nghiệm thu hiện trường'}"
+                                            onclick="openEvidenceModal(this)">
+                                        <i class="fa-solid fa-camera me-1"></i> Xem Ảnh Hiện Trường
+                                    </button>
+                                </div>
+                                <div th:if="${(asg.reportNotes == null or asg.reportNotes.isEmpty()) and (asg.reportImageUrl == null or asg.reportImageUrl.isEmpty())}">
+                                    <small class="text-muted">Chưa có báo cáo</small>
+                                </div>
+                            </td>
+                            <td class="text-end pe-3">
+                                <button type="button" class="btn btn-sm btn-outline-info text-dark fw-bold"
+                                        onclick="focusMissionFromButton(this)">
+                                    <i class="fa-solid fa-crosshairs me-1 text-danger"></i> Xem Lộ Trình
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Phóng To Bằng Chứng Cứu Nạn -->
+<div class="modal fade" id="evidenceModal" tabindex="-1" aria-labelledby="evidenceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-navy text-white">
+                <h5 class="modal-title fw-bold" id="evidenceModalLabel">
+                    <i class="fa-solid fa-camera text-warning me-2"></i> BẰNG CHỨNG & BÁO CÁO CỨU NẠN HIỆN TRƯỜNG
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <img id="evidenceModalImg" src="" alt="Ảnh hiện trường cứu nạn" class="img-fluid rounded border shadow-sm mb-3" style="max-height: 480px; object-fit: contain;">
+                <div class="alert alert-light border text-start">
+                    <strong class="text-navy"><i class="fa-solid fa-comment-dots me-1 text-primary"></i> Ghi chú nghiệm thu từ đội:</strong>
+                    <p id="evidenceModalNotes" class="mb-0 mt-1 text-dark"></p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="none">
+    let missionsMap = null;
+    let markersLayer = null;
+    let routesLayer = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        initMissionsMap();
+    });
+
+    function initMissionsMap() {
+        const mapEl = document.getElementById("missionsMap");
+        if (!mapEl) return;
+
+        const centerLat = parseFloat(mapEl.getAttribute("data-lat")) || 16.0544;
+        const centerLng = parseFloat(mapEl.getAttribute("data-lng")) || 108.2022;
+        const defaultZoom = parseInt(mapEl.getAttribute("data-zoom")) || 8;
+
+        missionsMap = L.map('missionsMap').setView([centerLat, centerLng], defaultZoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(missionsMap);
+
+        markersLayer = L.featureGroup().addTo(missionsMap);
+        routesLayer = L.featureGroup().addTo(missionsMap);
+
+        renderMissionsOnMap();
+    }
+
+    function renderMissionsOnMap() {
+        if (!missionsMap) return;
+        markersLayer.clearLayers();
+        routesLayer.clearLayers();
+
+        const rows = document.querySelectorAll(".mission-row");
+        const bounds = [];
+
+        rows.forEach(row => {
+            const sosLat = parseFloat(row.getAttribute("data-sos-lat"));
+            const sosLng = parseFloat(row.getAttribute("data-sos-lng"));
+            const teamLat = parseFloat(row.getAttribute("data-team-lat"));
+            const teamLng = parseFloat(row.getAttribute("data-team-lng"));
+            const sosName = row.getAttribute("data-sos-name") || "Ca SOS";
+            const sosPhone = row.getAttribute("data-sos-phone") || "";
+            const sosAddr = row.getAttribute("data-sos-addr") || "";
+            const teamName = row.getAttribute("data-team-name") || "Đội cứu hộ";
+            const distance = row.getAttribute("data-distance") || "";
+            const vehicle = row.getAttribute("data-vehicle") || "";
+
+            const hasSosPos = !isNaN(sosLat) && !isNaN(sosLng);
+            const hasTeamPos = !isNaN(teamLat) && !isNaN(teamLng);
+
+            // SOS Marker (Red icon)
+            if (hasSosPos) {
+                const sosIcon = L.divIcon({
+                    className: 'custom-sos-pin',
+                    html: '<div style="background-color:#dc3545; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.4);"><i class="fa-solid fa-person-burst" style="font-size:14px;"></i></div>',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                });
+
+                const sosMarker = L.marker([sosLat, sosLng], { icon: sosIcon });
+                sosMarker.bindPopup(`
+                    <div style="min-width:180px;">
+                        <strong class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Ca SOS: ${sosName}</strong><br/>
+                        <small>SĐT: ${sosPhone}</small><br/>
+                        <small class="text-muted">${sosAddr}</small><br/>
+                        ${teamName ? `<div class="mt-1 badge bg-primary text-white">Đảm trách: ${teamName}</div>` : ''}
+                    </div>
+                `);
+                markersLayer.addLayer(sosMarker);
+                bounds.push([sosLat, sosLng]);
+            }
+
+            // Team Marker (Navy/Blue icon)
+            if (hasTeamPos) {
+                const teamIcon = L.divIcon({
+                    className: 'custom-team-pin',
+                    html: '<div style="background-color:#0d6efd; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.4);"><i class="fa-solid fa-truck-medical" style="font-size:13px;"></i></div>',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                });
+
+                const teamMarker = L.marker([teamLat, teamLng], { icon: teamIcon });
+                teamMarker.bindPopup(`
+                    <div style="min-width:180px;">
+                        <strong class="text-primary"><i class="fa-solid fa-shield-halved"></i> ${teamName}</strong><br/>
+                        <small>Phương tiện: ${vehicle || 'Tiêu chuẩn'}</small><br/>
+                        <small class="text-muted">Đang tiếp cận ca: ${sosName}</small>
+                    </div>
+                `);
+                markersLayer.addLayer(teamMarker);
+                bounds.push([teamLat, teamLng]);
+            }
+
+            // Route Polyline connecting Team and SOS
+            if (hasSosPos && hasTeamPos) {
+                const polyline = L.polyline([[teamLat, teamLng], [sosLat, sosLng]], {
+                    color: '#0dcaf0',
+                    weight: 3,
+                    opacity: 0.8,
+                    dashArray: '6, 8'
+                });
+
+                polyline.bindPopup(`
+                    <div style="min-width:160px;">
+                        <strong>Lộ trình điều động:</strong><br/>
+                        <small>${teamName} &rarr; ${sosName}</small><br/>
+                        <span class="badge bg-danger mt-1">Cự ly: ${distance} km</span>
+                    </div>
+                `);
+                routesLayer.addLayer(polyline);
+            }
+        });
+
+        if (bounds.length > 0) {
+            missionsMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+        }
+    }
+
+    function focusMissionFromButton(btn) {
+        const row = btn.closest(".mission-row");
+        if (!row || !missionsMap) return;
+
+        const sosLat = parseFloat(row.getAttribute("data-sos-lat"));
+        const sosLng = parseFloat(row.getAttribute("data-sos-lng"));
+        const teamLat = parseFloat(row.getAttribute("data-team-lat"));
+        const teamLng = parseFloat(row.getAttribute("data-team-lng"));
+
+        const hasSos = !isNaN(sosLat) && !isNaN(sosLng);
+        const hasTeam = !isNaN(teamLat) && !isNaN(teamLng);
+
+        if (hasSos && hasTeam) {
+            missionsMap.fitBounds([[teamLat, teamLng], [sosLat, sosLng]], { padding: [50, 50] });
+        } else if (hasSos) {
+            missionsMap.setView([sosLat, sosLng], 14);
+        } else if (hasTeam) {
+            missionsMap.setView([teamLat, teamLng], 14);
+        } else {
+            alert("Nhiệm vụ này chưa có tọa độ GPS hợp lệ.");
+            return;
+        }
+
+        // Smooth scroll to map
+        const mapCard = document.getElementById("missionsMap");
+        if (mapCard) {
+            mapCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function onFilterChange() {
+        const province = document.getElementById("missionsProvinceSelect").value;
+        const status = document.getElementById("missionsStatusSelect").value;
+        const url = new URL(window.location.href);
+        url.searchParams.set("province", province);
+        url.searchParams.set("status", status);
+        window.location.href = url.toString();
+    }
+
+    function filterMissionTable() {
+        const input = document.getElementById("missionSearchInput");
+        const filter = input.value.toLowerCase().trim();
+        const rows = document.querySelectorAll("#assignmentsTable tbody tr.mission-row");
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    function openEvidenceModal(btn) {
+        const imgUrl = btn.getAttribute("data-img");
+        const notes = btn.getAttribute("data-notes");
+
+        const imgEl = document.getElementById("evidenceModalImg");
+        const notesEl = document.getElementById("evidenceModalNotes");
+
+        if (imgEl) imgEl.src = imgUrl || '';
+        if (notesEl) notesEl.textContent = notes || 'Không có ghi chú thêm.';
+
+        const modalEl = document.getElementById("evidenceModal");
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+
+    window.onFilterChange = onFilterChange;
+    window.filterMissionTable = filterMissionTable;
+    window.focusMissionFromButton = focusMissionFromButton;
+    window.openEvidenceModal = openEvidenceModal;
+</script>
+</body>
+</html>

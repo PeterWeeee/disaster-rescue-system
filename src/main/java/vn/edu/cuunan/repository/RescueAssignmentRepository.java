@@ -31,4 +31,7 @@ public interface RescueAssignmentRepository extends JpaRepository<RescueAssignme
 
     @Query("SELECT ra FROM RescueAssignment ra JOIN FETCH ra.sosRequest WHERE ra.team.leader.id = :leaderId ORDER BY ra.assignedAt DESC")
     List<RescueAssignment> findByLeaderIdWithSosRequest(@Param("leaderId") Long leaderId);
+
+    @Query("SELECT ra FROM RescueAssignment ra JOIN FETCH ra.sosRequest JOIN FETCH ra.team LEFT JOIN FETCH ra.assignedBy ORDER BY ra.assignedAt DESC")
+    List<RescueAssignment> findAllWithDetails();
 }

@@ -424,4 +424,30 @@ public class CoordinatorService {
         }
         return pins;
     }
+    /**
+     * Lấy danh sách nhiệm vụ cứu hộ kèm thông tin chi tiết ca SOS và đội cứu hộ, lọc theo trạng thái và tỉnh/thành.
+     */
+    @Transactional(readOnly = true)
+    public List<RescueAssignment> getAssignments(String statusFilter, String provinceCode) {
+        List<RescueAssignment> all = rescueAssignmentRepository.findAllWithDetails();
+        ProvinceRegion region = ProvinceRegion.fromCode(provinceCode);
+
+        return all.stream()
+                .filter(a -> {
+                    if (statusFilter != null && !statusFilter.isBlank() && !"ALL".equalsIgnoreCase(statusFilter)) {
+                        if (!statusFilter.equalsIgnoreCase(a.getStatus())) {
+                            return false;
+                        }
+                    }
+                    if (region != ProvinceRegion.ALL) {
+                        boolean matchSos = a.getSosRequest() != null &&
+                                (region.matches(a.getSosRequest().getAddressDetail()) || region.matches(a.getSosRequest().getDescription()));
+                        boolean matchTeam = a.getTeam() != null && region.matches(a.getTeam().getTeamName());
+                        return matchSos || matchTeam;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+
 }
