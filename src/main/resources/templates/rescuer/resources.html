@@ -395,7 +395,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form th:action="@{/rescuer/resources/request-budget}" method="post">
+                <form id="requestBudgetForm" th:action="@{/rescuer/resources/request-budget}" method="post">
                     <div class="modal-body p-4">
                         <div class="alert alert-light border small text-muted mb-3">
                             <i class="fa-solid fa-circle-info text-primary me-1"></i>
@@ -421,7 +421,7 @@
                         <!-- Danh mục sử dụng -->
                         <div class="mb-3">
                             <label class="form-label fw-bold text-navy small">Danh Mục Nhu Cầu <span class="text-danger">*</span></label>
-                            <select name="category" class="form-select" required>
+                            <select id="budgetCategorySelect" name="category" class="form-select" required>
                                 <option value="SUPPLY" selected>Lương thực, Nước uống & Nhu yếu phẩm khẩn cấp</option>
                                 <option value="FUEL">Xăng dầu & Nhiên liệu xuồng canô</option>
                                 <option value="MEDICAL">Dược phẩm, Băng gạc & Thuốc sơ cứu y tế</option>
@@ -433,7 +433,7 @@
                         <!-- Mức độ cấp bách -->
                         <div class="mb-3">
                             <label class="form-label fw-bold text-navy small">Mức Độ Cấp Bách <span class="text-danger">*</span></label>
-                            <select name="urgencyLevel" class="form-select" required>
+                            <select id="budgetUrgencySelect" name="urgencyLevel" class="form-select" required>
                                 <option value="CRITICAL">ĐẶC BIỆT KHẨN - Đang cạn kiệt nguồn lực trong ca SOS</option>
                                 <option value="HIGH" selected>CẤP BÁCH - Chuẩn bị xuất kích đợt mới trong 12 giờ tới</option>
                                 <option value="MEDIUM">BÌNH THƯỜNG - Bổ sung dự trữ thường quy</option>
@@ -443,13 +443,13 @@
                         <!-- Giải trình chi tiết -->
                         <div class="mb-3">
                             <label class="form-label fw-bold text-navy small">Giải Trình Mục Đích Chi Tiết <span class="text-danger">*</span></label>
-                            <textarea name="purpose" class="form-control" rows="3"
+                            <textarea id="budgetPurposeInput" name="purpose" class="form-control" rows="3"
                                       placeholder="Nêu rõ số lượng dự kiến mua (VD: 50 thùng mì tôm, 30 bình nước 20L, 100 lít xăng xuồng...) và khu vực cứu trợ dự kiến." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" class="btn btn-warning fw-bold text-dark px-4">
+                        <button type="submit" id="btnSubmitBudgetRequest" class="btn btn-warning fw-bold text-dark px-4">
                             <i class="fa-solid fa-paper-plane me-1"></i> Gửi Yêu Cầu Tới Điều Phối
                         </button>
                     </div>
@@ -491,6 +491,55 @@
             }
         }
         window.setQuickBudget = setQuickBudget;
+
+        const budgetForm = document.getElementById('requestBudgetForm');
+        if (budgetForm) {
+            budgetForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSubmitBudgetRequest');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...';
+                }
+
+                const payload = {
+                    amount: parseFloat(document.getElementById('budgetAmountInput').value),
+                    category: document.getElementById('budgetCategorySelect').value,
+                    urgencyLevel: document.getElementById('budgetUrgencySelect').value,
+                    purpose: document.getElementById('budgetPurposeInput').value
+                };
+
+                fetch('/api/rescuer/budget-requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => {
+                    return res.json().then(data => ({ status: res.status, data }));
+                })
+                .then(result => {
+                    if (result.data.success) {
+                        alert('Thành công: ' + result.data.message);
+                        location.reload();
+                    } else {
+                        alert('Không thể gửi yêu cầu: ' + (result.data.message || 'Lỗi không xác định'));
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Gửi Yêu Cầu Tới Điều Phối';
+                        }
+                    }
+                })
+                .catch(err => {
+                    alert('Lỗi kết nối máy chủ: ' + err.message);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Gửi Yêu Cầu Tới Điều Phối';
+                    }
+                });
+            });
+        }
 
     </script>
 </div>

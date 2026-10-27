@@ -125,4 +125,18 @@ class SecurityIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/donations/pay/**"));
     }
+    @Test
+    @DisplayName("DoD 8: Tài khoản RESCUER gửi yêu cầu tiếp tế ngân sách không bị lỗi 403")
+    void testRescuerSubmitBudgetRequestSuccess() throws Exception {
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+
+        mockMvc.perform(post("/rescuer/resources/request-budget")
+                        .cookie(new Cookie("jwt_token", rescuerToken))
+                        .param("amount", "5000000")
+                        .param("category", "SUPPLY")
+                        .param("urgencyLevel", "HIGH")
+                        .param("purpose", "Mua mì tôm và nước sạch khẩn cấp"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/rescuer/resources"));
+    }
 }

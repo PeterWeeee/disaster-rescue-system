@@ -57,7 +57,10 @@ public class SecurityConfig {
                 "/sos",
                 "/sos/**",
                 "/donations",
-                "/donations/**"
+                "/donations/**",
+                "/rescuer/**",
+                "/coordinator/**",
+                "/admin/**"
             ))
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
