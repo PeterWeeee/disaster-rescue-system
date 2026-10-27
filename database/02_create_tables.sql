@@ -321,3 +321,43 @@ BEGIN
     PRINT N'>>> Đã tạo bảng equipment_assignments';
 END
 GO
+
+-- 16. Bảng Mã OTP xác thực email (otp_verifications)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'otp_verifications')
+BEGIN
+    CREATE TABLE [dbo].[otp_verifications] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [email] VARCHAR(120) NOT NULL,
+        [otp_code] VARCHAR(6) NOT NULL,
+        [type] VARCHAR(30) NOT NULL, -- REGISTRATION, FORGOT_PASSWORD
+        [expiry_time] DATETIME2 NOT NULL,
+        [is_used] BIT NOT NULL DEFAULT 0,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX [IX_otp_email_code] ON [dbo].[otp_verifications]([email], [otp_code]);
+    PRINT N'>>> Đã tạo bảng otp_verifications';
+END
+GO
+
+-- 17. Bảng Quyên góp cứu trợ bão lũ (donations)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'donations')
+BEGIN
+    CREATE TABLE [dbo].[donations] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [donor_name] NVARCHAR(100) DEFAULT N'Nhà hảo tâm ẩn danh',
+        [donor_phone] VARCHAR(20) NULL,
+        [donor_email] VARCHAR(120) NULL,
+        [amount] DECIMAL(15,2) NOT NULL,
+        [message] NVARCHAR(500) NULL,
+        [target_province] NVARCHAR(80) DEFAULT N'TOAN_MIEN_TRUNG',
+        [payment_method] VARCHAR(30) NOT NULL, -- VNPAY, MOMO, VIETQR
+        [transaction_code] VARCHAR(100) NOT NULL UNIQUE,
+        [status] VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, SUCCESS, FAILED
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        [paid_at] DATETIME2 NULL
+    );
+    CREATE INDEX [IX_donations_status] ON [dbo].[donations]([status]);
+    CREATE INDEX [IX_donations_tx_code] ON [dbo].[donations]([transaction_code]);
+    PRINT N'>>> Đã tạo bảng donations';
+END
+GO

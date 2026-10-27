@@ -249,3 +249,33 @@ CREATE TABLE IF NOT EXISTS `equipment_assignments` (
     CONSTRAINT `fk_eq_assign_assignment` FOREIGN KEY (`rescue_assignment_id`) REFERENCES `rescue_assignments` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_eq_assign_equipment` FOREIGN KEY (`equipment_id`) REFERENCES `rescue_equipment` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 16. Bảng Mã OTP xác thực email (otp_verifications)
+CREATE TABLE IF NOT EXISTS `otp_verifications` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(120) NOT NULL,
+    `otp_code` VARCHAR(6) NOT NULL,
+    `type` VARCHAR(30) NOT NULL, -- REGISTRATION, FORGOT_PASSWORD
+    `expiry_time` DATETIME NOT NULL,
+    `is_used` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_otp_email_code` (`email`, `otp_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 17. Bảng Quyên góp cứu trợ bão lũ (donations)
+CREATE TABLE IF NOT EXISTS `donations` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `donor_name` VARCHAR(100) DEFAULT 'Nhà hảo tâm ẩn danh',
+    `donor_phone` VARCHAR(20) NULL,
+    `donor_email` VARCHAR(120) NULL,
+    `amount` DECIMAL(15,2) NOT NULL,
+    `message` TEXT NULL,
+    `target_province` VARCHAR(80) DEFAULT 'TOAN_MIEN_TRUNG',
+    `payment_method` VARCHAR(30) NOT NULL, -- VNPAY, MOMO, VIETQR
+    `transaction_code` VARCHAR(100) NOT NULL UNIQUE,
+    `status` VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, SUCCESS, FAILED
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `paid_at` DATETIME NULL,
+    INDEX `idx_donations_status` (`status`),
+    INDEX `idx_donations_tx_code` (`transaction_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -87,7 +87,11 @@ public class SecurityConfig {
                     "/api/upload/**",
                     "/feed",
                     "/feed/**",
-                    "/api/feed/**"
+                    "/api/feed/**",
+                    "/donations",
+                    "/donations/**",
+                    "/api/donations",
+                    "/api/donations/**"
                 ).permitAll()
 
                 // Phân hệ Điều Phối Viên (Coordinator & Admin)
