@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.repository.*;
+import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class DataInitializer implements CommandLineRunner {
     private final RescueEquipmentRepository rescueEquipmentRepository;
     private final NotificationRepository notificationRepository;
     private final ActivityLogRepository activityLogRepository;
+    private final TeamFundRequestRepository teamFundRequestRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository,
@@ -49,6 +51,7 @@ public class DataInitializer implements CommandLineRunner {
                            RescueEquipmentRepository rescueEquipmentRepository,
                            NotificationRepository notificationRepository,
                            ActivityLogRepository activityLogRepository,
+                           TeamFundRequestRepository teamFundRequestRepository,
                            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -64,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
         this.rescueEquipmentRepository = rescueEquipmentRepository;
         this.notificationRepository = notificationRepository;
         this.activityLogRepository = activityLogRepository;
+        this.teamFundRequestRepository = teamFundRequestRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -552,6 +556,53 @@ public class DataInitializer implements CommandLineRunner {
                     "Khởi tạo toàn bộ dữ liệu mẫu hệ thống cứu nạn 24/7 miền Trung thành công", "127.0.0.1"));
         }
 
+        // 15. Khởi tạo Yêu cầu tiếp tế ngân sách mẫu (TeamFundRequests)
+        if (teamFundRequestRepository.count() == 0) {
+            teamFundRequestRepository.save(TeamFundRequest.builder()
+                    .rescueTeam(teamDN01)
+                    .requester(rescuerDN01)
+                    .amount(new BigDecimal("15000000"))
+                    .purpose("Mua 100 thùng mì tôm, 50 bình nước khoáng 20L và lương khô tiếp tế khẩn cấp rốn lũ Hòa Vang")
+                    .category("SUPPLY")
+                    .urgencyLevel("CRITICAL")
+                    .status("PENDING")
+                    .createdAt(LocalDateTime.now().minusHours(2))
+                    .updatedAt(LocalDateTime.now().minusHours(2))
+                    .build());
+
+            teamFundRequestRepository.save(TeamFundRequest.builder()
+                    .rescueTeam(teamHue01)
+                    .requester(rescuerHue01)
+                    .amount(new BigDecimal("8000000"))
+                    .purpose("Mua 300 lít xăng pha nhớt dự trữ cho 3 canô cao tốc chạy xuyên đêm vượt lũ Tam Giang")
+                    .category("FUEL")
+                    .urgencyLevel("HIGH")
+                    .status("PENDING")
+                    .createdAt(LocalDateTime.now().minusHours(5))
+                    .updatedAt(LocalDateTime.now().minusHours(5))
+                    .build());
+
+            TeamFundRequest reqNA = TeamFundRequest.builder()
+                    .rescueTeam(teamNA01)
+                    .requester(rescuerNA01)
+                    .amount(new BigDecimal("5000000"))
+                    .purpose("Mua bông băng nẹp y tế, cồn sát trùng, thuốc hạ sốt cho người dân rốn lũ Hưng Nguyên")
+                    .category("MEDICAL")
+                    .urgencyLevel("HIGH")
+                    .status("APPROVED")
+                    .reviewedBy(coordCentral)
+                    .reviewedAt(LocalDateTime.now().minusHours(8))
+                    .createdAt(LocalDateTime.now().minusHours(12))
+                    .updatedAt(LocalDateTime.now().minusHours(8))
+                    .build();
+            teamFundRequestRepository.save(reqNA);
+
+            teamNA01.setBudget(teamNA01.getBudget().add(new BigDecimal("5000000")));
+            rescueTeamRepository.save(teamNA01);
+
+            log.info("  [TeamFundRequest] Đã khởi tạo 3 yêu cầu tiếp tế ngân sách mẫu (2 Chờ duyệt, 1 Đã duyệt)");
+        }
+
         log.info("==========================================================================");
         log.info(">>> [HOÀN THÀNH SEED DỮ LIỆU MIỀN TRUNG]:");
         log.info("    + 4 Roles chuẩn");
@@ -607,22 +658,29 @@ public class DataInitializer implements CommandLineRunner {
     private RescueTeam getOrCreateRescueTeam(String teamName, User leader, String contactPhone,
                                             Double lat, Double lng, Integer memberCount,
                                             String equipmentNotes, String status) {
-        return rescueTeamRepository.findByTeamName(teamName).orElseGet(() -> {
-            RescueTeam team = new RescueTeam(
-                    null,
-                    teamName,
-                    leader,
-                    contactPhone,
-                    lat,
-                    lng,
-                    memberCount,
-                    equipmentNotes,
-                    status
-            );
-            RescueTeam saved = rescueTeamRepository.save(team);
-            log.info("  [RescueTeam] Đã tạo đội cứu hộ: {} (Đội trưởng: {})", teamName, leader != null ? leader.getUsername() : "N/A");
-            return saved;
-        });
+        RescueTeam existing = rescueTeamRepository.findByTeamName(teamName).orElse(null);
+        if (existing != null) {
+            if (existing.getBudget() == null || existing.getBudget().compareTo(BigDecimal.ZERO) == 0) {
+                existing.setBudget(new BigDecimal("10000000"));
+                return rescueTeamRepository.save(existing);
+            }
+            return existing;
+        }
+        RescueTeam team = new RescueTeam(
+                null,
+                teamName,
+                leader,
+                contactPhone,
+                lat,
+                lng,
+                memberCount,
+                equipmentNotes,
+                status,
+                new BigDecimal("10000000")
+        );
+        RescueTeam saved = rescueTeamRepository.save(team);
+        log.info("  [RescueTeam] Đã tạo đội cứu hộ: {} (Đội trưởng: {}, Ngân sách: {})", teamName, leader != null ? leader.getUsername() : "N/A", saved.getFormattedBudget());
+        return saved;
     }
 
     private void initTeamMember(RescueTeam team, User user, String memberRole, Double lat, Double lng) {

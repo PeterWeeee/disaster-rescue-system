@@ -6,11 +6,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.cuunan.dto.AssignTaskRequestDto;
+import vn.edu.cuunan.dto.GeneralFundSummaryDto;
 import vn.edu.cuunan.dto.RescueTeamDistanceDto;
 import vn.edu.cuunan.entity.RescueAssignment;
 import vn.edu.cuunan.entity.SosRequest;
+import vn.edu.cuunan.entity.TeamFundRequest;
+import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.repository.RescueTeamRepository;
 import vn.edu.cuunan.security.CustomUserDetails;
+import vn.edu.cuunan.service.BudgetService;
 import vn.edu.cuunan.service.CoordinatorService;
 
 import java.util.HashMap;
@@ -24,11 +28,14 @@ public class CoordinatorApiController {
 
     private final CoordinatorService coordinatorService;
     private final RescueTeamRepository rescueTeamRepository;
+    private final BudgetService budgetService;
 
     public CoordinatorApiController(CoordinatorService coordinatorService,
-                                    RescueTeamRepository rescueTeamRepository) {
+                                    RescueTeamRepository rescueTeamRepository,
+                                    BudgetService budgetService) {
         this.coordinatorService = coordinatorService;
         this.rescueTeamRepository = rescueTeamRepository;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/stats")
@@ -97,5 +104,53 @@ public class CoordinatorApiController {
         data.put("defaultZoom", region.getDefaultZoom());
         data.put("regionName", region.getName());
         return ResponseEntity.ok(data);
+    }
+
+    @GetMapping("/budget-summary")
+    public ResponseEntity<GeneralFundSummaryDto> getBudgetSummary() {
+        return ResponseEntity.ok(budgetService.getOrganizationGeneralFund());
+    }
+
+    @PostMapping("/budget-requests/{id}/approve")
+    public ResponseEntity<?> approveBudgetRequest(@PathVariable("id") Long id,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        User coordinator = (userDetails != null) ? userDetails.getUser() : null;
+        try {
+            TeamFundRequest approved = budgetService.approveFundRequest(id, coordinator);
+            GeneralFundSummaryDto fundSummary = budgetService.getOrganizationGeneralFund();
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("message", "Đã phê duyệt và xuất ngân sách " + approved.getFormattedAmount() + " cho đội '" + approved.getRescueTeam().getTeamName() + "' thành công!");
+            res.put("requestId", approved.getId());
+            res.put("teamName", approved.getRescueTeam().getTeamName());
+            res.put("newTeamBudget", approved.getRescueTeam().getFormattedBudget());
+            res.put("availableGeneralFund", fundSummary.getFormattedAvailableGeneralFund());
+            return ResponseEntity.ok(res);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phê duyệt ngân sách: " + ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/budget-requests/{id}/reject")
+    public ResponseEntity<?> rejectBudgetRequest(@PathVariable("id") Long id,
+                                                @RequestBody(required = false) Map<String, String> body,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        User coordinator = (userDetails != null) ? userDetails.getUser() : null;
+        String reason = (body != null) ? body.get("reason") : null;
+        try {
+            TeamFundRequest rejected = budgetService.rejectFundRequest(id, reason, coordinator);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đã từ chối yêu cầu tiếp tế ngân sách #" + id + " của đội '" + rejected.getRescueTeam().getTeamName() + "'.",
+                    "requestId", rejected.getId()
+            ));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi từ chối ngân sách: " + ex.getMessage()));
+        }
     }
 }

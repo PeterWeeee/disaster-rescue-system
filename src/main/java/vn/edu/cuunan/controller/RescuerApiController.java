@@ -7,11 +7,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.cuunan.dto.*;
-import vn.edu.cuunan.entity.EquipmentAssignment;
-import vn.edu.cuunan.entity.RescueAssignment;
-import vn.edu.cuunan.entity.RescueTeam;
-import vn.edu.cuunan.entity.User;
+import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.security.CustomUserDetails;
+import vn.edu.cuunan.service.BudgetService;
 import vn.edu.cuunan.service.EquipmentService;
 import vn.edu.cuunan.service.RescuerService;
 
@@ -27,10 +25,14 @@ public class RescuerApiController {
 
     private final RescuerService rescuerService;
     private final EquipmentService equipmentService;
+    private final BudgetService budgetService;
 
-    public RescuerApiController(RescuerService rescuerService, EquipmentService equipmentService) {
+    public RescuerApiController(RescuerService rescuerService,
+                                EquipmentService equipmentService,
+                                BudgetService budgetService) {
         this.rescuerService = rescuerService;
         this.equipmentService = equipmentService;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/my-team")
@@ -58,23 +60,52 @@ public class RescuerApiController {
         return ResponseEntity.ok(resources);
     }
 
-    @GetMapping("/assignments")
-    public ResponseEntity<List<RescueAssignment>> getAssignments(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    @PostMapping("/budget-requests")
+    public ResponseEntity<?> requestBudget(@Valid @RequestBody TeamFundRequestDto dto,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null || userDetails.getUser() == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
         }
-        return ResponseEntity.ok(rescuerService.getMyAssignments(userDetails.getUser()));
+        try {
+            TeamFundRequest request = budgetService.createFundRequest(userDetails.getUser(), dto);
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("message", "Đã gửi yêu cầu tiếp tế ngân sách tới Người Điều Phối thành công!");
+            res.put("requestId", request.getId());
+            res.put("amount", request.getFormattedAmount());
+            res.put("status", request.getStatus());
+            return ResponseEntity.ok(res);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi tạo yêu cầu tiếp tế: " + ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/budget-requests")
+    public ResponseEntity<?> getBudgetRequests(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        Optional<RescueTeam> teamOpt = rescuerService.getMyTeam(userDetails.getUser());
+        if (teamOpt.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(budgetService.getRequestsByTeam(teamOpt.get().getId()));
     }
 
     @PostMapping("/assignments/{id}/accept")
-    public ResponseEntity<?> acceptAssignment(@PathVariable("id") Long id,
-                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> acceptMission(@PathVariable("id") Long id,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
         try {
             User user = userDetails.getUser();
             RescueAssignment assignment = rescuerService.acceptAssignment(id, user);
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
-            res.put("message", "Đã chấp nhận nhiệm vụ cứu nạn #" + id);
+            res.put("message", "Đã tiếp nhận nhiệm vụ cứu hộ #" + id + " thành công!");
             res.put("assignmentId", assignment.getId());
             res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
@@ -84,107 +115,56 @@ public class RescuerApiController {
     }
 
     @PostMapping("/assignments/{id}/reject")
-    public ResponseEntity<?> rejectAssignment(@PathVariable("id") Long id,
-                                              @Valid @RequestBody RejectAssignmentDto dto,
-                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> rejectMission(@PathVariable("id") Long id,
+                                           @RequestBody(required = false) Map<String, String> body,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        String reason = (body != null) ? body.get("reason") : null;
         try {
             User user = userDetails.getUser();
-            RescueAssignment assignment = rescuerService.rejectAssignment(id, user, dto.getReason());
+            RescueAssignment assignment = rescuerService.rejectAssignment(id, user, reason);
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
-            res.put("message", "Đã từ chối nhiệm vụ #" + id + ", ca cứu nạn đã được trả về hàng chờ điều phối");
+            res.put("message", "Đã từ chối nhiệm vụ #" + id + ". Đã thông báo tới điều phối viên.");
             res.put("assignmentId", assignment.getId());
             res.put("status", assignment.getStatus());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         }
-    }
-
-    @GetMapping("/assignments/{id}/route-terrain-analysis")
-    public ResponseEntity<?> getRouteTerrainAnalysis(@PathVariable("id") Long id,
-                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            User user = userDetails != null ? userDetails.getUser() : null;
-            RouteTerrainAnalysisDto analysis = rescuerService.getRouteAndTerrainAnalysis(id, user);
-            return ResponseEntity.ok(analysis);
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phân tích địa hình: " + ex.getMessage()));
-        }
-    }
-
-    @GetMapping("/assignments/{id}/route")
-    public ResponseEntity<?> getRoute(@PathVariable("id") Long id,
-                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return getRouteTerrainAnalysis(id, userDetails);
     }
 
     @PostMapping("/assignments/{id}/start")
-    public ResponseEntity<?> startMoving(@PathVariable("id") Long id,
-                                         @RequestBody(required = false) StartMissionRequestDto dto,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> startMission(@PathVariable("id") Long id,
+                                          @RequestBody(required = false) StartMissionRequestDto dto,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
         try {
-            User user = userDetails != null ? userDetails.getUser() : null;
+            User user = userDetails.getUser();
             RescueAssignment assignment = rescuerService.startMoving(id, user, dto);
-
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
-            res.put("message", "Đội đã xuất kích và đang tiếp cận hiện trường nhiệm vụ #" + id);
+            res.put("message", "Đội cứu hộ đang trên đường tiếp cận hiện trường!");
             res.put("assignmentId", assignment.getId());
             res.put("status", assignment.getStatus());
-            res.put("vehicleType", assignment.getVehicleType());
-            res.put("selectedEquipment", assignment.getSelectedEquipment());
-            return ResponseEntity.ok(res);
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi nội bộ: " + ex.getMessage()));
-        }
-    }
-
-    @PostMapping("/assignments/{id}/equipment/dispatch")
-    public ResponseEntity<?> dispatchEquipment(@PathVariable("id") Long id,
-                                               @RequestBody EquipmentDispatchDto dto,
-                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            User user = userDetails != null ? userDetails.getUser() : null;
-            List<EquipmentAssignment> result = equipmentService.dispatchEquipment(id, dto, user);
-            Map<String, Object> res = new HashMap<>();
-            res.put("success", true);
-            res.put("message", "Đã cấp phát " + result.size() + " loại trang bị cho nhiệm vụ #" + id);
-            res.put("count", result.size());
             return ResponseEntity.ok(res);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         }
     }
 
-    @PostMapping("/assignments/{id}/equipment/return")
-    public ResponseEntity<?> returnEquipment(@PathVariable("id") Long id,
-                                             @RequestBody EquipmentReturnDto dto,
+    @PostMapping(value = "/assignments/{id}/complete", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> completeMission(@PathVariable("id") Long id,
+                                             @RequestParam("reportNotes") String reportNotes,
+                                             @RequestParam(value = "reportImage", required = false) MultipartFile reportImage,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            User user = userDetails != null ? userDetails.getUser() : null;
-            equipmentService.returnEquipment(id, dto, user);
-            return ResponseEntity.ok(Map.of("success", true, "message", "Đã thu hồi và kiểm kê trang bị nhiệm vụ #" + id));
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
         }
-    }
-
-    @GetMapping("/assignments/{id}/equipment")
-    public ResponseEntity<?> getAssignedEquipment(@PathVariable("id") Long id) {
-        List<EquipmentAssignment> list = equipmentService.getDispatchedEquipmentForMission(id);
-        return ResponseEntity.ok(list);
-    }
-
-    @PostMapping("/assignments/{id}/complete")
-    public ResponseEntity<?> completeAssignment(@PathVariable("id") Long id,
-                                                @RequestParam(value = "reportNotes", required = false) String reportNotes,
-                                                @RequestParam(value = "reportImage", required = false) MultipartFile reportImage,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.getUser();
             RescueAssignment assignment = rescuerService.completeAssignment(id, user, reportNotes, reportImage);

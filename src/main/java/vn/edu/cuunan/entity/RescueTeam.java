@@ -2,6 +2,8 @@ package vn.edu.cuunan.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 @Entity
 @Table(name = "rescue_teams")
@@ -38,10 +40,17 @@ public class RescueTeam extends BaseEntity {
     @Column(length = 30)
     private String status = "AVAILABLE"; // AVAILABLE, BUSY, OFFLINE
 
+    @Column(name = "budget", precision = 15, scale = 2)
+    private BigDecimal budget = BigDecimal.ZERO;
+
     public RescueTeam() {
     }
 
     public RescueTeam(Long id, String teamName, User leader, String contactPhone, Double currentLatitude, Double currentLongitude, Integer memberCount, String equipmentNotes, String status) {
+        this(id, teamName, leader, contactPhone, currentLatitude, currentLongitude, memberCount, equipmentNotes, status, BigDecimal.ZERO);
+    }
+
+    public RescueTeam(Long id, String teamName, User leader, String contactPhone, Double currentLatitude, Double currentLongitude, Integer memberCount, String equipmentNotes, String status, BigDecimal budget) {
         this.id = id;
         this.teamName = teamName;
         this.leader = leader;
@@ -51,6 +60,7 @@ public class RescueTeam extends BaseEntity {
         this.memberCount = memberCount != null ? memberCount : 0;
         this.equipmentNotes = equipmentNotes;
         this.status = status != null ? status : "AVAILABLE";
+        this.budget = budget != null ? budget : BigDecimal.ZERO;
     }
 
     public Long getId() {
@@ -123,5 +133,18 @@ public class RescueTeam extends BaseEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BigDecimal getBudget() {
+        return budget != null ? budget : BigDecimal.ZERO;
+    }
+
+    public void setBudget(BigDecimal budget) {
+        this.budget = budget != null ? budget : BigDecimal.ZERO;
+    }
+
+    public String getFormattedBudget() {
+        DecimalFormat df = new DecimalFormat("#,### ₫");
+        return df.format(getBudget());
     }
 }

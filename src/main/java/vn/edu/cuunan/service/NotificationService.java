@@ -87,6 +87,34 @@ public class NotificationService {
         }
     }
 
+    @Transactional
+    public void notifyBudgetRequestCreated(TeamFundRequest request) {
+        if (request == null) return;
+        String title = "Yêu Cầu Tiếp Tế Ngân Sách Mới";
+        String message = String.format("Đội '%s' vừa gửi yêu cầu tiếp tế ngân sách %s đ (Mục đích: %s).",
+                request.getRescueTeam().getTeamName(), request.getFormattedAmount(), request.getPurpose());
+        sendToRole("ROLE_COORDINATOR", title, message, "BUDGET_REQUEST", "/coordinator/dashboard#budget-requests-section");
+        sendToRole("ROLE_ADMIN", title, message, "BUDGET_REQUEST", "/coordinator/dashboard#budget-requests-section");
+    }
+
+    @Transactional
+    public void notifyBudgetRequestApproved(TeamFundRequest request) {
+        if (request == null) return;
+        String title = "Yêu Cầu Tiếp Tế Ngân Sách Được Phê Duyệt";
+        String message = String.format("Điều phối viên đã phê duyệt cấp %s đ cho Đội '%s'. Số tiền đã được cộng vào ngân sách đội.",
+                request.getFormattedAmount(), request.getRescueTeam().getTeamName());
+        sendToTeam(request.getRescueTeam(), title, message, "BUDGET_APPROVED", "/rescuer/resources");
+    }
+
+    @Transactional
+    public void notifyBudgetRequestRejected(TeamFundRequest request) {
+        if (request == null) return;
+        String title = "Yêu Cầu Tiếp Tế Ngân Sách Bị Từ Chối";
+        String message = String.format("Yêu cầu xin cấp %s đ của Đội '%s' đã bị từ chối. Lý do: %s",
+                request.getFormattedAmount(), request.getRescueTeam().getTeamName(), request.getRejectReason());
+        sendToTeam(request.getRescueTeam(), title, message, "BUDGET_REJECTED", "/rescuer/resources");
+    }
+
     @Transactional(readOnly = true)
     public long getUnreadCount(User user) {
         if (user == null) return 0;

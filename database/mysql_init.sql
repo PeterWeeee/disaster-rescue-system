@@ -279,3 +279,25 @@ CREATE TABLE IF NOT EXISTS `donations` (
     INDEX `idx_donations_status` (`status`),
     INDEX `idx_donations_tx_code` (`transaction_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 18. Bảng Yêu cầu tiếp tế ngân sách nhu yếu phẩm (team_fund_requests)
+CREATE TABLE IF NOT EXISTS `team_fund_requests` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `team_id` BIGINT NOT NULL,
+    `requester_id` BIGINT NOT NULL,
+    `amount` DECIMAL(15,2) NOT NULL,
+    `purpose` VARCHAR(500) NOT NULL,
+    `category` VARCHAR(50) DEFAULT 'NHU_YEU_PHAM',
+    `urgency_level` VARCHAR(30) DEFAULT 'HIGH',
+    `status` VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    `reviewed_by` BIGINT NULL,
+    `reviewed_at` DATETIME NULL,
+    `reject_reason` VARCHAR(500) NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_team_fund_team` FOREIGN KEY (`team_id`) REFERENCES `rescue_teams` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_team_fund_requester` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
+    CONSTRAINT `fk_team_fund_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+    INDEX `idx_team_fund_status` (`status`),
+    INDEX `idx_team_fund_team_id` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

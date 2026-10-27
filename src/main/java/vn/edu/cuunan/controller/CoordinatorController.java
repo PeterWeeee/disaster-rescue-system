@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import vn.edu.cuunan.service.BudgetService;
 import vn.edu.cuunan.service.CoordinatorService;
 import vn.edu.cuunan.util.ProvinceRegion;
 
@@ -15,9 +16,11 @@ import vn.edu.cuunan.util.ProvinceRegion;
 public class CoordinatorController {
 
     private final CoordinatorService coordinatorService;
+    private final BudgetService budgetService;
 
-    public CoordinatorController(CoordinatorService coordinatorService) {
+    public CoordinatorController(CoordinatorService coordinatorService, BudgetService budgetService) {
         this.coordinatorService = coordinatorService;
+        this.budgetService = budgetService;
     }
 
     @GetMapping
@@ -45,6 +48,11 @@ public class CoordinatorController {
         model.addAttribute("rescueTeams", coordinatorService.getRescueTeams(cleanProvince));
         model.addAttribute("sosMapPins", coordinatorService.getSosMapPins(cleanStatus, cleanProvince));
         model.addAttribute("teamMapPins", coordinatorService.getRescueTeamMapPins(cleanProvince));
+
+        // Thống kê Ngân sách chung & Quản lý yêu cầu tiếp tế từ các đội
+        model.addAttribute("generalFund", budgetService.getOrganizationGeneralFund());
+        model.addAttribute("budgetRequests", budgetService.getAllRequests());
+        model.addAttribute("pendingBudgetRequestsCount", budgetService.getPendingRequests().size());
 
         return "coordinator/dashboard";
     }

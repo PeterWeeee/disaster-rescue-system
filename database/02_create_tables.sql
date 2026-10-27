@@ -361,3 +361,38 @@ BEGIN
     PRINT N'>>> Đã tạo bảng donations';
 END
 GO
+
+-- Thêm cột budget vào rescue_teams nếu chưa có
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'rescue_teams') AND name = 'budget')
+BEGIN
+    ALTER TABLE [dbo].[rescue_teams] ADD [budget] DECIMAL(15,2) DEFAULT 0;
+    PRINT N'>>> Đã thêm cột budget vào rescue_teams';
+END
+GO
+
+-- 18. Bảng Yêu cầu tiếp tế ngân sách nhu yếu phẩm cho đội cứu hộ (team_fund_requests)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'team_fund_requests')
+BEGIN
+    CREATE TABLE [dbo].[team_fund_requests] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [team_id] BIGINT NOT NULL,
+        [requester_id] BIGINT NOT NULL,
+        [amount] DECIMAL(15,2) NOT NULL,
+        [purpose] NVARCHAR(500) NOT NULL,
+        [category] VARCHAR(50) DEFAULT 'NHU_YEU_PHAM',
+        [urgency_level] VARCHAR(30) DEFAULT 'HIGH',
+        [status] VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, APPROVED, REJECTED
+        [reviewed_by] BIGINT NULL,
+        [reviewed_at] DATETIME2 NULL,
+        [reject_reason] NVARCHAR(500) NULL,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        [updated_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [FK_team_fund_team] FOREIGN KEY ([team_id]) REFERENCES [dbo].[rescue_teams]([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_team_fund_requester] FOREIGN KEY ([requester_id]) REFERENCES [dbo].[users]([id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_team_fund_reviewer] FOREIGN KEY ([reviewed_by]) REFERENCES [dbo].[users]([id]) ON DELETE SET NULL
+    );
+    CREATE INDEX [IX_team_fund_status] ON [dbo].[team_fund_requests]([status]);
+    CREATE INDEX [IX_team_fund_team_id] ON [dbo].[team_fund_requests]([team_id]);
+    PRINT N'>>> Đã tạo bảng team_fund_requests';
+END
+GO
