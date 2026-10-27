@@ -94,6 +94,23 @@ public class RescuerApiController {
         return ResponseEntity.ok(budgetService.getRequestsByTeam(teamOpt.get().getId()));
     }
 
+    @GetMapping({"/assignments/{id}/route", "/assignments/{id}/route-terrain-analysis"})
+    public ResponseEntity<?> getRouteAnalysis(@PathVariable("id") Long id,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        try {
+            User user = userDetails.getUser();
+            RouteTerrainAnalysisDto result = rescuerService.getRouteAndTerrainAnalysis(id, user);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phân tích lộ trình: " + ex.getMessage()));
+        }
+    }
+
     @PostMapping("/assignments/{id}/accept")
     public ResponseEntity<?> acceptMission(@PathVariable("id") Long id,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {

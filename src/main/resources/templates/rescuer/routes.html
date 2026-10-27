@@ -82,6 +82,11 @@
                                 <div class="small text-muted">Đang tải và tính toán dữ liệu lộ trình...</div>
                             </div>
 
+                            <div id="routeErrorAlert" class="alert alert-danger py-3 px-3 small rounded-3 mb-0" style="display: none;">
+                                <div class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu lộ trình</div>
+                                <div id="routeErrorMessage" class="text-dark">Lỗi kết nối máy chủ.</div>
+                            </div>
+
                             <div id="routeDetailPanel" style="display: none;">
                                 <!-- Cự ly & Thời gian -->
                                 <div class="row g-2 text-center mb-3">
@@ -187,12 +192,17 @@
             async function loadMissionRoute(assignmentId) {
                 const spinner = document.getElementById('routeLoadingSpinner');
                 const panel = document.getElementById('routeDetailPanel');
+                const errorAlert = document.getElementById('routeErrorAlert');
                 if (spinner) spinner.style.display = 'block';
                 if (panel) panel.style.display = 'none';
+                if (errorAlert) errorAlert.style.display = 'none';
 
                 try {
                     const res = await fetch(`/api/rescuer/assignments/${assignmentId}/route`);
-                    if (!res.ok) throw new Error('Không thể tải dữ liệu lộ trình');
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.message || 'Không thể tải dữ liệu lộ trình');
+                    }
                     const data = await res.json();
 
                     if (spinner) spinner.style.display = 'none';
@@ -273,7 +283,13 @@
 
                 } catch (e) {
                     if (spinner) spinner.style.display = 'none';
-                    alert(e.message || 'Lỗi tải lộ trình');
+                    if (panel) panel.style.display = 'none';
+                    if (errorAlert) {
+                        errorAlert.style.display = 'block';
+                        const msgEl = document.getElementById('routeErrorMessage');
+                        if (msgEl) msgEl.textContent = e.message || 'Không thể tải dữ liệu lộ trình';
+                    }
+                    console.error('Lỗi tải lộ trình:', e);
                 }
             }
 

@@ -139,4 +139,21 @@ class SecurityIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/rescuer/resources"));
     }
+
+    @Test
+    @DisplayName("DoD 9: Tài khoản RESCUER truy vấn API lộ trình OSRM /api/rescuer/assignments/{id}/route thành công")
+    void testRescuerGetAssignmentRouteSuccess() throws Exception {
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+
+        mockMvc.perform(get("/api/rescuer/assignments/1/route")
+                        .cookie(new Cookie("jwt_token", rescuerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.routeDistanceKm").exists())
+                .andExpect(jsonPath("$.terrainType").exists());
+
+        mockMvc.perform(get("/api/rescuer/assignments/1/route-terrain-analysis")
+                        .cookie(new Cookie("jwt_token", rescuerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.routeDistanceKm").exists());
+    }
 }
