@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.dto.GeneralFundSummaryDto;
 import vn.edu.cuunan.dto.TeamFundRequestDto;
 import vn.edu.cuunan.entity.RescueTeam;
+import vn.edu.cuunan.entity.RescueEquipment;
 import vn.edu.cuunan.entity.TeamFundRequest;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.repository.DonationRepository;
 import vn.edu.cuunan.repository.RescueTeamRepository;
+import vn.edu.cuunan.repository.RescueEquipmentRepository;
 import vn.edu.cuunan.repository.TeamFundRequestRepository;
 
 import java.math.BigDecimal;
@@ -32,6 +34,9 @@ public class BudgetService {
     private final NotificationService notificationService;
     private final ActivityLogService activityLogService;
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Autowired(required = false)
+    private RescueEquipmentRepository equipmentRepository;
 
     @Value("${app.fund.initial-base:500000000}")
     private BigDecimal initialBaseFund = new BigDecimal("500000000"); // 500 triệu quỹ nền tảng tổ chức
@@ -83,8 +88,13 @@ public class BudgetService {
         }
 
         RescueTeam team = null;
+        boolean cartRequest = dto.getItems() != null && !dto.getItems().isEmpty();
+        if (cartRequest && (requester.getRole() == null || !"ROLE_ADMIN".equalsIgnoreCase(requester.getRole().getName()))) {
+            team = rescuerService.getMyTeam(requester).orElseThrow(() ->
+                    new IllegalArgumentException("Bạn chưa tham gia Đội cứu hộ nào để gửi yêu cầu tiếp tế ngân sách!"));
+        }
         if (dto.getTeamId() != null) {
-            team = rescueTeamRepository.findById(dto.getTeamId()).orElse(null);
+            if (team == null) team = rescueTeamRepository.findById(dto.getTeamId()).orElse(null);
         }
         if (team == null) {
             Optional<RescueTeam> myTeamOpt = rescuerService.getMyTeam(requester);
@@ -98,11 +108,46 @@ public class BudgetService {
             throw new IllegalArgumentException("Số tiền xin tiếp tế phải lớn hơn 0!");
         }
 
+        String purpose = dto.getPurpose() == null ? "" : dto.getPurpose().trim();
+        if (purpose.isBlank()) throw new IllegalArgumentException("Vui lòng nhập lý do yêu cầu tiếp tế.");
+        BigDecimal requestAmount = dto.getAmount();
+        if (cartRequest) {
+            if (equipmentRepository == null) throw new IllegalStateException("Không thể kiểm tra danh mục trang bị lúc này.");
+            Set<Long> seen = new HashSet<>();
+            List<String> lines = new ArrayList<>();
+            BigDecimal calculatedTotal = BigDecimal.ZERO;
+            for (TeamFundRequestDto.CartItem item : dto.getItems()) {
+                if (item == null || item.getEquipmentId() == null || item.getQuantity() == null || item.getQuantity() < 1 || !seen.add(item.getEquipmentId())) {
+                    throw new IllegalArgumentException("Giỏ tiếp tế có vật dụng hoặc số lượng không hợp lệ.");
+                }
+                RescueEquipment equipment = equipmentRepository.findById(item.getEquipmentId()).orElseThrow(() ->
+                        new IllegalArgumentException("Có vật dụng không còn tồn tại trong kho của đội."));
+                if (equipment.getTeam() == null || !Objects.equals(equipment.getTeam().getId(), team.getId())) {
+                    throw new IllegalArgumentException("Vật dụng không thuộc kho của đội bạn.");
+                }
+                if (equipment.getUnitPrice() == null || equipment.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("Vật dụng " + equipment.getEquipmentName() + " chưa có đơn giá hợp lệ. Vui lòng liên hệ quản trị viên cập nhật giá trước khi gửi.");
+                }
+                if (equipment.getUnitPrice().stripTrailingZeros().scale() > 0) {
+                    throw new IllegalArgumentException("Đơn giá của " + equipment.getEquipmentName() + " không hợp lệ; đơn giá VNĐ phải là số nguyên.");
+                }
+                BigDecimal lineTotal = equipment.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                calculatedTotal = calculatedTotal.add(lineTotal);
+                lines.add(equipment.getEquipmentName() + " x " + item.getQuantity() + " " + equipment.getUnit());
+            }
+            if (calculatedTotal.compareTo(new BigDecimal("50000")) < 0) {
+                throw new IllegalArgumentException("Tổng giỏ hàng tối thiểu là 50.000 VNĐ theo quy trình yêu cầu tiếp tế.");
+            }
+            requestAmount = calculatedTotal;
+            purpose += " | Vật dụng đề xuất: " + String.join("; ", lines);
+        }
+        if (purpose.length() > 500) throw new IllegalArgumentException("Nội dung và danh sách vật dụng vượt quá giới hạn 500 ký tự. Hãy rút gọn lý do hoặc số mặt hàng.");
+
         TeamFundRequest request = TeamFundRequest.builder()
                 .rescueTeam(team)
                 .requester(requester)
-                .amount(dto.getAmount())
-                .purpose(dto.getPurpose().trim())
+                .amount(requestAmount)
+                .purpose(purpose)
                 .category(dto.getCategory() != null ? dto.getCategory() : "NHU_YEU_PHAM")
                 .urgencyLevel(dto.getUrgencyLevel() != null ? dto.getUrgencyLevel() : "HIGH")
                 .status("PENDING")

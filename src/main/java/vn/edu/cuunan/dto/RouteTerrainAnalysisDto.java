@@ -28,6 +28,9 @@ public class RouteTerrainAnalysisDto {
         private String icon;
         private String description;
         private boolean recommended;
+        private Long equipmentId;
+        private int availableQuantity;
+        private String unit;
 
         public VehicleOptionDto() {
         }
@@ -50,6 +53,12 @@ public class RouteTerrainAnalysisDto {
         public void setDescription(String description) { this.description = description; }
         public boolean isRecommended() { return recommended; }
         public void setRecommended(boolean recommended) { this.recommended = recommended; }
+        public Long getEquipmentId() { return equipmentId; }
+        public void setEquipmentId(Long equipmentId) { this.equipmentId = equipmentId; }
+        public int getAvailableQuantity() { return availableQuantity; }
+        public void setAvailableQuantity(int availableQuantity) { this.availableQuantity = availableQuantity; }
+        public String getUnit() { return unit; }
+        public void setUnit(String unit) { this.unit = unit; }
     }
 
     public static class EquipmentItemDto {
@@ -60,6 +69,10 @@ public class RouteTerrainAnalysisDto {
         private String icon;
         private boolean mandatory;
         private boolean defaultChecked;
+        private Long equipmentId;
+        private int availableQuantity;
+        private String unit;
+        private int recommendedQuantity = 1;
 
         public EquipmentItemDto() {
         }
@@ -88,6 +101,14 @@ public class RouteTerrainAnalysisDto {
         public void setMandatory(boolean mandatory) { this.mandatory = mandatory; }
         public boolean isDefaultChecked() { return defaultChecked; }
         public void setDefaultChecked(boolean defaultChecked) { this.defaultChecked = defaultChecked; }
+        public Long getEquipmentId() { return equipmentId; }
+        public void setEquipmentId(Long equipmentId) { this.equipmentId = equipmentId; }
+        public int getAvailableQuantity() { return availableQuantity; }
+        public void setAvailableQuantity(int availableQuantity) { this.availableQuantity = availableQuantity; }
+        public String getUnit() { return unit; }
+        public void setUnit(String unit) { this.unit = unit; }
+        public int getRecommendedQuantity() { return recommendedQuantity; }
+        public void setRecommendedQuantity(int recommendedQuantity) { this.recommendedQuantity = recommendedQuantity; }
     }
 
     public Long getAssignmentId() { return assignmentId; }

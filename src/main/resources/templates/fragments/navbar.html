@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="public-nav" sec:authorize="!hasAnyRole('RESCUER','COORDINATOR','ADMIN')">
-        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
+        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a sec:authorize="hasRole('CITIZEN')" th:href="@{/guide/disaster}">Cẩm nang</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
     </div>
     <div class="offcanvas offcanvas-start app-mobile-sidebar" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
         <div class="offcanvas-header"><h5 class="offcanvas-title" id="mobileSidebarLabel">Điều hướng</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button></div>

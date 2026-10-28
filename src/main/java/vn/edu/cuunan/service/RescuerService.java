@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
 import vn.edu.cuunan.dto.StartMissionRequestDto;
+import vn.edu.cuunan.dto.EquipmentReturnDto;
 import vn.edu.cuunan.entity.RescueAssignment;
 import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.entity.SosRequest;
@@ -37,6 +38,8 @@ public class RescuerService {
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
     private final ActivityLogService activityLogService;
+    @Autowired(required = false)
+    private EquipmentService equipmentService;
 
     public RescuerService(RescueAssignmentRepository rescueAssignmentRepository,
                           RescueTeamRepository rescueTeamRepository,
@@ -252,6 +255,18 @@ public class RescuerService {
         return terrainAnalysisService.analyzeRouteAndTerrain(assignment.getTeam(), assignment.getSosRequest(), assignmentId);
     }
 
+    @Transactional(readOnly = true)
+    public RescueTeam getAssignmentTeam(Long assignmentId, User user) {
+        return findAndValidateAssignmentAccess(assignmentId, user).getTeam();
+    }
+
+    @Transactional(readOnly = true)
+    public List<vn.edu.cuunan.entity.EquipmentAssignment> getMissionEquipment(Long assignmentId, User user) {
+        findAndValidateAssignmentAccess(assignmentId, user);
+        return equipmentService == null ? Collections.emptyList() : equipmentService.getDispatchedEquipmentForMission(assignmentId).stream()
+                .filter(equipment -> "DISPATCHED".equalsIgnoreCase(equipment.getStatus())).toList();
+    }
+
     @Transactional
     public RescueAssignment startMoving(Long assignmentId, User user) {
         return startMoving(assignmentId, user, null);
@@ -266,12 +281,24 @@ public class RescuerService {
             throw new IllegalStateException("Chỉ có thể bắt đầu di chuyển sau khi đội đã chấp nhận nhiệm vụ!");
         }
 
+        if (dto != null && ((dto.getVehicleEquipmentId() != null)
+                || (dto.getEquipmentItems() != null && !dto.getEquipmentItems().isEmpty()))) {
+            if (equipmentService == null) throw new IllegalStateException("Không thể kết nối kho trang bị lúc này.");
+            List<vn.edu.cuunan.entity.EquipmentAssignment> issued = equipmentService.dispatchMissionSelection(assignmentId, dto, user);
+            String issuedNames = issued.stream().filter(ea -> !ea.getEquipment().getEquipmentCode().startsWith("VEHICLE_"))
+                    .map(ea -> ea.getEquipment().getEquipmentName()
+                    + " (" + ea.getQuantityDispatched() + " " + ea.getEquipment().getUnit() + ")")
+                    .collect(java.util.stream.Collectors.joining(", "));
+            assignment.setSelectedEquipment(issuedNames.isBlank() ? null : issuedNames);
+        }
+
         assignment.setStatus("IN_PROGRESS");
         if (dto != null) {
             if (dto.getVehicleType() != null && !dto.getVehicleType().isBlank()) {
                 assignment.setVehicleType(dto.getVehicleType().trim());
             }
-            if (dto.getSelectedEquipment() != null && !dto.getSelectedEquipment().isEmpty()) {
+            if ((dto.getEquipmentItems() == null || dto.getEquipmentItems().isEmpty())
+                    && dto.getSelectedEquipment() != null && !dto.getSelectedEquipment().isEmpty()) {
                 assignment.setSelectedEquipment(String.join(", ", dto.getSelectedEquipment()));
             }
             if (dto.getCustomNotes() != null && !dto.getCustomNotes().isBlank()) {
@@ -346,11 +373,22 @@ public class RescuerService {
      */
     @Transactional
     public RescueAssignment completeAssignment(Long assignmentId, User user, String reportNotes, MultipartFile reportImage) {
+        return completeAssignment(assignmentId, user, reportNotes, reportImage, null);
+    }
+
+    @Transactional
+    public RescueAssignment completeAssignment(Long assignmentId, User user, String reportNotes, MultipartFile reportImage,
+                                               EquipmentReturnDto equipmentReturns) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
 
         if (!"IN_PROGRESS".equalsIgnoreCase(assignment.getStatus())
                 && !"ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
             throw new IllegalStateException("Chỉ có thể hoàn tất nhiệm vụ đang thực hiện (ACCEPTED hoặc IN_PROGRESS)!");
+        }
+
+        if (equipmentService != null) {
+            if (equipmentReturns == null) equipmentService.returnAllIntact(assignmentId, user);
+            else equipmentService.returnEquipment(assignmentId, equipmentReturns, user);
         }
 
         // 1. Tải ảnh nghiệm thu lên Cloudinary / Fallback local (nếu có đính kèm ảnh)

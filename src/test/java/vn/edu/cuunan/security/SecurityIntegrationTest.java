@@ -43,10 +43,30 @@ class SecurityIntegrationTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/auth/login"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("/guide/disaster"))));
 
         mockMvc.perform(get("/auth/register"))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/guide/disaster"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/login?error=unauthorized"));
+    }
+
+    @Test
+    @DisplayName("Cẩm nang chỉ cho người dân đã đăng nhập và xuất hiện trong thanh điều hướng của họ")
+    void testDisasterGuideRestrictedToAuthenticatedCitizens() throws Exception {
+        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+        mockMvc.perform(get("/guide/disaster").cookie(new Cookie("jwt_token", citizenToken)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Cẩm nang ứng phó thiên tai")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/guide/disaster\">Cẩm nang</a>")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("type=\"checkbox\""))));
+
+        String coordinatorToken = tokenProvider.generateToken("coordinator", "ROLE_COORDINATOR", "Điều Phối Viên");
+        mockMvc.perform(get("/guide/disaster").cookie(new Cookie("jwt_token", coordinatorToken)))
+                .andExpect(status().isForbidden());
     }
 
     @Test

@@ -3,6 +3,7 @@ package vn.edu.cuunan.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "rescue_equipment")
@@ -29,6 +30,9 @@ public class RescueEquipment {
 
     @Column(length = 30)
     private String unit = "chiếc"; // chiếc, bộ, cuộn, thùng...
+
+    @Column(name = "unit_price", precision = 15, scale = 2)
+    private BigDecimal unitPrice;
 
     @Column(name = "total_quantity", nullable = false)
     private int totalQuantity = 0;
@@ -118,6 +122,9 @@ public class RescueEquipment {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
 
     public int getTotalQuantity() {
         return totalQuantity;

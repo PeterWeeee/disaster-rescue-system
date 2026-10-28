@@ -463,6 +463,12 @@
                     <textarea class="form-control" id="completeNotes" rows="2" placeholder="Ví dụ: Đã đưa an toàn 4 người về trạm y tế phường; sức khỏe ổn định."></textarea>
                 </div>
 
+                <div class="mb-3" id="missionEquipmentReconciliation" hidden>
+                    <label class="form-label fw-bold small"><i class="fa-solid fa-boxes-stacked me-1 text-primary"></i>Kiểm kê phương tiện & trang bị thu hồi</label>
+                    <p class="small text-muted mb-2">Mặc định toàn bộ số đã cấp được ghi nhận nguyên vẹn. Chỉnh số lượng hư hỏng, mất hoặc tiêu hao; tổng mỗi dòng phải khớp số đã xuất.</p>
+                    <div id="missionEquipmentReturnRows" class="vstack gap-2"></div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-bold small">
                         <i class="fa-solid fa-camera me-1 text-primary"></i> Ảnh chụp minh chứng nghiệm thu hiện trường:
@@ -483,6 +489,8 @@
 
 <script th:inline="javascript">
     const currentRescueTeamId = /*[[${myTeam != null ? myTeam.id : null}]]*/ null;
+    let completeReturnItems = [];
+    let completeReturnLoadFailed = false;
 
     document.addEventListener("DOMContentLoaded", function () {
         // Tự động kích hoạt GPS watchPosition khi có nhiệm vụ đang thực hiện (IN_PROGRESS)
@@ -561,6 +569,7 @@
                 document.getElementById('completeCitizenName').innerText = name || 'Nạn nhân';
                 document.getElementById('completeNotes').value = '';
                 document.getElementById('completeImageFile').value = '';
+                loadMissionEquipmentForReturn(id);
                 new bootstrap.Modal(document.getElementById('completeModal')).show();
                 return;
             }
@@ -672,21 +681,25 @@
         vehicleContainer.innerHTML = '';
         const vehicles = data.recommendedVehicles || [];
         if (vehicles.length > 0) {
+            const firstAvailable = vehicles.findIndex(v => v.availableQuantity > 0 && v.equipmentId);
             vehicles.forEach((v, idx) => {
-                const isChecked = v.recommended ? 'checked' : (idx === 0 ? 'checked' : '');
-                const borderCls = v.recommended ? 'border-primary shadow-sm bg-primary-subtle' : 'border-secondary-subtle';
+                const isAvailable = v.availableQuantity > 0 && v.equipmentId;
+                const isChecked = isAvailable && ((v.recommended && firstAvailable === idx) || (!vehicles.some(candidate => candidate.recommended && candidate.availableQuantity > 0) && idx === firstAvailable)) ? 'checked' : '';
+                const borderCls = isChecked ? 'border-primary shadow-sm bg-primary-subtle' : 'border-secondary-subtle';
                 const badgeRec = v.recommended ? '<span class="badge bg-success ms-1"><i class="fa-solid fa-thumbs-up me-1"></i> Khuyên dùng</span>' : '';
+                const stockLabel = isAvailable ? `Kho đội còn ${v.availableQuantity} ${v.unit}` : 'Đang hết hoặc chưa có trong kho';
                 
                 const col = document.createElement('div');
                 col.className = 'col-md-6';
                 col.innerHTML = `
                     <div class="card p-2 border ${borderCls} h-100">
                         <div class="form-check">
-                            <input class="form-check-input vehicle-radio" type="radio" name="vehicleSelection" id="veh_${v.id}" value="${v.id}" ${isChecked}>
+                            <input class="form-check-input vehicle-radio" type="radio" name="vehicleSelection" id="veh_${v.id}" value="${v.id}" data-equipment-id="${v.equipmentId || ''}" ${isChecked} ${isAvailable ? '' : 'disabled'}>
                             <label class="form-check-label fw-bold text-navy" for="veh_${v.id}">
                                 <i class="${v.icon} me-1 text-primary"></i> ${v.name} ${badgeRec}
                             </label>
                             <div class="small text-secondary mt-1">${v.description}</div>
+                            <div class="small ${isAvailable ? 'text-success' : 'text-danger'} mt-1">${stockLabel}</div>
                         </div>
                     </div>
                 `;
@@ -702,20 +715,28 @@
             let count = 0;
             equipments.forEach(item => {
                 count++;
-                const isChecked = item.defaultChecked ? 'checked' : '';
+                const isAvailable = item.availableQuantity > 0 && item.equipmentId;
+                const recommendedQuantity = Math.min(item.recommendedQuantity || 1, item.availableQuantity || 0);
+                const isChecked = item.defaultChecked && isAvailable ? 'checked' : '';
                 const isMandatoryBadge = item.mandatory ? '<span class="badge bg-danger ms-1">Bắt buộc</span>' : '';
+                const displayName = `${item.name} (đề xuất ${item.recommendedQuantity} ${item.unit || ''})`;
                 const row = document.createElement('div');
-                row.className = 'form-check mb-2 pb-1 border-bottom d-flex align-items-center justify-content-between';
+                row.className = 'form-check mb-2 pb-2 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2';
                 row.innerHTML = `
                     <div>
-                        <input class="form-check-input prep-eq-checkbox" type="checkbox" value="${item.name}" id="eq_${item.id}" ${isChecked}>
+                        <input class="form-check-input prep-eq-checkbox" type="checkbox" value="${item.equipmentId || ''}" id="eq_${item.id}" ${isChecked} ${isAvailable ? '' : 'disabled'}>
                         <label class="form-check-label ms-1" for="eq_${item.id}">
-                            <i class="${item.icon} me-1 text-primary"></i> <strong>${item.name}</strong> ${isMandatoryBadge}
+                            <i class="${item.icon} me-1 text-primary"></i> <strong>${displayName}</strong> ${isMandatoryBadge}
                             <span class="badge bg-light text-dark border ms-1">${item.categoryName || item.category}</span>
+                            <span class="small text-muted d-block ms-4">Khả dụng: ${item.availableQuantity} ${item.unit || ''}</span>
                         </label>
                     </div>
+                    <input type="number" min="1" max="${item.availableQuantity}" step="1" value="${recommendedQuantity || 1}" class="form-control form-control-sm prep-eq-quantity" data-equipment-id="${item.equipmentId || ''}" style="width:100px" aria-label="Số lượng ${item.name}" ${isChecked ? '' : 'disabled'} ${isAvailable ? '' : 'disabled'}>
                 `;
                 eqContainer.appendChild(row);
+                row.querySelector('.prep-eq-checkbox').addEventListener('change', event => {
+                    row.querySelector('.prep-eq-quantity').disabled = !event.target.checked;
+                });
             });
             document.getElementById('prepEquipmentCountBadge').textContent = `${count} thiết bị`;
         } else {
@@ -728,12 +749,17 @@
         const id = document.getElementById('prepAssignmentId').value;
         const selectedVehRadio = document.querySelector('input[name="vehicleSelection"]:checked');
         const vehicleType = selectedVehRadio ? selectedVehRadio.value : null;
-
-        const checkedEquipments = [];
+        const equipmentItems = [];
+        let invalidQuantity = false;
         document.querySelectorAll('.prep-eq-checkbox:checked').forEach(cb => {
-            checkedEquipments.push(cb.value);
+            const input = document.querySelector(`.prep-eq-quantity[data-equipment-id="${cb.value}"]`);
+            const quantity = Number(input?.value);
+            const available = Number(input?.max);
+            if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > available) { invalidQuantity = true; return; }
+            equipmentItems.push({ equipmentId: Number(cb.value), quantity });
         });
-        const selectedEquipment = checkedEquipments.join(', ');
+        if (!selectedVehRadio || !selectedVehRadio.dataset.equipmentId) { alert('Vui lòng chọn phương tiện còn khả dụng trong kho.'); return; }
+        if (invalidQuantity) { alert('Kiểm tra lại số lượng trang bị: số lượng phải từ 1 và không vượt quá tồn khả dụng.'); return; }
 
         const notes = document.getElementById('prepNotes').value;
 
@@ -746,7 +772,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 vehicleType: vehicleType,
-                selectedEquipment: checkedEquipments,
+                vehicleEquipmentId: Number(selectedVehRadio.dataset.equipmentId),
+                equipmentItems: equipmentItems,
                 customNotes: notes
             })
         })
@@ -768,6 +795,46 @@
         });
     }
 
+    async function loadMissionEquipmentForReturn(assignmentId) {
+        const section = document.getElementById('missionEquipmentReconciliation');
+        const container = document.getElementById('missionEquipmentReturnRows');
+        const submitButton = document.getElementById('btnSubmitComplete');
+        submitButton.disabled = true;
+        section.hidden = false;
+        container.textContent = 'Đang tải danh sách đã xuất kho...';
+        completeReturnItems = [];
+        completeReturnLoadFailed = false;
+        try {
+            const response = await fetch(`/api/rescuer/assignments/${assignmentId}/equipment`);
+            const data = await response.json();
+            if (!response.ok || !Array.isArray(data)) throw new Error(data.message || 'Không tải được danh sách trang bị.');
+            completeReturnItems = data;
+            container.replaceChildren();
+            if (!data.length) { section.hidden = true; submitButton.disabled = false; return; }
+            data.forEach((item, index) => {
+                const card = document.createElement('div'); card.className = 'border rounded-3 p-2';
+                const title = document.createElement('div'); title.className = 'fw-semibold small mb-2'; title.textContent = `${item.equipmentName} · Đã cấp ${item.quantityDispatched} ${item.unit}`; card.append(title);
+                const fields = document.createElement('div'); fields.className = 'row g-2';
+                [
+                    { key: 'intactQuantity', label: 'Nguyên vẹn', value: item.quantityDispatched },
+                    { key: 'damagedQuantity', label: 'Hư hỏng', value: 0 },
+                    { key: 'lostQuantity', label: 'Mất', value: 0 },
+                    { key: 'consumedQuantity', label: 'Tiêu hao', value: 0 }
+                ].forEach(({ key, label, value }) => {
+                    const col = document.createElement('div'); col.className = 'col-6 col-lg-3';
+                    const fieldLabel = document.createElement('label'); fieldLabel.className = 'form-label small mb-1'; fieldLabel.textContent = label;
+                    const input = document.createElement('input'); input.type = 'number'; input.min = '0'; input.max = String(item.quantityDispatched); input.step = '1'; input.value = String(value); input.className = 'form-control form-control-sm equipment-return-count'; input.dataset.index = String(index); input.dataset.key = key; input.setAttribute('aria-label', `${label}: ${item.equipmentName}`);
+                    col.append(fieldLabel, input); fields.append(col);
+                });
+                card.append(fields); container.append(card);
+            });
+            submitButton.disabled = false;
+        } catch (error) {
+            completeReturnLoadFailed = true;
+            container.textContent = error.message || 'Không tải được danh sách trang bị.';
+        }
+    }
+
 function startMoving(id) {
         fetch(`/api/rescuer/assignments/${id}/start`, {
             method: 'POST'
@@ -785,12 +852,26 @@ function startMoving(id) {
     }
 
     function submitComplete() {
+        if (completeReturnLoadFailed) { alert('Không tải được danh sách cấp phát để kiểm kê. Hãy đóng rồi mở lại hộp thoại trước khi hoàn thành.'); return; }
         const id = document.getElementById('completeAssignmentId').value;
         const notes = document.getElementById('completeNotes').value;
         const fileInput = document.getElementById('completeImageFile');
 
         const formData = new FormData();
         formData.append('reportNotes', notes);
+        if (completeReturnItems.length) {
+            try {
+                const rows = completeReturnItems.map((item, index) => {
+                    const values = {};
+                    document.querySelectorAll(`.equipment-return-count[data-index="${index}"]`).forEach(input => values[input.dataset.key] = Number(input.value));
+                    const total = values.intactQuantity + values.damagedQuantity + values.lostQuantity + values.consumedQuantity;
+                    if (Object.values(values).some(value => !Number.isSafeInteger(value) || value < 0 || value > item.quantityDispatched)
+                            || total !== item.quantityDispatched) throw new Error(`Kiểm kê ${item.equipmentName} phải đủ ${item.quantityDispatched} ${item.unit}.`);
+                    return { assignmentEquipmentId: item.assignmentEquipmentId, ...values };
+                });
+                formData.append('equipmentReturns', JSON.stringify({ items: rows, reportNotes: notes }));
+            } catch (error) { alert(error.message); return; }
+        }
         if (fileInput.files.length > 0) {
             formData.append('reportImage', fileInput.files[0]);
         }

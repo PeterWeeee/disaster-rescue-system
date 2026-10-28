@@ -645,6 +645,60 @@ public class DataInitializer implements CommandLineRunner {
             rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "XUONG_CAO_SU", "Xuồng cứu nạn cao su 6 người", "GEAR", "chiếc", 2, "Kèm 2 mái chèo cơ động"));
             rescueEquipmentRepository.save(new vn.edu.cuunan.entity.RescueEquipment(team, "LUONG_KHO", "Lương khô quân đội & nước lọc đóng chai", "SUPPLY", "thùng", 30, "Hạn dùng 2028"));
         }
+        initVehicle(team, "VEHICLE_TRUCK_4X4", "Xe gầm cao 2 cầu 4x4", 1, "Phương tiện cứu hộ cơ động của đội");
+        initVehicle(team, "VEHICLE_AMBULANCE", "Xe cứu thương dã chiến chuyên dụng", 1, "Phương tiện y tế của đội");
+        initVehicle(team, "VEHICLE_BOAT_MOTOR", "Xuồng máy cứu hộ (Ca-nô cao tốc)", 1, "Phương tiện cứu hộ đường thủy");
+        initVehicle(team, "VEHICLE_BOAT_RUBBER", "Xuồng cứu nạn cao su 6 người", 2, "Phương tiện cứu hộ cơ động đường thủy");
+
+        List<RescueEquipment> equipment = rescueEquipmentRepository.findByTeamOrderByCategoryAscEquipmentNameAsc(team);
+        boolean changed = false;
+        for (RescueEquipment item : equipment) {
+            if (item.getUnitPrice() == null || item.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                item.setUnitPrice(estimatedUnitPrice(item));
+                changed = true;
+            }
+        }
+        if (changed) rescueEquipmentRepository.saveAll(equipment);
+    }
+
+    private void initVehicle(RescueTeam team, String code, String name, int count, String notes) {
+        if (rescueEquipmentRepository.findByTeamAndEquipmentCode(team, code).isEmpty()) {
+            rescueEquipmentRepository.save(new RescueEquipment(team, code, name, "GEAR", "chiếc", count, notes));
+        }
+    }
+
+    /** Giá tham khảo khởi tạo để chạy demo; ADMIN có thể cập nhật theo báo giá thực tế. */
+    private BigDecimal estimatedUnitPrice(RescueEquipment item) {
+        String code = item.getEquipmentCode() == null ? "" : item.getEquipmentCode().toUpperCase();
+        String name = item.getEquipmentName() == null ? "" : item.getEquipmentName().toLowerCase();
+
+        if (code.contains("AO_PHAO") || name.contains("áo phao")) return new BigDecimal("350000");
+        if (code.contains("PHAO_TRON") || name.contains("phao tròn")) return new BigDecimal("250000");
+        if (code.contains("DEN_PIN") || name.contains("đèn pin")) return new BigDecimal("450000");
+        if (code.contains("TUI_SO_CUU") || name.contains("sơ cứu") || name.contains("y tế")) return new BigDecimal("650000");
+        if (code.contains("BO_DAM") || name.contains("bộ đàm") || name.contains("radio")) return new BigDecimal("2500000");
+        if (code.contains("DAY_CUU_HO") || name.contains("dây thừng")) return new BigDecimal("900000");
+        if (code.contains("VEHICLE_AMBULANCE")) return new BigDecimal("35000000");
+        if (code.contains("VEHICLE_BOAT_MOTOR")) return new BigDecimal("18000000");
+        if (code.contains("VEHICLE_BOAT_RUBBER")) return new BigDecimal("12000000");
+        if (code.contains("VEHICLE_TRUCK_4X4")) return new BigDecimal("850000000");
+        if (code.contains("XUONG") || name.contains("xuồng") || name.contains("cano")) return new BigDecimal("18000000");
+        if (code.contains("LUONG_KHO") || name.contains("lương khô")) return new BigDecimal("450000");
+
+        if (name.contains("máy bơm") || name.contains("động cơ")) return new BigDecimal("8500000");
+        if (name.contains("máy phát")) return new BigDecimal("12000000");
+        if (name.contains("cáng")) return new BigDecimal("1200000");
+        if (name.contains("bạt")) return new BigDecimal("350000");
+        if (name.contains("nước")) return new BigDecimal("180000");
+        if (name.contains("mì") || name.contains("thực phẩm")) return new BigDecimal("400000");
+
+        String category = item.getCategory() == null ? "" : item.getCategory().toUpperCase();
+        return switch (category) {
+            case "MEDICAL" -> new BigDecimal("400000");
+            case "GEAR" -> new BigDecimal("1500000");
+            case "SUPPLY" -> new BigDecimal("350000");
+            default -> new BigDecimal("500000");
+        };
     }
 
     private Role getOrCreateRole(String roleName) {

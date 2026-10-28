@@ -161,20 +161,24 @@
             </div>
 
             <!-- ROW: 2 CHÍNH: DANH SÁCH QUÂN SỐ VÀ DANH MỤC TRANG BỊ -->
-            <div class="row g-4 mb-4">
+            <div class="row g-4 mb-4 resources-main-grid">
                 <!-- 1. Danh sách thành viên đội -->
-                <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 resources-panel">
                         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-navy">
-                                <i class="fa-solid fa-users text-primary me-2"></i> Danh Sách Quân Số Đội (<span th:text="${resources.totalMembers}">0</span>)
-                            </span>
-                            <span class="badge bg-light text-dark border">
-                                Sẵn sàng: <strong class="text-success" th:text="${resources.readyMembers}"></strong>
-                            </span>
+                            <div>
+                                <span class="fw-bold text-navy d-block"><i class="fa-solid fa-users text-primary me-2"></i> Quân số đội cứu hộ</span>
+                                <small class="text-muted">Danh sách thành viên và trạng thái hiện tại</small>
+                            </div>
+                            <div class="resource-metrics">
+                                <span class="badge bg-light text-dark border">Tổng <b th:text="${resources.totalMembers}">0</b></span>
+                                <span class="badge bg-success-subtle text-success">Sẵn sàng <b th:text="${resources.readyMembers}">0</b></span>
+                                <span class="badge bg-primary-subtle text-primary">Đang nhiệm vụ <b th:text="${resources.onMissionMembers}">0</b></span>
+                                <input type="search" id="memberSearchInput" class="form-control form-control-sm" placeholder="Tìm thành viên..." aria-label="Tìm thành viên">
+                            </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0" id="membersTable">
+                            <table class="table table-hover align-middle mb-0 resources-table" id="membersTable">
                                 <thead class="table-light small">
                                     <tr>
                                         <th>Họ và Tên</th>
@@ -220,12 +224,11 @@
                 </div>
 
                 <!-- 2. Danh mục kho trang thiết bị -->
-                <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 resources-panel">
                         <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <span class="fw-bold text-navy">
-                                <i class="fa-solid fa-toolbox text-warning me-2"></i> Kho Trang Thiết Bị Cứu Nạn
-                            </span>
+                            <div><span class="fw-bold text-navy d-block"><i class="fa-solid fa-toolbox text-warning me-2"></i> Kho trang thiết bị cứu nạn</span>
+                                <small class="text-muted"><span th:text="${resources.equipmentList.size()}">0</span> loại · <span th:text="${resources.availableEquipmentUnits}">0</span> đơn vị khả dụng</small></div>
                             <div class="d-flex align-items-center gap-2">
                                 <input type="text" id="eqSearchInput" class="form-control form-control-sm" placeholder="Tìm trang bị..." style="max-width: 180px;">
                                 <select id="eqCategoryFilter" class="form-select form-select-sm" style="max-width: 140px;">
@@ -238,7 +241,7 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0" id="equipmentTable">
+                            <table class="table table-hover align-middle mb-0 resources-table" id="equipmentTable">
                                 <thead class="table-light small">
                                     <tr>
                                         <th>Tên Trang Bị</th>
@@ -248,10 +251,12 @@
                                         <th class="text-center">Đang cấp</th>
                                         <th class="text-center">Hư hỏng</th>
                                         <th>Tình trạng</th>
+                                        <th>Đơn giá tham khảo</th>
+                                        <th class="text-end">Tiếp tế</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="item : ${resources.equipmentList}" th:attr="data-category=${item.category}">
+                                    <tr th:each="item : ${resources.equipmentList}" th:attr="data-category=${item.category},data-equipment-id=${item.id},data-unit-price=${item.unitPrice}">
                                         <td>
                                             <strong class="text-navy" th:text="${item.equipmentName}">Áo phao cứu sinh</strong>
                                             <small class="text-muted d-block" th:if="${item.notes != null}" th:text="${item.notes}">Chuẩn hàng hải</small>
@@ -278,6 +283,19 @@
                                             <span th:if="${item.availableQuantity > 0 and item.availableQuantity < 5}" class="badge bg-warning text-dark">Sắp hết</span>
                                             <span th:if="${item.availableQuantity >= 5}" class="badge bg-success">Đầy đủ</span>
                                         </td>
+                                        <td class="resource-price-cell">
+                                            <strong class="d-block unit-price-display" th:text="${item.unitPrice != null ? #numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + ' ₫ / ' + item.unit : 'Chưa có đơn giá'}">Chưa có đơn giá</strong>
+                                            <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-1 mt-1">
+                                                <input type="number" class="form-control form-control-sm unit-price-editor" min="1" step="1" th:value="${item.unitPrice}" placeholder="Nhập VNĐ" aria-label="Cập nhật đơn giá">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary save-unit-price" title="Lưu đơn giá"><i class="fa-regular fa-floppy-disk"></i></button>
+                                            </div>
+                                        </td>
+                                        <td class="text-end resource-cart-action">
+                                            <div class="d-inline-flex align-items-center gap-1">
+                                                <input type="number" min="1" value="1" class="form-control form-control-sm cart-quantity-input" aria-label="Số lượng yêu cầu" style="width:76px">
+                                                <button type="button" class="btn btn-sm btn-outline-primary add-to-cart-btn" th:attr="aria-label='Thêm ' + item.equipmentName + ' vào giỏ'" title="Thêm vào giỏ"><i class="fa-solid fa-cart-plus"></i></button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -289,6 +307,31 @@
                     </div>
                 </div>
             </div>
+
+            <section class="card border-0 shadow-sm rounded-3 mb-4" id="supply-cart-section">
+                <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div><h5 class="fw-bold text-navy mb-1"><i class="fa-solid fa-cart-shopping text-primary me-2"></i>Yêu cầu tiếp tế & ngân sách đội</h5>
+                        <small class="text-muted">Giá khởi tạo là mức ước tính tham khảo; ADMIN có thể chỉnh theo báo giá thực tế. Tổng tiền được máy chủ tính lại khi gửi.</small></div>
+                    <span class="badge bg-primary-subtle text-primary" id="cartItemCount">0 mặt hàng</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" id="cartTableWrap" hidden>
+                        <table class="table align-middle"><thead class="table-light"><tr><th>Vật dụng</th><th>Đơn giá / đơn vị</th><th style="width:160px">Số lượng</th><th>Thành tiền</th><th></th></tr></thead><tbody id="cartRows"></tbody></table>
+                    </div>
+                    <div id="cartEmpty" class="text-center text-muted py-3"><i class="fa-solid fa-basket-shopping d-block fs-3 mb-2"></i>Giỏ tiếp tế đang trống. Thêm vật dụng từ danh sách kho phía trên.</div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 border-top pt-3">
+                        <div class="small text-muted"><span id="cartQuantityTotal">0</span> đơn vị · Tổng chi phí dự kiến: <strong id="cartTotalDisplay">0 ₫</strong><br>Giá trị dự kiến sẽ được máy chủ tính lại từ đơn giá lưu trong kho khi gửi.</div>
+                        <button class="btn btn-outline-danger btn-sm" id="clearCartBtn" type="button" disabled><i class="fa-regular fa-trash-can me-1"></i>Xóa giỏ</button>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4"><label for="cartBudgetAmount" class="form-label fw-semibold">Tổng tiền tự tính (VNĐ)</label><input type="number" class="form-control fw-bold" id="cartBudgetAmount" min="50000" step="1" readonly value="0"></div>
+                        <div class="col-md-4"><label for="cartCategory" class="form-label fw-semibold">Danh mục</label><select id="cartCategory" class="form-select"><option value="SUPPLY">Nhu yếu phẩm</option><option value="FUEL">Nhiên liệu</option><option value="MEDICAL">Y tế</option><option value="GEAR">Thiết bị</option><option value="OTHER">Khác</option></select></div>
+                        <div class="col-md-4"><label for="cartUrgency" class="form-label fw-semibold">Mức độ cấp bách</label><select id="cartUrgency" class="form-select"><option value="CRITICAL">Đặc biệt khẩn</option><option value="HIGH" selected>Cấp bách</option><option value="MEDIUM">Bình thường</option></select></div>
+                        <div class="col-12"><label for="cartReason" class="form-label fw-semibold">Lý do tiếp tế</label><textarea id="cartReason" class="form-control" rows="2" maxlength="250" placeholder="Nêu nhu cầu sử dụng và nhiệm vụ dự kiến"></textarea></div>
+                        <div class="col-12 d-flex flex-wrap align-items-center gap-3"><button type="button" id="submitCartBtn" class="btn btn-primary" disabled><i class="fa-solid fa-paper-plane me-1"></i>Gửi yêu cầu tiếp tế</button><span id="cartFeedback" class="small" role="status" aria-live="polite"></span></div>
+                    </div>
+                </div>
+            </section>
 
             <!-- BẢNG LỊCH SỬ YÊU CẦU TIẾP TẾ NGÂN SÁCH -->
             <div id="budget-history-card" class="card border-0 shadow-sm rounded-3 mb-4">
@@ -525,10 +568,26 @@
         paginateSimpleTable('#membersTable', '#membersPaginationInfo', '#membersPaginationNav', 8);
         paginateSimpleTable('#budgetHistoryTable', '#budgetHistoryPaginationInfo', '#budgetHistoryPaginationNav', 8);
 
+        // Khởi tạo các tiện ích giỏ tiếp tế và tìm kiếm
+        const searchInput = document.getElementById('eqSearchInput');
+        const catFilter = document.getElementById('eqCategoryFilter');
+        const memberSearch = document.getElementById('memberSearchInput');
+        const cart = new Map();
+        const formatVnd = value => new Intl.NumberFormat('vi-VN').format(value) + ' ₫';
+        const integerPrice = value => {
+            const normalized = String(value ?? '').replace(/\.0+$/, '');
+            return /^\d+$/.test(normalized) && BigInt(normalized) > 0n ? normalized : '';
+        };
+
+        if (memberSearch) memberSearch.addEventListener('input', () => {
+            const query = memberSearch.value.toLowerCase().trim();
+            document.querySelectorAll('#membersTable tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
         // Phân trang và tìm kiếm cho kho trang thiết bị
         (function() {
-            const searchInput = document.getElementById('eqSearchInput');
-            const catFilter = document.getElementById('eqCategoryFilter');
             const table = document.getElementById('equipmentTable');
             if (!table) return;
             const rows = Array.from(table.querySelectorAll('tbody tr'));
@@ -591,6 +650,90 @@
             if (catFilter) catFilter.addEventListener('change', () => filterAndRender(1));
             filterAndRender(1);
         })();
+
+        function renderCart() {
+            const body = document.getElementById('cartRows');
+            if (!body) return;
+            body.replaceChildren();
+            let totalUnits = 0;
+            let totalPrice = 0n;
+            let hasMissingPrice = false;
+            cart.forEach((entry, id) => {
+                const inventoryRow = document.querySelector(`#equipmentTable tbody tr[data-equipment-id="${id}"]`);
+                entry.unitPrice = integerPrice(inventoryRow ? inventoryRow.dataset.unitPrice : '');
+                totalUnits += entry.quantity;
+                const tr = document.createElement('tr');
+                const name = document.createElement('td'); name.textContent = entry.name + ' · ' + entry.unit;
+                const validPrice = !!entry.unitPrice;
+                const lineTotal = validPrice ? BigInt(entry.unitPrice) * BigInt(entry.quantity) : null;
+                if (validPrice) totalPrice += lineTotal; else hasMissingPrice = true;
+                const price = document.createElement('td'); price.textContent = validPrice ? formatVnd(BigInt(entry.unitPrice)) : 'Chưa có đơn giá';
+                const qtyCell = document.createElement('td');
+                const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.step = '1'; qty.value = entry.quantity; qty.className = 'form-control form-control-sm cart-line-quantity'; qty.setAttribute('aria-label', 'Số lượng ' + entry.name);
+                qty.addEventListener('change', () => { const value = Number(qty.value); if (!Number.isSafeInteger(value) || value < 1) { qty.value = entry.quantity; return; } entry.quantity = value; renderCart(); });
+                qtyCell.append(qty);
+                const total = document.createElement('td'); total.textContent = validPrice ? formatVnd(lineTotal) : 'Chưa xác định';
+                const action = document.createElement('td'); const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-sm btn-outline-danger'; remove.setAttribute('aria-label', 'Xóa ' + entry.name); remove.innerHTML = '<i class="fa-regular fa-trash-can"></i>'; remove.addEventListener('click', () => { cart.delete(id); renderCart(); }); action.append(remove);
+                tr.append(name, price, qtyCell, total, action); body.append(tr);
+            });
+            const empty = cart.size === 0;
+            document.getElementById('cartTableWrap').hidden = empty;
+            document.getElementById('cartEmpty').hidden = !empty;
+            document.getElementById('cartItemCount').textContent = cart.size + ' mặt hàng';
+            document.getElementById('cartQuantityTotal').textContent = totalUnits;
+            document.getElementById('clearCartBtn').disabled = empty;
+            document.getElementById('cartTotalDisplay').textContent = empty ? formatVnd(0n) : (hasMissingPrice ? 'Chưa đủ đơn giá' : formatVnd(totalPrice));
+            document.getElementById('cartBudgetAmount').value = !empty && !hasMissingPrice ? totalPrice.toString() : '';
+            document.getElementById('submitCartBtn').disabled = empty || hasMissingPrice || totalPrice < 50000n;
+        }
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => button.addEventListener('click', () => {
+            const row = button.closest('tr'); const input = row.querySelector('.cart-quantity-input'); const amount = Number(input.value);
+            if (!Number.isSafeInteger(amount) || amount < 1) { input.focus(); return; }
+            const id = row.dataset.equipmentId; const name = row.cells[0].querySelector('strong').textContent.trim();
+            const unit = row.cells[3].textContent.trim().split(/\s+/).pop();
+            const existing = cart.get(id); cart.set(id, { name, unit, unitPrice: row.dataset.unitPrice || '', quantity: (existing ? existing.quantity : 0) + amount });
+            input.value = '1'; renderCart();
+            document.getElementById('cartFeedback').textContent = 'Đã thêm ' + name + ' vào giỏ.';
+            document.getElementById('cartFeedback').className = 'small text-success';
+        }));
+        document.getElementById('clearCartBtn')?.addEventListener('click', () => {
+            if (cart.size && window.confirm('Xóa toàn bộ vật dụng khỏi giỏ tiếp tế?')) { cart.clear(); renderCart(); }
+        });
+        document.querySelectorAll('.save-unit-price').forEach(button => button.addEventListener('click', async () => {
+            const row = button.closest('tr'); const input = row.querySelector('.unit-price-editor'); const value = integerPrice(input.value);
+            if (!value) { input.focus(); return; }
+            button.disabled = true;
+            try {
+                const response = await fetch(`/api/rescuer/resources/${row.dataset.equipmentId}/price`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ unitPrice: value }) });
+                const data = await response.json(); if (!response.ok || !data.success) throw new Error(data.message || 'Không thể lưu đơn giá.');
+                row.dataset.unitPrice = integerPrice(data.unitPrice);
+                row.querySelector('.unit-price-display').textContent = formatVnd(BigInt(row.dataset.unitPrice)) + ' / ' + row.cells[3].textContent.trim().split(/\s+/).pop();
+                renderCart();
+            } catch (error) { window.alert(error.message || 'Lỗi kết nối máy chủ.'); }
+            finally { button.disabled = false; }
+        }));
+        document.getElementById('submitCartBtn')?.addEventListener('click', async event => {
+            const button = event.currentTarget;
+            const amount = document.getElementById('cartBudgetAmount').value;
+            const purpose = document.getElementById('cartReason').value.trim();
+            const feedback = document.getElementById('cartFeedback');
+            if (!cart.size) { feedback.textContent = 'Giỏ tiếp tế đang trống.'; return; }
+            if (!/^\d+$/.test(amount) || BigInt(amount) < 50000n) { feedback.textContent = 'Tổng tiền giỏ hàng tối thiểu là 50.000 VNĐ.'; feedback.className = 'small text-danger'; return; }
+            if (!purpose) { feedback.textContent = 'Vui lòng nhập lý do tiếp tế.'; feedback.className = 'small text-danger'; document.getElementById('cartReason').focus(); return; }
+            const lines = [...cart.values()].map(item => `${item.name}: ${item.quantity} ${item.unit} × ${formatVnd(BigInt(item.unitPrice))}`).join('\n');
+            if (!window.confirm(`Xác nhận gửi yêu cầu tiếp tế?\n\n${lines}\n\nTổng dự kiến: ${formatVnd(BigInt(amount))}\nYêu cầu sẽ ở trạng thái chờ duyệt.`)) return;
+            button.disabled = true; feedback.textContent = 'Đang gửi yêu cầu...'; feedback.className = 'small text-muted';
+            try {
+                const response = await fetch('/api/rescuer/budget-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, purpose, category: document.getElementById('cartCategory').value, urgencyLevel: document.getElementById('cartUrgency').value, items: [...cart.entries()].map(([equipmentId, item]) => ({ equipmentId: Number(equipmentId), quantity: item.quantity })) }) });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'Không thể gửi yêu cầu.');
+                feedback.textContent = `Đã gửi yêu cầu #${data.requestId}; trạng thái: ${data.status === 'PENDING' ? 'Chờ duyệt' : data.status}.`;
+                feedback.className = 'small text-success fw-semibold'; cart.clear(); renderCart();
+                setTimeout(() => location.reload(), 1300);
+            } catch (error) {
+                feedback.textContent = error.message || 'Lỗi kết nối máy chủ.'; feedback.className = 'small text-danger'; button.disabled = cart.size === 0;
+            }
+        });
 
         function setQuickBudget(val) {
             const input = document.getElementById('budgetAmountInput');

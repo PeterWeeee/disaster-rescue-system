@@ -8,15 +8,16 @@
     <div class="container-xl">
 
         <!-- HEADER BANNER VỚI NỀN THIÊN TAI THỰC TẾ -->
-        <div class="feed-header-banner text-white p-4 rounded-4 shadow-sm mb-4 position-relative overflow-hidden">
+        <div class="feed-header-banner p-4 rounded-4 shadow-sm mb-4 position-relative overflow-hidden"
+             style="background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important; color: #fff !important;">
             <div class="position-relative z-1 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger text-white small fw-bold mb-2">
                         <span class="pulse-dot"></span>
                         <span>MẠNG XÃ HỘI CỨU TRỢ 24/7</span>
                     </div>
-                    <h1 class="h3 fw-extrabold text-white mb-1">Bảng Tin Cảnh Báo Thiên Tai Cộng Đồng</h1>
-                    <p class="text-light opacity-90 small mb-0">
+                    <h1 class="h3 fw-extrabold mb-1" style="color: #fff !important;">Bảng Tin Cảnh Báo Thiên Tai Cộng Đồng</h1>
+                    <p class="small mb-0" style="color: #fff !important; opacity: .92;">
                         Thông tin hiện trường do người dân chia sẻ theo thời gian thực · Ban Điều Phối xác minh và phân phối lực lượng cứu trợ.
                     </p>
                 </div>
@@ -59,28 +60,30 @@
                         </div>
                     </div>
 
-                    <!-- Card Đơn Cứu Hộ Của Tôi -->
+                    <!-- Card Lịch Sử Cứu Hộ -->
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark small"><i class="fa-solid fa-clipboard-check text-primary me-1"></i>Đơn cứu hộ của bạn:</span>
-                                <span th:if="${activeSos != null}" class="badge bg-warning text-dark fw-bold" th:text="${activeSos.status}">ĐANG XỬ LÝ</span>
-                                <span th:if="${activeSos == null}" class="badge bg-light text-dark border fw-bold">Chưa có đơn</span>
+                                <span class="fw-bold text-dark small"><i class="fa-solid fa-clock-rotate-left text-primary me-1"></i>Lịch sử cứu hộ của bạn</span>
+                                <span class="badge bg-primary-subtle text-primary fw-semibold" th:text="${#lists.size(sosHistory)} + ' ca'"></span>
                             </div>
 
-                            <div th:if="${activeSos != null}">
-                                <div class="fw-bold text-danger font-monospace fs-6" th:text="'SOS-' + ${activeSos.id}">SOS-1042</div>
-                                <p class="small text-muted mb-2 mt-1" th:text="${activeSos.addressDetail != null ? activeSos.addressDetail : 'Đang điều phối đội cứu hộ'}">
-                                    Vị trí cứu hộ
-                                </p>
-                                <a th:href="@{'/sos/track?code=' + ${activeSos.id}}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3">
-                                    <i class="fa-solid fa-location-crosshairs me-1"></i> Mở bản đồ theo dõi
-                                </a>
+                            <div th:if="${!#lists.isEmpty(sosHistory)}" class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                                <div th:each="historyItem : ${sosHistory}" class="border rounded-3 p-2">
+                                    <div class="d-flex justify-content-between align-items-center gap-2">
+                                        <span class="fw-bold text-danger font-monospace" th:text="'SOS-' + ${historyItem.id}">SOS-1042</span>
+                                        <span class="badge bg-warning text-dark" th:text="${historyItem.status}">DISPATCHED</span>
+                                    </div>
+                                    <p class="small text-muted mb-2 mt-1 text-truncate" th:text="${historyItem.addressDetail != null ? historyItem.addressDetail : 'Đang cập nhật vị trí'}">Vị trí cứu hộ</p>
+                                    <a th:href="@{'/sos/track/' + ${historyItem.id}}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3">
+                                        <i class="fa-solid fa-location-crosshairs me-1"></i> Mở chi tiết ca SOS
+                                    </a>
+                                </div>
                             </div>
 
-                            <div th:if="${activeSos == null}" class="text-center py-2 text-muted small">
+                            <div th:if="${#lists.isEmpty(sosHistory)}" class="text-center py-2 text-muted small">
                                 <i class="fa-solid fa-shield-heart fa-2x text-success mb-2 opacity-50"></i>
-                                <p class="mb-0">Khu vực của bạn hiện đang an toàn.</p>
+                                <p class="mb-0">Bạn chưa có yêu cầu cứu hộ nào.</p>
                             </div>
                         </div>
                     </div>
@@ -584,16 +587,24 @@
 
 <style>
     .feed-header-banner {
-        background-color: #0f172a;
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(136, 19, 55, 0.90) 50%, rgba(15, 23, 42, 0.95) 100%),
-                    url('/images/disaster_header_bg.webp') center 35% / cover no-repeat;
-        color: #ffffff !important;
+        background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important;
+        color: #fff !important;
     }
-    .feed-header-banner h1 {
-        color: #ffffff !important;
+    .feed-header-banner h1,
+    .feed-header-banner p {
+        color: #fff !important;
     }
     .feed-header-banner p {
-        color: #e2e8f0 !important;
+        opacity: .92;
+    }
+    .feed-header-banner .btn-outline-light {
+        color: #fff;
+        border-color: rgba(255, 255, 255, .75);
+    }
+    .feed-header-banner .btn-outline-light:hover,
+    .feed-header-banner .btn-outline-light:focus {
+        color: #7f1d1d;
+        background-color: #fff;
     }
     .post-content-text {
         color: #1e293b !important;
