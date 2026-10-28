@@ -239,8 +239,10 @@
                                 </div>
 
                                 <div class="pt-3 border-top d-flex gap-2">
-                                    <a th:href="@{'/rescuer/routes?assignmentId=' + ${a.id}}" class="btn btn-outline-primary btn-sm py-2 px-3 fw-bold" title="Xem bản đồ và lộ trình di chuyển">
-                                        <i class="fa-solid fa-route me-1"></i> Lộ trình
+                                    <a th:href="@{'/rescuer/routes?assignmentId=' + ${a.id}}" class="btn btn-outline-primary btn-sm py-2 px-3 fw-bold text-nowrap" title="Xem bản đồ và khung chat trực tiếp với nạn nhân">
+                                        <i class="fa-solid fa-comments text-warning me-1" th:if="${a.status == 'IN_PROGRESS'}"></i>
+                                        <i class="fa-solid fa-route me-1" th:unless="${a.status == 'IN_PROGRESS'}"></i>
+                                        <span th:text="${a.status == 'IN_PROGRESS' ? 'Lộ trình & Chat' : 'Lộ trình'}">Lộ trình</span>
                                     </a>
                                     <button th:if="${a.status == 'ACCEPTED'}" 
                                             class="btn btn-primary btn-sm w-100 fw-bold py-2 btn-open-prepare"
