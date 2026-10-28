@@ -18,15 +18,6 @@
                 <small class="text-muted">Theo dõi Quỹ Cứu Trợ Chung, giải ngân tiếp tế nhu yếu phẩm và phê duyệt yêu cầu từ các đội cứu hộ</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a th:href="@{/coordinator/dashboard(province=${currentProvince})}" class="btn btn-sm btn-outline-danger shadow-sm">
-                    <i class="fa-solid fa-tower-broadcast me-1"></i> TT Điều Phối
-                </a>
-                <a th:href="@{/coordinator/teams(province=${currentProvince})}" class="btn btn-sm btn-outline-primary shadow-sm">
-                    <i class="fa-solid fa-truck-medical me-1"></i> Đội Cứu Hộ
-                </a>
-                <a th:href="@{/coordinator/missions(province=${currentProvince})}" class="btn btn-sm btn-outline-info text-dark shadow-sm">
-                    <i class="fa-solid fa-route me-1"></i> Theo Dõi Lộ Trình
-                </a>
                 <a th:href="@{/donations}" target="_blank" class="btn btn-sm btn-outline-success shadow-sm">
                     <i class="fa-solid fa-hand-holding-heart me-1"></i> Cổng Quyên Góp
                 </a>
@@ -214,6 +205,15 @@
                     </tbody>
                 </table>
             </div>
+            <div class="card-footer bg-white py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted" id="budgetReqPaginationInfo">
+                    Hiển thị 0 trên tổng 0 yêu cầu
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="budgetReqPaginationNav">
+                    </ul>
+                </nav>
+            </div>
         </div>
 
         <!-- BẢNG TỔNG KẾT NGÂN SÁCH CÁC ĐỘI CỨU HỘ -->
@@ -225,7 +225,7 @@
                 <span class="badge bg-light text-muted border" th:text="${'Khu vực: ' + selectedRegion.name}">Toàn Miền Trung</span>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="teamsFundTable">
                     <thead class="table-light small">
                         <tr>
                             <th>Tên Đội Cứu Hộ</th>
@@ -275,9 +275,17 @@
                     </tbody>
                 </table>
             </div>
+            <div class="card-footer bg-white py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted" id="teamsFundPaginationInfo">
+                    Hiển thị 0 trên tổng 0 đội cứu hộ
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="teamsFundPaginationNav">
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
-</div>
 
 <!-- Modal Từ Chối Tiếp Tế Ngân Sách -->
 <div class="modal fade" id="rejectBudgetModal" tabindex="-1" aria-labelledby="rejectBudgetModalLabel" aria-hidden="true">
@@ -414,11 +422,75 @@
         });
     }
 
+    function setupTablePagination(tableSelector, infoSelector, navSelector, pageSize = 10, emptyRowSelector = null) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        const rows = Array.from(table.querySelectorAll('tbody tr')).filter(r => !emptyRowSelector || !r.matches(emptyRowSelector));
+        const emptyRow = emptyRowSelector ? table.querySelector(emptyRowSelector) : null;
+        let curPage = 1;
+
+        function render(page) {
+            curPage = page;
+            const total = rows.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (curPage > totalPages) curPage = totalPages;
+            if (curPage < 1) curPage = 1;
+
+            const start = (curPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+
+            rows.forEach((r, idx) => {
+                r.style.display = (idx >= start && idx < end) ? '' : 'none';
+            });
+
+            if (emptyRow) {
+                emptyRow.style.display = total === 0 ? '' : 'none';
+            }
+
+            const info = document.querySelector(infoSelector);
+            if (info) {
+                info.innerHTML = total === 0 ? 'Không có bản ghi nào' : `Hiển thị <strong>${start + 1} - ${end}</strong> trên tổng <strong>${total}</strong> bản ghi`;
+            }
+
+            const nav = document.querySelector(navSelector);
+            if (!nav) return;
+            nav.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prev = document.createElement('li');
+            prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
+            prev.innerHTML = '<a class="page-link" href="javascript:void(0)">&laquo;</a>';
+            prev.onclick = () => { if (curPage > 1) render(curPage - 1); };
+            nav.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item ' + (i === curPage ? 'active' : '');
+                li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+                li.onclick = () => render(i);
+                nav.appendChild(li);
+            }
+
+            const next = document.createElement('li');
+            next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
+            next.innerHTML = '<a class="page-link" href="javascript:void(0)">&raquo;</a>';
+            next.onclick = () => { if (curPage < totalPages) render(curPage + 1); };
+            nav.appendChild(next);
+        }
+
+        render(1);
+    }
+
+    setupTablePagination('#budgetRequestsTable', '#budgetReqPaginationInfo', '#budgetReqPaginationNav', 10);
+    setupTablePagination('#teamsFundTable', '#teamsFundPaginationInfo', '#teamsFundPaginationNav', 10);
+
     window.handleApproveClick = handleApproveClick;
     window.handleRejectClick = handleRejectClick;
     window.approveBudget = approveBudget;
     window.openRejectModal = openRejectModal;
     window.submitRejectBudget = submitRejectBudget;
 </script>
+</div>
+
 </body>
 </html>

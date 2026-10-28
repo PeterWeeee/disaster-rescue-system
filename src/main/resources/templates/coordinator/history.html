@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#history-content})}">
+<head>
+    <title>Lịch Sử Điều Phối Cứu Nạn</title>
+</head>
+<body>
+
+<div id="history-content" class="py-4">
+    <div class="container-fluid px-4">
+        <!-- HEADER & KHU VỰC CHỌN TỈNH/THÀNH -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h3 class="fw-bold text-navy mb-1">
+                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> LỊCH SỬ ĐIỀU PHỐI CỨU NẠN
+                </h3>
+                <div class="text-muted small">
+                    Hồ sơ lưu trữ toàn bộ các ca cứu nạn và nhiệm vụ đã điều phối hoàn tất trong hệ thống
+                </div>
+            </div>
+
+            <!-- CHỌN KHU VỰC VẬN HÀNH -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted fw-bold text-nowrap"><i class="fa-solid fa-map-pin text-danger me-1"></i> Khu vực:</span>
+                <select id="historyProvinceSelect" class="form-select form-select-sm shadow-xs" style="min-width: 200px;"
+                        onchange="window.location.href='/coordinator/history?province=' + this.value;">
+                    <option th:each="p : ${provinces}"
+                            th:value="${p.code}"
+                            th:text="${p.name}"
+                            th:selected="${p.code == currentProvince}">
+                        Toàn Miền Trung
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <!-- THỐNG KÊ TỔNG QUAN LỊCH SỬ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+                    <div class="card-body p-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-success-subtle text-success p-3 me-3">
+                            <i class="fa-solid fa-circle-check fa-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Ca SOS Giải Quyết Xong</div>
+                            <h4 class="fw-bold text-navy mb-0" th:text="${resolvedSosList != null ? resolvedSosList.size() : (stats != null ? stats.resolvedCount : 0)}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+                    <div class="card-body p-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-3 me-3">
+                            <i class="fa-solid fa-list-check fa-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Nhiệm Vụ Điều Động Đạt</div>
+                            <h4 class="fw-bold text-navy mb-0" th:text="${completedAssignments != null ? completedAssignments.size() : 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+                    <div class="card-body p-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-info-subtle text-info p-3 me-3">
+                            <i class="fa-solid fa-person-shelter fa-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Người Dân Đã Được Cứu</div>
+                            <h4 class="fw-bold text-navy mb-0" th:text="${stats != null and stats.rescuedPeopleCount != null ? stats.rescuedPeopleCount : 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+                    <div class="card-body p-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-warning-subtle text-warning p-3 me-3">
+                            <i class="fa-solid fa-people-group fa-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Tổng Đội Cứu Hộ</div>
+                            <h4 class="fw-bold text-navy mb-0" th:text="${stats != null and stats.totalTeamsCount != null ? stats.totalTeamsCount : 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BẢNG LỊCH SỬ ĐIỀU PHỐI -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 px-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-navy fs-6">
+                        <i class="fa-solid fa-table-list text-primary me-2"></i> Nhật Ký Lịch Sử Ca Cứu Nạn Đã Hoàn Thành (<span id="totalHistoryCount" th:text="${completedAssignments != null ? completedAssignments.size() : 0}">0</span>)
+                    </span>
+                    <span class="badge bg-light text-muted border" th:text="${'Khu vực: ' + selectedRegion.name}">Toàn Miền Trung</span>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="historySearchInput" class="form-control form-control-sm" placeholder="Tìm kiếm nạn nhân, SĐT, đội..." style="max-width: 250px;">
+                    <select id="historyUrgencyFilter" class="form-select form-select-sm" style="max-width: 160px;">
+                        <option value="ALL">Tất cả mức độ</option>
+                        <option value="CRITICAL">Nguy cấp</option>
+                        <option value="HIGH">Khẩn cấp</option>
+                        <option value="MEDIUM">Trung bình</option>
+                        <option value="LOW">Thấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="historyTable">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Mã NV</th>
+                            <th>Ca Cứu Nạn SOS</th>
+                            <th>Đội Cứu Hộ Đảm Trách</th>
+                            <th>Phương Tiện & Quân Trang</th>
+                            <th>Cự Ly & Lộ Trình</th>
+                            <th>Thời Gian</th>
+                            <th>Nghiệm Thu Hiện Trường</th>
+                            <th>Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${completedAssignments == null or completedAssignments.isEmpty()}" id="noHistoryRow">
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-clipboard-check fa-3x d-block mb-3 text-secondary opacity-50"></i>
+                                <h6 class="fw-bold text-dark">Chưa có lịch sử nhiệm vụ cứu hộ hoàn thành trong khu vực này.</h6>
+                                <p class="small mb-0">Khi các đội cứu hộ hoàn tất nhiệm vụ và nộp báo cáo nghiệm thu, hồ sơ sẽ được lưu giữ tại đây.</p>
+                            </td>
+                        </tr>
+                        <tr th:each="asg : ${completedAssignments}" class="history-row"
+                            th:attr="data-id=${asg.id},
+                                     data-sos-name=${asg.sosRequest != null ? asg.sosRequest.contactName : ''},
+                                     data-sos-phone=${asg.sosRequest != null ? asg.sosRequest.contactPhone : ''},
+                                     data-sos-addr=${asg.sosRequest != null ? asg.sosRequest.addressDetail : ''},
+                                     data-team-name=${asg.team != null ? asg.team.teamName : ''},
+                                     data-urgency=${asg.sosRequest != null ? asg.sosRequest.urgencyLevel : ''}">
+                            <td>
+                                <strong class="text-navy" th:text="${'#' + asg.id}">#1</strong>
+                            </td>
+                            <td>
+                                <div th:if="${asg.sosRequest != null}">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <strong class="text-dark" th:text="${asg.sosRequest.contactName}">Nguyễn Văn A</strong>
+                                        <span class="badge bg-danger" th:if="${asg.sosRequest.urgencyLevel == 'CRITICAL'}">ĐẶC BIỆT KHẨN</span>
+                                        <span class="badge bg-warning text-dark" th:if="${asg.sosRequest.urgencyLevel == 'HIGH'}">KHẨN CẤP</span>
+                                        <span class="badge bg-secondary" th:if="${asg.sosRequest.urgencyLevel != 'CRITICAL' and asg.sosRequest.urgencyLevel != 'HIGH'}" th:text="${asg.sosRequest.urgencyLevel}">TRUNG BÌNH</span>
+                                    </div>
+                                    <div class="small">
+                                        <a th:href="'tel:' + ${asg.sosRequest.contactPhone}" class="text-decoration-none fw-semibold text-primary">
+                                            <i class="fa-solid fa-phone me-1"></i><span th:text="${asg.sosRequest.contactPhone}">0900000000</span>
+                                        </a>
+                                        <span class="text-muted ms-2" th:if="${asg.sosRequest.peopleCount != null}">
+                                            <i class="fa-solid fa-user-group me-1"></i><span th:text="${asg.sosRequest.peopleCount}">1</span> người
+                                        </span>
+                                    </div>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 260px;" th:text="${asg.sosRequest.addressDetail}">Địa chỉ</small>
+                                </div>
+                                <div th:if="${asg.sosRequest == null}" class="text-muted small">Không có dữ liệu SOS</div>
+                            </td>
+                            <td>
+                                <div th:if="${asg.team != null}">
+                                    <strong class="text-navy" th:text="${asg.team.teamName}">Đội Cứu Hộ</strong>
+                                    <div class="small text-muted">
+                                        Đội trưởng: <span class="fw-semibold text-dark" th:text="${asg.team.leader != null ? asg.team.leader.fullName : 'Chưa gán'}">Trần B</span>
+                                    </div>
+                                    <div class="small">
+                                        <i class="fa-solid fa-phone text-secondary me-1"></i>
+                                        <a th:href="'tel:' + ${asg.team.contactPhone}" class="text-muted text-decoration-none" th:text="${asg.team.contactPhone}">0900000001</a>
+                                    </div>
+                                </div>
+                                <div th:if="${asg.team == null}" class="text-muted small">Chưa chỉ định đội</div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="fa-solid fa-truck-pickup text-primary me-1"></i>
+                                        <span th:text="${asg.vehicleType != null and !asg.vehicleType.isBlank() ? asg.vehicleType : 'Phương tiện tiêu chuẩn'}">Xe tải gầm cao</span>
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block mt-1 text-truncate" style="max-width: 200px;"
+                                       th:title="${asg.selectedEquipment}"
+                                       th:text="${asg.selectedEquipment != null and !asg.selectedEquipment.isBlank() ? asg.selectedEquipment : 'Trang bị mặc định'}">Áo phao, xuồng</small>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong class="text-danger" th:text="${asg.routeDistanceKm != null ? asg.routeDistanceKm + ' km' : '—'}">12.5 km</strong>
+                                    <small class="text-muted" th:if="${asg.routeDurationMinutes != null}" th:text="${' (~' + asg.routeDurationMinutes + 'p)'}">(~25p)</small>
+                                </div>
+                                <span class="badge bg-info text-dark mt-1" th:if="${asg.terrainType != null and !asg.terrainType.isBlank()}" th:text="${asg.terrainType}">ĐƯỜNG BỘ</span>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <span class="text-muted">Gán: </span>
+                                    <span th:text="${#temporals.format(asg.assignedAt, 'HH:mm dd/MM')}">08:30 15/10</span>
+                                </div>
+                                <div class="small" th:if="${asg.completedAt != null}">
+                                    <span class="text-success fw-semibold">Xong: </span>
+                                    <span class="fw-semibold text-dark" th:text="${#temporals.format(asg.completedAt, 'HH:mm dd/MM')}">09:15 15/10</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div th:if="${asg.reportNotes != null and !asg.reportNotes.isBlank()}">
+                                    <small class="text-dark d-block text-truncate" style="max-width: 200px;" th:title="${asg.reportNotes}" th:text="${asg.reportNotes}">Ghi chú</small>
+                                </div>
+                                <div th:if="${asg.reportImageUrl != null and !asg.reportImageUrl.isBlank()}">
+                                    <button type="button" class="btn btn-xs btn-outline-primary mt-1 py-0 px-2 small"
+                                            th:attr="data-img=${asg.reportImageUrl}, data-notes=${asg.reportNotes}"
+                                            onclick="openEvidenceModal(this)">
+                                        <i class="fa-regular fa-image me-1"></i> Xem ảnh minh chứng
+                                    </button>
+                                </div>
+                                <span th:if="${(asg.reportNotes == null or asg.reportNotes.isBlank()) and (asg.reportImageUrl == null or asg.reportImageUrl.isBlank())}" class="text-muted small">—</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success py-2 px-2">
+                                    <i class="fa-solid fa-circle-check me-1"></i> HOÀN TẤT
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân Trang Client-side -->
+            <div class="card-footer bg-white py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted" id="historyPaginationInfo">
+                    Hiển thị 0 trên tổng 0 ca điều phối
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="historyPaginationNav">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xem Ảnh Bằng Chứng Nghiệm Thu -->
+    <div class="modal fade" id="evidenceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-navy text-white">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-camera-retro me-2"></i>Ảnh Nghiệm Thu Hiện Trường Cứu Nạn</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-3">
+                    <img id="evidenceModalImg" src="" alt="Ảnh hiện trường cứu nạn" class="img-fluid rounded border shadow-sm mb-3" style="max-height: 480px; object-fit: contain;">
+                    <div class="alert alert-light border text-start">
+                        <strong class="text-navy"><i class="fa-solid fa-comment-dots me-1 text-primary"></i> Ghi chú nghiệm thu từ đội:</strong>
+                        <p id="evidenceModalNotes" class="mb-0 mt-1 text-dark"></p>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT ĐIỀU KHIỂN BẢNG & PHÂN TRANG -->
+    <script>
+        function openEvidenceModal(btn) {
+            const imgUrl = btn.getAttribute('data-img');
+            const notes = btn.getAttribute('data-notes') || 'Không có ghi chú thêm từ hiện trường.';
+            const modalImg = document.getElementById('evidenceModalImg');
+            const modalNotes = document.getElementById('evidenceModalNotes');
+
+            if (modalImg) modalImg.src = imgUrl || '';
+            if (modalNotes) modalNotes.textContent = notes;
+
+            const modalElem = document.getElementById('evidenceModal');
+            if (modalElem) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElem);
+                modal.show();
+            }
+        }
+
+        // Logic phân trang và tìm kiếm cho lịch sử
+        (function() {
+            const pageSize = 10;
+            let currentPage = 1;
+            const searchInput = document.getElementById('historySearchInput');
+            const urgencyFilter = document.getElementById('historyUrgencyFilter');
+            const table = document.getElementById('historyTable');
+            if (!table) return;
+
+            const allRows = Array.from(table.querySelectorAll('tbody tr.history-row'));
+            const noRow = document.getElementById('noHistoryRow');
+            const paginationInfo = document.getElementById('historyPaginationInfo');
+            const paginationNav = document.getElementById('historyPaginationNav');
+
+            function getFilteredRows() {
+                const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+                const urgency = urgencyFilter ? urgencyFilter.value : 'ALL';
+
+                return allRows.filter(row => {
+                    const name = (row.getAttribute('data-sos-name') || '').toLowerCase();
+                    const phone = (row.getAttribute('data-sos-phone') || '').toLowerCase();
+                    const addr = (row.getAttribute('data-sos-addr') || '').toLowerCase();
+                    const team = (row.getAttribute('data-team-name') || '').toLowerCase();
+                    const rowUrgency = row.getAttribute('data-urgency') || '';
+
+                    const matchSearch = !query || name.includes(query) || phone.includes(query) || addr.includes(query) || team.includes(query);
+                    const matchUrgency = (urgency === 'ALL') || (rowUrgency === urgency);
+
+                    return matchSearch && matchUrgency;
+                });
+            }
+
+            function renderTable() {
+                const filtered = getFilteredRows();
+                const total = filtered.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+
+                const startIdx = (currentPage - 1) * pageSize;
+                const endIdx = startIdx + pageSize;
+
+                allRows.forEach(r => r.style.display = 'none');
+
+                if (total === 0) {
+                    if (noRow) noRow.style.display = '';
+                } else {
+                    if (noRow) noRow.style.display = 'none';
+                    filtered.slice(startIdx, endIdx).forEach(r => r.style.display = '');
+                }
+
+                // Cập nhật text info
+                if (paginationInfo) {
+                    if (total === 0) {
+                        paginationInfo.textContent = 'Không tìm thấy ca điều phối nào phù hợp';
+                    } else {
+                        paginationInfo.innerHTML = `Hiển thị <strong>${startIdx + 1} - ${Math.min(endIdx, total)}</strong> trên tổng <strong>${total}</strong> ca điều phối`;
+                    }
+                }
+
+                // Cập nhật navigation phân trang
+                if (paginationNav) {
+                    paginationNav.innerHTML = '';
+                    if (totalPages <= 1) return;
+
+                    // Nút Trước
+                    const prevLi = document.createElement('li');
+                    prevLi.className = 'page-item ' + (currentPage === 1 ? 'disabled' : '');
+                    prevLi.innerHTML = '<a class="page-link" href="javascript:void(0)" aria-label="Trước">&laquo;</a>';
+                    prevLi.onclick = () => {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            renderTable();
+                        }
+                    };
+                    paginationNav.appendChild(prevLi);
+
+                    // Các số trang
+                    for (let p = 1; p <= totalPages; p++) {
+                        const li = document.createElement('li');
+                        li.className = 'page-item ' + (p === currentPage ? 'active' : '');
+                        li.innerHTML = `<a class="page-link" href="javascript:void(0)">${p}</a>`;
+                        li.onclick = () => {
+                            currentPage = p;
+                            renderTable();
+                        };
+                        paginationNav.appendChild(li);
+                    }
+
+                    // Nút Sau
+                    const nextLi = document.createElement('li');
+                    nextLi.className = 'page-item ' + (currentPage === totalPages ? 'disabled' : '');
+                    nextLi.innerHTML = '<a class="page-link" href="javascript:void(0)" aria-label="Sau">&raquo;</a>';
+                    nextLi.onclick = () => {
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            renderTable();
+                        }
+                    };
+                    paginationNav.appendChild(nextLi);
+                }
+            }
+
+            if (searchInput) searchInput.addEventListener('input', () => { currentPage = 1; renderTable(); });
+            if (urgencyFilter) urgencyFilter.addEventListener('change', () => { currentPage = 1; renderTable(); });
+
+            renderTable();
+        })();
+    </script>
+</div>
+
+</body>
+</html>

@@ -18,11 +18,9 @@
 
     <div sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')" class="sidebar-links">
         <a th:href="@{/coordinator/dashboard}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan điều phối</span></a>
-        <a th:href="@{/coordinator/dashboard(status='PENDING')}" class="sidebar-link"><i class="fa-solid fa-tower-broadcast"></i><span>Yêu cầu cứu nạn</span></a>
-        <a th:href="@{/coordinator/missions}" class="sidebar-link"><i class="fa-solid fa-list-check"></i><span>Phân công nhiệm vụ</span></a>
+        <a th:href="@{/coordinator/missions}" class="sidebar-link"><i class="fa-solid fa-route"></i><span>Phân công & Lộ trình</span></a>
         <a th:href="@{/coordinator/teams}" class="sidebar-link"><i class="fa-solid fa-people-group"></i><span>Quản lý đội cứu hộ</span></a>
-        <a th:href="@{/coordinator/missions(view='map')}" class="sidebar-link"><i class="fa-solid fa-map-location-dot"></i><span>Bản đồ và lộ trình</span></a>
-        <a th:href="@{/coordinator/dashboard(status='RESOLVED')}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử điều phối</span></a>
+        <a th:href="@{/coordinator/history}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử điều phối</span></a>
         <a th:href="@{/coordinator/budget}" class="sidebar-link"><i class="fa-solid fa-wallet"></i><span>Quỹ và ngân sách</span></a>
     </div>
 

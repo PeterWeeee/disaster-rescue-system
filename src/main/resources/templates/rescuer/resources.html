@@ -174,7 +174,7 @@
                             </span>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0" id="membersTable">
                                 <thead class="table-light small">
                                     <tr>
                                         <th>Họ và Tên</th>
@@ -211,6 +211,10 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="membersPaginationWrap">
+                            <div class="small text-muted" id="membersPaginationInfo">Hiển thị...</div>
+                            <ul class="pagination pagination-sm mb-0" id="membersPaginationNav"></ul>
                         </div>
                     </div>
                 </div>
@@ -278,6 +282,10 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="equipmentPaginationWrap">
+                            <div class="small text-muted" id="equipmentPaginationInfo">Hiển thị...</div>
+                            <ul class="pagination pagination-sm mb-0" id="equipmentPaginationNav"></ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -298,7 +306,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0" id="budgetHistoryTable">
                         <thead class="table-light small">
                             <tr>
                                 <th>Thời Gian</th>
@@ -370,6 +378,10 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="budgetHistoryPaginationWrap">
+                    <div class="small text-muted" id="budgetHistoryPaginationInfo">Hiển thị...</div>
+                    <ul class="pagination pagination-sm mb-0" id="budgetHistoryPaginationNav"></ul>
                 </div>
             </div>
 
@@ -459,30 +471,126 @@
     </div>
 
     <script>
-        const searchInput = document.getElementById('eqSearchInput');
-        const catFilter = document.getElementById('eqCategoryFilter');
-        const rows = document.querySelectorAll('#equipmentTable tbody tr');
+        // Phân trang chung cho bảng
+        function paginateSimpleTable(tableSelector, infoSelector, navSelector, pageSize = 8) {
+            const table = document.querySelector(tableSelector);
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            let curPage = 1;
 
-        function filterTable() {
-            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-            const cat = catFilter ? catFilter.value : 'ALL';
+            function render(p) {
+                curPage = p;
+                const total = rows.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                if (curPage > totalPages) curPage = totalPages;
+                if (curPage < 1) curPage = 1;
+                const start = (curPage - 1) * pageSize;
+                const end = Math.min(start + pageSize, total);
 
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const rowCat = row.getAttribute('data-category');
-                const matchText = text.includes(query);
-                const matchCat = (cat === 'ALL' || rowCat === cat);
+                rows.forEach((r, idx) => {
+                    r.style.display = (idx >= start && idx < end) ? '' : 'none';
+                });
 
-                if (matchText && matchCat) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+                const info = document.querySelector(infoSelector);
+                if (info) info.innerHTML = total === 0 ? 'Không có bản ghi' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong>`;
+
+                const nav = document.querySelector(navSelector);
+                if (!nav) return;
+                nav.innerHTML = '';
+                if (totalPages <= 1) return;
+
+                const prev = document.createElement('li');
+                prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
+                prev.innerHTML = '<a class="page-link" href="javascript:void(0)">&laquo;</a>';
+                prev.onclick = () => { if (curPage > 1) render(curPage - 1); };
+                nav.appendChild(prev);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item ' + (i === curPage ? 'active' : '');
+                    li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+                    li.onclick = () => render(i);
+                    nav.appendChild(li);
                 }
-            });
+
+                const next = document.createElement('li');
+                next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
+                next.innerHTML = '<a class="page-link" href="javascript:void(0)">&raquo;</a>';
+                next.onclick = () => { if (curPage < totalPages) render(curPage + 1); };
+                nav.appendChild(next);
+            }
+            render(1);
         }
 
-        if (searchInput) searchInput.addEventListener('input', filterTable);
-        if (catFilter) catFilter.addEventListener('change', filterTable);
+        paginateSimpleTable('#membersTable', '#membersPaginationInfo', '#membersPaginationNav', 8);
+        paginateSimpleTable('#budgetHistoryTable', '#budgetHistoryPaginationInfo', '#budgetHistoryPaginationNav', 8);
+
+        // Phân trang và tìm kiếm cho kho trang thiết bị
+        (function() {
+            const searchInput = document.getElementById('eqSearchInput');
+            const catFilter = document.getElementById('eqCategoryFilter');
+            const table = document.getElementById('equipmentTable');
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            const pageSize = 8;
+            let curPage = 1;
+
+            function filterAndRender(p = 1) {
+                curPage = p;
+                const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+                const cat = catFilter ? catFilter.value : 'ALL';
+
+                const matched = rows.filter(row => {
+                    const text = row.textContent.toLowerCase();
+                    const rowCat = row.getAttribute('data-category');
+                    const matchSearch = text.includes(query);
+                    const matchCat = (cat === 'ALL' || rowCat === cat);
+                    return matchSearch && matchCat;
+                });
+
+                const total = matched.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                if (curPage > totalPages) curPage = totalPages;
+                if (curPage < 1) curPage = 1;
+                const start = (curPage - 1) * pageSize;
+                const end = Math.min(start + pageSize, total);
+
+                rows.forEach(r => r.style.display = 'none');
+                matched.slice(start, end).forEach(r => r.style.display = '');
+
+                const info = document.getElementById('equipmentPaginationInfo');
+                if (info) info.innerHTML = total === 0 ? 'Không tìm thấy trang bị' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong> trang bị`;
+
+                const nav = document.getElementById('equipmentPaginationNav');
+                if (!nav) return;
+                nav.innerHTML = '';
+                if (totalPages <= 1) return;
+
+                const prev = document.createElement('li');
+                prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
+                prev.innerHTML = '<a class="page-link" href="javascript:void(0)">&laquo;</a>';
+                prev.onclick = () => { if (curPage > 1) filterAndRender(curPage - 1); };
+                nav.appendChild(prev);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item ' + (i === curPage ? 'active' : '');
+                    li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+                    li.onclick = () => filterAndRender(i);
+                    nav.appendChild(li);
+                }
+
+                const next = document.createElement('li');
+                next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
+                next.innerHTML = '<a class="page-link" href="javascript:void(0)">&raquo;</a>';
+                next.onclick = () => { if (curPage < totalPages) filterAndRender(curPage + 1); };
+                nav.appendChild(next);
+            }
+
+            if (searchInput) searchInput.addEventListener('input', () => filterAndRender(1));
+            if (catFilter) catFilter.addEventListener('change', () => filterAndRender(1));
+            filterAndRender(1);
+        })();
 
         function setQuickBudget(val) {
             const input = document.getElementById('budgetAmountInput');

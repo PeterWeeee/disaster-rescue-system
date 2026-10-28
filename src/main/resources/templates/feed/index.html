@@ -65,7 +65,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold text-dark small"><i class="fa-solid fa-clipboard-check text-primary me-1"></i>Đơn cứu hộ của bạn:</span>
                                 <span th:if="${activeSos != null}" class="badge bg-warning text-dark fw-bold" th:text="${activeSos.status}">ĐANG XỬ LÝ</span>
-                                <span th:if="${activeSos == null}" class="badge bg-secondary-subtle text-secondary fw-semibold">Chưa có đơn</span>
+                                <span th:if="${activeSos == null}" class="badge bg-light text-dark border fw-bold">Chưa có đơn</span>
                             </div>
 
                             <div th:if="${activeSos != null}">
@@ -128,7 +128,8 @@
                              style="width: 44px; height: 44px; font-size: 1.1rem; line-height: 44px; text-align: center;">
                             <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">N</span>
                         </div>
-                        <button type="button" class="btn btn-light rounded-pill flex-grow-1 text-start text-muted px-4 py-2.5 small fw-medium border shadow-xs"
+                        <button type="button" class="btn rounded-pill flex-grow-1 text-start px-4 py-2.5 small fw-semibold shadow-xs"
+                                style="background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;"
                                 data-bs-toggle="modal" data-bs-target="#createPostModal">
                             Bạn đang thấy hiểm họa gì quanh khu vực? Chia sẻ để cảnh báo...
                         </button>
@@ -196,8 +197,8 @@
                                     <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-2.5 py-1.5 rounded-pill shadow-xs">
                                         <i class="fa-solid fa-check me-1"></i> Đã xác minh
                                     </span>
-                                    <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-secondary-subtle text-secondary fw-semibold px-2.5 py-1.5 rounded-pill">
-                                        Chờ xác minh
+                                    <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-2.5 py-1.5 rounded-pill">
+                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
                                     </span>
                                     <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-2.5 py-1.5 rounded-pill">
                                         Đã bác bỏ
@@ -206,7 +207,7 @@
                             </div>
 
                             <!-- Content text -->
-                            <p class="text-dark mb-3 lh-base" th:text="${post.content}">
+                            <p class="post-content-text mb-3" th:text="${post.content}">
                                 Nội dung chi tiết bài viết cảnh báo thiên tai từ hiện trường...
                             </p>
 
@@ -280,12 +281,12 @@
                                     </div>
                                     <div class="text-muted mt-1" style="font-size: 0.75rem;">Sông Thu Bồn · 07:45</div>
                                 </div>
-                                <div class="p-2 rounded-3 bg-secondary-subtle border">
+                                <div class="p-2 rounded-3 bg-light border">
                                     <div class="d-flex align-items-center gap-1.5 fw-bold text-dark">
-                                        <span class="badge bg-secondary">LƯU Ý</span>
+                                        <span class="badge bg-secondary text-white">LƯU Ý</span>
                                         <span>Nguy cơ sạt lở đồi</span>
                                     </div>
-                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">Các huyện vùng cao · 06:10</div>
+                                    <div class="text-secondary mt-1 fw-medium" style="font-size: 0.75rem;">Các huyện vùng cao · 06:10</div>
                                 </div>
                             </div>
                         </div>
@@ -349,8 +350,8 @@
                         <div>
                             <div class="fw-bold text-dark" th:text="${currentUser != null ? currentUser.fullName : 'Người dân'}">Nguyễn Văn A</div>
                             <div class="d-flex align-items-center gap-1.5 mt-0.5">
-                                <span class="badge bg-secondary-subtle text-secondary small fw-semibold">
-                                    <i class="fa-solid fa-earth-americas me-1"></i>Công khai toàn vùng
+                                <span class="badge bg-light text-dark border small fw-bold">
+                                    <i class="fa-solid fa-earth-americas me-1 text-primary"></i>Công khai toàn vùng
                                 </span>
                             </div>
                         </div>
@@ -369,7 +370,7 @@
                             <div th:each="hazard : ${hazardTypes}">
                                 <input type="radio" class="btn-check" name="hazardType" th:id="'hazard_' + ${hazard.name()}"
                                        th:value="${hazard.name()}" th:checked="${hazard.name() == 'LANDSLIDE'}">
-                                <label class="btn btn-outline-secondary btn-sm rounded-pill fw-bold" th:for="'hazard_' + ${hazard.name()}"
+                                <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'hazard_' + ${hazard.name()}"
                                        th:text="${hazard.shortName}">Sạt lở</label>
                             </div>
                         </div>
@@ -544,10 +545,14 @@
                 countEl.innerText = data.upvoteCount;
                 if (data.isVoted) {
                     btn.classList.remove('btn-outline-secondary');
-                    btn.classList.add('btn-primary');
+                    btn.classList.add('btn-upvoted');
+                    const icon = btn.querySelector('i');
+                    if (icon) icon.className = 'fa-solid fa-thumbs-up me-1 text-white';
                 } else {
-                    btn.classList.remove('btn-primary');
+                    btn.classList.remove('btn-upvoted');
                     btn.classList.add('btn-outline-secondary');
+                    const icon = btn.querySelector('i');
+                    if (icon) icon.className = 'fa-solid fa-thumbs-up me-1 text-primary';
                 }
             } else {
                 alert(data.message || 'Lỗi khi xác nhận bài viết!');
@@ -579,8 +584,29 @@
 
 <style>
     .feed-header-banner {
-        background: linear-gradient(90deg, rgba(160, 20, 15, 0.90) 0%, rgba(125, 18, 12, 0.84) 40%, rgba(15, 23, 42, 0.92) 100%),
+        background-color: #0f172a;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(136, 19, 55, 0.90) 50%, rgba(15, 23, 42, 0.95) 100%),
                     url('/images/disaster_header_bg.webp') center 35% / cover no-repeat;
+        color: #ffffff !important;
+    }
+    .feed-header-banner h1 {
+        color: #ffffff !important;
+    }
+    .feed-header-banner p {
+        color: #e2e8f0 !important;
+    }
+    .post-content-text {
+        color: #1e293b !important;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .btn-upvoted {
+        background-color: #0d6efd !important;
+        color: #ffffff !important;
+        border-color: #0d6efd !important;
+    }
+    .btn-upvoted i {
+        color: #ffffff !important;
     }
     .hover-bg:hover {
         background-color: rgba(0, 0, 0, 0.04);

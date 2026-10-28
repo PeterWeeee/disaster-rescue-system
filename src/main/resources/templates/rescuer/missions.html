@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="row g-3">
-                    <div th:each="a : ${assignments}" th:if="${a.status == 'PENDING'}" class="col-md-6 col-lg-4">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'PENDING'}" class="col-md-6 col-lg-4 pending-mission-card">
                         <div class="card border-0 shadow-sm rounded-3 h-100 border-top border-4 border-warning">
                             <div class="card-body p-3 d-flex flex-column justify-content-between">
                                 <div>
@@ -143,6 +143,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="card border-0 shadow-sm rounded-3 mt-3" id="pendingPaginationWrap">
+                    <div class="card-footer bg-white py-2 px-3 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="small text-muted" id="pendingPaginationInfo">Hiển thị nhiệm vụ...</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="pendingPaginationNav"></ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
 
             <!-- TAB 2: Nhiệm vụ đang thực hiện (ACCEPTED, IN_PROGRESS) -->
@@ -154,7 +162,7 @@
                 </div>
 
                 <div class="row g-3">
-                    <div th:each="a : ${assignments}" th:if="${a.status == 'ACCEPTED' or a.status == 'IN_PROGRESS'}" class="col-md-6">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'ACCEPTED' or a.status == 'IN_PROGRESS'}" class="col-md-6 active-mission-card">
                         <div class="card border-0 shadow-sm rounded-3 h-100 border-top border-4 border-primary">
                             <div class="card-body p-3 d-flex flex-column justify-content-between">
                                 <div>
@@ -249,6 +257,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="card border-0 shadow-sm rounded-3 mt-3" id="activePaginationWrap">
+                    <div class="card-footer bg-white py-2 px-3 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="small text-muted" id="activePaginationInfo">Hiển thị nhiệm vụ...</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="activePaginationNav"></ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
 
             <!-- TAB 3: Nhiệm vụ hoàn thành & lịch sử (COMPLETED, REJECTED) -->
@@ -259,7 +275,7 @@
                 </div>
 
                 <div class="row g-3">
-                    <div th:each="a : ${assignments}" th:if="${a.status == 'COMPLETED' or a.status == 'REJECTED'}" class="col-md-6 col-lg-4">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'COMPLETED' or a.status == 'REJECTED'}" class="col-md-6 col-lg-4 completed-mission-card">
                         <div class="card border-0 shadow-sm rounded-3 h-100"
                              th:classappend="${a.status == 'COMPLETED' ? 'border-top border-4 border-success' : 'border-top border-4 border-secondary opacity-75'}">
                             <div class="card-body p-3">
@@ -288,6 +304,14 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm rounded-3 mt-3" id="completedPaginationWrap">
+                    <div class="card-footer bg-white py-2 px-3 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="small text-muted" id="completedPaginationInfo">Hiển thị lịch sử nhiệm vụ...</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="completedPaginationNav"></ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -821,6 +845,68 @@ function startMoving(id) {
             }
         });
     });
+
+    // Phân trang danh sách thẻ nhiệm vụ cứu hộ
+    function paginateMissionCards(cardSelector, infoSelector, navSelector, wrapSelector, pageSize = 6) {
+        const cards = Array.from(document.querySelectorAll(cardSelector));
+        const wrap = document.querySelector(wrapSelector);
+        if (!cards.length) {
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
+        let curPage = 1;
+        function render(p) {
+            curPage = p;
+            const total = cards.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (curPage > totalPages) curPage = totalPages;
+            if (curPage < 1) curPage = 1;
+            const start = (curPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+
+            cards.forEach((c, idx) => {
+                c.style.display = (idx >= start && idx < end) ? '' : 'none';
+            });
+
+            const info = document.querySelector(infoSelector);
+            if (info) info.innerHTML = total === 0 ? 'Không có nhiệm vụ' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong> nhiệm vụ`;
+
+            const nav = document.querySelector(navSelector);
+            if (!nav) return;
+            nav.innerHTML = '';
+            if (totalPages <= 1) {
+                if (wrap) wrap.style.display = 'none';
+                return;
+            } else {
+                if (wrap) wrap.style.display = '';
+            }
+
+            const prev = document.createElement('li');
+            prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
+            prev.innerHTML = '<a class="page-link" href="javascript:void(0)">&laquo;</a>';
+            prev.onclick = () => { if (curPage > 1) render(curPage - 1); };
+            nav.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item ' + (i === curPage ? 'active' : '');
+                li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+                li.onclick = () => render(i);
+                nav.appendChild(li);
+            }
+
+            const next = document.createElement('li');
+            next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
+            next.innerHTML = '<a class="page-link" href="javascript:void(0)">&raquo;</a>';
+            next.onclick = () => { if (curPage < totalPages) render(curPage + 1); };
+            nav.appendChild(next);
+        }
+        render(1);
+    }
+
+    paginateMissionCards('.pending-mission-card', '#pendingPaginationInfo', '#pendingPaginationNav', '#pendingPaginationWrap', 6);
+    paginateMissionCards('.active-mission-card', '#activePaginationInfo', '#activePaginationNav', '#activePaginationWrap', 6);
+    paginateMissionCards('.completed-mission-card', '#completedPaginationInfo', '#completedPaginationNav', '#completedPaginationWrap', 6);
 </script>
 </div>
 

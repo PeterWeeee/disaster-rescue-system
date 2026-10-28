@@ -120,4 +120,24 @@ public class CoordinatorController {
 
         return "coordinator/budget";
     }
+    /**
+     * 5. Trang Lịch Sử Điều Phối: Toàn bộ lịch sử các ca điều phối và nhiệm vụ cứu nạn đã hoàn tất.
+     */
+    @GetMapping("/history")
+    public String history(@RequestParam(value = "province", required = false, defaultValue = "ALL") String province,
+                          Model model) {
+        String cleanProvince = (province == null || province.isBlank()) ? "ALL" : province.trim().toUpperCase();
+        ProvinceRegion selectedRegion = ProvinceRegion.fromCode(cleanProvince);
+
+        model.addAttribute("pageTitle", "Lịch Sử Điều Phối Cứu Nạn - " + selectedRegion.getName());
+        model.addAttribute("currentProvince", selectedRegion.getCode());
+        model.addAttribute("selectedRegion", selectedRegion);
+        model.addAttribute("provinces", ProvinceRegion.values());
+
+        model.addAttribute("stats", coordinatorService.getDashboardStats(cleanProvince));
+        model.addAttribute("completedAssignments", coordinatorService.getAssignments("COMPLETED", cleanProvince));
+        model.addAttribute("resolvedSosList", coordinatorService.getSosRequests("RESOLVED", cleanProvince));
+
+        return "coordinator/history";
+    }
 }

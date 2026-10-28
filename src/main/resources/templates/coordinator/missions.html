@@ -8,6 +8,12 @@
 <body>
 
 <div id="missions-content" class="py-3" th:with="missionView=${param.view != null ? param.view[0] : 'both'}">
+    <style>
+        .custom-sos-pin, .custom-team-pin {
+            background: transparent !important;
+            border: none !important;
+        }
+    </style>
     <div class="container-fluid px-3 px-lg-4">
         <!-- Header & Toolbar -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -18,15 +24,6 @@
                 <small class="text-muted">Giám sát thời gian thực lộ trình điều động, phương tiện xuất kích, khoảng cách và báo cáo hiện trường ca SOS</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a th:href="@{/coordinator/dashboard(province=${currentProvince})}" class="btn btn-sm btn-outline-danger shadow-sm">
-                    <i class="fa-solid fa-tower-broadcast me-1"></i> TT Điều Phối
-                </a>
-                <a th:href="@{/coordinator/teams(province=${currentProvince})}" class="btn btn-sm btn-outline-primary shadow-sm">
-                    <i class="fa-solid fa-truck-medical me-1"></i> Quản Lý Đội Cứu Hộ
-                </a>
-                <a th:href="@{/coordinator/budget(province=${currentProvince})}" class="btn btn-sm btn-outline-warning text-dark fw-bold bg-warning-subtle border-warning shadow-sm">
-                    <i class="fa-solid fa-vault text-warning me-1"></i> Quỹ Cứu Trợ & Tiếp Tế
-                </a>
                 <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
                     <i class="fa-solid fa-rotate me-1"></i> Làm mới
                 </button>
@@ -132,13 +129,19 @@
                     <!-- View Switcher & Search -->
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Chế độ hiển thị">
-                            <button type="button" class="btn" id="btnModeBoth" onclick="switchViewMode('both')">
+                            <button type="button" class="btn" id="btnModeBoth"
+                                    th:classappend="${missionView == 'both' ? 'btn-primary' : 'btn-outline-primary'}"
+                                    onclick="switchViewMode('both')">
                                 <i class="fa-solid fa-table-columns me-1"></i> Cả hai
                             </button>
-                            <button type="button" class="btn" id="btnModeMap" onclick="switchViewMode('map')">
+                            <button type="button" class="btn" id="btnModeMap"
+                                    th:classappend="${missionView == 'map' ? 'btn-primary' : 'btn-outline-primary'}"
+                                    onclick="switchViewMode('map')">
                                 <i class="fa-solid fa-map-location-dot me-1"></i> Bản đồ
                             </button>
-                            <button type="button" class="btn" id="btnModeTable" onclick="switchViewMode('table')">
+                            <button type="button" class="btn" id="btnModeTable"
+                                    th:classappend="${missionView == 'table' ? 'btn-primary' : 'btn-outline-primary'}"
+                                    onclick="switchViewMode('table')">
                                 <i class="fa-solid fa-list-check me-1"></i> Bảng phân công
                             </button>
                         </div>
@@ -152,7 +155,7 @@
         </div>
 
         <!-- BẢN ĐỒ LỘ TRÌNH GIS THỜI GIAN THỰC -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4" id="missionsMapCard">
+        <div class="card border-0 shadow-sm rounded-3 mb-4" id="missionsMapCard" th:classappend="${missionView == 'table' ? 'd-none' : ''}">
             <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-navy fs-6">
                     <i class="fa-solid fa-map-location-dot text-danger me-2"></i> Bản Đồ Lộ Trình Điều Động Cứu Hộ Thời Gian Thực
@@ -171,7 +174,7 @@
         </div>
 
         <!-- BẢNG TOÀN BỘ CÁC NHIỆM VỤ PHÂN CÔNG & LỘ TRÌNH -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4" id="assignmentsTableCard">
+        <div class="card border-0 shadow-sm rounded-3 mb-4" id="assignmentsTableCard" th:classappend="${missionView == 'map' ? 'd-none' : ''}">
             <div class="card-header bg-white py-3 px-3 border-bottom d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-navy fs-6">
                     <i class="fa-solid fa-list-check text-primary me-2"></i> Danh Sách Lộ Trình & Nhiệm Vụ Phân Công (<span id="totalAssignmentsCount" th:text="${assignments != null ? assignments.size() : 0}">0</span>)
@@ -321,7 +324,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Modal Xem Ảnh Bằng Chứng Nghiệm Thu -->
 <div class="modal fade" id="evidenceModal" tabindex="-1" aria-hidden="true">
@@ -349,17 +351,37 @@
     let missionsMap = null;
     let markersLayer = null;
     let routesLayer = null;
+    let currentHighlightedPolyline = null;
+    const missionLayers = {};
 
     // Pagination state
     const PAGE_SIZE = 10;
     let currentPage = 1;
     let visibleRows = [];
 
-    document.addEventListener("DOMContentLoaded", function () {
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    function initAll() {
         initMissionsMap();
         initViewModeFromUrl();
         initTablePagination();
-    });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initAll);
+    } else {
+        initAll();
+    }
 
     function initViewModeFromUrl() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -381,9 +403,9 @@
         const btnMap = document.getElementById("btnModeMap");
         const btnTable = document.getElementById("btnModeTable");
 
-        btnBoth.className = "btn " + (mode === 'both' ? 'btn-primary' : 'btn-outline-primary');
-        btnMap.className = "btn " + (mode === 'map' ? 'btn-primary' : 'btn-outline-primary');
-        btnTable.className = "btn " + (mode === 'table' ? 'btn-primary' : 'btn-outline-primary');
+        if (btnBoth) btnBoth.className = "btn " + (mode === 'both' ? 'btn-primary' : 'btn-outline-primary');
+        if (btnMap) btnMap.className = "btn " + (mode === 'map' ? 'btn-primary' : 'btn-outline-primary');
+        if (btnTable) btnTable.className = "btn " + (mode === 'table' ? 'btn-primary' : 'btn-outline-primary');
 
         if (mode === 'both') {
             if (mapCard) mapCard.classList.remove('d-none');
@@ -406,10 +428,19 @@
     function initMissionsMap() {
         const mapEl = document.getElementById("missionsMap");
         if (!mapEl) return;
+        if (typeof L === 'undefined') {
+            console.error('Leaflet GIS library (L) is not loaded.');
+            return;
+        }
 
         const centerLat = parseFloat(mapEl.getAttribute("data-lat")) || 16.0544;
         const centerLng = parseFloat(mapEl.getAttribute("data-lng")) || 108.2022;
         const defaultZoom = parseInt(mapEl.getAttribute("data-zoom")) || 8;
+
+        if (missionsMap) {
+            missionsMap.remove();
+            missionsMap = null;
+        }
 
         missionsMap = L.map('missionsMap').setView([centerLat, centerLng], defaultZoom);
 
@@ -424,7 +455,7 @@
         renderMissionsOnMap();
 
         setTimeout(function() {
-            missionsMap.invalidateSize();
+            if (missionsMap) missionsMap.invalidateSize();
         }, 300);
     }
 
@@ -437,6 +468,7 @@
         const bounds = [];
 
         rows.forEach(row => {
+            const assignmentId = row.getAttribute("data-id");
             const sosLat = parseFloat(row.getAttribute("data-sos-lat"));
             const sosLng = parseFloat(row.getAttribute("data-sos-lng"));
             const teamLat = parseFloat(row.getAttribute("data-team-lat"));
@@ -451,6 +483,10 @@
             const hasSosPos = !isNaN(sosLat) && !isNaN(sosLng);
             const hasTeamPos = !isNaN(teamLat) && !isNaN(teamLng);
 
+            let sosMarker = null;
+            let teamMarker = null;
+            let polyline = null;
+
             // SOS Marker (Red icon)
             if (hasSosPos) {
                 const sosIcon = L.divIcon({
@@ -460,13 +496,13 @@
                     iconAnchor: [14, 14]
                 });
 
-                const sosMarker = L.marker([sosLat, sosLng], { icon: sosIcon });
+                sosMarker = L.marker([sosLat, sosLng], { icon: sosIcon });
                 sosMarker.bindPopup(`
                     <div style="min-width:180px;">
-                        <strong class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Ca SOS: ${sosName}</strong><br/>
-                        <small>SĐT: ${sosPhone}</small><br/>
-                        <small class="text-muted">${sosAddr}</small><br/>
-                        ${teamName ? `<div class="mt-1 badge bg-primary text-white">Đảm trách: ${teamName}</div>` : ''}
+                        <strong class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Ca SOS: ${escapeHtml(sosName)}</strong><br/>
+                        <small>SĐT: ${escapeHtml(sosPhone)}</small><br/>
+                        <small class="text-muted">${escapeHtml(sosAddr)}</small><br/>
+                        ${teamName ? `<div class="mt-1 badge bg-primary text-white">Đảm trách: ${escapeHtml(teamName)}</div>` : ''}
                     </div>
                 `);
                 markersLayer.addLayer(sosMarker);
@@ -482,12 +518,12 @@
                     iconAnchor: [14, 14]
                 });
 
-                const teamMarker = L.marker([teamLat, teamLng], { icon: teamIcon });
+                teamMarker = L.marker([teamLat, teamLng], { icon: teamIcon });
                 teamMarker.bindPopup(`
                     <div style="min-width:180px;">
-                        <strong class="text-primary"><i class="fa-solid fa-shield-halved"></i> ${teamName}</strong><br/>
-                        <small>Phương tiện: ${vehicle || 'Tiêu chuẩn'}</small><br/>
-                        <small class="text-muted">Đang tiếp cận ca: ${sosName}</small>
+                        <strong class="text-primary"><i class="fa-solid fa-shield-halved"></i> ${escapeHtml(teamName)}</strong><br/>
+                        <small>Phương tiện: ${escapeHtml(vehicle || 'Tiêu chuẩn')}</small><br/>
+                        <small class="text-muted">Đang tiếp cận ca: ${escapeHtml(sosName)}</small>
                     </div>
                 `);
                 markersLayer.addLayer(teamMarker);
@@ -496,7 +532,7 @@
 
             // Route Polyline connecting Team and SOS
             if (hasSosPos && hasTeamPos) {
-                const polyline = L.polyline([[teamLat, teamLng], [sosLat, sosLng]], {
+                polyline = L.polyline([[teamLat, teamLng], [sosLat, sosLng]], {
                     color: '#0dcaf0',
                     weight: 3,
                     opacity: 0.85,
@@ -505,17 +541,29 @@
 
                 polyline.bindPopup(`
                     <div style="min-width:160px;">
-                        <strong>Lộ trình điều động:</strong><br/>
-                        <small>${teamName} &rarr; ${sosName}</small><br/>
-                        <span class="badge bg-danger mt-1">Cự ly: ${distance} km</span>
+                        <strong>Lộ trình điều động #${assignmentId}:</strong><br/>
+                        <small>${escapeHtml(teamName)} &rarr; ${escapeHtml(sosName)}</small><br/>
+                        ${distance ? `<span class="badge bg-danger mt-1">Cự ly: ${escapeHtml(distance)} km</span>` : ''}
                     </div>
                 `);
                 routesLayer.addLayer(polyline);
             }
+
+            if (assignmentId) {
+                missionLayers[assignmentId] = {
+                    sosMarker: sosMarker,
+                    teamMarker: teamMarker,
+                    polyline: polyline,
+                    sosPos: hasSosPos ? [sosLat, sosLng] : null,
+                    teamPos: hasTeamPos ? [teamLat, teamLng] : null
+                };
+            }
         });
 
-        if (bounds.length > 0) {
+        if (bounds.length > 1) {
             missionsMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+        } else if (bounds.length === 1) {
+            missionsMap.setView(bounds[0], 12);
         }
     }
 
@@ -523,13 +571,13 @@
         const row = btn.closest(".mission-row");
         if (!row || !missionsMap) return;
 
-        // Nếu map đang bị ẩn, mở ra ngay
+        // Nếu map đang bị ẩn (chế độ bảng), tự động chuyển sang chế độ hiển thị cả hai
         const mapCard = document.getElementById("missionsMapCard");
         if (mapCard && mapCard.classList.contains("d-none")) {
-            mapCard.classList.remove("d-none");
-            missionsMap.invalidateSize();
+            applyViewMode('both');
         }
 
+        const assignmentId = row.getAttribute("data-id");
         const sosLat = parseFloat(row.getAttribute("data-sos-lat"));
         const sosLng = parseFloat(row.getAttribute("data-sos-lng"));
         const teamLat = parseFloat(row.getAttribute("data-team-lat"));
@@ -541,7 +589,7 @@
         setTimeout(function() {
             missionsMap.invalidateSize();
             if (hasSos && hasTeam) {
-                missionsMap.fitBounds([[teamLat, teamLng], [sosLat, sosLng]], { padding: [50, 50] });
+                missionsMap.fitBounds([[teamLat, teamLng], [sosLat, sosLng]], { padding: [60, 60], maxZoom: 14 });
             } else if (hasSos) {
                 missionsMap.setView([sosLat, sosLng], 14);
             } else if (hasTeam) {
@@ -549,6 +597,44 @@
             } else {
                 alert("Nhiệm vụ này chưa có tọa độ GPS hợp lệ.");
                 return;
+            }
+
+            // Tự động mở popup lộ trình hoặc marker
+            const layerObj = missionLayers[assignmentId];
+            if (layerObj) {
+                if (layerObj.polyline) {
+                    layerObj.polyline.openPopup();
+                } else if (layerObj.sosMarker) {
+                    layerObj.sosMarker.openPopup();
+                } else if (layerObj.teamMarker) {
+                    layerObj.teamMarker.openPopup();
+                }
+            }
+
+            // Tải chi tiết lộ trình thực tế OSRM nếu có
+            if (assignmentId && hasSos && hasTeam) {
+                fetch(`/api/coordinator/assignments/${assignmentId}/route`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => {
+                        if (data && data.routeGeometryGeoJson) {
+                            try {
+                                const geoData = JSON.parse(data.routeGeometryGeoJson);
+                                if (currentHighlightedPolyline) {
+                                    missionsMap.removeLayer(currentHighlightedPolyline);
+                                }
+                                currentHighlightedPolyline = L.geoJSON(geoData, {
+                                    style: {
+                                        color: '#0d6efd',
+                                        weight: 5,
+                                        opacity: 0.9
+                                    }
+                                }).addTo(missionsMap);
+                            } catch (e) {
+                                console.debug('GeoJSON parse fallback', e);
+                            }
+                        }
+                    })
+                    .catch(err => console.debug('Route detail fetch skipped', err));
             }
 
             const mapTarget = document.getElementById("missionsMapCard");
@@ -665,6 +751,9 @@
     window.filterMissionTable = filterMissionTable;
     window.focusMissionFromButton = focusMissionFromButton;
     window.openEvidenceModal = openEvidenceModal;
+    window.initMissionsMap = initMissionsMap;
 </script>
+</div>
+
 </body>
 </html>

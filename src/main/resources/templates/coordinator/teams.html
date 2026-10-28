@@ -18,12 +18,6 @@
                 <small class="text-muted">Theo dõi quân số trực ban, trang bị sẵn sàng, tọa độ trạm và ngân sách tác chiến theo khu vực</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a th:href="@{/coordinator/dashboard(province=${currentProvince})}" class="btn btn-sm btn-outline-danger shadow-sm">
-                    <i class="fa-solid fa-tower-broadcast me-1"></i> Về TT Điều Phối
-                </a>
-                <a th:href="@{/coordinator/budget(province=${currentProvince})}" class="btn btn-sm btn-outline-warning text-dark fw-bold bg-warning-subtle border-warning shadow-sm">
-                    <i class="fa-solid fa-vault text-warning me-1"></i> Quỹ Cứu Trợ & Tiếp Tế
-                </a>
                 <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
                     <i class="fa-solid fa-rotate me-1"></i> Làm mới
                 </button>

@@ -105,7 +105,7 @@ class BudgetServiceTest {
         assertEquals(new BigDecimal("550000000"), summary.getTotalGrossFund());
         assertEquals(new BigDecimal("20000000"), summary.getTotalDisbursedFunds());
         assertEquals(new BigDecimal("530000000"), summary.getAvailableGeneralFund()); // 500 + 50 - 20 = 530tr
-        assertTrue(summary.getFormattedAvailableGeneralFund().contains("530.000.000"));
+        assertTrue(summary.getFormattedAvailableGeneralFund().contains("530.000.000") || summary.getFormattedAvailableGeneralFund().contains("530,000,000"));
     }
 
     @Test

@@ -63,6 +63,11 @@ class CoordinatorControllerTest {
 
         String html = result.getResponse().getContentAsString();
         assertTrue(html.contains("THEO DÕI CỨU HỘ & LỘ TRÌNH TÁC CHIẾN"), "Tiêu đề theo dõi cứu hộ & lộ trình chuẩn");
+        assertTrue(html.contains("id=\"missionsMap\""), "Chứa container bản đồ Leaflet");
+        assertTrue(html.contains("initMissionsMap"), "Chứa hàm khởi tạo bản đồ GIS lộ trình");
+        assertTrue(html.contains("renderMissionsOnMap"), "Chứa hàm vẽ lộ trình và đội cứu hộ");
+        assertTrue(html.contains("focusMissionFromButton"), "Chứa hàm định vị nhiệm vụ trên bản đồ");
+        assertTrue(html.contains("evidenceModal"), "Chứa modal nghiệm thu hiện trường");
         assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
         System.out.println("Rendered Missions HTML length: " + html.length());
     }
@@ -76,8 +81,42 @@ class CoordinatorControllerTest {
 
         String html = result.getResponse().getContentAsString();
         assertTrue(html.contains("QUẢN LÝ TIẾP TẾ NGÂN SÁCH & QUỸ CỨU TRỢ TỔ CHỨC"), "Tiêu đề quỹ cứu trợ & tiếp tế ngân sách chuẩn");
+        assertTrue(html.contains("rejectBudgetModal"), "Chứa modal từ chối tiếp tế ngân sách");
+        assertTrue(html.contains("submitRejectBudget"), "Chứa script xử lý tiếp tế ngân sách");
         assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
         System.out.println("Rendered Budget HTML length: " + html.length());
+    }
+
+    @Test
+    @WithMockUser(username = "coordinator", roles = {"COORDINATOR"})
+    void testRenderCoordinatorHistory() throws Exception {
+        MvcResult result = mockMvc.perform(get("/coordinator/history"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("LỊCH SỬ ĐIỀU PHỐI CỨU NẠN"), "Tiêu đề lịch sử điều phối chuẩn");
+        assertTrue(html.contains("historyTable"), "Chứa bảng lịch sử điều phối");
+        assertTrue(html.contains("historyPaginationNav"), "Chứa phân trang lịch sử điều phối");
+        assertTrue(html.contains("evidenceModal"), "Chứa modal nghiệm thu minh chứng");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
+        System.out.println("Rendered History HTML length: " + html.length());
+    }
+
+    @Test
+    @WithMockUser(username = "rescuer", roles = {"RESCUER"})
+    void testRenderRescuerResources() throws Exception {
+        MvcResult result = mockMvc.perform(get("/rescuer/resources"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("THỐNG KÊ QUÂN SỐ & KHO TRANG BỊ CỨU HỘ"), "Tiêu đề trang quân số và trang bị chuẩn");
+        assertTrue(html.contains("membersTable"), "Chứa bảng quân số");
+        assertTrue(html.contains("equipmentTable"), "Chứa bảng kho trang bị");
+        assertTrue(html.contains("budgetHistoryTable"), "Chứa bảng lịch sử tiếp tế ngân sách");
+        assertTrue(html.contains("/auth/logout"), "Chứa link/form đăng xuất");
+        System.out.println("Rendered Rescuer Resources HTML length: " + html.length());
     }
 
     @Test
