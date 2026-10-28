@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<div th:fragment="navbar">
+    <!-- Top Emergency Hotline Bar -->
+    <div class="emergency-topbar py-1 text-white">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center small">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-danger text-uppercase fw-bold pulse-badge">
+                    <i class="fa-solid fa-tower-broadcast me-1"></i> Khẩn cấp 24/7
+                </span>
+                <span class="d-none d-md-inline text-light">Tổng đài cứu nạn quốc gia sẵn sàng tiếp nhận cuộc gọi</span>
+            </div>
+            <div class="d-flex align-items-center gap-3 fw-semibold">
+                <span><i class="fa-solid fa-phone text-warning me-1"></i> Cứu hộ: <a href="tel:112" class="text-white text-decoration-underline fw-bold">112</a></span>
+                <span><i class="fa-solid fa-fire-extinguisher text-danger me-1"></i> PCCC/Lụt: <a href="tel:114" class="text-white text-decoration-underline fw-bold">114</a></span>
+                <span><i class="fa-solid fa-truck-medical text-info me-1"></i> Cấp cứu: <a href="tel:115" class="text-white text-decoration-underline fw-bold">115</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-navy sticky-top shadow-sm">
+        <div class="container-fluid px-lg-4">
+            <!-- Brand Logo -->
+            <!-- Brand Logo (Điều hướng vào Dashboard đối với Coordinator, trang chủ đối với người dùng khác) -->
+            <a class="navbar-brand d-flex align-items-center gap-2" sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')" th:href="@{/coordinator/dashboard}">
+                <span class="brand-icon">
+                    <i class="fa-solid fa-shield-halved text-danger fa-lg"></i>
+                </span>
+                <span class="brand-text">
+                    <strong class="text-white tracking-wide">CỨUNẠN</strong><span class="text-danger fw-extrabold">24/7</span>
+                </span>
+            </a>
+            <a class="navbar-brand d-flex align-items-center gap-2" sec:authorize="!hasRole('COORDINATOR') or hasRole('ADMIN')" th:href="@{/}">
+                <span class="brand-icon">
+                    <i class="fa-solid fa-shield-halved text-danger fa-lg"></i>
+                </span>
+                <span class="brand-text">
+                    <strong class="text-white tracking-wide">CỨUNẠN</strong><span class="text-danger fw-extrabold">24/7</span>
+                </span>
+            </a>
+
+            <!-- Mobile Toggler -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links tailored per Role -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <!-- ================= MENU: ĐỘI CỨU HỘ (ROLE_RESCUER) ================= -->
+                    <th:block sec:authorize="hasRole('RESCUER') and !hasRole('ADMIN')">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}">
+                                <i class="fa-solid fa-house me-1"></i> Trang Chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/rescuer/missions}">
+                                <i class="fa-solid fa-gauge-high me-1"></i> Tổng quan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/rescuer/missions#active-missions}">
+                                <i class="fa-solid fa-person-running me-1 text-primary"></i> Nhiệm vụ cứu hộ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/rescuer/routes}">
+                                <i class="fa-solid fa-route me-1 text-warning"></i> Lộ trình di chuyển
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/rescuer/resources}">
+                                <i class="fa-solid fa-boxes-stacked me-1 text-info"></i> Thống kê quân số & trang bị
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/rescuer/missions#completed-missions}">
+                                <i class="fa-solid fa-clipboard-check me-1 text-success"></i> Lịch sử nhiệm vụ
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <!-- ================= MENU: ĐIỀU PHỐI VIÊN (ROLE_COORDINATOR) ================= -->
+                    <th:block sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/coordinator/dashboard}">
+                                <i class="fa-solid fa-tower-broadcast me-1 text-danger"></i> Tổng quan điều phối
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/coordinator/teams}">
+                                <i class="fa-solid fa-truck-medical me-1 text-info"></i> Quản lý đội cứu hộ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/coordinator/missions}">
+                                <i class="fa-solid fa-route me-1 text-primary"></i> Theo dõi cứu hộ & lộ trình
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-semibold" th:href="@{/coordinator/budget}">
+                                <i class="fa-solid fa-vault me-1"></i> Quỹ Cứu Trợ & Ngân Sách
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <!-- ================= MENU: QUẢN TRỊ VIÊN (ROLE_ADMIN) ================= -->
+                    <th:block sec:authorize="hasRole('ADMIN')">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}">
+                                <i class="fa-solid fa-house me-1"></i> Trang Chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/dashboard}">
+                                <i class="fa-solid fa-gauge-high me-1 text-danger"></i> Tổng quan quản trị
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/dashboard#users-section}">
+                                <i class="fa-solid fa-users-gear me-1 text-info"></i> Quản lý tài khoản
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/dashboard#teams-section}">
+                                <i class="fa-solid fa-truck-medical me-1 text-warning"></i> Quản lý đội cứu hộ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/audit-logs}">
+                                <i class="fa-solid fa-clock-rotate-left me-1 text-secondary"></i> Nhật ký hoạt động
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <!-- ================= MENU: KHÁCH & NGƯỜI DÂN (CITIZEN / ANONYMOUS) ================= -->
+                    <th:block sec:authorize="!hasAnyRole('RESCUER', 'COORDINATOR', 'ADMIN')">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}"><i class="fa-solid fa-house me-1"></i> Trang Chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" th:href="@{/feed}"><i class="fa-solid fa-newspaper me-1"></i> Bảng Tin</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/map}"><i class="fa-solid fa-map-location-dot me-1"></i> Bản Đồ Cứu Hộ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/map#shelters}"><i class="fa-solid fa-campground me-1"></i> Điểm Sơ Tán</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" th:href="@{/donations}">
+                                <i class="fa-solid fa-hand-holding-heart text-danger me-1"></i> Ủng Hộ Cứu Trợ
+                            </a>
+                        </li>
+                    </th:block>
+                </ul>
+
+                <!-- Action Buttons: Notification Bell & Auth -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Nút SOS khẩn cấp (chỉ hiển thị cho người dân/khách) -->
+                    <a sec:authorize="!hasAnyRole('COORDINATOR', 'ADMIN', 'RESCUER')" th:href="@{/sos}" class="btn btn-sos pulse-button text-white fw-bold px-3 py-2 shadow">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> GỬI SOS KHẨN CẤP
+                    </a>
+
+                    <!-- ================= CHUÔNG THÔNG BÁO CHO NGƯỜI ĐÃ ĐĂNG NHẬP ================= -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown me-1 position-relative">
+                        <button class="btn btn-dark btn-sm position-relative border-secondary rounded-pill px-3 py-2"
+                                type="button" id="notificationBellBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo hệ thống">
+                            <i class="fa-solid fa-bell fa-lg text-warning"></i>
+                            <span id="navUnreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="display: none; font-size: 0.7rem;">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-0 border-0" style="width: 350px; max-width: 90vw; font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, sans-serif;" aria-labelledby="notificationBellBtn">
+                            <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-navy text-white rounded-top">
+                                <span class="fw-bold"><i class="fa-solid fa-bell me-2 text-warning"></i>Thông Báo</span>
+                                <button type="button" class="btn btn-sm btn-link text-light text-decoration-none p-0 small" id="markAllReadNavBtn" style="font-size: 0.8rem;">
+                                    Đánh dấu đã đọc
+                                </button>
+                            </div>
+                            <div id="navNotificationList" class="list-group list-group-flush" style="max-height: 360px; overflow-y: auto;">
+                                <div class="text-center py-4 text-muted small">
+                                    <div class="spinner-border spinner-border-sm text-secondary mb-1" role="status"></div>
+                                    <div>Đang tải thông báo...</div>
+                                </div>
+                            </div>
+                            <div class="p-2 text-center border-top bg-light rounded-bottom">
+                                <a th:href="@{/notifications}" class="small text-decoration-none text-primary fw-bold">
+                                    Xem tất cả thông báo <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Not Logged In -->
+                    <div sec:authorize="isAnonymous()" class="d-flex gap-2 ms-2">
+                        <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm px-3">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Đăng Nhập
+                        </a>
+                        <a th:href="@{/auth/register}" class="btn btn-primary btn-sm px-3">
+                            <i class="fa-solid fa-user-plus me-1"></i> Đăng Ký
+                        </a>
+                    </div>
+
+                    <!-- Logged In User Dropdown -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown ms-1">
+                        <a class="btn btn-dark btn-sm dropdown-toggle d-flex align-items-center gap-2 border-secondary"
+                           href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-circle-user fa-lg text-info"></i>
+                            <span sec:authentication="name" class="d-none d-sm-inline">Người dùng</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow">
+                            <li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-solid fa-id-card me-2 text-info"></i> Hồ sơ cá nhân</a></li>
+                            <li sec:authorize="hasRole('RESCUER')">
+                                <a class="dropdown-item" th:href="@{/rescuer/resources}"><i class="fa-solid fa-boxes-stacked me-2 text-warning"></i> Kho quân số & trang bị</a>
+                            </li>
+                            <li sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item" th:href="@{/admin/audit-logs}"><i class="fa-solid fa-shield-halved me-2 text-danger"></i> Nhật ký kiểm toán</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/auth/logout}" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification Bell Handling Script -->
+    <script sec:authorize="isAuthenticated()">
+        (function() {
+            const badge = document.getElementById('navUnreadBadge');
+            const listEl = document.getElementById('navNotificationList');
+            const markAllBtn = document.getElementById('markAllReadNavBtn');
+            const bellBtn = document.getElementById('notificationBellBtn');
+
+            async function updateUnreadCount() {
+                try {
+                    const res = await fetch('/api/notifications/unread-count');
+                    if (res.ok) {
+                        const data = await res.json();
+                        const count = data.unreadCount || 0;
+                        if (badge) {
+                            if (count > 0) {
+                                badge.textContent = count > 99 ? '99+' : count;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // silent fail
+                }
+            }
+
+            async function loadRecentNotifications() {
+                if (!listEl) return;
+                try {
+                    const res = await fetch('/api/notifications/recent');
+                    if (res.ok) {
+                        const items = await res.json();
+                        if (!items || items.length === 0) {
+                            listEl.innerHTML = '<div class="text-center py-4 text-muted small"><i class="fa-regular fa-bell-slash fa-2x mb-2 text-secondary opacity-50 d-block"></i>Không có thông báo mới</div>';
+                            return;
+                        }
+                        listEl.innerHTML = items.map(n => {
+                            const icon = n.type === 'MISSION_NEW' ? 'fa-triangle-exclamation text-danger' :
+                                         n.type === 'MISSION_STATUS' ? 'fa-person-running text-primary' :
+                                         n.type === 'EQUIPMENT_ALERT' ? 'fa-boxes-stacked text-warning' :
+                                         n.type === 'SOS_NEW' ? 'fa-tower-broadcast text-danger' : 'fa-bell text-info';
+                            const bg = n.read ? 'bg-white' : 'bg-light border-start border-3 border-primary';
+                            const target = n.targetUrl ? n.targetUrl : '#';
+                            const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '';
+                            return `
+                                <a href="${target}" class="list-group-item list-group-item-action ${bg} py-2 px-3 notification-nav-item" data-id="${n.id}">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                        <strong class="small text-navy text-truncate" style="max-width: 220px;">
+                                            <i class="fa-solid ${icon} me-1"></i> ${n.title}
+                                        </strong>
+                                        <small class="text-muted" style="font-size: 0.75rem;">${timeStr}</small>
+                                    </div>
+                                    <p class="mb-0 text-muted small text-truncate" style="font-size: 0.8rem;">${n.message}</p>
+                                </a>
+                            `;
+                        }).join('');
+
+                        // Attach click handlers to mark single read
+                        listEl.querySelectorAll('.notification-nav-item').forEach(el => {
+                            el.addEventListener('click', async () => {
+                                const id = el.dataset.id;
+                                try {
+                                    await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+                                    updateUnreadCount();
+                                } catch (e) {}
+                            });
+                        });
+                    }
+                } catch (e) {
+                    listEl.innerHTML = '<div class="text-center py-3 text-danger small">Lỗi tải thông báo</div>';
+                }
+            }
+
+            if (bellBtn) {
+                bellBtn.addEventListener('show.bs.dropdown', function() {
+                    loadRecentNotifications();
+                });
+            }
+
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    try {
+                        await fetch('/api/notifications/read-all', { method: 'PUT' });
+                        if (badge) badge.style.display = 'none';
+                        loadRecentNotifications();
+                    } catch (e) {}
+                });
+            }
+
+            // Init & periodic check every 30s
+            updateUnreadCount();
+            setInterval(updateUnreadCount, 30000);
+        })();
+    </script>
+</div>
+
+</body>
+</html>

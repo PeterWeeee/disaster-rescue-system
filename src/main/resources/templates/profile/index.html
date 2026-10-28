@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#profile-content})}">
+<body>
+
+<div id="profile-content" class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-navy text-white text-center py-4">
+                        <i class="fa-solid fa-circle-user fa-3x text-info mb-2"></i>
+                        <h4 class="fw-bold mb-0" th:text="${user != null ? user.fullName : 'Hồ Sơ Cá Nhân'}">HỒ SƠ CÁ NHÂN</h4>
+                        <span class="badge bg-danger mt-1" th:text="${user != null and user.role != null ? user.role.name : 'ROLE_CITIZEN'}">ROLE</span>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 35%;">Tên đăng nhập:</th>
+                                    <td><code class="fw-bold fs-6" th:text="${user != null ? user.username : ''}">username</code></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Họ và tên:</th>
+                                    <td class="fw-bold" th:text="${user != null ? user.fullName : ''}">Nguyễn Văn A</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Số điện thoại:</th>
+                                    <td th:text="${user != null ? user.phone : ''}">0987654321</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Email:</th>
+                                    <td th:text="${user != null and user.email != null ? user.email : 'Chưa cập nhật'}">email</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Địa chỉ:</th>
+                                    <td th:text="${user != null and user.address != null ? user.address : 'Chưa cập nhật'}">Địa chỉ</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Trạng thái:</th>
+                                    <td><span class="badge bg-success">HOẠT ĐỘNG (ACTIVE)</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a th:href="@{/}" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Trang Chủ
+                            </a>
+                            <a th:href="@{/auth/logout}" class="btn btn-danger">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

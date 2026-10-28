@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout('Cổng Quyên Góp & Ủng Hộ Cứu Trợ Lũ Lụt - CứuNạn 24/7', ~{::#donation-content})}">
+<body>
+
+<div id="donation-content">
+
+    <!-- CSS tùy biến riêng cho trang Quyên góp & Cứu trợ -->
+    <style>
+        .donation-hero {
+            background: linear-gradient(135deg, #09111e 0%, #0f172a 40%, #1e293b 70%, #7f1d1d 100%) !important;
+            color: #ffffff !important;
+        }
+        .donation-stat-card {
+            background-color: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff !important;
+        }
+        .btn-quick-amount {
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-quick-amount.active {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .payment-method-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+        }
+        .payment-method-card:hover {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+
+    <!-- Hero Banner Cứu Trợ -->
+    <section class="py-5 donation-hero position-relative">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <span class="badge bg-danger text-white border border-danger-subtle px-3 py-2 rounded-pill text-uppercase fw-bold mb-3 shadow-sm">
+                        <i class="fa-solid fa-heart-pulse me-1 text-white"></i> Quỹ Cứu Trợ Khẩn Cấp Thiên Tai & Bão Lũ
+                    </span>
+                    <h1 class="display-4 fw-extrabold text-white mb-3" style="text-shadow: 0 2px 10px rgba(0,0,0,0.6);">
+                        CHUNG TAY HƯỚNG VỀ <br>
+                        <span class="text-warning">ĐỒNG BÀO VÙNG BÃO LŨ</span>
+                    </h1>
+                    <p class="lead text-light opacity-90 mx-auto" style="max-width: 700px; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
+                        Mỗi đóng góp dù nhỏ nhất của quý vị là nguồn sống, chiếc áo phao, gói lương khô và cano cứu nạn tiếp cận kịp thời bà con đang bị cô lập giữa dòng nước xiết.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="row g-3 mt-4 justify-content-center">
+                <div class="col-md-4 col-sm-6">
+                    <div class="card donation-stat-card shadow-sm text-center p-3 rounded-4">
+                        <small class="text-white-50 text-uppercase fw-bold">Tổng tiền tiếp nhận</small>
+                        <h3 class="fw-extrabold text-warning my-1" th:text="${#numbers.formatDecimal(stats.totalAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                            0 ₫
+                        </h3>
+                        <small class="text-light opacity-90">
+                            <i class="fa-solid fa-bolt text-warning me-1"></i>Minh bạch thời gian thực
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card donation-stat-card shadow-sm text-center p-3 rounded-4">
+                        <small class="text-white-50 text-uppercase fw-bold">Lượt ủng hộ</small>
+                        <h3 class="fw-extrabold text-white my-1" th:text="${stats.totalCount + ' lượt'}">
+                            0 lượt
+                        </h3>
+                        <small class="text-light opacity-90">
+                            <i class="fa-solid fa-heart text-danger me-1"></i>Triệu trái tim hướng về vùng lũ
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="card donation-stat-card shadow-sm p-3 rounded-4">
+                        <div class="d-flex justify-content-between text-white-50 small fw-bold mb-1">
+                            <span>MỤC TIÊU KHẨN CẤP</span>
+                            <span class="text-white fw-bold" th:text="${#numbers.formatDecimal(stats.targetAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">500,000,000 ₫</span>
+                        </div>
+                        <div class="progress" style="height: 12px; background-color: rgba(255,255,255,0.2);">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                 role="progressbar"
+                                 th:style="'width: ' + (${stats.totalAmount} > 0 ? (${stats.totalAmount} * 100 / ${stats.targetAmount}) : 2) + '%;'"
+                                 aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-center text-white-50 mt-1 d-block">Trang bị cano cứu hộ & nhu yếu phẩm</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Section: Form & Golden Book -->
+    <section class="py-5 bg-light">
+        <div class="container">
+
+            <!-- Flash Error Alert -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- Left Column: Donation Form Card -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                        <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                            <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle">
+                                <i class="fa-solid fa-hand-holding-heart fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0 text-dark">Gửi Tấm Lòng Cứu Trợ</h3>
+                                <p class="text-muted small mb-0">Ủng hộ trực tuyến an toàn qua Cổng VNPay, VietQR Napas 24/7 hoặc Ví MoMo</p>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/donations/submit}" th:object="${donationDto}" method="post" id="donationForm">
+
+                            <!-- Step 1: Chọn số tiền -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">
+                                    <i class="fa-solid fa-coins text-warning me-1"></i> Chọn hoặc nhập số tiền ủng hộ (₫):
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <!-- Fast amount buttons -->
+                                <div class="d-flex flex-wrap gap-2 mb-3" id="quickAmountContainer">
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="50000" onclick="selectAmount('50000', this)">50,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="100000" onclick="selectAmount('100000', this)">100,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount active" data-val="200000" onclick="selectAmount('200000', this)">200,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="500000" onclick="selectAmount('500000', this)">500,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="1000000" onclick="selectAmount('1000000', this)">1,000,000 ₫</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-quick-amount" data-val="2000000" onclick="selectAmount('2000000', this)">2,000,000 ₫</button>
+                                </div>
+
+                                <div class="input-group input-group-lg">
+                                    <input type="number" step="1000" min="10000" class="form-control fw-bold text-primary"
+                                           id="amountInput" th:field="*{amount}" placeholder="Nhập số tiền tùy tâm (tối thiểu 10,000 ₫)" required>
+                                    <span class="input-group-text fw-bold text-muted">VNĐ</span>
+                                </div>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                            </div>
+
+                            <!-- Step 2: Thông tin nhà hảo tâm -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="fa-solid fa-user me-1 text-secondary"></i> Họ và tên người ủng hộ:
+                                    </label>
+                                    <input type="text" class="form-control" th:field="*{donorName}"
+                                           placeholder="Để trống nếu muốn ẩn danh">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="fa-solid fa-phone me-1 text-secondary"></i> Số điện thoại:
+                                    </label>
+                                    <input type="tel" class="form-control" th:field="*{donorPhone}"
+                                           placeholder="Nhập số điện thoại (tùy chọn)">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="fa-solid fa-envelope me-1 text-secondary"></i> Email nhận biên lai & thư tri ân:
+                                    </label>
+                                    <input type="email" class="form-control" th:field="*{donorEmail}"
+                                           placeholder="Nhập email để nhận chứng nhận đóng góp điện tử">
+                                    <small class="text-muted">Hệ thống sẽ gửi email thư tri ân và biên nhận sau khi hoàn tất giao dịch.</small>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Khu vực ưu tiên & Lời nhắn -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="fa-solid fa-location-dot me-1 text-danger"></i> Vùng ưu tiên cứu trợ:
+                                    </label>
+                                    <select class="form-select" th:field="*{targetProvince}">
+                                        <option value="TOAN_MIEN_TRUNG">Toàn miền Trung (Ưu tiên vùng cao nhất)</option>
+                                        <option value="Quảng Bình">Quảng Bình</option>
+                                        <option value="Quảng Trị">Quảng Trị</option>
+                                        <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+                                        <option value="Đà Nẵng">Đà Nẵng</option>
+                                        <option value="Quảng Nam">Quảng Nam</option>
+                                        <option value="Yên Bái">Yên Bái</option>
+                                        <option value="Lào Cai">Lào Cai</option>
+                                        <option value="CUU_HO_KHAN_CAP">Đội phản ứng nhanh khẩn cấp</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="fa-solid fa-comment-dots me-1 text-secondary"></i> Lời nhắn gửi đồng bào:
+                                    </label>
+                                    <input type="text" class="form-control" th:field="*{message}"
+                                           placeholder="Lời động viên bà con vượt qua bão lũ...">
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Chọn phương thức thanh toán -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark d-block">
+                                    <i class="fa-solid fa-credit-card me-1 text-primary"></i> Chọn phương thức thanh toán:
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="row g-3">
+                                    <!-- VNPay Option -->
+                                    <div class="col-md-4">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
+                                            <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
+                                                   th:field="*{paymentMethod}" value="VNPAY" checked>
+                                            <div class="fw-bold text-primary mb-1 mt-2">
+                                                <i class="fa-solid fa-building-columns fa-2x mb-2 d-block"></i>
+                                                Cổng VNPay
+                                            </div>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">ATM, Mobile Banking, Visa/Master</small>
+                                        </label>
+                                    </div>
+
+                                    <!-- VietQR Option -->
+                                    <div class="col-md-4">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
+                                            <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
+                                                   th:field="*{paymentMethod}" value="VIETQR">
+                                            <div class="fw-bold text-success mb-1 mt-2">
+                                                <i class="fa-solid fa-qrcode fa-2x mb-2 d-block"></i>
+                                                VietQR 24/7
+                                            </div>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Quét mã QR mọi ngân hàng Napas</small>
+                                        </label>
+                                    </div>
+
+                                    <!-- MoMo Option -->
+                                    <div class="col-md-4">
+                                        <label class="payment-method-card d-block p-3 rounded-3 text-center cursor-pointer h-100 position-relative">
+                                            <input type="radio" class="form-check-input position-absolute top-0 end-0 m-2"
+                                                   th:field="*{paymentMethod}" value="MOMO">
+                                            <div class="fw-bold text-danger mb-1 mt-2">
+                                                <i class="fa-solid fa-wallet fa-2x mb-2 d-block"></i>
+                                                Ví MoMo
+                                            </div>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Quét mã Ví điện tử MoMo</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('paymentMethod')}" th:errors="*{paymentMethod}"></div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold py-3 shadow-lg d-flex align-items-center justify-content-center gap-2">
+                                <i class="fa-solid fa-heart fa-beat text-white"></i>
+                                <span>TIẾN HÀNH ỦNG HỘ CỨU TRỢ</span>
+                            </button>
+
+                            <div class="text-center mt-3 text-muted small">
+                                <i class="fa-solid fa-shield-check text-success me-1"></i> Giao dịch bảo mật 256-bit SSL | 100% dòng tiền được giải ngân trực tiếp cho công tác cứu nạn.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Sổ Vàng Tri Ân (Live Table) -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="fa-solid fa-award text-warning me-2"></i> BẢNG VÀNG TRI ÂN
+                            </h5>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small">
+                                <span class="spinner-grow spinner-grow-sm text-success me-1" style="width: 0.5rem; height: 0.5rem;" role="status"></span>
+                                Cập nhật liên tục
+                            </span>
+                        </div>
+
+                        <!-- Danh sách đóng góp mới nhất -->
+                        <div class="overflow-auto" style="max-height: 600px;">
+                            <div th:if="${recentDonations == null or recentDonations.empty}" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-hand-holding-heart fa-3x text-secondary opacity-50 mb-3 d-block"></i>
+                                <p class="mb-1">Chưa có lượt ủng hộ nào hôm nay.</p>
+                                <small>Hãy là người đầu tiên trao gửi yêu thương!</small>
+                            </div>
+
+                            <div th:each="donor : ${recentDonations}" class="donor-item p-3 mb-2 rounded-3 border bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div class="fw-bold text-dark">
+                                        <i class="fa-solid fa-circle-user text-primary me-1"></i>
+                                        <span th:text="${donor.donorName}">Nguyễn Văn A</span>
+                                    </div>
+                                    <span class="badge bg-success fs-6 fw-bold" th:text="${donor.formattedAmount}">
+                                        200,000 ₫
+                                    </span>
+                                </div>
+                                <div th:if="${donor.message != null and !donor.message.empty}" class="text-muted small fst-italic mb-1">
+                                    "<span th:text="${donor.message}">Ủng hộ bà con sớm vượt qua khó khăn</span>"
+                                </div>
+                                <div class="d-flex justify-content-between text-secondary small" style="font-size: 0.75rem;">
+                                    <span>
+                                        <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                        <span th:text="${donor.targetProvince}">Toàn miền Trung</span>
+                                    </span>
+                                    <span th:text="${#temporals.format(donor.paidAt, 'dd/MM/yyyy HH:mm')}">
+                                        27/10/2026 14:00
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cam kết minh bạch -->
+                        <div class="mt-4 p-3 bg-light rounded-3 border text-muted small">
+                            <h6 class="fw-bold text-dark mb-2">
+                                <i class="fa-solid fa-circle-info text-primary me-1"></i> Cam Kết Của CứuNạn 24/7
+                            </h6>
+                            <ul class="mb-0 ps-3">
+                                <li>Mọi khoản đóng góp đều được lưu vết minh bạch trên cơ sở dữ liệu hệ thống.</li>
+                                <li>Điều phối trực tiếp mua trang thiết bị phao, lương khô, thuốc men cấp phát tại hiện trường.</li>
+                                <li>Hỗ trợ xuất giấy chứng nhận/biên nhận điện tử phục vụ lưu niệm và kiểm toán.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript nằm BÊN TRONG id="donation-content" để Thymeleaf nạp đầy đủ vào layout -->
+    <script>
+        function selectAmount(val, element) {
+            const input = document.getElementById('amountInput');
+            if (input) {
+                input.value = val;
+            }
+            document.querySelectorAll('.btn-quick-amount').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            });
+            if (element) {
+                element.classList.remove('btn-outline-secondary');
+                element.classList.add('active', 'btn-primary');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const amountInput = document.getElementById('amountInput');
+            if (amountInput) {
+                if (!amountInput.value) {
+                    amountInput.value = '200000';
+                }
+                amountInput.addEventListener('input', function () {
+                    const currentVal = this.value;
+                    document.querySelectorAll('.btn-quick-amount').forEach(btn => {
+                        if (btn.getAttribute('data-val') === currentVal) {
+                            btn.classList.remove('btn-outline-secondary');
+                            btn.classList.add('active', 'btn-primary');
+                        } else {
+                            btn.classList.remove('active', 'btn-primary');
+                            btn.classList.add('btn-outline-secondary');
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

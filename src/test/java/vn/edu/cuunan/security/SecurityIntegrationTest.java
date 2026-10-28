@@ -1,0 +1,159 @@
+package vn.edu.cuunan.security;
+
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import vn.edu.cuunan.dto.LoginRequestDto;
+import vn.edu.cuunan.dto.RegisterRequestDto;
+import vn.edu.cuunan.entity.User;
+import vn.edu.cuunan.repository.UserRepository;
+import vn.edu.cuunan.service.AuthService;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("local")
+class SecurityIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    @Test
+    @DisplayName("DoD 1: Trang chủ và các trang công khai truy cập không cần đăng nhập")
+    void testPublicEndpoints() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/auth/login"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/auth/register"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("DoD 2: Truy cập trang bảo vệ khi chưa đăng nhập -> chuyển hướng về /auth/login")
+    void testUnauthenticatedRedirect() throws Exception {
+        mockMvc.perform(get("/coordinator/dashboard"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/login?error=unauthorized"));
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("DoD 3: Đăng ký người dân mới thành công -> mật khẩu được băm BCrypt")
+    void testRegisterCitizen() {
+        String testUser = "citizen_test_" + System.currentTimeMillis();
+        String testPhone = "098" + (System.currentTimeMillis() % 10000000);
+
+        RegisterRequestDto dto = new RegisterRequestDto(
+                "Người Dân Kiểm Thử",
+                testUser,
+                testPhone,
+                "secret123",
+                "test@gmail.com",
+                "Đà Nẵng",
+                "ROLE_CITIZEN"
+        );
+
+        User registered = authService.register(dto);
+        assertNotNull(registered.getId());
+        assertNotEquals("secret123", registered.getPassword());
+        assertTrue(registered.getPassword().startsWith("$2a$") || registered.getPassword().startsWith("$2b$"));
+        assertEquals("ROLE_CITIZEN", registered.getRole().getName());
+    }
+
+    @Test
+    @DisplayName("DoD 4: Đăng nhập thành công -> Cấp phát JWT token hợp lệ")
+    void testLoginSuccess() {
+        // Tài khoản 'coordinator' tạo sẵn từ DataInitializer
+        LoginRequestDto loginDto = new LoginRequestDto("coordinator", "123456");
+        var response = authService.authenticate(loginDto);
+
+        assertNotNull(response.getToken());
+        assertEquals("coordinator", response.getUsername());
+        assertEquals("ROLE_COORDINATOR", response.getRole());
+        assertTrue(tokenProvider.validateToken(response.getToken()));
+    }
+
+    @Test
+    @DisplayName("DoD 5: Tài khoản CITIZEN truy cập trang COORDINATOR -> Bị chặn 403 Forbidden")
+    void testCitizenForbiddenOnCoordinatorDashboard() throws Exception {
+        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+
+        mockMvc.perform(get("/coordinator/dashboard")
+                        .cookie(new Cookie("jwt_token", citizenToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("DoD 6: Tài khoản COORDINATOR có JWT hợp lệ truy cập Dashboard thành công")
+    void testCoordinatorAccessDashboardSuccess() throws Exception {
+        String coordToken = tokenProvider.generateToken("coordinator", "ROLE_COORDINATOR", "Điều Phối Viên");
+
+        mockMvc.perform(get("/coordinator/dashboard")
+                        .cookie(new Cookie("jwt_token", coordToken)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("DoD 7: Cổng quyên góp cho phép gửi biểu mẫu POST công khai không bị chặn 403 CSRF")
+    void testDonationSubmitWithoutCsrf() throws Exception {
+        mockMvc.perform(post("/donations/submit")
+                        .param("amount", "200000")
+                        .param("paymentMethod", "VIETQR"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/donations/pay/**"));
+    }
+    @Test
+    @DisplayName("DoD 8: Tài khoản RESCUER gửi yêu cầu tiếp tế ngân sách không bị lỗi 403")
+    void testRescuerSubmitBudgetRequestSuccess() throws Exception {
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+
+        mockMvc.perform(post("/rescuer/resources/request-budget")
+                        .cookie(new Cookie("jwt_token", rescuerToken))
+                        .param("amount", "5000000")
+                        .param("category", "SUPPLY")
+                        .param("urgencyLevel", "HIGH")
+                        .param("purpose", "Mua mì tôm và nước sạch khẩn cấp"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/rescuer/resources"));
+    }
+
+    @Test
+    @DisplayName("DoD 9: Tài khoản RESCUER truy vấn API lộ trình OSRM /api/rescuer/assignments/{id}/route thành công")
+    void testRescuerGetAssignmentRouteSuccess() throws Exception {
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+
+        mockMvc.perform(get("/api/rescuer/assignments/1/route")
+                        .cookie(new Cookie("jwt_token", rescuerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.routeDistanceKm").exists())
+                .andExpect(jsonPath("$.terrainType").exists());
+
+        mockMvc.perform(get("/api/rescuer/assignments/1/route-terrain-analysis")
+                        .cookie(new Cookie("jwt_token", rescuerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.routeDistanceKm").exists());
+    }
+}

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#rescuer-content})}">
+<head>
+    <title th:text="${pageTitle}">Tác Nghiệp Cứu Hộ</title>
+</head>
+<body>
+
+<div id="rescuer-content" class="py-3">
+    <div class="container-fluid px-3 px-lg-4" style="max-width: 1200px;">
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-person-military-pointing text-warning me-2"></i> TÁC NGHIỆP CỨU HỘ HIỆN TRƯỜNG (RESCUER PORTAL)
+                </h3>
+                <small class="text-muted">Nhận lệnh điều phối, tiếp cận hiện trường và báo cáo nghiệm thu cứu nạn</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fa-solid fa-rotate me-1"></i> Cập nhật nhiệm vụ
+                </button>
+            </div>
+        </div>
+
+        <!-- Team Information Banner -->
+        <div th:if="${myTeam != null}" class="card border-0 shadow-sm rounded-3 mb-3 bg-navy text-white">
+            <div class="card-body p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <div class="text-warning small text-uppercase fw-bold">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Đơn vị trực thuộc
+                        </div>
+                        <h4 class="fw-bold mb-1" th:text="${myTeam.teamName}">Đội Cứu Hộ Đà Nẵng</h4>
+                        <div class="small opacity-75 d-flex flex-wrap gap-3">
+                            <span><i class="fa-solid fa-phone me-1"></i> <span th:text="${myTeam.contactPhone}">0900000000</span></span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge py-2 px-3 fs-6"
+                              th:classappend="${myTeam.status == 'AVAILABLE' ? 'bg-success' : (myTeam.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                              th:text="${myTeam.status == 'AVAILABLE' ? 'SẴN SÀNG NHẬN NHIỆM VỤ' : (myTeam.status == 'BUSY' ? 'ĐANG LÀM NHIỆM VỤ' : 'OFFLINE')}">
+                            SẴN SÀNG
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${myTeam == null}" class="alert alert-warning border-0 shadow-sm mb-3">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Tài khoản của bạn chưa được gắn vào Đội cứu hộ nào. Vui lòng liên hệ Quản trị viên (Admin) để được phân công đội tác nghiệp.
+        </div>
+
+        <!-- Task Tabs -->
+        <ul class="nav nav-pills nav-fill bg-white p-2 rounded-3 shadow-sm mb-3" id="missionTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold position-relative" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-missions" type="button" role="tab">
+                    <i class="fa-solid fa-bell text-warning me-1"></i> Mới Đến Chờ Nhận
+                    <span class="badge bg-danger ms-1" th:text="${pendingCount}">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold position-relative" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-missions" type="button" role="tab">
+                    <i class="fa-solid fa-person-running text-primary me-1"></i> Đang Thực Hiện
+                    <span class="badge bg-primary ms-1" th:text="${activeCount}">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-missions" type="button" role="tab">
+                    <i class="fa-solid fa-circle-check text-success me-1"></i> Lịch Sử Hoàn Thành
+                    <span class="badge bg-success ms-1" th:text="${completedCount}">0</span>
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="missionTabContent">
+            <!-- TAB 1: Nhiệm vụ chờ xác nhận (PENDING) -->
+            <div class="tab-pane fade show active" id="pending-missions" role="tabpanel">
+                <div th:if="${pendingCount == 0}" class="text-center py-5 bg-white rounded-3 shadow-sm text-muted">
+                    <i class="fa-solid fa-circle-check fa-3x text-success opacity-50 mb-2"></i>
+                    <h5>Hiện không có nhiệm vụ mới nào cần xác nhận!</h5>
+                    <p class="small mb-0">Khi Coordinator điều phối ca SOS cho đội, thông báo sẽ hiển thị ngay tại đây.</p>
+                </div>
+
+                <div class="row g-3">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'PENDING'}" class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 border-top border-4 border-warning">
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge"
+                                              th:classappend="${a.sosRequest.urgencyLevel == 'CRITICAL' ? 'bg-danger' : (a.sosRequest.urgencyLevel == 'HIGH' ? 'bg-warning text-dark' : 'bg-info')}"
+                                              th:text="${a.sosRequest.urgencyLevel}">
+                                            CRITICAL
+                                        </span>
+                                        <small class="text-muted" th:text="${#temporals.format(a.assignedAt, 'HH:mm dd/MM')}">10:30</small>
+                                    </div>
+
+                                    <h5 class="fw-bold text-navy mb-1" th:text="${a.sosRequest.contactName}">Trần Thị Bé</h5>
+                                    
+                                    <div class="text-danger fw-bold mb-2">
+                                        <i class="fa-solid fa-phone me-1"></i>
+                                        <a th:href="'tel:' + ${a.sosRequest.contactPhone}" class="text-danger text-decoration-none" th:text="${a.sosRequest.contactPhone}">0912345678</a>
+                                    </div>
+
+                                    <p class="small text-muted mb-2">
+                                        <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                        <span th:text="${a.sosRequest.addressDetail}">Địa chỉ</span>
+                                    </p>
+
+                                    <div class="d-flex flex-wrap gap-1 mb-2 small">
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fa-solid fa-users me-1"></i> <strong th:text="${a.sosRequest.peopleCount}">1</strong> người
+                                        </span>
+                                        <span th:if="${a.sosRequest.hasElderly}" class="badge bg-danger-subtle text-danger border">Người già</span>
+                                        <span th:if="${a.sosRequest.hasChildren}" class="badge bg-warning-subtle text-warning-emphasis border">Trẻ em</span>
+                                        <span th:if="${a.sosRequest.hasInjured}" class="badge bg-danger-subtle text-danger border">Bị thương</span>
+                                    </div>
+
+                                    <div th:if="${a.reportNotes}" class="alert alert-info py-2 px-3 small mb-2">
+                                        <i class="fa-solid fa-bullhorn me-1"></i> <span th:text="${a.reportNotes}">Chỉ đạo</span>
+                                    </div>
+
+                                    <div th:if="${a.sosRequest.description}" class="small text-secondary fst-italic mb-3 bg-light p-2 rounded" th:text="${a.sosRequest.description}">
+                                        Mô tả
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-top d-flex gap-2">
+                                    <button class="btn btn-outline-danger btn-sm w-50 btn-reject"
+                                            th:attr="data-id=${a.id}">
+                                        <i class="fa-solid fa-xmark me-1"></i> Từ chối
+                                    </button>
+                                    <button class="btn btn-success btn-sm w-50 fw-bold btn-accept"
+                                            th:attr="data-id=${a.id}">
+                                        <i class="fa-solid fa-check me-1"></i> Tiếp nhận
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Nhiệm vụ đang thực hiện (ACCEPTED, IN_PROGRESS) -->
+            <div class="tab-pane fade" id="active-missions" role="tabpanel">
+                <div th:if="${activeCount == 0}" class="text-center py-5 bg-white rounded-3 shadow-sm text-muted">
+                    <i class="fa-solid fa-person-shelter fa-3x text-primary opacity-50 mb-2"></i>
+                    <h5>Hiện không có nhiệm vụ nào đang thực hiện.</h5>
+                    <p class="small mb-0">Khi bạn tiếp nhận một nhiệm vụ mới, nhiệm vụ đó sẽ hiển thị tại đây để bạn cập nhật tiến độ.</p>
+                </div>
+
+                <div class="row g-3">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'ACCEPTED' or a.status == 'IN_PROGRESS'}" class="col-md-6">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 border-top border-4 border-primary">
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary" th:text="${a.status == 'ACCEPTED' ? 'ĐÃ TIẾP NHẬN' : (a.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : a.status)}">IN_PROGRESS</span>
+                                        <span class="badge"
+                                              th:classappend="${a.sosRequest.urgencyLevel == 'CRITICAL' ? 'bg-danger' : 'bg-warning text-dark'}"
+                                              th:text="${a.sosRequest.urgencyLevel == 'CRITICAL' ? 'NGUY CẤP' : (a.sosRequest.urgencyLevel == 'HIGH' ? 'KHẨN CẤP' : (a.sosRequest.urgencyLevel == 'MEDIUM' ? 'TRUNG BÌNH' : 'THẤP'))}">CRITICAL</span>
+                                    </div>
+
+                                    <h4 class="fw-bold text-navy mb-1" th:text="${a.sosRequest.contactName}">Trần Thị Bé</h4>
+                                    
+                                    <div class="d-flex gap-2 my-2">
+                                        <a th:href="'tel:' + ${a.sosRequest.contactPhone}" class="btn btn-danger btn-sm fw-bold">
+                                            <i class="fa-solid fa-phone me-1"></i> Gọi ngay: <span th:text="${a.sosRequest.contactPhone}"></span>
+                                        </a>
+                                        <a th:href="'https://www.google.com/maps/dir/?api=1&destination=' + ${a.sosRequest.latitude} + ',' + ${a.sosRequest.longitude}"
+                                           target="_blank" class="btn btn-outline-primary btn-sm">
+                                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Chỉ đường
+                                        </a>
+                                    </div>
+
+                                    <div class="p-2 bg-light rounded-2 mb-2 small">
+                                        <strong>Địa chỉ:</strong> <span th:text="${a.sosRequest.addressDetail}">Địa chỉ</span><br>
+                                        <strong>Tọa độ GPS:</strong> [<span th:text="${a.sosRequest.latitude}"></span>, <span th:text="${a.sosRequest.longitude}"></span>]<br>
+                                        <strong>Số người cần cứu:</strong> <span class="badge bg-dark" th:text="${a.sosRequest.peopleCount}">1</span> người
+                                    </div>
+
+                                    <div th:if="${a.sosRequest.imageUrl}" class="mb-2">
+                                        <img th:src="${a.sosRequest.imageUrl}" class="img-fluid rounded border" style="max-height: 150px; object-fit: cover;" alt="Hiện trường" />
+                                    </div>
+
+                                    <div th:if="${a.status == 'IN_PROGRESS'}" class="p-2 mb-2 rounded bg-light border border-primary">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-bold text-primary">
+                                                <i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Định vị GPS thời gian thực:
+                                            </span>
+                                            <span class="badge bg-success" id="gpsStatusBadge">ĐANG TRUYỀN TÍN HIỆU</span>
+                                        </div>
+                                        <div class="small text-muted mb-1">
+                                            Tọa độ đội hiện tại: <strong id="rescuerCoordText">[<span th:text="${myTeam != null ? myTeam.currentLatitude : '--'}"></span>, <span th:text="${myTeam != null ? myTeam.currentLongitude : '--'}"></span>]</strong>
+                                        </div>
+                                        <div class="small text-dark">
+                                            Khoảng cách đến nạn nhân: <strong class="text-danger fs-6" id="rescuerDistText">Đang theo dõi...</strong>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hiển thị phương tiện & trang thiết bị đã chọn khi IN_PROGRESS -->
+                                    <div th:if="${a.status == 'IN_PROGRESS' and (a.vehicleType != null or a.selectedEquipment != null)}" class="p-2 mb-2 rounded bg-white border border-info shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-bold text-navy">
+                                                <i class="fa-solid fa-shield-halved text-primary me-1"></i> Phương tiện & Trang bị đã chọn:
+                                            </span>
+                                            <span th:if="${a.terrainType != null}" class="badge bg-secondary-subtle text-secondary-emphasis border">
+                                                <span th:text="${a.terrainType == 'FLOOD_DEEP' ? 'Vùng ngập sâu/lũ quét' : (a.terrainType == 'LANDSLIDE_MOUNTAIN' ? 'Miền núi/sạt lở' : (a.terrainType == 'URBAN_INUNDATION' ? 'Đô thị ngập cục bộ' : 'Đường bộ bình thường'))}"></span>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1 align-items-center mb-1">
+                                            <span th:if="${a.vehicleType != null}" class="badge bg-primary">
+                                                <i class="fa-solid fa-truck-fast me-1"></i>
+                                                <span th:text="${a.vehicleType == 'BOAT_MOTOR' ? 'Xuồng máy cứu hộ cao tốc' : (a.vehicleType == 'BOAT_RUBBER' ? 'Thuyền phao cao su' : (a.vehicleType == 'TRUCK_4X4' ? 'Xe gầm cao 2 cầu 4x4' : (a.vehicleType == 'AMBULANCE_SPECIAL' ? 'Xe cứu thương lội nước' : a.vehicleType)))}"></span>
+                                            </span>
+                                            <span th:if="${a.routeDistanceKm != null}" class="badge bg-light text-dark border">
+                                                <i class="fa-solid fa-route me-1"></i> <strong th:text="${a.routeDistanceKm}"></strong> km
+                                            </span>
+                                            <span th:if="${a.routeDurationMinutes != null}" class="badge bg-light text-dark border">
+                                                <i class="fa-regular fa-clock me-1"></i> ~<strong th:text="${a.routeDurationMinutes}"></strong> phút
+                                            </span>
+                                        </div>
+                                        <div th:if="${a.selectedEquipment != null and !#strings.isEmpty(a.selectedEquipment)}" class="small text-secondary">
+                                            <i class="fa-solid fa-toolbox me-1 text-primary"></i> <span class="fw-semibold text-dark" th:text="${a.selectedEquipment}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-3 border-top d-flex gap-2">
+                                    <a th:href="@{'/rescuer/routes?assignmentId=' + ${a.id}}" class="btn btn-outline-primary btn-sm py-2 px-3 fw-bold" title="Xem bản đồ và lộ trình di chuyển">
+                                        <i class="fa-solid fa-route me-1"></i> Lộ trình
+                                    </a>
+                                    <button th:if="${a.status == 'ACCEPTED'}" 
+                                            class="btn btn-primary btn-sm w-100 fw-bold py-2 btn-open-prepare"
+                                            th:attr="data-id=${a.id}, data-name=${a.sosRequest.contactName}">
+                                        <i class="fa-solid fa-truck-ramp-box me-1"></i> Phân Tích Địa Hình & Xuất Kích
+                                    </button>
+                                    <button th:if="${a.status == 'IN_PROGRESS'}"
+                                            class="btn btn-success btn-sm w-100 fw-bold py-2 btn-open-complete"
+                                            th:attr="data-id=${a.id}, data-name=${a.sosRequest.contactName}">
+                                        <i class="fa-solid fa-flag-checkered me-1"></i> Báo Cáo Hoàn Thành Cứu Nạn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Nhiệm vụ hoàn thành & lịch sử (COMPLETED, REJECTED) -->
+            <div class="tab-pane fade" id="completed-missions" role="tabpanel">
+                <div th:if="${completedCount == 0}" class="text-center py-5 bg-white rounded-3 shadow-sm text-muted">
+                    <i class="fa-solid fa-clipboard-list fa-3x text-secondary opacity-50 mb-2"></i>
+                    <h5>Chưa có lịch sử ca cứu hộ hoàn thành.</h5>
+                </div>
+
+                <div class="row g-3">
+                    <div th:each="a : ${assignments}" th:if="${a.status == 'COMPLETED' or a.status == 'REJECTED'}" class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-3 h-100"
+                             th:classappend="${a.status == 'COMPLETED' ? 'border-top border-4 border-success' : 'border-top border-4 border-secondary opacity-75'}">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge" th:classappend="${a.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary'}" th:text="${a.status == 'COMPLETED' ? 'ĐÃ HOÀN THÀNH' : (a.status == 'REJECTED' ? 'ĐÃ TỪ CHỐI' : a.status)}">COMPLETED</span>
+                                    <small class="text-muted" th:text="${a.completedAt != null ? #temporals.format(a.completedAt, 'HH:mm dd/MM') : ''}"></small>
+                                </div>
+
+                                <h6 class="fw-bold text-navy mb-1" th:text="${a.sosRequest.contactName}">Nạn nhân</h6>
+                                <p class="small text-muted mb-2" th:text="${a.sosRequest.addressDetail}">Địa chỉ</p>
+
+                                <div th:if="${a.status == 'COMPLETED'}" class="alert alert-success py-2 px-3 small mb-2">
+                                    <i class="fa-solid fa-circle-check me-1"></i>
+                                    <strong>Nghiệm thu:</strong> <span th:text="${a.reportNotes != null ? a.reportNotes : 'Đã cứu hộ an toàn'}"></span>
+                                </div>
+
+                                <div th:if="${a.status == 'REJECTED'}" class="alert alert-secondary py-2 px-3 small mb-2">
+                                    <i class="fa-solid fa-ban me-1"></i>
+                                    <strong>Lý do từ chối:</strong> <span th:text="${a.rejectionReason}">Không đủ quân số</span>
+                                </div>
+
+                                <div th:if="${a.reportImageUrl}" class="mt-2">
+                                    <a th:href="${a.reportImageUrl}" target="_blank">
+                                        <img th:src="${a.reportImageUrl}" class="img-fluid rounded border" style="max-height: 120px; object-fit: cover;" alt="Ảnh nghiệm thu" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal Phân Tích Địa Hình & Chuẩn Bị Trang Bị Xuất Kích -->
+<div class="modal fade" id="prepareModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-navy text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-truck-ramp-box me-2 text-warning"></i> Phân Tích Địa Hình & Chuẩn Bị Xuất Kích
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="prepAssignmentId" />
+
+                <!-- Loading State -->
+                <div id="prepLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h6 class="fw-bold text-navy">Đang phân tích dữ liệu địa hình OSRM & GIS...</h6>
+                    <p class="text-muted small mb-0">Hệ thống đang đối soát dữ liệu cự ly đường bộ, ngập lụt và gợi ý trang thiết bị phù hợp.</p>
+                </div>
+
+                <!-- Analysis Content -->
+                <div id="prepContent" style="display: none;">
+                    <!-- Thông tin nạn nhân & Phân tích cự ly địa hình -->
+                    <div class="card border-0 bg-light p-3 mb-3 rounded-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">
+                                <i class="fa-solid fa-user me-1 text-danger"></i> Nạn nhân: <strong id="prepCitizenName" class="text-navy"></strong>
+                            </span>
+                            <span id="prepTerrainBadge" class="badge bg-primary px-3 py-2 fs-7">
+                                Đang tải...
+                            </span>
+                        </div>
+                        <div class="row g-2 text-center mt-1">
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Cự ly thực tế</small>
+                                    <strong class="fs-5 text-danger" id="prepDistanceText">-- km</strong>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Thời gian dự kiến</small>
+                                    <strong class="fs-5 text-primary" id="prepDurationText">-- phút</strong>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded shadow-sm border">
+                                    <small class="text-muted d-block">Chế độ định tuyến</small>
+                                    <span class="badge bg-info-subtle text-info-emphasis mt-1" id="prepRouteSource">OSRM Route</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 small text-muted fst-italic">
+                            <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                            <span id="prepTerrainDesc"></span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Chọn Phương Tiện Cơ Động -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-navy mb-2">
+                            <i class="fa-solid fa-truck-fast text-primary me-1"></i> 1. Lựa chọn Phương tiện Cơ động Tiếp cận:
+                        </label>
+                        <div class="row g-2" id="prepVehicleOptions">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Checklist Trang Thiết Bị Cứu Nạn -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-navy mb-0">
+                                <i class="fa-solid fa-toolbox text-warning me-1"></i> 2. Danh mục Trang thiết bị Cứu nạn (Đã gợi ý theo tình hình):
+                            </label>
+                            <span class="badge bg-light text-dark border" id="prepEquipmentCountBadge">0 món</span>
+                        </div>
+                        <div class="p-3 bg-white border rounded-3" style="max-height: 250px; overflow-y: auto;" id="prepEquipmentList">
+                            <!-- Populated via JS grouped or listed with checkmarks -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Ghi Chú Khi Xuất Kích -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-navy small">
+                            <i class="fa-regular fa-comment-dots text-secondary me-1"></i> 3. Ghi chú xuất quân (Tùy chọn):
+                        </label>
+                        <textarea class="form-control" id="prepNotes" rows="2" placeholder="Ví dụ: Đội gồm 4 đồng chí, mang theo thêm bình oxy cá nhân dự phòng..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light" id="prepFooter" style="display: none;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" id="btnSubmitStartMission" onclick="submitStartMission()">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Từ Chối Nhiệm Vụ -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-xmark me-2"></i> Từ Chối Nhiệm Vụ Cứu Nạn</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small">Vui lòng cung cấp lý do chính xác để Coordinator kịp thời điều phối đội cứu trợ khác tiếp ứng:</p>
+                <input type="hidden" id="rejectAssignmentId" />
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Lý do từ chối:</label>
+                    <textarea class="form-control" id="rejectReason" rows="3" placeholder="Ví dụ: Đội đang kẹt tại điểm cứu hộ trước; mực nước quá sâu vượt tải trọng xuồng..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger fw-bold" onclick="submitReject()">Xác Nhận Từ Chối</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Báo Cáo Nghiệm Thu Hoàn Thành -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-check me-2"></i> Báo Cáo Nghiệm Thu Cứu Nạn</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="completeAssignmentId" />
+                <div class="alert alert-light border small mb-3">
+                    Nhiệm vụ cho nạn nhân: <strong id="completeCitizenName"></strong>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Ghi chú kết quả cứu nạn:</label>
+                    <textarea class="form-control" id="completeNotes" rows="2" placeholder="Ví dụ: Đã đưa an toàn 4 người về trạm y tế phường; sức khỏe ổn định."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">
+                        <i class="fa-solid fa-camera me-1 text-primary"></i> Ảnh chụp minh chứng nghiệm thu hiện trường:
+                    </label>
+                    <input type="file" class="form-control" id="completeImageFile" accept="image/*" />
+                    <small class="text-muted">Hỗ trợ định dạng JPG, PNG, WEBP (Tự động tải lên Cloudinary / Bộ nhớ máy chủ).</small>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success fw-bold px-4" id="btnSubmitComplete" onclick="submitComplete()">
+                    <i class="fa-solid fa-check me-1"></i> Hoàn Tất Ca Cứu Hộ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const currentRescueTeamId = /*[[${myTeam != null ? myTeam.id : null}]]*/ null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Tự động kích hoạt GPS watchPosition khi có nhiệm vụ đang thực hiện (IN_PROGRESS)
+        const inProgressMissions = document.querySelectorAll('.btn-open-complete');
+        if (inProgressMissions.length > 0 && navigator.geolocation) {
+            const assignmentId = inProgressMissions[0].dataset.id;
+            navigator.geolocation.watchPosition(function(pos) {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                fetch(`/api/rescuer/assignments/${assignmentId}/location`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ latitude: lat, longitude: lng })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const coordEl = document.getElementById('rescuerCoordText');
+                        if (coordEl) coordEl.textContent = `[${lat.toFixed(5)}, ${lng.toFixed(5)}]`;
+                        const distEl = document.getElementById('rescuerDistText');
+                        if (distEl) distEl.textContent = `${data.distanceKm} km`;
+                    }
+                })
+                .catch(err => console.warn('Lỗi gửi GPS:', err));
+            }, function(err) {
+                console.warn('GPS Watch error:', err);
+            }, {
+                enableHighAccuracy: false,
+                maximumAge: 1000,
+                timeout: 10000
+            });
+        }
+        document.addEventListener('rescue:assignment', function (event) {
+            const assignment = event.detail || {};
+            if (currentRescueTeamId && String(assignment.teamId) === String(currentRescueTeamId)) {
+                window.setTimeout(() => location.reload(), 700);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            // Chấp nhận nhiệm vụ
+            const acceptBtn = e.target.closest('.btn-accept');
+            if (acceptBtn) {
+                const id = acceptBtn.dataset.id;
+                if (confirm('Bạn có chắc chắn muốn tiếp nhận nhiệm vụ cứu hộ này?')) {
+                    acceptAssignment(id);
+                }
+                return;
+            }
+
+            // Mở modal từ chối
+            const rejectBtn = e.target.closest('.btn-reject');
+            if (rejectBtn) {
+                const id = rejectBtn.dataset.id;
+                document.getElementById('rejectAssignmentId').value = id;
+                document.getElementById('rejectReason').value = '';
+                new bootstrap.Modal(document.getElementById('rejectModal')).show();
+                return;
+            }
+
+            // Mở modal chuẩn bị & phân tích địa hình trước khi xuất kích
+            const prepBtn = e.target.closest('.btn-open-prepare') || e.target.closest('.btn-start-moving');
+            if (prepBtn) {
+                const id = prepBtn.dataset.id;
+                const name = prepBtn.dataset.name;
+                openPrepareModal(id, name);
+                return;
+            }
+
+            // Mở modal hoàn thành
+            const completeBtn = e.target.closest('.btn-open-complete');
+            if (completeBtn) {
+                const id = completeBtn.dataset.id;
+                const name = completeBtn.dataset.name;
+                document.getElementById('completeAssignmentId').value = id;
+                document.getElementById('completeCitizenName').innerText = name || 'Nạn nhân';
+                document.getElementById('completeNotes').value = '';
+                document.getElementById('completeImageFile').value = '';
+                new bootstrap.Modal(document.getElementById('completeModal')).show();
+                return;
+            }
+        });
+    });
+
+    function acceptAssignment(id) {
+        fetch(`/api/rescuer/assignments/${id}/accept`, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Đã tiếp nhận nhiệm vụ thành công! Đang chuyển sang bản đồ lộ trình di chuyển...');
+                window.location.href = '/rescuer/routes?assignmentId=' + id;
+                return;
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
+    function submitReject() {
+        const id = document.getElementById('rejectAssignmentId').value;
+        const reason = document.getElementById('rejectReason').value;
+        if (!reason || !reason.trim()) {
+            alert('Vui lòng nhập lý do từ chối!');
+            return;
+        }
+
+        fetch(`/api/rescuer/assignments/${id}/reject`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
+        function openPrepareModal(id, name) {
+        document.getElementById('prepAssignmentId').value = id;
+        document.getElementById('prepCitizenName').innerText = name || 'Nạn nhân';
+        document.getElementById('prepLoading').style.display = 'block';
+        document.getElementById('prepContent').style.display = 'none';
+        document.getElementById('prepFooter').style.display = 'none';
+        document.getElementById('prepNotes').value = '';
+
+        const modalEl = document.getElementById('prepareModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        fetch(`/api/rescuer/assignments/${id}/route-terrain-analysis`)
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(errData => {
+                        throw new Error(errData.message || ('Lỗi máy chủ: HTTP ' + res.status));
+                    });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success === false) {
+                    alert('Không thể tải dữ liệu phân tích: ' + (data.message || 'Lỗi không xác định'));
+                    modal.hide();
+                    return;
+                }
+                renderPrepareData(data);
+                document.getElementById('prepLoading').style.display = 'none';
+                document.getElementById('prepContent').style.display = 'block';
+                document.getElementById('prepFooter').style.display = 'flex';
+            })
+            .catch(err => {
+                alert('Không thể tải dữ liệu phân tích: ' + err.message);
+                modal.hide();
+            });
+    }
+
+    function renderPrepareData(data) {
+        // Phân tích địa hình & cự ly
+        const terrainBadge = document.getElementById('prepTerrainBadge');
+        terrainBadge.textContent = data.terrainTitle || data.terrainType;
+        if (data.terrainType === 'FLOOD_DEEP') {
+            terrainBadge.className = 'badge bg-danger px-3 py-2 fs-7';
+        } else if (data.terrainType === 'LANDSLIDE_MOUNTAIN') {
+            terrainBadge.className = 'badge bg-warning text-dark px-3 py-2 fs-7';
+        } else if (data.terrainType === 'URBAN_INUNDATION') {
+            terrainBadge.className = 'badge bg-primary px-3 py-2 fs-7';
+        } else {
+            terrainBadge.className = 'badge bg-success px-3 py-2 fs-7';
+        }
+
+        document.getElementById('prepDistanceText').textContent = (data.routeDistanceKm != null ? data.routeDistanceKm : '--') + ' km';
+        document.getElementById('prepDurationText').textContent = '~' + (data.routeDurationMinutes != null ? data.routeDurationMinutes : '--') + ' phút';
+        document.getElementById('prepRouteSource').textContent = data.routeGeometryGeoJson ? 'OSRM Trực tuyến' : 'Ước tính Haversine';
+        document.getElementById('prepTerrainDesc').textContent = data.terrainDescription || '';
+
+        // Lựa chọn phương tiện
+        const vehicleContainer = document.getElementById('prepVehicleOptions');
+        vehicleContainer.innerHTML = '';
+        const vehicles = data.recommendedVehicles || [];
+        if (vehicles.length > 0) {
+            vehicles.forEach((v, idx) => {
+                const isChecked = v.recommended ? 'checked' : (idx === 0 ? 'checked' : '');
+                const borderCls = v.recommended ? 'border-primary shadow-sm bg-primary-subtle' : 'border-secondary-subtle';
+                const badgeRec = v.recommended ? '<span class="badge bg-success ms-1"><i class="fa-solid fa-thumbs-up me-1"></i> Khuyên dùng</span>' : '';
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-6';
+                col.innerHTML = `
+                    <div class="card p-2 border ${borderCls} h-100">
+                        <div class="form-check">
+                            <input class="form-check-input vehicle-radio" type="radio" name="vehicleSelection" id="veh_${v.id}" value="${v.id}" ${isChecked}>
+                            <label class="form-check-label fw-bold text-navy" for="veh_${v.id}">
+                                <i class="${v.icon} me-1 text-primary"></i> ${v.name} ${badgeRec}
+                            </label>
+                            <div class="small text-secondary mt-1">${v.description}</div>
+                        </div>
+                    </div>
+                `;
+                vehicleContainer.appendChild(col);
+            });
+        }
+
+        // Checklist trang bị
+        const eqContainer = document.getElementById('prepEquipmentList');
+        eqContainer.innerHTML = '';
+        const equipments = data.recommendedEquipment || [];
+        if (equipments.length > 0) {
+            let count = 0;
+            equipments.forEach(item => {
+                count++;
+                const isChecked = item.defaultChecked ? 'checked' : '';
+                const isMandatoryBadge = item.mandatory ? '<span class="badge bg-danger ms-1">Bắt buộc</span>' : '';
+                const row = document.createElement('div');
+                row.className = 'form-check mb-2 pb-1 border-bottom d-flex align-items-center justify-content-between';
+                row.innerHTML = `
+                    <div>
+                        <input class="form-check-input prep-eq-checkbox" type="checkbox" value="${item.name}" id="eq_${item.id}" ${isChecked}>
+                        <label class="form-check-label ms-1" for="eq_${item.id}">
+                            <i class="${item.icon} me-1 text-primary"></i> <strong>${item.name}</strong> ${isMandatoryBadge}
+                            <span class="badge bg-light text-dark border ms-1">${item.categoryName || item.category}</span>
+                        </label>
+                    </div>
+                `;
+                eqContainer.appendChild(row);
+            });
+            document.getElementById('prepEquipmentCountBadge').textContent = `${count} thiết bị`;
+        } else {
+            eqContainer.innerHTML = '<p class="text-muted small mb-0">Không có thiết bị đặc biệt nào được yêu cầu.</p>';
+            document.getElementById('prepEquipmentCountBadge').textContent = '0 món';
+        }
+    }
+
+    function submitStartMission() {
+        const id = document.getElementById('prepAssignmentId').value;
+        const selectedVehRadio = document.querySelector('input[name="vehicleSelection"]:checked');
+        const vehicleType = selectedVehRadio ? selectedVehRadio.value : null;
+
+        const checkedEquipments = [];
+        document.querySelectorAll('.prep-eq-checkbox:checked').forEach(cb => {
+            checkedEquipments.push(cb.value);
+        });
+        const selectedEquipment = checkedEquipments.join(', ');
+
+        const notes = document.getElementById('prepNotes').value;
+
+        const btn = document.getElementById('btnSubmitStartMission');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xác nhận xuất kích...';
+
+        fetch(`/api/rescuer/assignments/${id}/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                vehicleType: vehicleType,
+                selectedEquipment: checkedEquipments,
+                customNotes: notes
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Đã xuất kích thành công! Hệ thống đang truyền tín hiệu GPS đến nạn nhân.');
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận';
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đầy Đủ & Xuất Kích Tiếp Cận';
+        });
+    }
+
+function startMoving(id) {
+        fetch(`/api/rescuer/assignments/${id}/start`, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
+    function submitComplete() {
+        const id = document.getElementById('completeAssignmentId').value;
+        const notes = document.getElementById('completeNotes').value;
+        const fileInput = document.getElementById('completeImageFile');
+
+        const formData = new FormData();
+        formData.append('reportNotes', notes);
+        if (fileInput.files.length > 0) {
+            formData.append('reportImage', fileInput.files[0]);
+        }
+
+        const btn = document.getElementById('btnSubmitComplete');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi báo cáo...';
+
+        fetch(`/api/rescuer/assignments/${id}/complete`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Hoàn Tất Ca Cứu Hộ';
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Hoàn Tất Ca Cứu Hộ';
+        });
+    }
+    function activateTabByHash() {
+        const hash = window.location.hash;
+        if (hash === '#active-missions') {
+            const btn = document.getElementById('active-tab');
+            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+        } else if (hash === '#completed-missions') {
+            const btn = document.getElementById('completed-tab');
+            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+        } else if (hash === '#pending-missions') {
+            const btn = document.getElementById('pending-tab');
+            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', activateTabByHash);
+    window.addEventListener('hashchange', activateTabByHash);
+
+    document.querySelectorAll('#missionTabs button[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', (e) => {
+            const target = e.target.getAttribute('data-bs-target');
+            if (target && history.replaceState) {
+                history.replaceState(null, null, target);
+            }
+        });
+    });
+</script>
+</div>
+
+</body>
+</html>

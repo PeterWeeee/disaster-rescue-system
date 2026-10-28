@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#rescuer-routes-content})}">
+<head>
+    <title th:text="${pageTitle}">Lộ Trình Di Chuyển Cứu Hộ</title>
+</head>
+<body>
+
+<div id="rescuer-routes-content" class="py-4">
+    <div class="container-fluid px-3 px-lg-4" style="max-width: 1400px;">
+
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">
+                    <i class="fa-solid fa-route text-warning me-2"></i> BẢN ĐỒ & LỘ TRÌNH DI CHUYỂN CỨU HỘ
+                </h3>
+                <small class="text-muted">Định tuyến đường bộ thực tế (OSRM & Leaflet) kết nối từ điểm xuất phát đến tọa độ nạn nhân SOS</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary py-2 px-3 shadow-sm fs-7" th:if="${myTeam != null}">
+                    <i class="fa-solid fa-shield-halved me-1"></i> <span th:text="${myTeam.teamName}">Đội Cứu Hộ</span>
+                </span>
+                <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                    <i class="fa-solid fa-rotate me-1"></i> Làm mới lộ trình
+                </button>
+            </div>
+        </div>
+
+        <div th:if="${assignments.empty}" class="alert alert-info border-0 shadow-sm p-4 text-center rounded-3">
+            <i class="fa-solid fa-map-location-dot fa-3x text-primary opacity-50 mb-3 d-block"></i>
+            <h5>Hiện tại đội của bạn chưa có nhiệm vụ nào đang tiếp nhận hoặc xuất kích.</h5>
+            <p class="small text-muted mb-0">Vui lòng vào tab <a th:href="@{/rescuer/missions}" class="fw-bold text-primary">Nhiệm vụ cứu hộ</a> để nhận ca cứu nạn mới từ Điều phối viên.</p>
+        </div>
+
+        <div th:if="${!assignments.empty}">
+            <div class="row g-3">
+                <!-- CỘT TRÁI: DANH SÁCH NHIỆM VỤ & THÔNG TIN TUYẾN ĐƯỜNG -->
+                <div class="col-lg-4">
+                    <!-- 1. Bộ chọn nhiệm vụ -->
+                    <div class="card border-0 shadow-sm rounded-3 mb-3">
+                        <div class="card-header bg-navy text-white py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small"><i class="fa-solid fa-list-check me-1 text-warning"></i> Chọn Nhiệm Vụ Cứu Hộ</span>
+                            <span class="badge bg-warning text-dark" th:text="${assignments.size() + ' ca'}">1 ca</span>
+                        </div>
+                        <div class="list-group list-group-flush" id="missionSelectList" style="max-height: 250px; overflow-y: auto;">
+                            <button type="button"
+                                    th:each="a, iterStat : ${assignments}"
+                                    class="list-group-item list-group-item-action p-3 mission-item-btn"
+                                    th:classappend="${iterStat.first ? 'active' : ''}"
+                                    th:attr="data-id=${a.id}">
+                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                    <strong class="text-truncate" th:text="${a.sosRequest.contactName}">Nạn nhân</strong>
+                                    <span class="badge"
+                                          th:classappend="${a.status == 'IN_PROGRESS' ? 'bg-primary' : 'bg-warning text-dark'}"
+                                          th:text="${a.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : 'ĐÃ TIẾP NHẬN'}">ACCEPTED</span>
+                                </div>
+                                <div class="small opacity-75 text-truncate mb-1">
+                                    <i class="fa-solid fa-location-dot me-1"></i> <span th:text="${a.sosRequest.addressDetail}">Địa chỉ</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small">
+                                    <span><i class="fa-solid fa-users me-1"></i> <strong th:text="${a.sosRequest.peopleCount}">1</strong> người</span>
+                                    <span class="badge"
+                                          th:classappend="${a.sosRequest.urgencyLevel == 'CRITICAL' ? 'bg-danger' : 'bg-warning text-dark'}"
+                                          th:text="${a.sosRequest.urgencyLevel}">CRITICAL</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Thông tin chi tiết tuyến đường đang chọn -->
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="fw-bold text-navy mb-0">
+                                <i class="fa-solid fa-circle-info text-primary me-2"></i> Chi Tiết Tuyến Đường & Khí Tượng
+                            </h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <div id="routeLoadingSpinner" class="text-center py-4">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+                                <div class="small text-muted">Đang tải và tính toán dữ liệu lộ trình...</div>
+                            </div>
+
+                            <div id="routeErrorAlert" class="alert alert-danger py-3 px-3 small rounded-3 mb-0" style="display: none;">
+                                <div class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu lộ trình</div>
+                                <div id="routeErrorMessage" class="text-dark">Lỗi kết nối máy chủ.</div>
+                            </div>
+
+                            <div id="routeDetailPanel" style="display: none;">
+                                <!-- Cự ly & Thời gian -->
+                                <div class="row g-2 text-center mb-3">
+                                    <div class="col-6">
+                                        <div class="bg-light p-2 rounded border">
+                                            <small class="text-muted d-block">Khoảng cách tuyến</small>
+                                            <strong class="fs-4 text-danger" id="panelDistance">-- km</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-light p-2 rounded border">
+                                            <small class="text-muted d-block">Thời gian dự kiến</small>
+                                            <strong class="fs-4 text-primary" id="panelDuration">-- phút</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Phân loại địa hình -->
+                                <div class="mb-3 p-2 rounded bg-light border border-info">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small fw-bold text-navy">Địa hình dự báo:</span>
+                                        <span class="badge bg-primary" id="panelTerrainTitle">ĐANG TẢI...</span>
+                                    </div>
+                                    <p class="small text-muted mb-0" id="panelTerrainDesc">Đang phân tích...</p>
+                                </div>
+
+                                <!-- Điểm xuất phát & Đích đến -->
+                                <div class="mb-3 small">
+                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                        <div class="badge bg-success rounded-circle p-2 mt-1">A</div>
+                                        <div>
+                                            <strong class="text-success d-block">Điểm xuất phát (Căn cứ Đội):</strong>
+                                            <span class="text-muted" id="panelStartCoord">--</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start gap-2">
+                                        <div class="badge bg-danger rounded-circle p-2 mt-1">B</div>
+                                        <div>
+                                            <strong class="text-danger d-block">Vị trí nạn nhân SOS:</strong>
+                                            <span class="text-muted" id="panelSosCoord">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Phân biệt Lộ trình dự kiến vs Vị trí thực tế -->
+                                <div class="alert alert-warning py-2 px-3 small mb-0 rounded-2">
+                                    <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>
+                                    <strong>Lưu ý:</strong> Tuyến đường hiển thị là <em>Lộ trình dự kiến tối ưu</em> được tính toán qua OSRM. Tọa độ thực tế của đội sẽ đồng bộ khi thiết bị định vị GPS di động gửi tín hiệu.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: BẢN ĐỒ LEAFLET HIỂN THỊ TUYẾN ĐƯỜNG TRỰC QUAN -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                        <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small text-navy">
+                                <i class="fa-solid fa-map-location-dot text-danger me-1"></i> Bản Đồ Trực Quan Hiện Trường
+                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success-subtle text-success border small">
+                                    <i class="fa-solid fa-circle text-success me-1"></i> Xuất phát
+                                </span>
+                                <span class="badge bg-danger-subtle text-danger border small">
+                                    <i class="fa-solid fa-location-pin text-danger me-1"></i> Điểm SOS
+                                </span>
+                                <span class="badge bg-primary-subtle text-primary border small">
+                                    <i class="fa-solid fa-minus text-primary me-1"></i> Tuyến OSRM
+                                </span>
+                            </div>
+                        </div>
+                        <div id="routeMap" style="height: 580px; width: 100%;" class="bg-light"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script th:inline="javascript">
+        (function() {
+            let map = null;
+            let currentRouteLayer = null;
+            let startMarker = null;
+            let endMarker = null;
+
+            function initMap() {
+                const mapEl = document.getElementById('routeMap');
+                if (!mapEl) return;
+
+                map = L.map('routeMap').setView([16.0544, 108.2022], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+            }
+
+            async function loadMissionRoute(assignmentId) {
+                const spinner = document.getElementById('routeLoadingSpinner');
+                const panel = document.getElementById('routeDetailPanel');
+                const errorAlert = document.getElementById('routeErrorAlert');
+                if (spinner) spinner.style.display = 'block';
+                if (panel) panel.style.display = 'none';
+                if (errorAlert) errorAlert.style.display = 'none';
+
+                try {
+                    const res = await fetch(`/api/rescuer/assignments/${assignmentId}/route`);
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.message || 'Không thể tải dữ liệu lộ trình');
+                    }
+                    const data = await res.json();
+
+                    if (spinner) spinner.style.display = 'none';
+                    if (panel) panel.style.display = 'block';
+
+                    // Cập nhật thông tin chi tiết
+                    document.getElementById('panelDistance').textContent = (data.routeDistanceKm || '--') + ' km';
+                    document.getElementById('panelDuration').textContent = '~' + (data.routeDurationMinutes || '--') + ' phút';
+                    document.getElementById('panelTerrainTitle').textContent = data.terrainTitle || data.terrainType || 'ĐƯỜNG BỘ';
+                    document.getElementById('panelTerrainDesc').textContent = data.terrainDescription || '';
+
+                    const startLat = data.teamLocation ? data.teamLocation[0] : 16.0544;
+                    const startLng = data.teamLocation ? data.teamLocation[1] : 108.2022;
+                    const endLat = data.sosLocation ? data.sosLocation[0] : 16.0544;
+                    const endLng = data.sosLocation ? data.sosLocation[1] : 108.2022;
+
+                    document.getElementById('panelStartCoord').textContent = `[${startLat.toFixed(4)}, ${startLng.toFixed(4)}]`;
+                    document.getElementById('panelSosCoord').textContent = `[${endLat.toFixed(4)}, ${endLng.toFixed(4)}]`;
+
+                    // Vẽ trên Leaflet
+                    if (map) {
+                        // Xóa các layer cũ
+                        if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+                        if (startMarker) map.removeLayer(startMarker);
+                        if (endMarker) map.removeLayer(endMarker);
+
+                        // Icon Điểm xuất phát (Green)
+                        const startIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: '<div style="background-color: #198754; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"><i class="fa-solid fa-truck-fast"></i></div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        });
+
+                        // Icon Điểm SOS (Red)
+                        const endIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: '<div style="background-color: #dc3545; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"><i class="fa-solid fa-person-shelter"></i></div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        });
+
+                        startMarker = L.marker([startLat, startLng], { icon: startIcon })
+                            .addTo(map)
+                            .bindPopup(`<strong>Xuất phát: ${data.teamName || 'Đội cứu hộ'}</strong><br>Tọa độ: [${startLat}, ${startLng}]`);
+
+                        endMarker = L.marker([endLat, endLng], { icon: endIcon })
+                            .addTo(map)
+                            .bindPopup(`<strong>Điểm cứu nạn SOS #${data.sosId}</strong><br>Tọa độ: [${endLat}, ${endLng}]`);
+
+                        // Vẽ tuyến đường OSRM GeoJSON
+                        if (data.routeGeometryGeoJson) {
+                            try {
+                                const geojson = JSON.parse(data.routeGeometryGeoJson);
+                                currentRouteLayer = L.geoJSON(geojson, {
+                                    style: {
+                                        color: '#0d6efd',
+                                        weight: 5,
+                                        opacity: 0.85,
+                                        dashArray: '2, 6',
+                                        lineJoin: 'round'
+                                    }
+                                }).addTo(map);
+
+                                map.fitBounds(currentRouteLayer.getBounds(), { padding: [50, 50] });
+                            } catch (e) {
+                                // fallback polyline
+                                const latlngs = [ [startLat, startLng], [endLat, endLng] ];
+                                currentRouteLayer = L.polyline(latlngs, { color: '#0d6efd', weight: 4, dashArray: '5, 10' }).addTo(map);
+                                map.fitBounds(currentRouteLayer.getBounds(), { padding: [50, 50] });
+                            }
+                        } else {
+                            const latlngs = [ [startLat, startLng], [endLat, endLng] ];
+                            currentRouteLayer = L.polyline(latlngs, { color: '#dc3545', weight: 4, dashArray: '5, 10' }).addTo(map);
+                            map.fitBounds(currentRouteLayer.getBounds(), { padding: [50, 50] });
+                        }
+                    }
+
+                } catch (e) {
+                    if (spinner) spinner.style.display = 'none';
+                    if (panel) panel.style.display = 'none';
+                    if (errorAlert) {
+                        errorAlert.style.display = 'block';
+                        const msgEl = document.getElementById('routeErrorMessage');
+                        if (msgEl) msgEl.textContent = e.message || 'Không thể tải dữ liệu lộ trình';
+                    }
+                    console.error('Lỗi tải lộ trình:', e);
+                }
+            }
+
+            // Gắn sự kiện chọn nhiệm vụ
+            document.querySelectorAll('.mission-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.mission-item-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const id = this.dataset.id;
+                    if (id) loadMissionRoute(id);
+                });
+            });
+
+            // Khởi tạo trang: tự động nhận diện ca nhiệm vụ từ URL và vẽ bản đồ ngay lập tức
+            window.addEventListener('DOMContentLoaded', () => {
+                initMap();
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetAssignmentId = urlParams.get('assignmentId');
+                let targetBtn = null;
+                if (targetAssignmentId) {
+                    targetBtn = document.querySelector(`.mission-item-btn[data-id="${targetAssignmentId}"]`);
+                }
+                if (!targetBtn) {
+                    targetBtn = document.querySelector('.mission-item-btn.active') || document.querySelector('.mission-item-btn');
+                }
+                if (targetBtn) {
+                    document.querySelectorAll('.mission-item-btn').forEach(b => b.classList.remove('active'));
+                    targetBtn.classList.add('active');
+                    targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    if (targetBtn.dataset.id) {
+                        loadMissionRoute(targetBtn.dataset.id);
+                    }
+                }
+            });
+        })();
+    </script>
+</div>
+
+</body>
+</html>

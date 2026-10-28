@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="footer" class="bg-dark text-white pt-5 pb-3 mt-auto">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <!-- Brand & Mission -->
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fa-solid fa-shield-halved text-danger fa-2x"></i>
+                    <h5 class="fw-bold mb-0 text-white">CỨUNẠN <span class="text-danger">24/7</span></h5>
+                </div>
+                <p class="text-secondary small">
+                    Hệ thống phản ứng khẩn cấp hỗ trợ đồng bào vùng thiên tai bão lũ, sạt lở kết nối trực tiếp với đội cứu hộ và điều phối viên chuyên trách theo thời gian thực.
+                </p>
+                <div class="d-flex gap-2 text-secondary">
+                    <span class="badge bg-secondary">Spring Boot 3</span>
+                    <span class="badge bg-secondary">Leaflet GIS</span>
+                    <span class="badge bg-secondary">WebSocket Realtime</span>
+                </div>
+            </div>
+
+            <!-- Emergency Hotlines -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold text-uppercase text-danger mb-3">Đường Dây Nóng Khẩn Cấp</h6>
+                <ul class="list-unstyled small text-secondary">
+                    <li class="mb-2">
+                        <i class="fa-solid fa-phone text-warning me-2"></i>
+                        <strong class="text-white">112:</strong> Yêu cầu trợ giúp & tìm kiếm cứu nạn toàn quốc
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa-solid fa-fire-extinguisher text-danger me-2"></i>
+                        <strong class="text-white">114:</strong> Cứu nạn cứu hộ bão lũ & cháy nổ
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa-solid fa-truck-medical text-info me-2"></i>
+                        <strong class="text-white">115:</strong> Cấp cứu y tế & vận chuyển thương bệnh binh
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6">
+                <h6 class="fw-bold text-uppercase text-light mb-3">Liên Kết Nhanh</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/sos}" class="text-secondary text-decoration-none hover-white">Gửi cứu nạn SOS</a></li>
+                    <li class="mb-2"><a th:href="@{/map}" class="text-secondary text-decoration-none hover-white">Bản đồ cứu hộ</a></li>
+                    <li class="mb-2"><a th:href="@{/map#shelters}" class="text-secondary text-decoration-none hover-white">Điểm trú ẩn an toàn</a></li>
+                    <li class="mb-2"><a th:href="@{/auth/register}" class="text-secondary text-decoration-none hover-white">Đăng ký tình nguyện</a></li>
+                </ul>
+            </div>
+
+            <!-- Academic Project Info -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold text-uppercase text-light mb-3">Đồ Án Nhóm 04</h6>
+                <p class="text-secondary small mb-2">
+                    Môn học: <strong>Lập trình Web</strong><br>
+                    Trường Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)
+                </p>
+                <div class="small text-secondary">
+                    <i class="fa-brands fa-github me-1"></i>
+                    <a href="https://github.com/PeterWeeee/disaster-rescue-system.git" target="_blank" class="text-secondary text-decoration-none hover-white">
+                        PeterWeeee/disaster-rescue-system
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-secondary opacity-25">
+
+        <div class="row align-items-center small text-secondary">
+            <div class="col-md-6 text-center text-md-start">
+                &copy; 2026 CứuNạn 24/7. Vì sự an toàn của nhân dân trong thiên tai.
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                <span>Hệ thống hỗ trợ song song MySQL & SQL Server</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

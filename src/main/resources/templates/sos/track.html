@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#track-content})}">
+<body>
+
+<div id="track-content" class="py-5">
+    <div class="container">
+        
+        <!-- Search Bar Section -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <form th:action="@{/sos/track}" method="get" class="row g-3 align-items-center justify-content-between">
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-uppercase text-secondary mb-1">
+                            <i class="fa-solid fa-hashtag me-1 text-danger"></i> Tra cứu theo Mã Ca SOS
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-danger">#SOS-</span>
+                            <input type="text" name="code" class="form-control" placeholder="Vd: 12 hoặc nhập số bất kỳ">
+                            <button type="submit" class="btn btn-danger fw-semibold">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Tra cứu
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-uppercase text-secondary mb-1">
+                            <i class="fa-solid fa-phone me-1 text-primary"></i> Hoặc tra cứu theo Số Điện Thoại
+                        </label>
+                        <div class="input-group">
+                            <input type="tel" name="phone" th:value="${searchedPhone}" class="form-control" placeholder="Vd: 0987654321">
+                            <button type="submit" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-phone me-1"></i> Tìm ca của tôi
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-md-end text-center mt-3 mt-md-0">
+                        <a sec:authorize="hasRole('COORDINATOR')" th:href="@{/coordinator/dashboard}" class="btn btn-navy fw-bold w-100">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Bàn điều phối
+                        </a>
+                        <a sec:authorize="hasRole('RESCUER')" th:href="@{/rescuer/missions}" class="btn btn-navy fw-bold w-100">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Nhiệm vụ đội
+                        </a>
+                        <a sec:authorize="!hasAnyRole('COORDINATOR', 'ADMIN', 'RESCUER')" th:href="@{/sos}" class="btn btn-outline-danger fw-bold w-100">
+                            <i class="fa-solid fa-plus me-1"></i> Gửi SOS mới
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Message Flash -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm mb-4 border-2 border-success" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check fa-2x text-success"></i>
+                <div>
+                    <h6 class="fw-bold mb-0 text-success" th:text="${successMessage}"></h6>
+                    <small>Đội điều phối đang phân tích tọa độ của bạn và chỉ định đội xuồng cứu hộ gần nhất.</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Case 1: SOS Not Found -->
+        <div th:if="${sosNotFound}" class="card border-0 shadow-sm p-5 text-center">
+            <div class="py-4">
+                <i class="fa-solid fa-circle-exclamation fa-4x text-warning mb-3"></i>
+                <h4 class="fw-bold text-dark">Không Tìm Thấy Ca Cứu Nạn</h4>
+                <p class="text-muted max-w-500 mx-auto">
+                    Không tìm thấy dữ liệu yêu cầu cứu nạn với mã <strong th:text="'#SOS-' + ${searchedId}"></strong>. Vui lòng kiểm tra lại mã số hoặc tìm theo số điện thoại đã sử dụng khi gửi.
+                </p>
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <a th:href="@{/sos/track}" class="btn btn-outline-secondary">Tra cứu lại</a>
+                    <a sec:authorize="!hasAnyRole('COORDINATOR', 'ADMIN', 'RESCUER')" th:href="@{/sos}" class="btn btn-danger fw-bold">Gửi tín hiệu SOS mới</a>
+                    <a sec:authorize="hasRole('COORDINATOR')" th:href="@{/coordinator/dashboard}" class="btn btn-primary fw-bold">Về bàn điều phối</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case 2: List Results (Search by Phone or User's List) -->
+        <div th:if="${results != null}" class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-navy text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">
+                    <i class="fa-solid fa-list-check me-2"></i> Danh Sách Ca Cứu Nạn
+                    <span th:if="${searchedPhone}" th:text="' - SĐT: ' + ${searchedPhone}"></span>
+                    <span th:if="${userTrackList}"> - Của bạn</span>
+                </h5>
+                <span class="badge bg-danger" th:text="${#lists.size(results)} + ' ca ghi nhận'"></span>
+            </div>
+            <div class="card-body p-0">
+                <div th:if="${#lists.isEmpty(results)}" class="text-center p-5 text-muted">
+                    <i class="fa-solid fa-folder-open fa-3x mb-2 text-secondary"></i>
+                    <p class="mb-0">Không tìm thấy ca cứu nạn nào tương ứng.</p>
+                </div>
+                <div th:unless="${#lists.isEmpty(results)}" class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã Ca</th>
+                                <th>Thời gian gửi</th>
+                                <th>Người liên hệ</th>
+                                <th>Mức độ</th>
+                                <th>Số người</th>
+                                <th>Địa chỉ / Mốc</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${results}">
+                                <td>
+                                    <strong class="text-danger" th:text="'#SOS-' + ${item.id}"></strong>
+                                </td>
+                                <td class="small" th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${item.contactName}"></div>
+                                    <small class="text-muted" th:text="${item.contactPhone}"></small>
+                                </td>
+                                <td>
+                                    <span th:if="${item.urgencyLevel == 'CRITICAL'}" class="badge bg-danger">🔴 Đặc biệt</span>
+                                    <span th:if="${item.urgencyLevel == 'HIGH'}" class="badge bg-warning text-dark">🟠 Nguy cấp</span>
+                                    <span th:if="${item.urgencyLevel == 'MEDIUM'}" class="badge bg-primary">🔵 Hỗ trợ</span>
+                                    <span th:if="${item.urgencyLevel == 'LOW'}" class="badge bg-secondary">⚪ Thấp</span>
+                                </td>
+                                <td th:text="${item.peopleCount} + ' người'"></td>
+                                <td>
+                                    <span class="small text-truncate d-inline-block" style="max-width: 200px;"
+                                          th:text="${item.addressDetail ?: (item.latitude + ', ' + item.longitude)}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${item.status == 'PENDING'}" class="badge bg-secondary">Chờ tiếp nhận</span>
+                                    <span th:if="${item.status == 'DISPATCHED'}" class="badge bg-info text-dark">Đã điều phối</span>
+                                    <span th:if="${item.status == 'IN_PROGRESS'}" class="badge bg-warning text-dark">Đang tới</span>
+                                    <span th:if="${item.status == 'RESOLVED' || item.status == 'COMPLETED'}" class="badge bg-success">Đã hoàn tất</span>
+                                    <span th:if="${item.status == 'CANCELLED'}" class="badge bg-dark">Đã hủy</span>
+                                </td>
+                                <td class="text-end">
+                                    <a th:href="@{'/sos/track/' + ${item.id}}" class="btn btn-sm btn-outline-danger fw-semibold">
+                                        <i class="fa-solid fa-eye me-1"></i> Theo dõi
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case 3: Single SOS Tracking Details -->
+        <div th:if="${sos != null}">
+            <!-- Header Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h3 class="fw-extrabold text-danger mb-0" th:text="'#SOS-' + ${sos.id}"></h3>
+                                <span th:if="${sos.urgencyLevel == 'CRITICAL'}" class="badge bg-danger fs-6 px-3 py-1">🔴 ĐẶC BIỆT NGUY HIỂM</span>
+                                <span th:if="${sos.urgencyLevel == 'HIGH'}" class="badge bg-warning text-dark fs-6 px-3 py-1">🟠 NGUY CẤP CAO</span>
+                                <span th:if="${sos.urgencyLevel == 'MEDIUM'}" class="badge bg-primary fs-6 px-3 py-1">🔵 CẦN HỖ TRỢ</span>
+                                <span th:if="${sos.urgencyLevel == 'LOW'}" class="badge bg-secondary fs-6 px-3 py-1">⚪ MỨC ĐỘ THẤP</span>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                <i class="fa-regular fa-clock me-1"></i> Tiếp nhận lúc:
+                                <strong th:text="${sos.createdAt != null ? #temporals.format(sos.createdAt, 'dd/MM/yyyy HH:mm:ss') : 'Vừa xong'}"></strong>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="location.reload();">
+                                <i class="fa-solid fa-arrows-rotate me-1"></i> Làm mới trạng thái
+                            </button>
+                            <a th:href="@{'https://www.google.com/maps?q=' + ${sos.latitude} + ',' + ${sos.longitude}}"
+                               target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-diamond-turn-right me-1"></i> Mở Google Maps
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Visual Stepper Timeline -->
+                    <div class="mb-2">
+                        <h6 class="fw-bold text-uppercase text-secondary mb-3">
+                            <i class="fa-solid fa-timeline me-1 text-danger"></i> Tiến Trình Xử Lý Cứu Hộ
+                        </h6>
+
+                        <!-- Cancelled Banner if cancelled -->
+                        <div th:if="${sos.status == 'CANCELLED'}" class="alert alert-dark text-center py-3 mb-0">
+                            <i class="fa-solid fa-ban text-danger me-2"></i> Ca cứu nạn này đã được hủy bởi người gửi hoặc trung tâm điều phối.
+                        </div>
+
+                        <!-- Active Stepper -->
+                        <div th:unless="${sos.status == 'CANCELLED'}" class="timeline-tracker">
+                            <!-- Step 1: PENDING -->
+                            <div class="timeline-step"
+                                 th:classappend="${stepIndex > 1 ? ' completed' : (stepIndex == 1 ? ' active' : '')}">
+                                <div class="step-circle">
+                                    <i th:if="${stepIndex > 1}" class="fa-solid fa-check"></i>
+                                    <i th:if="${stepIndex == 1}" class="fa-solid fa-satellite-dish fa-spin"></i>
+                                    <span th:if="${stepIndex < 1}">1</span>
+                                </div>
+                                <div class="step-title">1. Đã Tiếp Nhận</div>
+                                <div class="step-desc">Tín hiệu SOS đã vào hàng đợi điều phối</div>
+                            </div>
+
+                            <!-- Step 2: DISPATCHED -->
+                            <div class="timeline-step"
+                                 th:classappend="${stepIndex > 2 ? ' completed' : (stepIndex == 2 ? ' active' : '')}">
+                                <div class="step-circle">
+                                    <i th:if="${stepIndex > 2}" class="fa-solid fa-check"></i>
+                                    <i th:if="${stepIndex == 2}" class="fa-solid fa-person-military-pointing"></i>
+                                    <span th:if="${stepIndex < 2}">2</span>
+                                </div>
+                                <div class="step-title">2. Đã Điều Phối</div>
+                                <div class="step-desc">Đã chỉ định đội cứu hộ chuyên trách</div>
+                            </div>
+
+                            <!-- Step 3: IN_PROGRESS -->
+                            <div class="timeline-step"
+                                 th:classappend="${stepIndex > 3 ? ' completed' : (stepIndex == 3 ? ' active' : '')}">
+                                <div class="step-circle">
+                                    <i th:if="${stepIndex > 3}" class="fa-solid fa-check"></i>
+                                    <i th:if="${stepIndex == 3}" class="fa-solid fa-sailboat"></i>
+                                    <span th:if="${stepIndex < 3}">3</span>
+                                </div>
+                                <div class="step-title">3. Đang Tiếp Cận</div>
+                                <div class="step-desc">Đội xuồng đang di chuyển đến hiện trường</div>
+                            </div>
+
+                            <!-- Step 4: RESOLVED -->
+                            <div class="timeline-step"
+                                 th:classappend="${stepIndex >= 4 ? ' completed' : ''}">
+                                <div class="step-circle">
+                                    <i th:if="${stepIndex >= 4}" class="fa-solid fa-check-double"></i>
+                                    <span th:if="${stepIndex < 4}">4</span>
+                                </div>
+                                <div class="step-title">4. Hoàn Tất Cứu Nạn</div>
+                                <div class="step-desc">Đã tiếp cận và đưa đến nơi an toàn</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Approach Tracking Banner if assigned -->
+            <div th:if="${assignedTeam != null}" id="liveTrackingCard" class="card border-0 shadow-sm border-start border-4 border-primary mb-4 bg-light">
+                <div class="card-body p-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="text-primary small fw-bold text-uppercase">
+                                <i class="fa-solid fa-truck-medical me-1"></i> Đơn vị cứu hộ phụ trách:
+                            </div>
+                            <h5 class="fw-bold mb-1 text-navy" th:text="${teamName}">Đội Cứu Hộ Hải Châu</h5>
+                            <div class="small text-muted d-flex gap-3">
+                                <span><i class="fa-solid fa-phone text-danger me-1"></i> Hotline: <a th:href="'tel:' + ${teamPhone}" class="fw-bold text-danger" th:text="${teamPhone}"></a></span>
+                                <span th:if="${teamMemberCount != null}"><i class="fa-solid fa-users me-1"></i> <span th:text="${teamMemberCount}"></span> quân số</span>
+                            </div>
+                        </div>
+                        <div class="text-md-end bg-white p-2 px-3 rounded-3 shadow-sm border">
+                            <div class="small text-secondary fw-semibold">Khoảng cách tiếp cận hiện tại:</div>
+                            <h3 class="fw-bold text-danger mb-0" id="liveDistanceText">
+                                <span id="distVal" th:text="${distanceKm != null ? distanceKm : '--'}">--</span> km
+                            </h3>
+                            <small class="text-success fw-bold" id="liveStatusBadge">
+                                <i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Cập nhật GPS Real-time
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin phương tiện và trang thiết bị cứu hộ tiếp cận -->
+                    <div th:if="${vehicleType != null or selectedEquipment != null}" class="mt-3 pt-2 border-top">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span th:if="${vehicleType != null}" class="badge bg-primary fs-7 py-2 px-3">
+                                    <i class="fa-solid fa-truck-fast me-1"></i>
+                                    <span th:text="${vehicleType == 'BOAT_MOTOR' ? 'Xuồng máy cứu hộ cao tốc' : (vehicleType == 'BOAT_RUBBER' ? 'Thuyền phao cao su chèo tay' : (vehicleType == 'TRUCK_4X4' ? 'Xe gầm cao 2 cầu chuyên dụng (4x4)' : (vehicleType == 'AMBULANCE_SPECIAL' ? 'Xe cứu thương lội nước' : vehicleType)))}"></span>
+                                </span>
+                                <span th:if="${terrainType != null}" class="badge bg-secondary-subtle text-secondary-emphasis border py-2 px-3">
+                                    <i class="fa-solid fa-mountain-sun me-1"></i>
+                                    <span th:text="${terrainType == 'FLOOD_DEEP' ? 'Khu vực ngập sâu/lũ quét' : (terrainType == 'LANDSLIDE_MOUNTAIN' ? 'Khu vực đồi núi sạt lở' : (terrainType == 'URBAN_INUNDATION' ? 'Khu vực ngập úng đô thị' : 'Đường bộ tiếp cận'))}"></span>
+                                </span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border">
+                                <i class="fa-solid fa-clipboard-check me-1"></i> Đã trang bị đầy đủ
+                            </span>
+                        </div>
+                        <div th:if="${selectedEquipment != null and !#strings.isEmpty(selectedEquipment)}" class="small text-dark mt-2 bg-white p-2 rounded border">
+                            <i class="fa-solid fa-toolbox text-primary me-1"></i> <strong>Trang bị cứu nạn mang theo:</strong>
+                            <span class="text-secondary" th:text="${selectedEquipment}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details & Map Row -->
+            <div class="row g-4 mb-4">
+                <!-- Left: Detailed Info -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-navy text-white fw-bold py-3">
+                            <i class="fa-solid fa-circle-info me-2 text-danger"></i> Chi Tiết Phiếu Cứu Nạn
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <small class="text-secondary fw-semibold d-block">Người liên hệ:</small>
+                                    <strong class="fs-6" th:text="${sos.contactName}"></strong>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-secondary fw-semibold d-block">Số điện thoại liên hệ:</small>
+                                    <a th:href="'tel:' + ${sos.contactPhone}" class="text-danger fw-bold fs-6" th:text="${sos.contactPhone}"></a>
+                                </div>
+                                <div class="col-sm-6" th:if="${sos.secondaryPhone}">
+                                    <small class="text-secondary fw-semibold d-block">SĐT phụ / Người thân:</small>
+                                    <a th:href="'tel:' + ${sos.secondaryPhone}" class="text-dark fw-semibold" th:text="${sos.secondaryPhone}"></a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-secondary fw-semibold d-block">Số lượng người cần cứu:</small>
+                                    <strong class="text-primary fs-6" th:text="${sos.peopleCount} + ' người'"></strong>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <!-- Priority Flags -->
+                            <div class="mb-3">
+                                <small class="text-secondary fw-semibold d-block mb-2">Nhóm đối tượng ưu tiên đặc biệt:</small>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span th:if="${sos.hasElderly}" class="badge bg-warning text-dark py-2 px-3">
+                                        👵 Có người già / khuyết tật
+                                    </span>
+                                    <span th:if="${sos.hasChildren}" class="badge bg-info text-dark py-2 px-3">
+                                        👶 Có trẻ em / trẻ sơ sinh
+                                    </span>
+                                    <span th:if="${sos.hasInjured}" class="badge bg-danger py-2 px-3">
+                                        🩹 Có người bị thương / cần cấp cứu
+                                    </span>
+                                    <span th:if="${!sos.hasElderly && !sos.hasChildren && !sos.hasInjured}" class="text-muted small">
+                                        Không ghi nhận trường hợp đặc biệt
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Coordinates & Address -->
+                            <div class="mb-3">
+                                <small class="text-secondary fw-semibold d-block">Vị trí tọa độ GPS:</small>
+                                <div class="font-monospace fw-bold text-dark bg-light p-2 rounded mt-1">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                    <span id="lat-val" th:text="${sos.latitude}"></span>,
+                                    <span id="lng-val" th:text="${sos.longitude}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" th:if="${sos.addressDetail}">
+                                <small class="text-secondary fw-semibold d-block">Mốc địa danh / Nhận diện:</small>
+                                <p class="mb-0 text-dark" th:text="${sos.addressDetail}"></p>
+                            </div>
+
+                            <div th:if="${sos.description}">
+                                <small class="text-secondary fw-semibold d-block">Mô tả tình hình hiện trường:</small>
+                                <p class="mb-0 text-muted fst-italic" th:text="${sos.description}"></p>
+                            </div>
+
+                            <!-- Hiện thị ảnh hiện trường nếu có -->
+                            <div class="mt-3" th:if="${sos.imageUrl}">
+                                <small class="text-secondary fw-semibold d-block mb-1">
+                                    <i class="fa-solid fa-camera text-danger me-1"></i> Ảnh hiện trường đính kèm:
+                                </small>
+                                <div class="position-relative d-inline-block">
+                                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#imageZoomModal">
+                                        <img th:src="${sos.imageUrl}" alt="Ảnh hiện trường" class="img-thumbnail rounded shadow-sm hover-zoom" style="max-height: 180px; max-width: 100%; object-fit: cover; cursor: pointer;">
+                                    </a>
+                                    <span class="badge bg-dark bg-opacity-75 position-absolute bottom-0 start-0 m-1">
+                                        <i class="fa-solid fa-expand me-1"></i> Bấm để phóng to
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Interactive Leaflet Mini Map -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-navy text-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-map-location-dot me-2 text-danger"></i> Vị Trí Vệ Tinh Hiện Trường</span>
+                            <span class="badge bg-danger">GPS Vệ Tinh</span>
+                        </div>
+                        <div class="card-body p-3">
+                            <div id="trackMap" class="map-container" style="min-height: 340px; height: 340px;"></div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+                                <span><i class="fa-solid fa-crosshairs text-danger me-1"></i> Tọa độ: <strong th:text="${sos.latitude} + ', ' + ${sos.longitude}"></strong></span>
+                                <span class="text-success"><i class="fa-solid fa-signal me-1"></i> Đang theo dõi vệ tinh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Leaflet Tracking Map Script -->
+<script th:if="${sos != null}" th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+    const lat = parseFloat(document.getElementById("lat-val").innerText);
+    const lng = parseFloat(document.getElementById("lng-val").innerText);
+
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    const trackMapElement = document.getElementById("trackMap");
+    if (!trackMapElement) return;
+
+    const trackMap = L.map("trackMap").setView([lat, lng], 15);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(trackMap);
+
+    // Marker với biểu tượng tròn đỏ nhấp nháy radar
+    const radarIcon = L.divIcon({
+        className: 'custom-radar-pin',
+        html: '<div class="sos-radar-marker"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+
+    const marker = L.marker([lat, lng], { icon: radarIcon }).addTo(trackMap);
+    
+    // Vòng tròn radar xung quanh điểm cứu nạn
+    L.circle([lat, lng], {
+        color: '#dc2626',
+        fillColor: '#ef4444',
+        fillOpacity: 0.15,
+        radius: 200
+    }).addTo(trackMap);
+
+    marker.bindPopup(`
+        <div style="min-width: 180px;">
+            <strong style="color: #dc2626;">🚨 VỊ TRÍ CẦN CỨU NẠN</strong><br>
+            <b>Tọa độ:</b> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+            <small style="color: #64748b;">Đội cứu hộ đang tiếp cận theo tọa độ này.</small>
+        </div>
+    `).openPopup();
+
+    const teamLat = parseFloat(/*[[${teamLat}]]*/ null);
+    const teamLng = parseFloat(/*[[${teamLng}]]*/ null);
+    let teamMarker = null;
+    let connectingLine = null;
+
+    if (!isNaN(teamLat) && !isNaN(teamLng)) {
+        const teamIcon = L.divIcon({
+            className: 'custom-team-pin',
+            html: '<div style="background:#0d6efd;color:white;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:13px;"><i class="fa-solid fa-truck-medical"></i></div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        teamMarker = L.marker([teamLat, teamLng], { icon: teamIcon }).addTo(trackMap);
+        teamMarker.bindPopup('<strong class="text-primary">Vị trí Đội cứu hộ đang tiếp cận</strong>');
+
+        connectingLine = L.polyline([ [lat, lng], [teamLat, teamLng]], {
+            color: '#0d6efd',
+            weight: 3,
+            dashArray: '6, 8',
+            opacity: 0.8
+        }).addTo(trackMap);
+
+        trackMap.fitBounds([ [lat, lng], [teamLat, teamLng]], { padding: [50, 50], maxZoom: 16 });
+    }
+
+    // Lắng nghe sự kiện cập nhật GPS thời gian thực từ WebSocket
+    document.addEventListener('rescue:map-update', function (e) {
+        const data = e.detail || {};
+        const currentSosId = /*[[${sos.id}]]*/ 0;
+        if (String(data.sosId) !== String(currentSosId)) return;
+
+        if (data.type === 'LOCATION_UPDATE') {
+            const newLat = Number(data.latitude);
+            const newLng = Number(data.longitude);
+            const dist = data.distanceKm;
+
+            const distEl = document.getElementById('distVal');
+            if (distEl && dist !== undefined) {
+                distEl.textContent = dist;
+            }
+
+            if (teamMarker && !isNaN(newLat) && !isNaN(newLng)) {
+                teamMarker.setLatLng([newLat, newLng]);
+                if (connectingLine) {
+                    connectingLine.setLatLngs([ [lat, lng], [newLat, newLng]]);
+                }
+            }
+
+            const statusBadge = document.getElementById('liveStatusBadge');
+            if (statusBadge) {
+                if (dist <= 0.05) {
+                    statusBadge.className = 'text-success fw-bold';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> ĐÃ TIẾP CẬN HIỆN TRƯỜNG!';
+                } else {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin me-1"></i> Đang di chuyển tiếp cận...';
+                }
+            }
+        } else if (data.status === 'IN_PROGRESS' || data.status === 'RESOLVED' || data.type === 'MISSION_START') {
+            window.setTimeout(() => location.reload(), 1000);
+        }
+    });
+
+    setTimeout(function () {
+        trackMap.invalidateSize();
+    }, 200);
+});
+</script>
+    <!-- Modal Phóng To Ảnh Hiện Trường -->
+    <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-hidden="true" th:if="${sos != null and sos.imageUrl != null}">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-navy text-white py-2">
+                    <h6 class="modal-title"><i class="fa-solid fa-camera me-2 text-danger"></i> Ảnh Hiện Trường Ca Cứu Hộ #SOS-[[${sos.id}]]</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center bg-dark">
+                    <img th:src="${sos.imageUrl}" alt="Ảnh hiện trường phóng to" class="img-fluid" style="max-height: 80vh; object-fit: contain;">
+                </div>
+                <div class="modal-footer py-1 justify-content-between small text-muted">
+                    <span>Thời điểm ghi nhận: <strong th:text="${#temporals.format(sos.createdAt, 'HH:mm dd/MM/yyyy')}"></strong></span>
+                    <a th:href="${sos.imageUrl}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

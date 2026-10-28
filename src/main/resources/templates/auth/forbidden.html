@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#forbidden-content})}">
+<body>
+
+<div id="forbidden-content" class="py-5">
+    <div class="container text-center py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card border-0 shadow-lg p-5">
+                    <div class="mb-4 text-danger">
+                        <i class="fa-solid fa-hand text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <h2 class="fw-bold text-navy mb-2">403 - TRUY CẬP BỊ TỪ CHỐI</h2>
+                    <p class="text-secondary lead mb-4">
+                        Bạn không có quyền truy cập vào phân hệ này. Khu vực này chỉ dành riêng cho Điều phối viên, Đội cứu hộ hoặc Quản trị viên được phân quyền.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a th:href="@{/}" class="btn btn-outline-secondary px-4">
+                            <i class="fa-solid fa-house me-1"></i> Về Trang Chủ
+                        </a>
+                        <a th:href="@{/auth/login}" class="btn btn-primary px-4">
+                            <i class="fa-solid fa-user-shield me-1"></i> Đổi Tài Khoản
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
