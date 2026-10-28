@@ -4,13 +4,13 @@
 ---
 
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
-- **Thời điểm cập nhật:** 26/10/2026
-- **Nhánh Git hiện tại:** `develop`
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ:
-  - **SESSION 06 (Điều Phối Viên & Thuật Toán Haversine Formula)**
-  - **SESSION 07 (Tác Nghiệp Cứu Hộ & Nghiệm Thu Hiện Trường)**
-  - **SESSION 08 (Quản Trị Admin, Broadcast Khẩn Cấp Toàn Màn Hình & Thống Kê Chart.js)**
-- **Trạng thái tổng quan:** Toàn bộ **54/54 unit & integration tests đạt BUILD SUCCESS 100%**. Sẵn sàng cho Session 09 (Tối ưu UI/UX Mobile toàn diện & Kịch bản bảo vệ đồ án).
+- **Thời điểm cập nhật:** 28/10/2026
+- **Nhánh Git hiện tại:** `ui-fixes` (Đã tích hợp toàn bộ nâng cấp giao diện, sửa lỗi bản đồ, phân trang và thống kê thu chi)
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI:
+  - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
+  - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
+  - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
+- **Trạng thái tổng quan:** Toàn bộ **101/101 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 
@@ -19,29 +19,32 @@
 - [x] **SESSION 02 (Võ Văn Thịnh):** 7 JPA Entities, Spring Security 6 + Stateless JWT HttpOnly Cookie, Đăng ký / Đăng nhập 4 Roles.
 - [x] **SESSION 03 (Võ Văn Thịnh):** Phân hệ SOS, GPS 1 chạm, Reverse geocoding 3 cấp tiếng Việt, Bản đồ Leaflet.js tương tác, Trang theo dõi tiến độ `/sos/track/{id}`.
 - [x] **SESSION 04 (PeterWeeee):** Cloudinary Media Upload SDK & Fallback Local Storage (`/uploads/**`), Modal phóng to ảnh và xem ảnh trong popup Leaflet.
-- [x] **MỞ RỘNG (Community Feed):** Bản tin thiên tai cộng đồng, trạm sơ tán an toàn, upvote xác minh tin và chuyển đổi bài đăng thành ca cứu nạn SOS.
-- [x] **SESSION 06 (SV 24110329):**
-  - [x] Cài đặt thuật toán khoảng cách địa lý **Haversine Formula** (`GeoUtils.java`).
-  - [x] `CoordinatorService.java` & `CoordinatorApiController.java`: Lấy thống kê số liệu, tính khoảng cách km từ vị trí SOS tới các đội cứu hộ, sắp xếp từ gần nhất đến xa nhất.
-  - [x] Tạo và quản lý phân công nhiệm vụ cứu nạn `RescueAssignment`, cập nhật trạng thái SOS sang `DISPATCHED` và đội sang `BUSY`.
-  - [x] Bố cục Split Screen chuyên nghiệp trên `coordinator/dashboard.html` (danh sách SOS + Leaflet Live Map + Modal gợi ý đội gần nhất kèm km).
-  - [x] Bộ kiểm thử `CoordinatorServiceTest`.
-- [x] **SESSION 07 (SV 24110329):**
-  - [x] `RescuerService.java` & `RescuerApiController.java`: Xác định đội của user (`getMyTeam`), xem nhiệm vụ được phân công.
-  - [x] Luồng trạng thái nhiệm vụ: Tiếp nhận (`ACCEPTED`), Từ chối (`REJECTED` kèm lý do và tự động trả ca SOS về hàng chờ `PENDING`), Bắt đầu di chuyển (`IN_PROGRESS`).
-  - [x] Nghiệm thu hoàn thành (`COMPLETED`): Nhập ghi chú, tải ảnh bằng chứng hiện trường lên Cloudinary/Local, chuyển ca SOS sang `RESOLVED` và đưa đội cứu hộ về `AVAILABLE`.
-  - [x] Giao diện Mobile-First trên `rescuer/missions.html` với 3 tabs rõ ràng, nút gọi điện thoại nhanh, chỉ đường Google Maps.
-  - [x] Bộ kiểm thử `RescuerServiceTest`.
-- [x] **SESSION 08 (SV 24110329):**
-  - [x] `AdminService.java` & `AdminApiController.java`: Quản trị người dùng (đổi vai trò, khóa/mở khóa ACTIVE/BLOCKED, chặn tự khóa admin cuối cùng).
-  - [x] Quản trị đội cứu hộ: Xem danh sách, thêm mới, cập nhật tọa độ, quân số, trang thiết bị, chỉ định đội trưởng.
-  - [x] Phát cảnh báo khẩn cấp diện rộng (Broadcast Alert): Tạo `DisasterAlert`, gửi thông điệp STOMP tới `/topic/broadcast-alerts`.
-  - [x] `alert-client.js` & `#emergencyBroadcastModal` trong `layout/main.html`: Tự động hiện popup modal cảnh báo khẩn cấp màu đỏ/cam/vàng đè toàn màn hình trên mọi trang web kèm còi báo động Web Audio API.
-  - [x] Dashboard Thống kê Chart.js: Biểu đồ tròn phân bố mức độ khẩn cấp, biểu đồ cột số ca theo quận/huyện, tính thời gian phản ứng trung bình từ dữ liệu thực 100% trong CSDL.
-  - [x] Bộ kiểm thử `AdminServiceTest`.
+- [x] **SESSION 05 (PeterWeeee):** WebSocket Real-time STOMP over SockJS, kênh `/topic/sos-alerts`, âm thanh chuông báo động và marker đỏ động.
+- [x] **SESSION 06 (SV 24110329):** Trung tâm chỉ huy Điều phối viên, thuật toán Haversine Formula gợi ý đội cứu hộ gần nhất, phân công nhiệm vụ cứu nạn.
+- [x] **SESSION 07 (SV 24110329):** Tác nghiệp Đội cứu hộ, tiếp nhận/từ chối nhiệm vụ, nghiệm thu hiện trường hoàn thành kèm ảnh Cloudinary.
+- [x] **SESSION 08 (SV 24110329):** Quản trị Admin, quản lý tài khoản & đội, phát cảnh báo Broadcast đè toàn màn hình kèm còi báo động Web Audio API, biểu đồ thống kê cơ bản.
+- [x] **SESSION 09 (SV 24110329 - Nhánh `ui-redesign`):**
+  - [x] Tân trang lại toàn bộ giao diện website theo phong cách chỉ huy cứu hộ hiện đại.
+  - [x] Xóa sạch các nội dung thừa thãi, rườm rà (bloatware) trên trang chủ, tập trung vào 3 hành động khẩn cấp: Gửi SOS, Bản đồ cứu nạn và Quyên góp.
+  - [x] Tái cấu trúc thanh điều hướng: Navbar tinh gọn + Sidebar chuyên dụng theo từng vai trò (`fragments/sidebar.html`).
+  - [x] Tối ưu hóa trang đăng nhập, chân trang và xây dựng bộ UI Preview độc lập (`ui-preview/`).
+- [x] **SESSION 10 (PeterWeeee - Nhánh `ui-fixes`):**
+  - [x] Bản nâng cấp sâu và sửa lỗi toàn diện của `ui-redesign`.
+  - [x] Sửa triệt để lỗi hiển thị Bản đồ số GIS Leaflet (xung đột z-index điều khiển và lỗi tự co giãn `invalidateSize`).
+  - [x] Khắc phục toàn bộ lỗi mã hóa UTF-8 tiếng Việt trong CSDL và `DataInitializer.java`.
+  - [x] Tân trang Cổng Quyên Góp cứu trợ: Bố cục Fullwidth Seamless Dark Theme, khắc phục độ tương phản chữ trắng trên nền trắng.
+  - [x] Triển khai phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống (Coordinator, Rescuer, Admin, Feed).
+  - [x] Tách riêng trang Lịch sử điều phối chuyên biệt (`coordinator/history.html`).
+- [x] **SESSION 11 (PeterWeeee):**
+  - [x] Bổ sung phân hệ Thống kê Thu - Chi minh bạch dành cho Quản trị viên (`ROLE_ADMIN`) tại `/admin/dashboard?view=finance` và `/admin/finance`.
+  - [x] Thống kê tổng nguồn thu (Quỹ cơ sở 500tr + Quyên góp từ cộng đồng qua VNPay, MoMo, VietQR) và tổng chi giải ngân cho các đội cứu hộ.
+  - [x] Thẻ KPI tài chính, 2 biểu đồ Chart.js (So sánh Thu - Chi và Phân bổ cổng thanh toán), bảng kê dòng tiền Thu và dòng tiền Chi kèm phân trang.
 
 ---
 
-## 3. Những Việc CẦN LÀM TIẾP THEO (Next Steps - Session 09)
-1. **Tối ưu hóa Responsive Mobile toàn diện** cho các màn hình điện thoại thực tế.
-2. **Kịch bản thuyết trình bảo vệ đồ án 5 bước** dành cho nhóm sinh viên trước hội đồng chấm thi.
+## 3. Tồn Đọng / Kế Hoạch Sau Này (Session Chưa Làm - Đưa Về Cuối)
+- **Tên phiên:** [`session-chua-lam-mobile-testing-demo-script.md`](roadmap/session-chua-lam-mobile-testing-demo-script.md)
+- **Trạng thái:** ⏸️ **Chưa thực hiện trong project này** (Backlog / Tồn đọng cho các giai đoạn nâng cấp tiếp theo)
+- **Nội dung dự kiến:**
+  1. Tối ưu hóa sâu responsive 100% trên các dòng màn hình điện thoại di động cụ thể.
+  2. Kịch bản thuyết trình bảo vệ đồ án 5 bước dành cho hội đồng chấm thi.

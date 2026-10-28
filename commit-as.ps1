@@ -72,11 +72,14 @@ if ($LASTEXITCODE -eq 0) {
     git log -1 --pretty=format:"Hash: %h%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s%n"
     
     if ($Push) {
-        Write-Host "`n[3/3] Pushing to origin develop..." -ForegroundColor Magenta
-        git push origin develop
+        $currentBranch = (git branch --show-current).Trim()
+        if (-not $currentBranch) { $currentBranch = "develop" }
+        Write-Host "`n[3/3] Pushing to origin $currentBranch..." -ForegroundColor Magenta
+        git push origin $currentBranch
         Write-Host ">>> PUSH THANH CONG! <<<" -ForegroundColor Green
     } else {
-        Write-Host "`nDe push len GitHub, hay chay lenh: git push origin develop" -ForegroundColor Cyan
+        $currentBranch = (git branch --show-current).Trim()
+        Write-Host "`nDe push len GitHub, hay chay lenh: git push origin $currentBranch" -ForegroundColor Cyan
     }
 } else {
     Write-Host "`nKhong co thay doi nao de commit hoac da xay ra loi!" -ForegroundColor Yellow

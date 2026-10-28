@@ -133,6 +133,28 @@ class CoordinatorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testRenderAdminDashboardFinanceTab() throws Exception {
+        MvcResult result = mockMvc.perform(get("/admin/dashboard?view=finance"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains("Báo cáo thống kê thu chi"), "Tiêu đề tab thống kê thu chi");
+        assertTrue(html.contains("donationsTable"), "Chứa bảng dòng tiền thu");
+        assertTrue(html.contains("disbursementsTable"), "Chứa bảng dòng tiền chi");
+        System.out.println("Rendered Admin Finance HTML length: " + html.length());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminFinanceRedirect() throws Exception {
+        mockMvc.perform(get("/admin/finance"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard?view=finance"));
+    }
+
+    @Test
     @WithMockUser(username = "rescuer", roles = {"RESCUER"})
     void testRenderRescuerMissions() throws Exception {
         MvcResult result = mockMvc.perform(get("/rescuer/missions"))

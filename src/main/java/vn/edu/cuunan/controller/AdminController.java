@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.cuunan.entity.ActivityLog;
 import vn.edu.cuunan.service.ActivityLogService;
 import vn.edu.cuunan.service.AdminService;
+import vn.edu.cuunan.service.BudgetService;
+import vn.edu.cuunan.service.DonationService;
 
 @Controller
 @RequestMapping("/admin")
@@ -20,14 +22,21 @@ public class AdminController {
 
     private final AdminService adminService;
     private final ActivityLogService activityLogService;
+    private final BudgetService budgetService;
+    private final DonationService donationService;
 
-    public AdminController(AdminService adminService, ActivityLogService activityLogService) {
+    public AdminController(AdminService adminService,
+                           ActivityLogService activityLogService,
+                           BudgetService budgetService,
+                           DonationService donationService) {
         this.adminService = adminService;
         this.activityLogService = activityLogService;
+        this.budgetService = budgetService;
+        this.donationService = donationService;
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(@RequestParam(value = "view", defaultValue = "overview") String view, Model model) {
         var users = adminService.getUsers();
         model.addAttribute("pageTitle", "Tổng Quan Quản Trị Hệ Thống - CứuNạn 24/7");
         model.addAttribute("users", users);
@@ -35,7 +44,19 @@ public class AdminController {
         model.addAttribute("rescuerUsers", users.stream()
                 .filter(user -> user.getRole() != null && "ROLE_RESCUER".equals(user.getRole().getName())).toList());
         model.addAttribute("stats", adminService.getStatistics());
+
+        // Dữ liệu Báo cáo & Thống kê Thu - Chi cho Admin
+        model.addAttribute("fundSummary", budgetService.getOrganizationGeneralFund());
+        model.addAttribute("allDonations", donationService.getAllSuccessfulDonations());
+        model.addAttribute("recentDonations", donationService.getRecentDonations());
+        model.addAttribute("fundRequests", budgetService.getAllRequests());
+        model.addAttribute("donationStats", donationService.getDonationStats());
         return "admin/dashboard";
+    }
+
+    @GetMapping("/finance")
+    public String finance() {
+        return "redirect:/admin/dashboard?view=finance";
     }
 
     @GetMapping("/audit-logs")

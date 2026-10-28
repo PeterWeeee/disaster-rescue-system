@@ -1,18 +1,19 @@
-# PHIÊN LÀM VIỆC #09: TỐI ƯU MOBILE, KIỂM THỬ & KỊCH BẢN BẢO VỆ ĐỒ ÁN
-> **Trạng thái:** ⏳ Chưa bắt đầu  
+# PHIÊN LÀM VIỆC CHƯA THỰC HIỆN: TỐI ƯU MOBILE, KIỂM THỬ & KỊCH BẢN BẢO VỆ ĐỒ ÁN
+> **Trạng thái:** ⏸️ CHƯA LÀM TRONG PROJECT NÀY (Backlog / Tồn đọng cho tương lai)  
 > **Ước tính thời gian:** 1 phiên làm việc  
-> **Nhánh thực hiện:** `develop`
+> **Nhánh dự kiến:** `future/mobile-testing-demo`  
+> **Ghi chú quan trọng:** Phiên làm việc này (nguyên bản là Session 09) được dời về cuối lộ trình và **tạm hoãn chưa thực hiện trong phạm vi dự án hiện tại** để tập trung nguồn lực hoàn thiện Phân hệ Tái thiết kế Giao diện (UI Redesign & UI Fixes) và Chức năng Thống kê Thu - Chi cho Admin.
 
 ---
 
-## 1. Mục Tiêu Phiên
+## 1. Mục Tiêu Phiên (Kế Hoạch Dự Kiến)
 - Tối ưu giao diện Responsive 100% trên thiết bị di động (Mobile First cho Người dân và Đội cứu hộ).
 - Nạp sẵn bộ dữ liệu mẫu sinh động (Data Seeder: 1 Admin, 2 Coordinator, 4 Đội cứu hộ, 10 ca SOS thực tế kèm tọa độ tại khu vực miền Trung/TP.HCM).
 - Chuẩn bị Kịch bản Demo thuyết trình để giảng viên chấm đồ án thấy rõ giá trị thực tế và kỹ thuật WebSocket.
 
 ---
 
-## 2. Danh Sách Công Việc Cần Thực Hiện
+## 2. Danh Sách Công Việc Tồn Đọng (Backlog)
 
 ### 2.1. Tối Ưu Giao Diện Di Động
 - Kiểm tra các viewport điện thoại (iPhone, Samsung) trên trình duyệt DevTools.
@@ -42,6 +43,6 @@
 
 ---
 
-## 3. Tiêu Chí Nghiệm Thu (Definition of Done - DoD)
+## 3. Tiêu Chí Nghiệm Thu (Definition of Done - DoD Khi Triển Khai)
 - [ ] Khởi động project từ con số 0 trên máy mới -> Tự động có sẵn tài khoản và dữ liệu mẫu để demo ngay mà không cần nhập tay.
 - [ ] Chạy trơn tru toàn bộ kịch bản 5 bước trên mà không có bất kỳ lỗi JavaScript Console hay Exception Backend.

@@ -1,39 +1,36 @@
-# 📋 BẢNG PHÂN CHIA NHIỆM VỤ & QUẢN LÝ COMMIT NHÓM 04
-> **Dự án:** Hệ thống Website Cứu Nạn Thiên Tai (CứuNạn 24/7)  
-> **Repository:** [https://github.com/PeterWeeee/disaster-rescue-system.git](https://github.com/PeterWeeee/disaster-rescue-system.git)  
-> **Nhánh phát triển chính:** `develop`
+# PHÂN CHIA CÔNG VIỆC NHÓM 04 - ĐỒ ÁN LẬP TRÌNH WEB (HCMUTE)
+> **Dự án:** CứuNạn 24/7 - Hệ thống phản ứng khẩn cấp & điều phối cứu hộ thiên tai  
+> **Thời gian cập nhật:** 28/10/2026
 
 ---
 
-## 1. Danh Sách Thành Viên & Thông Tin Định Danh
+## 1. Thông Tin Thành Viên Nhóm
 
-| STT | Mã số / ID | Họ và tên / Tên hiển thị | Email định danh GitHub | Vai trò chuyên trách trong dự án |
-| :---: | :---: | :--- | :--- | :--- |
-| **1** | `PeterWeeee` | **Tri Thai (PeterWeeee)** | `NguyenTT162.4@gmail.com` | **Trưởng nhóm:** Kiến trúc hệ thống, Backend Core, Real-time WebSocket & Đám mây Cloudinary |
-| **2** | `vovanthinh` | **Võ Văn Thịnh** | `vovanthinh2006@gmail.com` | **Thành viên:** Bảo mật & Xác thực (Security/JWT), Phân hệ Người dân & Bản đồ Leaflet.js, Tối ưu Mobile UI |
-| **3** | `24110329` | **Sinh viên MSSV 24110329** | `24110329@student.hcmute.edu.vn` | **Thành viên:** Phân hệ Điều phối viên (Coordinator & Haversine), Phân hệ Đội cứu hộ (Rescuer) & Quản trị Admin |
-
-> [!IMPORTANT]
-> **LƯU Ý ĐỂ GITHUB TÍNH ĐIỂM ĐÓNG GÓP (CONTRIBUTIONS GRAPH / GREEN SQUARES):**
-> 1. Mỗi thành viên cần đăng nhập vào GitHub của mình -> vào **Settings** -> **Emails** -> Thêm đúng địa chỉ email tương ứng ở bảng trên vào tài khoản GitHub (`NguyenTT162.4@gmail.com`, `vovanthinh2006@gmail.com`, `24110329@student.hcmute.edu.vn`).
-> 2. Khi commit mang đúng email đó, GitHub sẽ tự động nhận diện và cộng ô xanh (contributions) cho tài khoản cá nhân của từng bạn trên trang chủ và mục Insights của Repository.
+| STT | Họ và Tên | Mã Số SV | Vai Trò Trong Đồ Án | Email Git / GitHub | Username |
+| :---: | :--- | :---: | :--- | :--- | :--- |
+| **1** | **Tri Thai** | *Trưởng nhóm* | Architecture, Core WebSocket, Cloudinary & Nâng Cấp UI | `NguyenTT162.4@gmail.com` | `PeterWeeee` |
+| **2** | **Võ Văn Thịnh** | **24110329** | Fullstack, Spring Security 6, JWT, GPS SOS & Thống Kê Thu Chi | `vovanthinh2006@gmail.com` | `thinhvo` |
+| **3** | **Sinh viên MSSV 24110329** | **24110329** | GIS Haversine, Điều Phối Viên, Tác Nghiệp Cứu Hộ & UI Redesign | `24110329@student.hcmute.edu.vn` | `sv24110329` |
 
 ---
 
 ## 2. Ma Trận Phân Chia Công Việc Chi Tiết (Work Breakdown Structure)
 
-Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương ứng với tài liệu trong thư mục `docs/roadmap/`:
+Dự án được phân chia thành các phiên làm việc (Session) hoàn toàn tương ứng với tài liệu trong thư mục `docs/roadmap/`:
 
 ```
-                                  PHÂN CHIA 9 SESSIONS
+                                 PHÂN CHIA CÁC SESSIONS
 ┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
 │     THÀNH VIÊN 1: PeterWeeee    │   THÀNH VIÊN 2: Võ Văn Thịnh    │   THÀNH VIÊN 3: SV 24110329     │
 ├─────────────────────────────────┼─────────────────────────────────┼─────────────────────────────────┤
 │ • Session 01: Setup & Dual DB   │ • Session 02: Security & JWT    │ • Session 06: Coordinator Dash  │
 │ • Session 04: Cloudinary Media  │ • Session 03: SOS & Leaflet GPS │ • Session 07: Rescuer Operations│
-│ • Session 05: WebSocket STOMP   │ • Session 09 (Phần UI Mobile)   │ • Session 08: Admin & Broadcast │
-│ • Review & Tích hợp mã nguồn    │ • Kiểm thử luồng gửi SOS        │ • Session 09 (Phần Data & Demo) │
+│ • Session 05: WebSocket STOMP   │ • Kiểm thử luồng gửi SOS        │ • Session 08: Admin & Broadcast │
+│ • Session 10: UI Fixes & Page   │                                 │ • Session 09: UI Redesign       │
+│ • Session 11: Admin Finance     │                                 │   (Tân trang web & tinh gọn)    │
+│ • Review & Tích hợp mã nguồn    │                                 │                                 │
 └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
+ [SESSION CHƯA LÀM]: Tối ưu UI/UX Mobile & Kịch bản bảo vệ (Dời về cuối lộ trình - Chưa làm trong project này)
 ```
 
 ### Chi tiết phân công từng phiên & Trạng thái hoàn thành:
@@ -51,6 +48,17 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
   - Xây dựng hạ tầng WebSocket Real-time cốt lõi (`WebSocketConfig`, STOMP over SockJS).
   - Kênh `/topic/sos-alerts` bắn sự kiện cứu nạn tức thì không cần F5.
   - Âm thanh chuông báo khẩn cấp và hiệu ứng cập nhật marker bản đồ thời gian thực.
+- **Session 10 (✅ Đã hoàn thành - Nhánh `ui-fixes`):**
+  - Nâng cấp hoàn thiện sâu trực tiếp từ nhánh `ui-redesign`.
+  - Khắc phục triệt để lỗi hiển thị bản đồ GIS Leaflet (xung đột z-index điều khiển và auto resize).
+  - Sửa toàn bộ lỗi mã hóa UTF-8 tiếng Việt trong SQL scripts và bộ nạp mẫu `DataInitializer.java`.
+  - Tân trang Cổng Quyên Góp Fullwidth Seamless Dark Theme, khắc phục lỗi tương phản chữ trắng trên nền trắng.
+  - Triển khai phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống (Coordinator, Rescuer, Admin, Feed).
+  - Tách riêng trang Lịch sử điều phối chuyên biệt (`coordinator/history.html`).
+- **Session 11 (✅ Đã hoàn thành):**
+  - Bổ sung phân hệ Báo cáo & Thống kê Thu - Chi minh bạch dành cho Quản trị viên (`ROLE_ADMIN`) tại `/admin/dashboard?view=finance` và `/admin/finance`.
+  - Thống kê dòng tiền Thu (Quỹ cơ sở 500tr + Quyên góp từ nhà hảo tâm) và dòng tiền Chi (giải ngân cấp phát cho các đội cứu hộ).
+  - 4 thẻ KPI tài chính, 2 biểu đồ Chart.js trực quan (Thu vs Chi và Phân bổ phương thức thanh toán), bảng kê quyên góp và bảng kê giải ngân có phân trang.
 
 ---
 
@@ -66,8 +74,6 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
   - Tích hợp HTML5 Geolocation API lấy tọa độ GPS chính xác với 1 chạm và Reverse geocoding 3 cấp tiếng Việt.
   - Nhúng bản đồ tương tác Leaflet.js + OpenStreetMap (kéo thả ghim vị trí, tự điền kinh độ/vĩ độ).
   - Giao diện người dân theo dõi trạng thái ca cứu hộ (`templates/sos/track.html`).
-- **Session 09 (⏳ Đang chuẩn bị):**
-  - Tối ưu giao diện Responsive 100% chuẩn Mobile First cho người dân gửi SOS trên điện thoại.
 
 ---
 
@@ -86,8 +92,18 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
   - Quản lý danh sách tài khoản người dùng (khóa/mở khóa, đổi role) và quản lý danh sách đội cứu hộ.
   - Chức năng phát sóng khẩn cấp diện rộng (Broadcast Emergency Alert) đẩy popup cảnh báo toàn màn hình qua WebSocket kèm còi báo động.
   - Báo cáo thống kê trực quan với biểu đồ Chart.js từ 100% dữ liệu thực CSDL.
-- **Session 09 (⏳ Đang chuẩn bị):**
-  - Chuẩn bị Data Seeder (10 ca SOS mẫu, 4 đội cứu hộ, tọa độ vùng ngập lụt miền Trung/TP.HCM) và kịch bản thuyết trình bảo vệ đồ án.
+- **Session 09 (✅ Đã hoàn thành - Nhánh `ui-redesign`):**
+  - Tân trang toàn bộ giao diện hệ thống theo phong cách chỉ huy cứu hộ hiện đại.
+  - Xóa sạch các nội dung thừa thãi, rườm rà (bloatware) trên trang chủ, tập trung vào 3 khối hành động khẩn cấp sống còn (SOS, Bản đồ, Quyên góp).
+  - Tái cấu trúc thanh điều hướng: Topbar tinh gọn + Sidebar chuyên dụng theo từng vai trò (`fragments/sidebar.html`).
+  - Thiết kế bộ UI Preview độc lập (`ui-preview/`).
+
+---
+
+### ⏸️ Session Chưa Làm (Đưa về cuối lộ trình - Chưa thực hiện trong project này)
+- **Tài liệu:** [`docs/roadmap/session-chua-lam-mobile-testing-demo-script.md`](roadmap/session-chua-lam-mobile-testing-demo-script.md)
+- **Phụ trách:** Cả nhóm
+- **Nội dung:** Tối ưu hóa sâu responsive 100% trên các thiết bị di động, nạp dữ liệu mẫu tự động và kịch bản thuyết trình demo bảo vệ đồ án trước hội đồng.
 
 ---
 
@@ -109,9 +125,12 @@ Dự án được chia thành 9 phiên làm việc (Session) hoàn toàn tương
 | `10` | 06 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(dispatch): build coordinator live dashboard and dispatching operations` | ✅ Đã xong |
 | `11` | 07 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(rescuer): implement mission acceptance, status transition, and completion photo report` | ✅ Đã xong |
 | `12` | 08 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(admin): build user management, emergency broadcast popup, and chartjs analytics` | ✅ Đã xong |
-| `13` | 09 | **Vo Van Thinh** | `vovanthinh2006@gmail.com` | `style(mobile): optimize responsive design and touch controls for mobile screens` | ⏳ Đang làm |
-| `14` | 09 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `test(seed): add full realistic demo data seeder and presentation test script` | ⏳ Đang làm |
-| `15` | 09 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `chore: finalize project, verify all unit tests, and prepare release on main branch` | ⏳ Đang làm |
+| `13` | 09 | **Student 24110329** | `24110329@student.hcmute.edu.vn` | `feat(ui): redesign rescue portal and role navigation` | ✅ Đã xong |
+| `14` | 10 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `fix(ui): resolve map rendering, encoding, pagination, and route status bugs` | ✅ Đã xong |
+| `15` | 10 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(ui): update homepage scale, donation fullwidth seamless dark layout, and brand spacing` | ✅ Đã xong |
+| `16` | 10 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(ui): refine coordinator navigation, add dedicated dispatch history, and implement pagination across all role tables` | ✅ Đã xong |
+| `17` | 11 | **Tri Thai** | `NguyenTT162.4@gmail.com` | `feat(admin): implement revenue and expenditure statistics dashboard with chartjs and pagination` | ✅ Đã xong |
+| `18` | Cuối | **Cả nhóm** | `24110329@student.hcmute.edu.vn` | `chore: future mobile testing and presentation demo script` | ⏸️ Chưa làm |
 
 ---
 
@@ -126,23 +145,18 @@ Chỉ cần gõ **1 dòng lệnh** duy nhất, script sẽ tự động gán đ�
 # Cú pháp: .\commit-as.ps1 <Số_thành_viên> "Thông_điệp_commit" [-Push]
 
 # 1. Commit cho Võ Văn Thịnh (Thành viên 2):
-.\commit-as.ps1 2 "feat(security): implement user role entity, spring security 6, and jwt filter"
+.\commit-as.ps1 2 "feat(admin): implement revenue and expenditure statistics dashboard"
 
 # 2. Commit cho Sinh viên 24110329 (Thành viên 3):
-.\commit-as.ps1 3 "feat(coordinator): build coordinator dashboard and haversine dispatching"
+.\commit-as.ps1 3 "feat(ui): redesign rescue portal and role navigation"
 
 # 3. Commit cho Tri Thai / PeterWeeee (Thành viên 1):
-.\commit-as.ps1 1 "feat(websocket): configure stomp broker and real-time sos alerts"
-
-# Muốn commit và PUSH luôn lên GitHub chỉ cần thêm cờ -Push:
-.\commit-as.ps1 2 "feat(auth): complete login register thymeleaf pages" -Push
+.\commit-as.ps1 1 "fix(ui): resolve map rendering, encoding, pagination, and route status bugs"
 ```
 
 ---
 
 ### 🔄 Cách 2: Dùng script `git-member.ps1` (Chuyển danh tính đang hoạt động)
-Dùng khi bạn muốn chuyển hẳn danh tính tác giả hiện tại sang bạn khác:
-
 ```powershell
 # Xem ai đang là người commit hiện tại:
 .\git-member.ps1 -Check
@@ -155,28 +169,6 @@ Dùng khi bạn muốn chuyển hẳn danh tính tác giả hiện tại sang b�
 
 # Chuyển sang SV 24110329:
 .\git-member.ps1 3
-```
-
----
-
-### 🛠️ Cách 3: Lệnh Git thủ công
-Nếu không muốn dùng script PowerShell, bạn có thể truyền trực tiếp cờ `--author` vào lệnh `git commit`:
-
-```bash
-# Cho Võ Văn Thịnh:
-git add .
-git commit --author="Vo Van Thinh <vovanthinh2006@gmail.com>" -m "feat(security): implement jwt filter"
-git push origin develop
-
-# Cho SV 24110329:
-git add .
-git commit --author="Student 24110329 <24110329@student.hcmute.edu.vn>" -m "feat(coordinator): add haversine algorithm"
-git push origin develop
-
-# Cho PeterWeeee:
-git add .
-git commit --author="PeterWeeee <NguyenTT162.4@gmail.com>" -m "feat(websocket): add realtime channel"
-git push origin develop
 ```
 
 ---
