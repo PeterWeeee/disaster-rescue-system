@@ -638,7 +638,16 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private User getOrCreateUser(String username, String rawPassword, String fullName, String phone, String email, String address, Role role) {
-        return userRepository.findByUsername(username).orElseGet(() -> {
+        return userRepository.findByUsername(username).map(existingUser -> {
+            // Tự động đồng bộ mật khẩu chuẩn nếu tài khoản đã tồn tại trong DB nhưng mật khẩu không khớp rawPassword (ví dụ do chạy file SQL seed cũ)
+            if (!passwordEncoder.matches(rawPassword, existingUser.getPassword())) {
+                existingUser.setPassword(passwordEncoder.encode(rawPassword));
+                existingUser.setStatus("ACTIVE");
+                userRepository.save(existingUser);
+                log.info("  [User] Đã tự động cập nhật lại mật khẩu chuẩn cho tài khoản: {}", username);
+            }
+            return existingUser;
+        }).orElseGet(() -> {
             User user = User.builder()
                     .username(username)
                     .password(passwordEncoder.encode(rawPassword))

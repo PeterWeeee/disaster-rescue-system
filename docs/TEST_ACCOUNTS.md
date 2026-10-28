@@ -2,7 +2,7 @@
 
 > **Mật khẩu dùng chung cho tất cả tài khoản thử nghiệm (Development / Test):**  
 > `123456`  
-> *(Tất cả mật khẩu đều được băm bằng thuật toán BCrypt chuẩn Spring Security: `$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa`)*
+> *(Tất cả mật khẩu đều được băm bằng thuật toán BCrypt chuẩn Spring Security: `$2a$10$yZFNmD6q21gAeJKXtGVUBO3LtnCsWfWWG4yU30/LvhT.ci1IfFrS.`)*
 
 ---
 

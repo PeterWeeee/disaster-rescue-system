@@ -24,12 +24,12 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[roles] WHERE [name] = 'ROLE_CITIZEN')
 PRINT N'>>> Đã nạp 4 Roles chuẩn hệ thống!';
 GO
 
--- 2. Nạp Người dùng mẫu (Mật khẩu mặc định: 123456 -> BCrypt hash: $2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa)
+-- 2. Nạp Người dùng mẫu (Mật khẩu mặc định: 123456 -> BCrypt hash: $2a$10$yZFNmD6q21gAeJKXtGVUBO3LtnCsWfWWG4yU30/LvhT.ci1IfFrS.)
 DECLARE @adminRoleId INT = (SELECT [id] FROM [dbo].[roles] WHERE [name] = 'ROLE_ADMIN');
 DECLARE @coordRoleId INT = (SELECT [id] FROM [dbo].[roles] WHERE [name] = 'ROLE_COORDINATOR');
 DECLARE @rescuerRoleId INT = (SELECT [id] FROM [dbo].[roles] WHERE [name] = 'ROLE_RESCUER');
 DECLARE @citizenRoleId INT = (SELECT [id] FROM [dbo].[roles] WHERE [name] = 'ROLE_CITIZEN');
-DECLARE @hash VARCHAR(255) = '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa';
+DECLARE @hash VARCHAR(255) = '$2a$10$yZFNmD6q21gAeJKXtGVUBO3LtnCsWfWWG4yU30/LvhT.ci1IfFrS.';
 
 -- 2.1. Admin & Điều phối viên
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'admin')
