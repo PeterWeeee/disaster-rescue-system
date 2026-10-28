@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="sidebar" class="app-sidebar" aria-label="Điều hướng chính">
+    <a class="sidebar-brand" th:href="@{/}">
+        <span class="sidebar-brand-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span><strong>CỨUNẠN</strong><small>HỆ THỐNG CỨU HỘ</small></span>
+    </a>
+    <div class="sidebar-caption">KHÔNG GIAN LÀM VIỆC</div>
+
+    <div sec:authorize="hasRole('RESCUER') and !hasRole('ADMIN')" class="sidebar-links">
+        <a th:href="@{/rescuer/missions}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan</span></a>
+        <a th:href="@{/rescuer/missions#active-missions}" class="sidebar-link"><i class="fa-solid fa-person-running"></i><span>Nhiệm vụ cứu hộ</span></a>
+        <a th:href="@{/rescuer/routes}" class="sidebar-link"><i class="fa-solid fa-route"></i><span>Lộ trình di chuyển</span></a>
+        <a th:href="@{/rescuer/resources}" class="sidebar-link"><i class="fa-solid fa-boxes-stacked"></i><span>Quân số và trang bị</span></a>
+        <a th:href="@{/rescuer/missions#completed-missions}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử nhiệm vụ</span></a>
+    </div>
+
+    <div sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')" class="sidebar-links">
+        <a th:href="@{/coordinator/dashboard}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan điều phối</span></a>
+        <a th:href="@{/coordinator/dashboard(status='PENDING')}" class="sidebar-link"><i class="fa-solid fa-tower-broadcast"></i><span>Yêu cầu cứu nạn</span></a>
+        <a th:href="@{/coordinator/missions}" class="sidebar-link"><i class="fa-solid fa-list-check"></i><span>Phân công nhiệm vụ</span></a>
+        <a th:href="@{/coordinator/teams}" class="sidebar-link"><i class="fa-solid fa-people-group"></i><span>Quản lý đội cứu hộ</span></a>
+        <a th:href="@{/coordinator/missions(view='map')}" class="sidebar-link"><i class="fa-solid fa-map-location-dot"></i><span>Bản đồ và lộ trình</span></a>
+        <a th:href="@{/coordinator/dashboard(status='RESOLVED')}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử điều phối</span></a>
+        <a th:href="@{/coordinator/budget}" class="sidebar-link"><i class="fa-solid fa-wallet"></i><span>Quỹ và ngân sách</span></a>
+    </div>
+
+    <div sec:authorize="hasRole('ADMIN')" class="sidebar-links">
+        <a th:href="@{/admin/dashboard}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan quản trị</span></a>
+        <a th:href="@{/admin/dashboard(view='users')}" class="sidebar-link"><i class="fa-solid fa-users-gear"></i><span>Quản lý tài khoản</span></a>
+        <a th:href="@{/admin/dashboard(view='teams')}" class="sidebar-link"><i class="fa-solid fa-people-group"></i><span>Quản lý đội cứu hộ</span></a>
+        <a th:href="@{/admin/audit-logs}" class="sidebar-link"><i class="fa-solid fa-clipboard-list"></i><span>Nhật ký hoạt động</span></a>
+    </div>
+
+    <div class="sidebar-bottom">
+        <a th:href="@{/}" class="sidebar-link"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Trang thông tin</span></a>
+        <div class="sidebar-status"><span class="status-dot"></span> Hệ thống cứu hộ</div>
+    </div>
+</nav>
+<script>
+    (() => {
+        const current = new URL(window.location.href);
+        const candidates = [...document.querySelectorAll('.app-sidebar .sidebar-link[href]')].map((link) => {
+            const target = new URL(link.href, window.location.href);
+            const matches = target.pathname === current.pathname
+                && (!target.hash || target.hash === current.hash)
+                && [...target.searchParams.entries()].every(([key, value]) => current.searchParams.get(key) === value);
+            const specificity = target.hash.length + target.search.length;
+            return { link, matches, specificity };
+        }).filter((item) => item.matches).sort((a, b) => b.specificity - a.specificity);
+        if (candidates.length) {
+            candidates[0].link.classList.add('active');
+            candidates[0].link.setAttribute('aria-current', 'page');
+        }
+    })();
+</script>
+</body>
+</html>

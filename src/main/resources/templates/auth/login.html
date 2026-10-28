@@ -3,17 +3,18 @@
       th:replace="~{layout/main :: layout(${pageTitle}, ~{::#login-content})}">
 <body>
 
-<div id="login-content" class="py-5">
+<div id="login-content" class="auth-page auth-login-page">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-navy text-white text-center py-4">
-                        <i class="fa-solid fa-shield-halved text-danger fa-2x mb-2"></i>
-                        <h4 class="fw-bold mb-0">ĐĂNG NHẬP HỆ THỐNG</h4>
-                        <small class="text-white-50">CứuNạn 24/7 - Cổng thông tin điều phối & ứng cứu</small>
+                <div class="card auth-card border-0">
+                    <div class="card-header auth-card-header text-center">
+                        <span class="auth-brand-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                        <span class="auth-eyebrow">CỨU NẠN 24/7</span>
+                        <h1 class="fw-bold mb-1">Chào mừng trở lại</h1>
+                        <p class="auth-subtitle mb-0">Đăng nhập để tiếp tục sử dụng hệ thống cứu trợ</p>
                     </div>
-                    <div class="card-body p-4 p-md-5">
+                    <div class="card-body auth-card-body">
                         <!-- Thông báo lỗi -->
                         <div th:if="${errorMessage}" class="alert alert-danger small py-2 d-flex align-items-center">
                             <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
@@ -45,7 +46,7 @@
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label fw-semibold mb-0">Mật khẩu</label>
-                                    <a th:href="@{/auth/forgot-password}" class="small text-danger text-decoration-none">Quên mật khẩu?</a>
+                                    <a th:href="@{/auth/forgot-password}" class="small text-primary text-decoration-none">Quên mật khẩu?</a>
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fa-solid fa-lock text-secondary"></i></span>
@@ -59,21 +60,8 @@
                             </div>
                         </form>
 
-                        <div class="text-center small text-muted mb-4">
-                            Chưa có tài khoản? <a th:href="@{/auth/register}" class="fw-bold text-danger">Đăng ký ngay</a>
-                        </div>
-
-                        <!-- Gợi ý tài khoản demo -->
-                        <div class="p-3 bg-light rounded-3 border">
-                            <div class="small fw-bold text-secondary mb-2">
-                                <i class="fa-solid fa-key text-warning me-1"></i> Tài khoản dùng thử (Mật khẩu: <code>123456</code>):
-                            </div>
-                            <div class="d-flex flex-wrap gap-1">
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="quickFill('admin')">Admin</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="quickFill('coordinator')">Điều phối</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="quickFill('rescuer')">Cứu hộ</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="quickFill('citizen')">Người dân</button>
-                            </div>
+                        <div class="text-center small text-muted mb-0">
+                            Chưa có tài khoản? <a th:href="@{/auth/register}" class="fw-bold text-primary">Đăng ký ngay</a>
                         </div>
                     </div>
                 </div>
@@ -81,13 +69,6 @@
         </div>
     </div>
 </div>
-
-<script>
-function quickFill(user) {
-    document.getElementById('loginUsername').value = user;
-    document.getElementById('loginPassword').value = '123456';
-}
-</script>
 
 </body>
 </html>

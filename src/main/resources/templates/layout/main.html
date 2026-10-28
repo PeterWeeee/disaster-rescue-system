@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:fragment="layout(title, content)">
 <head th:replace="~{fragments/head :: head(${title})}">
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="app-body d-flex flex-column min-vh-100">
 
     <!-- Navigation -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Main Dynamic Content -->
-    <main class="flex-grow-1">
-        <div th:replace="${content}"></div>
-    </main>
+    <!-- Shared role navigation and page canvas -->
+    <div class="app-workspace flex-grow-1">
+        <aside class="app-sidebar-wrap" sec:authorize="hasAnyRole('RESCUER','COORDINATOR','ADMIN')">
+            <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        </aside>
+        <main class="app-main flex-grow-1">
+            <div class="app-content">
+                <div th:replace="${content}"></div>
+            </div>
+        </main>
+    </div>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>

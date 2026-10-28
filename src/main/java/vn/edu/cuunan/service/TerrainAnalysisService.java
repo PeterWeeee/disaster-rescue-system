@@ -27,9 +27,23 @@ public class TerrainAnalysisService {
     private static final Logger log = LoggerFactory.getLogger(TerrainAnalysisService.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofMillis(2500))
-            .build();
+    private volatile HttpClient httpClient;
+
+    private HttpClient getHttpClient() {
+        HttpClient client = httpClient;
+        if (client == null) {
+            synchronized (this) {
+                client = httpClient;
+                if (client == null) {
+                    client = HttpClient.newBuilder()
+                            .connectTimeout(Duration.ofMillis(2500))
+                            .build();
+                    httpClient = client;
+                }
+            }
+        }
+        return client;
+    }
 
     /**
      * Phân tích tuyến đường, địa hình và đề xuất danh mục trang thiết bị & phương tiện tương thích.
@@ -79,7 +93,7 @@ public class TerrainAnalysisService {
                     .GET()
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
                 JsonNode root = objectMapper.readTree(response.body());

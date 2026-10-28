@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8fc">
+  <meta name="description" content="Bản xem trước thiết kế Cứu Nạn 24/7 — kết nối người cần giúp đỡ với lực lượng cứu hộ.">
+  <title>Cứu Nạn 24/7 — Bản xem trước giao diện</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Cứu Nạn 24/7, về đầu trang">
+        <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 3.5 34 9v9.3c0 8.3-5.5 14.8-14 18.2C11.5 33.1 6 26.6 6 18.3V9l14-5.5Z"/><path class="brand-cross" d="M18 11h4v6h6v4h-6v6h-4v-6h-6v-4h6z"/></svg></span>
+        <span class="brand-name">CỨU NẠN <b>24/7</b><small>KẾT NỐI CỨU TRỢ CỘNG ĐỒNG</small></span>
+      </a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Mở menu"><span></span><span></span><span></span></button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Điều hướng chính">
+        <a href="#features">Tính năng</a><a href="#map">Bản đồ cứu trợ</a><a href="#process">Quy trình</a>
+        <a class="nav-action" href="#process"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 20h18L12 3Zm0 5.2 5.1 9.8H6.9L12 8.2Zm-1 3.1v3.5h2v-3.5h-2Zm0 4.5v1.5h2v-1.5h-2Z"/></svg>Gửi yêu cầu cứu trợ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero section-pad" id="top">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> NỀN TẢNG KẾT NỐI CỨU TRỢ</div>
+          <h1>Cứu trợ đúng nơi.<br><span>Kịp thời khi cần.</span></h1>
+          <p class="hero-lead">Kết nối người dân cần hỗ trợ với đội cứu hộ và nguồn lực cộng đồng — từ lúc gửi yêu cầu đến khi hoàn tất hỗ trợ.</p>
+          <div class="hero-actions"><a class="button button-danger" href="#process"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg>Gửi yêu cầu cứu trợ</a><a class="button button-secondary" href="#map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-.8-4 2v10.6l4-2V5.2Zm2 0v10.6l4 2V7.2l-4-2Zm6 2v10.6l4-2V4.4l-4 2.8Z"/></svg>Xem bản đồ</a></div>
+          <div class="hero-note"><span class="note-check" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m4 10 4 4 8-9"/></svg></span><span>Thông tin rõ ràng, hỗ trợ có điều phối</span></div>
+        </div>
+        <div class="hero-visual" aria-label="Minh họa bản đồ điều phối cứu trợ">
+          <div class="visual-topline"><span><i></i> BẢN ĐỒ ĐIỀU PHỐI</span><span class="visual-live">MINH HỌA</span></div>
+          <div class="map-art hero-map-art" role="img" aria-label="Bản đồ minh họa các vị trí yêu cầu, đội cứu hộ và điểm an toàn">
+            <svg class="terrain" viewBox="0 0 720 455" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="720" height="455" fill="#edf3f2"/>
+              <path class="park" d="M-8 35 165 13l32 85-92 54-112-9Zm433-37 133 21 39 72-78 42-89-42ZM527 256l155-38 63 93-81 79-151-27ZM58 302l114-30 69 68-26 108L91 467 10 401Z"/>
+              <path class="water" d="M-12 253c88-25 120 14 196-19 62-27 79-82 145-70 58 11 74 63 127 72 54 9 99-30 153-8 45 18 65 64 124 68v70c-65 0-87-47-141-59-59-13-98 27-157 18-67-10-93-67-150-73-63-6-83 48-144 70-57 21-101-2-153 27Z"/>
+              <g class="roads" fill="none" stroke-linecap="round">
+                <path d="M-30 103 139 142l120-70 123 75 114-24 120 66 153-34"/>
+                <path d="m32 473 96-118 2-110 111-87 94 13 92-101"/>
+                <path d="m170-20 23 86 104 69 8 104 107 62 15 131"/>
+                <path d="m369 469 23-92 110-80 15-90 88-60 22-132"/>
+                <path d="m-30 333 113-29 86 32 102-45 68 12"/>
+                <path d="m451 25 16 70 79 27 22 83 90 38"/>
+              </g>
+              <g class="minor-roads" fill="none" stroke-linecap="round">
+                <path d="m31 20 78 57-10 68 68 50-33 74 44 55"/><path d="m234 34-22 52 32 32-15 62 43 43-32 50"/>
+                <path d="m552 39-73 72 25 39-29 54 66 54-13 64"/><path d="m634 114-58 30-18 59 48 35-38 67"/>
+                <path d="m114 391 90-41 50 17 68-47 64 42"/>
+              </g>
+              <path class="route-line" d="M530 109c-55 17-49 89-112 104-48 12-67 52-99 71-47 44-93 26-130 85"/>
+              <path class="hazard-area" d="m71 218 47-34 59 10 31 42-19 52-54 25-56-27-25-35Z"/>
+              <text class="map-label" x="90" y="162">KHU DÂN CƯ</text><text class="map-label" x="492" y="315">ĐIỂM AN TOÀN</text><text class="map-label" x="265" y="402">SÔNG</text>
+            </svg>
+            <div class="map-pin pin-help"><span class="pin-pulse"></span><b><svg viewBox="0 0 24 24"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg></b></div>
+            <div class="map-pin pin-team"><b><svg viewBox="0 0 24 24"><path d="M3 11h2l2-5h10l2 5h2v7h-2v2h-2v-2H7v2H5v-2H3v-7Zm5-3-1 3h10l-1-3H8Zm-2 5v2h3v-2H6Zm9 0v2h3v-2h-3Z"/></svg></b></div>
+            <div class="map-pin pin-safe"><b><svg viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.3 9.3-8 11-4.7-1.7-8-5.9-8-11V5l8-3Zm-1 13 6-6-1.4-1.4L11 12.2l-2.6-2.6L7 11l4 4Z"/></svg></b></div>
+            <div class="map-callout callout-help"><span class="callout-icon danger-icon"><svg viewBox="0 0 24 24"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg></span><span><strong>Yêu cầu hỗ trợ</strong><small>Vị trí cần xác minh</small></span></div>
+            <div class="map-callout callout-safe"><span class="callout-icon safe-icon"><svg viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.3 9.3-8 11-4.7-1.7-8-5.9-8-11V5l8-3Zm-1 13 6-6-1.4-1.4L11 12.2l-2.6-2.6L7 11l4 4Z"/></svg></span><span><strong>Điểm hỗ trợ an toàn</strong><small>Đang mở</small></span></div>
+          </div>
+          <div class="visual-bottom"><span><b class="legend-dot dot-danger"></b> Yêu cầu hỗ trợ</span><span><b class="legend-dot dot-blue"></b> Đội cứu hộ</span><span><b class="legend-dot dot-green"></b> Điểm an toàn</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-strip" aria-label="Thông tin bản xem trước">
+      <div class="container stats-inner">
+        <div class="stats-intro"><span class="small-label">CỨU TRỢ CÓ ĐIỀU PHỐI</span><strong>Một điểm kết nối<br>cho nhiều nguồn lực.</strong></div>
+        <div class="stat"><strong>24/7</strong><span>Tiếp nhận yêu cầu<br>hỗ trợ cộng đồng</span></div>
+        <div class="stat"><strong>3 bước</strong><span>Từ tiếp nhận đến<br>cập nhật kết quả</span></div>
+        <div class="demo-label"><svg viewBox="0 0 20 20"><path d="M10 2 2 6v8l8 4 8-4V6l-8-4Zm0 2.2 5.4 2.7L10 9.6 4.6 6.9 10 4.2ZM4 8.5l5 2.5v4.6l-5-2.5V8.5Zm7 7.1V11l5-2.5v4.6l-5 2.5Z"/></svg><span><b>Bản xem trước</b><small>Số liệu và vị trí trên bản đồ chỉ minh họa</small></span></div>
+      </div>
+    </section>
+
+    <section id="features" class="section-pad feature-section">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">HỖ TRỢ ĐÚNG VIỆC</span><h2>Mọi thông tin cần thiết,<br><span>trong một luồng rõ ràng.</span></h2></div><p>Từ tín hiệu khẩn cấp đến quá trình điều phối và theo dõi, các bước được trình bày dễ hiểu cho cả người dân lẫn lực lượng hỗ trợ.</p></div>
+        <div class="feature-grid">
+          <article class="feature-card feature-sos"><span class="feature-icon red-bg"><svg viewBox="0 0 24 24"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg></span><span class="feature-kicker">KHẨN CẤP</span><h3>Gửi yêu cầu SOS</h3><p>Chia sẻ vị trí, tình huống và nhu cầu thiết yếu để đội tiếp nhận có thông tin cần thiết.</p><a href="#process">Tìm hiểu quy trình <span>↗</span></a></article>
+          <article class="feature-card"><span class="feature-icon blue-bg"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4V4Zm3 3v2h10V7H7Zm0 4v2h7v-2H7Z"/></svg></span><span class="feature-kicker">CỘNG ĐỒNG</span><h3>Yêu cầu cứu trợ</h3><p>Nêu rõ loại hỗ trợ cần thiết để thông tin có thể được phân loại và chuyển đúng nơi.</p><a href="#process">Xem cách tiếp nhận <span>↗</span></a></article>
+          <article class="feature-card"><span class="feature-icon teal-bg"><svg viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-.8-4 2v10.6l4-2V5.2Zm2 0v10.6l4 2V7.2l-4-2Zm6 2v10.6l4-2V4.4l-4 2.8Z"/></svg></span><span class="feature-kicker">ĐỊNH HƯỚNG</span><h3>Bản đồ cứu trợ</h3><p>Quan sát yêu cầu, đội cứu hộ và điểm hỗ trợ trên một giao diện bản đồ thống nhất.</p><a href="#map">Khám phá bản đồ <span>↗</span></a></article>
+          <article class="feature-card"><span class="feature-icon green-bg"><svg viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.3 9.3-8 11-4.7-1.7-8-5.9-8-11V5l8-3Zm-1 13 6-6-1.4-1.4L11 12.2l-2.6-2.6L7 11l4 4Z"/></svg></span><span class="feature-kicker">AN TOÀN</span><h3>Điểm hỗ trợ an toàn</h3><p>Tìm các điểm sơ tán và hỗ trợ đã được hệ thống ghi nhận để tham khảo.</p><a href="#map">Xem chú giải bản đồ <span>↗</span></a></article>
+          <article class="feature-card"><span class="feature-icon navy-bg"><svg viewBox="0 0 24 24"><path d="M3 11h2l2-5h10l2 5h2v7h-2v2h-2v-2H7v2H5v-2H3v-7Zm5-3-1 3h10l-1-3H8Zm-2 5v2h3v-2H6Zm9 0v2h3v-2h-3Z"/></svg></span><span class="feature-kicker">ĐIỀU PHỐI</span><h3>Phân công đội cứu hộ</h3><p>Điều phối viên xem xét thông tin và phân công nguồn lực phù hợp với tình huống.</p><a href="#process">Tìm hiểu các bước <span>↗</span></a></article>
+          <article class="feature-card"><span class="feature-icon amber-bg"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Zm1 0v9h8a9 9 0 0 0-8-9Zm2.1 2.4A7.1 7.1 0 0 1 19 10h-3.9V5.4Z"/></svg></span><span class="feature-kicker">CẬP NHẬT</span><h3>Theo dõi trạng thái</h3><p>Thông tin trạng thái giúp người gửi và người hỗ trợ nắm được tiến trình xử lý.</p><a href="#process">Xem luồng xử lý <span>↗</span></a></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="map" class="map-section section-pad">
+      <div class="container map-section-grid">
+        <div class="map-section-copy"><span class="eyebrow">BẢN ĐỒ CỨU TRỢ</span><h2>Nhìn rõ tình hình.<br><span>Điều phối có căn cứ.</span></h2><p>Bản đồ minh họa cách thông tin cứu trợ có thể được đặt trong bối cảnh khu vực: yêu cầu cần hỗ trợ, đội cứu hộ và điểm an toàn được phân biệt rõ.</p>
+          <div class="map-legend"><div><span class="legend-symbol symbol-request"><svg viewBox="0 0 24 24"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg></span><span><b>Yêu cầu cứu trợ</b><small>Điểm cần tiếp nhận / xác minh</small></span></div><div><span class="legend-symbol symbol-team"><svg viewBox="0 0 24 24"><path d="M3 11h2l2-5h10l2 5h2v7h-2v2h-2v-2H7v2H5v-2H3v-7Zm5-3-1 3h10l-1-3H8Zm-2 5v2h3v-2H6Zm9 0v2h3v-2h-3Z"/></svg></span><span><b>Đội cứu hộ</b><small>Vị trí đơn vị được điều phối</small></span></div><div><span class="legend-symbol symbol-safe"><svg viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.3 9.3-8 11-4.7-1.7-8-5.9-8-11V5l8-3Zm-1 13 6-6-1.4-1.4L11 12.2l-2.6-2.6L7 11l4 4Z"/></svg></span><span><b>Điểm hỗ trợ an toàn</b><small>Vị trí hỗ trợ / sơ tán</small></span></div><div><span class="legend-symbol symbol-hazard"></span><span><b>Khu vực cần lưu ý</b><small>Vùng cảnh báo trên bản đồ</small></span></div></div>
+          <span class="map-disclaimer"><svg viewBox="0 0 20 20"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 12H9v-5h2v5Zm0-6H9V6h2v2Z"/></svg> Bản đồ này là hình minh họa, không hiển thị dữ liệu cứu hộ thực.</span>
+        </div>
+        <div class="map-panel"><div class="map-panel-head"><div><span class="panel-title">KHU VỰC ĐIỀU PHỐI</span><strong>Bản đồ cứu trợ</strong></div><span class="demo-chip">DEMO</span></div>
+          <div class="map-art large-map" role="img" aria-label="Bản đồ minh họa khu vực với yêu cầu cứu trợ, đội cứu hộ, điểm an toàn và khu vực lưu ý">
+            <svg class="terrain" viewBox="0 0 720 455" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="720" height="455" fill="#edf3f2"/><path class="park" d="M-8 35 165 13l32 85-92 54-112-9Zm433-37 133 21 39 72-78 42-89-42ZM527 256l155-38 63 93-81 79-151-27ZM58 302l114-30 69 68-26 108L91 467 10 401Z"/>
+              <path class="water" d="M-12 253c88-25 120 14 196-19 62-27 79-82 145-70 58 11 74 63 127 72 54 9 99-30 153-8 45 18 65 64 124 68v70c-65 0-87-47-141-59-59-13-98 27-157 18-67-10-93-67-150-73-63-6-83 48-144 70-57 21-101-2-153 27Z"/>
+              <g class="roads" fill="none" stroke-linecap="round"><path d="M-30 103 139 142l120-70 123 75 114-24 120 66 153-34"/><path d="m32 473 96-118 2-110 111-87 94 13 92-101"/><path d="m170-20 23 86 104 69 8 104 107 62 15 131"/><path d="m369 469 23-92 110-80 15-90 88-60 22-132"/><path d="m-30 333 113-29 86 32 102-45 68 12"/><path d="m451 25 16 70 79 27 22 83 90 38"/></g>
+              <g class="minor-roads" fill="none" stroke-linecap="round"><path d="m31 20 78 57-10 68 68 50-33 74 44 55"/><path d="m234 34-22 52 32 32-15 62 43 43-32 50"/><path d="m552 39-73 72 25 39-29 54 66 54-13 64"/><path d="m634 114-58 30-18 59 48 35-38 67"/><path d="m114 391 90-41 50 17 68-47 64 42"/></g>
+              <path class="route-line" d="M530 109c-55 17-49 89-112 104-48 12-67 52-99 71-47 44-93 26-130 85"/><path class="hazard-area" d="m71 218 47-34 59 10 31 42-19 52-54 25-56-27-25-35Z"/>
+              <text class="map-label" x="90" y="162">KHU DÂN CƯ</text><text class="map-label" x="492" y="315">ĐIỂM AN TOÀN</text><text class="map-label" x="265" y="402">SÔNG</text>
+            </svg>
+            <div class="map-pin pin-help"><span class="pin-pulse"></span><b><svg viewBox="0 0 24 24"><path d="M12 2.5 2.8 19h18.4L12 2.5Zm-1 6h2v5h-2v-5Zm0 6.5h2v2h-2v-2Z"/></svg></b></div><div class="map-pin pin-team"><b><svg viewBox="0 0 24 24"><path d="M3 11h2l2-5h10l2 5h2v7h-2v2h-2v-2H7v2H5v-2H3v-7Zm5-3-1 3h10l-1-3H8Zm-2 5v2h3v-2H6Zm9 0v2h3v-2h-3Z"/></svg></b></div><div class="map-pin pin-safe"><b><svg viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.3 9.3-8 11-4.7-1.7-8-5.9-8-11V5l8-3Zm-1 13 6-6-1.4-1.4L11 12.2l-2.6-2.6L7 11l4 4Z"/></svg></b></div>
+            <div class="map-controls" aria-label="Điều khiển bản đồ minh họa"><button type="button" aria-label="Phóng to">+</button><button type="button" aria-label="Thu nhỏ">−</button></div>
+          </div>
+          <div class="map-panel-foot"><span><i class="map-status-dot"></i>Thông tin minh họa</span><span>Vị trí / lộ trình không phải dữ liệu thực tế</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="section-pad process-section">
+      <div class="container process-grid"><div class="process-intro"><span class="eyebrow">QUY TRÌNH HỖ TRỢ</span><h2>Từng bước rõ ràng,<br><span>không bỏ sót thông tin.</span></h2><p>Một luồng phối hợp dễ theo dõi giúp người cần hỗ trợ và đội cứu hộ cùng nắm được tiến trình xử lý.</p><a href="#top" class="text-link">Trở về đầu trang <span>↑</span></a></div>
+        <div class="process-steps"><article class="process-step"><span class="step-number">01</span><div><h3>Gửi yêu cầu</h3><p>Người dân cung cấp tình huống, nhu cầu và vị trí cần hỗ trợ.</p></div><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M4 3h16v13H8l-4 4V3Zm4 4v2h8V7H8Zm0 4v2h6v-2H8Z"/></svg></span></article>
+          <article class="process-step"><span class="step-number">02</span><div><h3>Tiếp nhận và xác minh</h3><p>Thông tin được xem xét để làm rõ mức độ ưu tiên và nguồn lực cần thiết.</p></div><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg></span></article>
+          <article class="process-step"><span class="step-number">03</span><div><h3>Phân công đội hỗ trợ</h3><p>Điều phối viên lựa chọn đội phù hợp và cung cấp thông tin tiếp cận.</p></div><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M3 11h2l2-5h10l2 5h2v7h-2v2h-2v-2H7v2H5v-2H3v-7Zm5-3-1 3h10l-1-3H8Z"/></svg></span></article>
+          <article class="process-step"><span class="step-number">04</span><div><h3>Cập nhật kết quả</h3><p>Trạng thái được cập nhật để các bên biết tiến trình và kết quả hỗ trợ.</p></div><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Zm1 0v9h8a9 9 0 0 0-8-9Z"/></svg></span></article>
+        </div>
+      </div>
+    </section>
+    <section class="closing-band"><div class="container closing-inner"><div><span class="eyebrow eyebrow-light">CỨU NẠN 24/7</span><h2>Khi cần giúp đỡ,<br><span>hãy để thông tin được kết nối.</span></h2></div><a class="button button-white" href="#process">Tìm hiểu cách gửi yêu cầu <span>→</span></a></div></section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-main"><a class="brand footer-brand" href="#top"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 3.5 34 9v9.3c0 8.3-5.5 14.8-14 18.2C11.5 33.1 6 26.6 6 18.3V9l14-5.5Z"/><path class="brand-cross" d="M18 11h4v6h6v4h-6v6h-4v-6h-6v-4h6z"/></svg></span><span class="brand-name">CỨU NẠN <b>24/7</b><small>KẾT NỐI CỨU TRỢ CỘNG ĐỒNG</small></span></a><p>Nền tảng kết nối người dân, đội cứu hộ và cộng đồng hỗ trợ trong tình huống thiên tai.</p><div class="footer-links"><a href="#features">Tính năng</a><a href="#map">Bản đồ</a><a href="#process">Quy trình</a></div></div><div class="container footer-bottom"><span>© 2026 Cứu Nạn 24/7 · Bản xem trước giao diện</span><span>Minh họa độc lập · Không kết nối dữ liệu thật</span></div></footer>
+  <div class="preview-toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

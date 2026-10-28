@@ -4,13 +4,13 @@
       th:replace="~{layout/main :: layout(${pageTitle}, ~{::#admin-content})}">
 <body>
 
-<div id="admin-content" class="py-4">
+<div id="admin-content" class="py-4" th:with="adminView=${param.view != null ? param.view[0] : 'overview'}">
     <div class="container-fluid px-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-            <div><h2 class="fw-bold text-navy mb-1"><i class="fa-solid fa-shield-halved text-danger me-2"></i>Trung tâm quản trị</h2><div class="text-muted">Tài khoản, đội cứu hộ, cảnh báo và số liệu vận hành</div></div>
+            <div><h2 class="fw-bold text-navy mb-1"><i class="fa-solid fa-shield-halved text-danger me-2"></i><span th:text="${adminView == 'users' ? 'Quản lý tài khoản' : (adminView == 'teams' ? 'Quản lý đội cứu hộ' : 'Trung tâm quản trị')}">Trung tâm quản trị</span></h2><div class="text-muted" th:text="${adminView == 'users' ? 'Cập nhật vai trò và trạng thái tài khoản' : (adminView == 'teams' ? 'Theo dõi và cập nhật thông tin các đội cứu hộ' : 'Cảnh báo và số liệu vận hành')}">Cảnh báo và số liệu vận hành</div></div>
             <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#broadcastModal"><i class="fa-solid fa-tower-broadcast me-2"></i>Phát cảnh báo khẩn cấp</button>
         </div>
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
             <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
             <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
             <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
@@ -18,20 +18,20 @@
             <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
             <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Thời gian xử lý TB</div><div class="fs-3 fw-bold"><span th:text="${stats.averageResponseMinutes}">0</span><small class="fs-6"> phút</small></div></div></div></div>
         </div>
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
             <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Phân bố mức độ SOS</div><div class="card-body"><canvas id="urgencyChart" height="220"></canvas></div></div></div>
             <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Ca cứu nạn theo khu vực</div><div class="card-body"><canvas id="regionChart" height="220"></canvas></div></div></div>
         </div>
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white fw-bold" id="users-section"><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản</div>
+        <div class="card border-0 shadow-sm mb-4" id="users-section" th:classappend="${adminView != '' and adminView != 'users' ? 'd-none' : ''}">
+            <div class="card-header bg-white fw-bold"><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản</div>
             <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr></thead><tbody>
                 <tr th:each="user : ${users}" th:attr="data-user-id=${user.id}"><td><strong th:text="${user.fullName}">Tên</strong><div class="small text-muted" th:text="${user.username}">username</div></td><td><span th:text="${user.phone}">SĐT</span><div class="small text-muted" th:text="${user.email}">email</div></td>
                     <td><select class="form-select form-select-sm user-role"><option value="ROLE_CITIZEN" th:selected="${user.role != null and user.role.name == 'ROLE_CITIZEN'}">Người dân</option><option value="ROLE_RESCUER" th:selected="${user.role != null and user.role.name == 'ROLE_RESCUER'}">Cứu hộ</option><option value="ROLE_COORDINATOR" th:selected="${user.role != null and user.role.name == 'ROLE_COORDINATOR'}">Điều phối</option><option value="ROLE_ADMIN" th:selected="${user.role != null and user.role.name == 'ROLE_ADMIN'}">Quản trị</option></select></td>
                     <td><select class="form-select form-select-sm user-status"><option value="ACTIVE" th:selected="${user.status == 'ACTIVE'}">Hoạt động</option><option value="BLOCKED" th:selected="${user.status == 'BLOCKED'}">Đã khóa</option></select></td><td><button class="btn btn-sm btn-outline-primary btn-save-user">Lưu</button></td></tr>
             </tbody></table></div>
         </div>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center" id="teams-section"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
+        <div class="card border-0 shadow-sm" id="teams-section" th:classappend="${adminView != '' and adminView != 'teams' ? 'd-none' : ''}">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
             <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Tên đội</th><th>Đội trưởng</th><th>Liên hệ</th><th>Quân số</th><th>Trạng thái</th><th></th></tr></thead><tbody>
                 <tr th:each="team : ${teams}" th:attr="data-team-id=${team.id}"><td><strong th:text="${team.teamName}">Đội</strong><div class="small text-muted" th:text="${team.equipmentNotes}">Thiết bị</div></td><td th:text="${team.leader != null ? team.leader.fullName : 'Chưa chỉ định'}">—</td><td th:text="${team.contactPhone}">SĐT</td><td th:text="${team.memberCount}">0</td><td><span class="badge" th:classappend="${team.status == 'AVAILABLE' ? 'bg-success' : (team.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}" th:text="${team.status}">AVAILABLE</span></td><td><button class="btn btn-sm btn-outline-secondary" th:attr="data-team-id=${team.id}" onclick="editTeamFromRow(this)">Sửa</button></td></tr>
             </tbody></table></div>
@@ -53,9 +53,11 @@
     const adminStats = /*[[${stats}]]*/ {};
     const teamsForEditing = /*[[${teams}]]*/ [];
     const urgency = adminStats.byUrgency || {};
+    if (!new URLSearchParams(window.location.search).has('view') || new URLSearchParams(window.location.search).get('view') === 'overview') {
     new Chart(document.getElementById('urgencyChart'), {type:'doughnut',data:{labels:['Nguy cấp','Khẩn cấp','Trung bình','Thấp'],datasets:[{data:[urgency.CRITICAL||0,urgency.HIGH||0,urgency.MEDIUM||0,urgency.LOW||0],backgroundColor:['#dc3545','#fd7e14','#0dcaf0','#6c757d']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
     const regions = adminStats.byRegion || {};
     new Chart(document.getElementById('regionChart'), {type:'bar',data:{labels:Object.keys(regions),datasets:[{label:'Số ca SOS',data:Object.values(regions),backgroundColor:'#0d6efd',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+    }
     document.querySelectorAll('.btn-save-user').forEach(button => button.addEventListener('click', async () => {const row=button.closest('tr');try{const response=await fetch(`/api/admin/users/${row.dataset.userId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:row.querySelector('.user-role').value,status:row.querySelector('.user-status').value})});const body=await response.json();if(!response.ok)throw new Error(body.message||'Không thể cập nhật tài khoản');alert('Đã cập nhật. Thay đổi quyền có hiệu lực từ yêu cầu tiếp theo.');}catch(error){alert(error.message);}}));
     function openTeamForm(team){document.getElementById('teamModalTitle').textContent=team?'Cập nhật đội cứu hộ':'Thêm đội cứu hộ';document.getElementById('teamId').value=team?.id||'';document.getElementById('teamName').value=team?.teamName||'';document.getElementById('teamPhone').value=team?.contactPhone||'';document.getElementById('teamLeader').value=team?.leader?.id||'';document.getElementById('teamLat').value=team?.currentLatitude??'';document.getElementById('teamLng').value=team?.currentLongitude??'';document.getElementById('teamCount').value=team?.memberCount??0;document.getElementById('teamStatus').value=team?.status||'AVAILABLE';document.getElementById('teamEquipment').value=team?.equipmentNotes||'';bootstrap.Modal.getOrCreateInstance(document.getElementById('teamModal')).show();}
     function editTeamFromRow(button){const team=teamsForEditing.find(item=>String(item.id)===button.dataset.teamId);if(team)openTeamForm(team);}
