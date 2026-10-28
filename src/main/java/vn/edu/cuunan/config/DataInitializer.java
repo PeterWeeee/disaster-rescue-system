@@ -552,8 +552,23 @@ public class DataInitializer implements CommandLineRunner {
         // 14. Khởi tạo Nhật ký hoạt động kiểm toán (ActivityLogs)
         if (activityLogRepository.count() == 0) {
             activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
-                    adminUser, "SYSTEM_INIT", "System",
+                    adminUser, "SYSTEM_INIT", "Hệ thống",
                     "Khởi tạo toàn bộ dữ liệu mẫu hệ thống cứu nạn 24/7 miền Trung thành công", "127.0.0.1"));
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    coordCentral, "DISPATCH_MISSION", "Nhiệm vụ #1",
+                    "Điều phối Đội cứu hộ Đà Nẵng 01 tiếp cận ca cứu nạn #1 (Nguyễn Văn An)", "192.168.1.10"));
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    rescuerDN01, "ACCEPT_MISSION", "Nhiệm vụ #1",
+                    "Đội Cứu hộ Đà Nẵng 01 chấp nhận ca cứu nạn #1", "192.168.1.25"));
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    rescuerDN01, "DISPATCH_EQUIPMENT", "Nhiệm vụ #1",
+                    "Xuất kho trang bị: 2 Áo phao chuyên dụng, 1 Xuồng máy cao su", "192.168.1.25"));
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    rescuerDN01, "START_MISSION", "Nhiệm vụ #1",
+                    "Đội Cứu hộ Đà Nẵng 01 xuất kích tiếp cận ca #1 (Cự ly: 8.5 km)", "192.168.1.25"));
+            activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
+                    coordCentral, "APPROVE_BUDGET_REQUEST", "Yêu cầu tiếp tế #1",
+                    "Phê duyệt kinh phí 15.000.000 ₫ cho Đội Cứu hộ Đà Nẵng 01 mua nhu yếu phẩm", "192.168.1.10"));
         }
 
         // 15. Khởi tạo Yêu cầu tiếp tế ngân sách mẫu (TeamFundRequests)

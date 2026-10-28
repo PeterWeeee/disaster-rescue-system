@@ -46,6 +46,7 @@
                             <option value="REJECT_MISSION">Từ chối nhiệm vụ</option>
                             <option value="DISPATCH_EQUIPMENT">Cấp phát trang bị</option>
                             <option value="RETURN_EQUIPMENT">Thu hồi trang bị</option>
+                            <option value="APPROVE_BUDGET_REQUEST">Phê duyệt ngân sách</option>
                             <option value="SYSTEM_INIT">Khởi tạo hệ thống</option>
                         </select>
                     </div>
@@ -85,8 +86,18 @@
                             </td>
                             <td>
                                 <span class="badge"
-                                      th:classappend="${log.action.contains('COMPLETE') ? 'bg-success' : (log.action.contains('DISPATCH') ? 'bg-primary' : (log.action.contains('REJECT') ? 'bg-danger' : (log.action.contains('EQUIPMENT') ? 'bg-warning text-dark' : 'bg-secondary')))}"
-                                      th:text="${log.action}">ACTION</span>
+                                      th:classappend="${log.action.contains('COMPLETE') || log.action.contains('APPROVE') ? 'bg-success' : (log.action.contains('DISPATCH') || log.action.contains('START') ? 'bg-primary' : (log.action.contains('REJECT') ? 'bg-danger' : (log.action.contains('EQUIPMENT') ? 'bg-warning text-dark' : 'bg-secondary')))}"
+                                      th:text="${log.action == 'CREATE_SOS' ? 'Tạo SOS' :
+                                                (log.action == 'DISPATCH_MISSION' ? 'Điều phối ca' :
+                                                (log.action == 'ACCEPT_MISSION' ? 'Tiếp nhận ca' :
+                                                (log.action == 'START_MISSION' ? 'Xuất kích' :
+                                                (log.action == 'COMPLETE_MISSION' ? 'Hoàn thành' :
+                                                (log.action == 'REJECT_MISSION' ? 'Từ chối' :
+                                                (log.action == 'DISPATCH_EQUIPMENT' ? 'Xuất trang bị' :
+                                                (log.action == 'RETURN_EQUIPMENT' ? 'Thu hồi trang bị' :
+                                                (log.action == 'APPROVE_BUDGET_REQUEST' ? 'Duyệt kinh phí' :
+                                                (log.action == 'REJECT_BUDGET_REQUEST' ? 'Từ chối kinh phí' :
+                                                (log.action == 'SYSTEM_INIT' ? 'Khởi tạo hệ thống' : log.action))))))))))}">ACTION</span>
                             </td>
                             <td>
                                 <span class="fw-semibold text-navy small" th:text="${log.targetEntity != null ? log.targetEntity : '—'}">Nhiệm vụ #1</span>

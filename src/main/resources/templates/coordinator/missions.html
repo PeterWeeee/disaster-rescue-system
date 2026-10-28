@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div id="missions-content" class="py-3" th:with="missionView=${param.view != null ? param.view[0] : 'assignments'}">
+<div id="missions-content" class="py-3" th:with="missionView=${param.view != null ? param.view[0] : 'both'}">
     <div class="container-fluid px-3 px-lg-4">
         <!-- Header & Toolbar -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -93,7 +93,7 @@
             </div>
         </div>
 
-        <!-- Filter & Search Bar -->
+        <!-- Filter & Search Bar + View Switcher -->
         <div class="card border-0 shadow-sm mb-3 rounded-3 bg-white">
             <div class="card-body py-2 px-3">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -129,11 +129,22 @@
                         </div>
                     </div>
 
-                    <!-- Ô Tìm Kiếm Nhanh -->
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="input-group input-group-sm" style="min-width: 280px;">
+                    <!-- View Switcher & Search -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Chế độ hiển thị">
+                            <button type="button" class="btn" id="btnModeBoth" onclick="switchViewMode('both')">
+                                <i class="fa-solid fa-table-columns me-1"></i> Cả hai
+                            </button>
+                            <button type="button" class="btn" id="btnModeMap" onclick="switchViewMode('map')">
+                                <i class="fa-solid fa-map-location-dot me-1"></i> Bản đồ
+                            </button>
+                            <button type="button" class="btn" id="btnModeTable" onclick="switchViewMode('table')">
+                                <i class="fa-solid fa-list-check me-1"></i> Bảng phân công
+                            </button>
+                        </div>
+                        <div class="input-group input-group-sm" style="min-width: 240px;">
                             <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                            <input type="text" id="missionSearchInput" class="form-control border-start-0" placeholder="Tìm tên nạn nhân, đội cứu hộ, địa chỉ..." onkeyup="filterMissionTable()">
+                            <input type="text" id="missionSearchInput" class="form-control border-start-0" placeholder="Tìm kiếm nhiệm vụ..." onkeyup="filterMissionTable()">
                         </div>
                     </div>
                 </div>
@@ -141,7 +152,7 @@
         </div>
 
         <!-- BẢN ĐỒ LỘ TRÌNH GIS THỜI GIAN THỰC -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4" th:classappend="${missionView != 'map' ? 'd-none' : ''}">
+        <div class="card border-0 shadow-sm rounded-3 mb-4" id="missionsMapCard">
             <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-navy fs-6">
                     <i class="fa-solid fa-map-location-dot text-danger me-2"></i> Bản Đồ Lộ Trình Điều Động Cứu Hộ Thời Gian Thực
@@ -155,15 +166,15 @@
             <div class="card-body p-0">
                 <div id="missionsMap"
                      th:attr="data-province=${currentProvince}, data-lat=${selectedRegion.centerLat}, data-lng=${selectedRegion.centerLng}, data-zoom=${selectedRegion.defaultZoom}"
-                     style="height: 480px; width: 100%; border-radius: 0 0 8px 8px;"></div>
+                     style="height: 500px; width: 100%; border-radius: 0 0 8px 8px;"></div>
             </div>
         </div>
 
         <!-- BẢNG TOÀN BỘ CÁC NHIỆM VỤ PHÂN CÔNG & LỘ TRÌNH -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4" th:classappend="${missionView == 'map' ? 'd-none' : ''}">
+        <div class="card border-0 shadow-sm rounded-3 mb-4" id="assignmentsTableCard">
             <div class="card-header bg-white py-3 px-3 border-bottom d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-navy fs-6">
-                    <i class="fa-solid fa-list-check text-primary me-2"></i> Danh Sách Lộ Trình & Nhiệm Vụ Phân Công (<span th:text="${assignments != null ? assignments.size() : 0}">0</span>)
+                    <i class="fa-solid fa-list-check text-primary me-2"></i> Danh Sách Lộ Trình & Nhiệm Vụ Phân Công (<span id="totalAssignmentsCount" th:text="${assignments != null ? assignments.size() : 0}">0</span>)
                 </span>
                 <span class="badge bg-light text-muted border" th:text="${'Khu vực: ' + selectedRegion.name}">Toàn Miền Trung</span>
             </div>
@@ -183,7 +194,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:if="${assignments == null or assignments.isEmpty()}">
+                        <tr th:if="${assignments == null or assignments.isEmpty()}" id="noAssignmentRow">
                             <td colspan="9" class="text-center py-4 text-muted">
                                 <i class="fa-solid fa-circle-info me-1"></i> Không tìm thấy nhiệm vụ điều động nào trong khu vực và trạng thái đã chọn.
                             </td>
@@ -230,93 +241,97 @@
                                         Đội trưởng: <span class="fw-semibold text-dark" th:text="${asg.team.leader != null ? asg.team.leader.fullName : 'Chưa gán'}">Trần B</span>
                                     </div>
                                     <div class="small">
-                                        <a th:href="'tel:' + ${asg.team.contactPhone}" class="text-decoration-none text-muted">
-                                            <i class="fa-solid fa-phone me-1"></i><span th:text="${asg.team.contactPhone}">0911111111</span>
-                                        </a>
+                                        <i class="fa-solid fa-phone text-secondary me-1"></i>
+                                        <a th:href="'tel:' + ${asg.team.contactPhone}" class="text-muted text-decoration-none" th:text="${asg.team.contactPhone}">0900000001</a>
                                     </div>
                                 </div>
+                                <div th:if="${asg.team == null}" class="text-muted small">Chưa chỉ định đội</div>
                             </td>
                             <td>
                                 <div>
-                                    <span class="badge bg-info-subtle text-dark border border-info fw-semibold" th:if="${asg.vehicleType != null and !asg.vehicleType.isEmpty()}">
-                                        <i class="fa-solid fa-ship me-1 text-info"></i><span th:text="${asg.vehicleType}">Xuồng cứu sinh</span>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="fa-solid fa-truck-pickup text-primary me-1"></i>
+                                        <span th:text="${asg.vehicleType != null and !asg.vehicleType.isBlank() ? asg.vehicleType : 'Phương tiện tiêu chuẩn'}">Xe tải gầm cao</span>
                                     </span>
-                                    <span class="badge bg-light text-muted border" th:if="${asg.vehicleType == null or asg.vehicleType.isEmpty()}">Tiêu chuẩn</span>
                                 </div>
-                                <div class="mt-1" th:if="${asg.selectedEquipment != null and !asg.selectedEquipment.isEmpty()}">
-                                    <small class="text-muted" th:text="${asg.selectedEquipment}">Phao, dây thừng</small>
-                                </div>
-                                <div class="mt-1" th:if="${asg.terrainType != null and !asg.terrainType.isEmpty()}">
-                                    <span class="badge bg-secondary-subtle text-dark" th:text="${'Địa hình: ' + asg.terrainType}">Đồng bằng</span>
-                                </div>
+                                <small class="text-muted d-block mt-1 text-truncate" style="max-width: 200px;"
+                                       th:title="${asg.selectedEquipment}"
+                                       th:text="${asg.selectedEquipment != null and !asg.selectedEquipment.isBlank() ? asg.selectedEquipment : 'Trang bị mặc định'}">Áo phao, xuồng</small>
                             </td>
                             <td>
                                 <div>
-                                    <span class="fw-bold text-danger">
-                                        <i class="fa-solid fa-compass me-1"></i><span th:text="${asg.routeDistanceKm != null ? asg.routeDistanceKm + ' km' : '---'}">5.2 km</span>
-                                    </span>
+                                    <strong class="text-danger" th:text="${asg.routeDistanceKm != null ? asg.routeDistanceKm + ' km' : '—'}">12.5 km</strong>
+                                    <small class="text-muted" th:if="${asg.routeDurationMinutes != null}" th:text="${' (~' + asg.routeDurationMinutes + 'p)'}">(~25p)</small>
                                 </div>
-                                <small class="text-muted d-block" th:if="${asg.routeDurationMinutes != null}">
-                                    <i class="fa-solid fa-stopwatch me-1"></i> Dự kiến: <strong th:text="${asg.routeDurationMinutes}">15</strong> phút
-                                </small>
+                                <span class="badge bg-info text-dark mt-1" th:if="${asg.terrainType != null and !asg.terrainType.isBlank()}" th:text="${asg.terrainType}">ĐƯỜNG BỘ</span>
                             </td>
                             <td>
-                                <div class="small text-muted">
-                                    <div>Phân công: <span th:text="${#temporals.format(asg.assignedAt, 'dd/MM HH:mm')}">27/10 10:00</span></div>
-                                    <div th:if="${asg.acceptedAt != null}">Tiếp nhận: <span th:text="${#temporals.format(asg.acceptedAt, 'dd/MM HH:mm')}">27/10 10:05</span></div>
-                                    <div th:if="${asg.completedAt != null}" class="text-success fw-semibold">Xong: <span th:text="${#temporals.format(asg.completedAt, 'dd/MM HH:mm')}">27/10 11:30</span></div>
+                                <div class="small">
+                                    <span class="text-muted">Gán: </span>
+                                    <span th:text="${#temporals.format(asg.assignedAt, 'HH:mm dd/MM')}">08:30 15/10</span>
+                                </div>
+                                <div class="small" th:if="${asg.completedAt != null}">
+                                    <span class="text-success">Xong: </span>
+                                    <span th:text="${#temporals.format(asg.completedAt, 'HH:mm dd/MM')}">09:15 15/10</span>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge py-2 px-3"
-                                      th:classappend="${asg.status == 'COMPLETED' ? 'bg-success' : (asg.status == 'IN_PROGRESS' ? 'bg-primary' : (asg.status == 'ACCEPTED' ? 'bg-info text-dark' : (asg.status == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark')))}"
-                                      th:text="${asg.status == 'COMPLETED' ? 'HOÀN THÀNH' : (asg.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : (asg.status == 'ACCEPTED' ? 'ĐÃ NHẬN LỆNH' : (asg.status == 'REJECTED' ? 'TỪ CHỐI' : 'CHỜ ĐỘI NHẬN')))}">
-                                    CHỜ TIẾP NHẬN
-                                </span>
-                                <div th:if="${asg.status == 'REJECTED' and asg.rejectionReason != null}" class="small text-danger mt-1">
-                                    <small th:text="${'Lý do: ' + asg.rejectionReason}"></small>
-                                </div>
+                                <span class="badge"
+                                      th:classappend="${asg.status == 'COMPLETED' ? 'bg-success' :
+                                                       (asg.status == 'IN_PROGRESS' ? 'bg-primary' :
+                                                       (asg.status == 'ACCEPTED' ? 'bg-info text-dark' :
+                                                       (asg.status == 'PENDING' ? 'bg-warning text-dark' : 'bg-danger')))}"
+                                      th:text="${asg.status == 'COMPLETED' ? 'HOÀN TẤT' :
+                                                (asg.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' :
+                                                (asg.status == 'ACCEPTED' ? 'ĐÃ NHẬN LỆNH' :
+                                                (asg.status == 'PENDING' ? 'CHỜ ĐỘI NHẬN' : 'TỪ CHỐI')))}">IN_PROGRESS</span>
                             </td>
-                            <td style="max-width: 220px;">
-                                <div th:if="${asg.reportNotes != null and !asg.reportNotes.isEmpty()}" class="small text-dark mb-1">
-                                    <i class="fa-solid fa-comment-dots text-muted me-1"></i><span th:text="${asg.reportNotes}">Đã đưa 3 nạn nhân đến nơi an toàn</span>
+                            <td>
+                                <div th:if="${asg.reportNotes != null and !asg.reportNotes.isBlank()}">
+                                    <small class="text-dark d-block text-truncate" style="max-width: 180px;" th:title="${asg.reportNotes}" th:text="${asg.reportNotes}">Ghi chú</small>
                                 </div>
-                                <div th:if="${asg.reportImageUrl != null and !asg.reportImageUrl.isEmpty()}">
-                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 fw-semibold"
-                                            th:attr="data-img=${asg.reportImageUrl}, data-notes=${asg.reportNotes != null ? asg.reportNotes : 'Ảnh nghiệm thu hiện trường'}"
+                                <div th:if="${asg.reportImageUrl != null and !asg.reportImageUrl.isBlank()}">
+                                    <button type="button" class="btn btn-xs btn-outline-primary mt-1 py-0 px-1 small"
+                                            th:attr="data-img=${asg.reportImageUrl}, data-notes=${asg.reportNotes}"
                                             onclick="openEvidenceModal(this)">
-                                        <i class="fa-solid fa-camera me-1"></i> Xem Ảnh Hiện Trường
+                                        <i class="fa-regular fa-image me-1"></i>Xem ảnh
                                     </button>
                                 </div>
-                                <div th:if="${(asg.reportNotes == null or asg.reportNotes.isEmpty()) and (asg.reportImageUrl == null or asg.reportImageUrl.isEmpty())}">
-                                    <small class="text-muted">Chưa có báo cáo</small>
-                                </div>
+                                <span th:if="${(asg.reportNotes == null or asg.reportNotes.isBlank()) and (asg.reportImageUrl == null or asg.reportImageUrl.isBlank())}" class="text-muted small">—</span>
                             </td>
                             <td class="text-end pe-3">
-                                <button type="button" class="btn btn-sm btn-outline-info text-dark fw-bold"
-                                        onclick="focusMissionFromButton(this)">
-                                    <i class="fa-solid fa-crosshairs me-1 text-danger"></i> Xem Lộ Trình
+                                <button type="button" class="btn btn-sm btn-outline-danger shadow-xs" onclick="focusMissionFromButton(this)">
+                                    <i class="fa-solid fa-crosshairs me-1"></i>Định Vị
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Client-side Pagination Footer -->
+            <div class="card-footer bg-white py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted" id="assignmentsPaginationInfo">
+                    Hiển thị 0 trên tổng 0 nhiệm vụ
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="assignmentsPaginationNav">
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Phóng To Bằng Chứng Cứu Nạn -->
-<div class="modal fade" id="evidenceModal" tabindex="-1" aria-labelledby="evidenceModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal Xem Ảnh Bằng Chứng Nghiệm Thu -->
+<div class="modal fade" id="evidenceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-navy text-white">
-                <h5 class="modal-title fw-bold" id="evidenceModalLabel">
-                    <i class="fa-solid fa-camera text-warning me-2"></i> BẰNG CHỨNG & BÁO CÁO CỨU NẠN HIỆN TRƯỜNG
-                </h5>
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-camera-retro me-2"></i>Ảnh Nghiệm Thu Hiện Trường Cứu Nạn</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4 text-center">
+            <div class="modal-body text-center p-3">
                 <img id="evidenceModalImg" src="" alt="Ảnh hiện trường cứu nạn" class="img-fluid rounded border shadow-sm mb-3" style="max-height: 480px; object-fit: contain;">
                 <div class="alert alert-light border text-start">
                     <strong class="text-navy"><i class="fa-solid fa-comment-dots me-1 text-primary"></i> Ghi chú nghiệm thu từ đội:</strong>
@@ -324,7 +339,7 @@
                 </div>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -335,9 +350,58 @@
     let markersLayer = null;
     let routesLayer = null;
 
+    // Pagination state
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let visibleRows = [];
+
     document.addEventListener("DOMContentLoaded", function () {
         initMissionsMap();
+        initViewModeFromUrl();
+        initTablePagination();
     });
+
+    function initViewModeFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const viewParam = urlParams.get('view') || 'both';
+        applyViewMode(viewParam);
+    }
+
+    function switchViewMode(mode) {
+        applyViewMode(mode);
+        const url = new URL(window.location.href);
+        url.searchParams.set("view", mode);
+        window.history.replaceState({}, '', url.toString());
+    }
+
+    function applyViewMode(mode) {
+        const mapCard = document.getElementById("missionsMapCard");
+        const tableCard = document.getElementById("assignmentsTableCard");
+        const btnBoth = document.getElementById("btnModeBoth");
+        const btnMap = document.getElementById("btnModeMap");
+        const btnTable = document.getElementById("btnModeTable");
+
+        btnBoth.className = "btn " + (mode === 'both' ? 'btn-primary' : 'btn-outline-primary');
+        btnMap.className = "btn " + (mode === 'map' ? 'btn-primary' : 'btn-outline-primary');
+        btnTable.className = "btn " + (mode === 'table' ? 'btn-primary' : 'btn-outline-primary');
+
+        if (mode === 'both') {
+            if (mapCard) mapCard.classList.remove('d-none');
+            if (tableCard) tableCard.classList.remove('d-none');
+        } else if (mode === 'map') {
+            if (mapCard) mapCard.classList.remove('d-none');
+            if (tableCard) tableCard.classList.add('d-none');
+        } else if (mode === 'table') {
+            if (mapCard) mapCard.classList.add('d-none');
+            if (tableCard) tableCard.classList.remove('d-none');
+        }
+
+        if (missionsMap && (mode === 'both' || mode === 'map')) {
+            setTimeout(function() {
+                missionsMap.invalidateSize();
+            }, 250);
+        }
+    }
 
     function initMissionsMap() {
         const mapEl = document.getElementById("missionsMap");
@@ -351,13 +415,17 @@
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> | CứuNạn 24/7'
         }).addTo(missionsMap);
 
         markersLayer = L.featureGroup().addTo(missionsMap);
         routesLayer = L.featureGroup().addTo(missionsMap);
 
         renderMissionsOnMap();
+
+        setTimeout(function() {
+            missionsMap.invalidateSize();
+        }, 300);
     }
 
     function renderMissionsOnMap() {
@@ -431,7 +499,7 @@
                 const polyline = L.polyline([[teamLat, teamLng], [sosLat, sosLng]], {
                     color: '#0dcaf0',
                     weight: 3,
-                    opacity: 0.8,
+                    opacity: 0.85,
                     dashArray: '6, 8'
                 });
 
@@ -455,6 +523,13 @@
         const row = btn.closest(".mission-row");
         if (!row || !missionsMap) return;
 
+        // Nếu map đang bị ẩn, mở ra ngay
+        const mapCard = document.getElementById("missionsMapCard");
+        if (mapCard && mapCard.classList.contains("d-none")) {
+            mapCard.classList.remove("d-none");
+            missionsMap.invalidateSize();
+        }
+
         const sosLat = parseFloat(row.getAttribute("data-sos-lat"));
         const sosLng = parseFloat(row.getAttribute("data-sos-lng"));
         const teamLat = parseFloat(row.getAttribute("data-team-lat"));
@@ -463,22 +538,24 @@
         const hasSos = !isNaN(sosLat) && !isNaN(sosLng);
         const hasTeam = !isNaN(teamLat) && !isNaN(teamLng);
 
-        if (hasSos && hasTeam) {
-            missionsMap.fitBounds([[teamLat, teamLng], [sosLat, sosLng]], { padding: [50, 50] });
-        } else if (hasSos) {
-            missionsMap.setView([sosLat, sosLng], 14);
-        } else if (hasTeam) {
-            missionsMap.setView([teamLat, teamLng], 14);
-        } else {
-            alert("Nhiệm vụ này chưa có tọa độ GPS hợp lệ.");
-            return;
-        }
+        setTimeout(function() {
+            missionsMap.invalidateSize();
+            if (hasSos && hasTeam) {
+                missionsMap.fitBounds([[teamLat, teamLng], [sosLat, sosLng]], { padding: [50, 50] });
+            } else if (hasSos) {
+                missionsMap.setView([sosLat, sosLng], 14);
+            } else if (hasTeam) {
+                missionsMap.setView([teamLat, teamLng], 14);
+            } else {
+                alert("Nhiệm vụ này chưa có tọa độ GPS hợp lệ.");
+                return;
+            }
 
-        // Smooth scroll to map
-        const mapCard = document.getElementById("missionsMap");
-        if (mapCard) {
-            mapCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+            const mapTarget = document.getElementById("missionsMapCard");
+            if (mapTarget) {
+                mapTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 150);
     }
 
     function onFilterChange() {
@@ -490,19 +567,80 @@
         window.location.href = url.toString();
     }
 
+    // Pagination logic
+    function initTablePagination() {
+        const allRows = Array.from(document.querySelectorAll("#assignmentsTable tbody tr.mission-row"));
+        visibleRows = allRows;
+        currentPage = 1;
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const total = visibleRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const allRows = document.querySelectorAll("#assignmentsTable tbody tr.mission-row");
+        allRows.forEach(r => r.style.display = "none");
+
+        const startIdx = (currentPage - 1) * PAGE_SIZE;
+        const endIdx = Math.min(startIdx + PAGE_SIZE, total);
+
+        for (let i = startIdx; i < endIdx; i++) {
+            if (visibleRows[i]) visibleRows[i].style.display = "";
+        }
+
+        const infoEl = document.getElementById("assignmentsPaginationInfo");
+        if (infoEl) {
+            infoEl.innerHTML = total === 0 ? "Không có bản ghi phù hợp" :
+                `Hiển thị <strong>${startIdx + 1} - ${endIdx}</strong> trên tổng <strong>${total}</strong> nhiệm vụ`;
+        }
+
+        const navEl = document.getElementById("assignmentsPaginationNav");
+        if (!navEl) return;
+        navEl.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        // Nút Trước
+        const prevLi = document.createElement("li");
+        prevLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage - 1})">Trước</a>`;
+        navEl.appendChild(prevLi);
+
+        // Các trang số
+        for (let p = 1; p <= totalPages; p++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = "page-item " + (p === currentPage ? "active" : "");
+            pageLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${p})">${p}</a>`;
+            navEl.appendChild(pageLi);
+        }
+
+        // Nút Sau
+        const nextLi = document.createElement("li");
+        nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage + 1})">Sau</a>`;
+        navEl.appendChild(nextLi);
+    }
+
+    window.goToPage = function(p) {
+        currentPage = p;
+        renderPagination();
+    };
+
     function filterMissionTable() {
         const input = document.getElementById("missionSearchInput");
         const filter = input.value.toLowerCase().trim();
-        const rows = document.querySelectorAll("#assignmentsTable tbody tr.mission-row");
+        const allRows = Array.from(document.querySelectorAll("#assignmentsTable tbody tr.mission-row"));
 
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            if (text.includes(filter)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
+        if (!filter) {
+            visibleRows = allRows;
+        } else {
+            visibleRows = allRows.filter(row => row.innerText.toLowerCase().includes(filter));
+        }
+
+        currentPage = 1;
+        renderPagination();
     }
 
     function openEvidenceModal(btn) {
@@ -523,6 +661,7 @@
     }
 
     window.onFilterChange = onFilterChange;
+    window.switchViewMode = switchViewMode;
     window.filterMissionTable = filterMissionTable;
     window.focusMissionFromButton = focusMissionFromButton;
     window.openEvidenceModal = openEvidenceModal;

@@ -49,12 +49,12 @@
                                     th:each="a, iterStat : ${assignments}"
                                     class="list-group-item list-group-item-action p-3 mission-item-btn"
                                     th:classappend="${iterStat.first ? 'active' : ''}"
-                                    th:attr="data-id=${a.id}">
+                                    th:attr="data-id=${a.id}, data-status=${a.status}">
                                 <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                                     <strong class="text-truncate" th:text="${a.sosRequest.contactName}">Nạn nhân</strong>
                                     <span class="badge"
-                                          th:classappend="${a.status == 'IN_PROGRESS' ? 'bg-primary' : 'bg-warning text-dark'}"
-                                          th:text="${a.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : 'ĐÃ TIẾP NHẬN'}">ACCEPTED</span>
+                                          th:classappend="${a.status == 'IN_PROGRESS' ? 'bg-primary' : (a.status == 'ACCEPTED' ? 'bg-info text-dark' : 'bg-warning text-dark')}"
+                                          th:text="${a.status == 'IN_PROGRESS' ? 'ĐANG TIẾP CẬN' : (a.status == 'ACCEPTED' ? 'ĐÃ TIẾP NHẬN' : 'CHỜ TIẾP NHẬN')}">ACCEPTED</span>
                                 </div>
                                 <div class="small opacity-75 text-truncate mb-1">
                                     <i class="fa-solid fa-location-dot me-1"></i> <span th:text="${a.sosRequest.addressDetail}">Địa chỉ</span>
@@ -88,6 +88,12 @@
                             </div>
 
                             <div id="routeDetailPanel" style="display: none;">
+                                <!-- Thông báo nếu nhiệm vụ chưa được tiếp nhận -->
+                                <div id="pendingMissionNotice" class="alert alert-warning py-2 px-3 small rounded-3 mb-3" style="display: none;">
+                                    <i class="fa-solid fa-hourglass-half me-1"></i> <strong>Ca chờ tiếp nhận:</strong> Đội của bạn chưa chính thức tiếp nhận nhiệm vụ này.
+                                    <a th:href="@{/rescuer/missions}" class="fw-bold text-decoration-underline ms-1">Vào Nhiệm vụ cứu hộ để tiếp nhận &rarr;</a>
+                                </div>
+
                                 <!-- Cự ly & Thời gian -->
                                 <div class="row g-2 text-center mb-3">
                                     <div class="col-6">
@@ -207,6 +213,12 @@
 
                     if (spinner) spinner.style.display = 'none';
                     if (panel) panel.style.display = 'block';
+
+                    // Hiển thị thông báo nếu nhiệm vụ này chưa tiếp nhận (PENDING)
+                    const activeBtn = document.querySelector(`.mission-item-btn[data-id="${assignmentId}"]`);
+                    const isPending = activeBtn && activeBtn.getAttribute('data-status') === 'PENDING';
+                    const noticeEl = document.getElementById('pendingMissionNotice');
+                    if (noticeEl) noticeEl.style.display = isPending ? 'block' : 'none';
 
                     // Cập nhật thông tin chi tiết
                     document.getElementById('panelDistance').textContent = (data.routeDistanceKm || '--') + ' km';

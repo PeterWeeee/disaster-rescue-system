@@ -188,6 +188,10 @@
                     </tbody>
                 </table>
             </div>
+            <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="teamsPaginationWrap">
+                <div class="small text-muted" id="teamsPaginationInfo">Hiển thị...</div>
+                <ul class="pagination pagination-sm mb-0" id="teamsPaginationNav"></ul>
+            </div>
         </div>
     </div>
 
@@ -197,16 +201,62 @@
         }
 
         const teamSearch = document.getElementById('teamSearchInput');
+        const allTeamRows = Array.from(document.querySelectorAll('#rescueTeamsTable tbody tr'));
+        let filteredTeamRows = allTeamRows;
+        let currentTeamPage = 1;
+        const TEAM_PAGE_SIZE = 10;
+
+        function renderTeamPagination() {
+            const total = filteredTeamRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / TEAM_PAGE_SIZE));
+            if (currentTeamPage > totalPages) currentTeamPage = totalPages;
+
+            allTeamRows.forEach(r => r.style.display = 'none');
+            const start = (currentTeamPage - 1) * TEAM_PAGE_SIZE;
+            const end = Math.min(start + TEAM_PAGE_SIZE, total);
+            for (let i = start; i < end; i++) {
+                if (filteredTeamRows[i]) filteredTeamRows[i].style.display = '';
+            }
+
+            const info = document.getElementById('teamsPaginationInfo');
+            if (info) info.innerHTML = total === 0 ? 'Không tìm thấy đội nào' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong> đội cứu hộ`;
+
+            const nav = document.getElementById('teamsPaginationNav');
+            if (!nav) return;
+            nav.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prevLi = document.createElement('li');
+            prevLi.className = 'page-item ' + (currentTeamPage === 1 ? 'disabled' : '');
+            prevLi.innerHTML = '<a class="page-link" href="javascript:void(0)">Trước</a>';
+            prevLi.onclick = () => { if (currentTeamPage > 1) { currentTeamPage--; renderTeamPagination(); } };
+            nav.appendChild(prevLi);
+
+            for (let p = 1; p <= totalPages; p++) {
+                const li = document.createElement('li');
+                li.className = 'page-item ' + (p === currentTeamPage ? 'active' : '');
+                li.innerHTML = `<a class="page-link" href="javascript:void(0)">${p}</a>`;
+                li.onclick = () => { currentTeamPage = p; renderTeamPagination(); };
+                nav.appendChild(li);
+            }
+
+            const nextLi = document.createElement('li');
+            nextLi.className = 'page-item ' + (currentTeamPage === totalPages ? 'disabled' : '');
+            nextLi.innerHTML = '<a class="page-link" href="javascript:void(0)">Sau</a>';
+            nextLi.onclick = () => { if (currentTeamPage < totalPages) { currentTeamPage++; renderTeamPagination(); } };
+            nav.appendChild(nextLi);
+        }
+
         if (teamSearch) {
             teamSearch.addEventListener('input', function() {
                 const q = this.value.toLowerCase().trim();
-                const rows = document.querySelectorAll('#rescueTeamsTable tbody tr');
-                rows.forEach(r => {
-                    const text = r.textContent.toLowerCase();
-                    r.style.display = text.includes(q) ? '' : 'none';
-                });
+                filteredTeamRows = allTeamRows.filter(r => r.textContent.toLowerCase().includes(q));
+                currentTeamPage = 1;
+                renderTeamPagination();
             });
         }
+
+        renderTeamPagination();
     </script>
 </div>
 
