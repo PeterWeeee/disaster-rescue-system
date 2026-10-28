@@ -52,7 +52,7 @@ cloudinary:
 
 # Application & Emergency Hotlines Info
 app:
-  name: "CứuNạn 24/7"
+  name: "Cứu Nạn 24/7"
   organization: "Ban Chỉ Đạo Ứng Phó Thiên Tai & Tìm Kiếm Cứu Nạn"
   hotlines:
     rescue: "112"

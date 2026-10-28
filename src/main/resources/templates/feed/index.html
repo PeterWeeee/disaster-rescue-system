@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/main :: layout('Bảng Tin Cộng Đồng - CứuNạn 24/7', ~{::#feed-content})}">
+      th:replace="~{layout/main :: layout('Bảng Tin Cộng Đồng - Cứu Nạn 24/7', ~{::#feed-content})}">
 <body>
 
 <div id="feed-content" class="py-4">
@@ -91,15 +91,9 @@
                             <h6 class="fw-bold text-uppercase text-secondary small mb-2 tracking-wider">Tiện ích nhanh</h6>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small fw-semibold">
                                 <li>
-                                    <a th:href="@{/map#shelters}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
-                                        <i class="fa-solid fa-campground text-warning"></i>
-                                        <span>Tra cứu điểm sơ tán</span>
-                                    </a>
-                                </li>
-                                <li>
                                     <a th:href="@{/map}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
-                                        <i class="fa-solid fa-map-location-dot text-info"></i>
-                                        <span>Bản đồ cứu nạn Live</span>
+                                        <i class="fa-solid fa-map-location-dot text-danger"></i>
+                                        <span>Bản đồ cứu hộ & điểm sơ tán</span>
                                     </a>
                                 </li>
                                 <li>

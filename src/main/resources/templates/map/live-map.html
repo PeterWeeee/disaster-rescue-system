@@ -80,12 +80,12 @@
                     <div class="card-header bg-dark text-white p-1">
                         <ul class="nav nav-tabs card-header-tabs nav-fill m-0 border-0" id="mapListTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active text-white py-2 px-1 small fw-semibold" id="tabSosBtn" data-bs-toggle="tab" data-bs-target="#tabSosContent" type="button" role="tab">
+                                <button class="nav-link active py-2 px-1 small fw-semibold" id="tabSosBtn" data-bs-toggle="tab" data-bs-target="#tabSosContent" type="button" role="tab">
                                     <i class="fa-solid fa-tower-broadcast text-danger me-1"></i>Ca SOS (<span id="sos-badge-count">0</span>)
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link text-white py-2 px-1 small fw-semibold" id="tabShelterBtn" data-bs-toggle="tab" data-bs-target="#tabShelterContent" type="button" role="tab">
+                                <button class="nav-link py-2 px-1 small fw-semibold" id="tabShelterBtn" data-bs-toggle="tab" data-bs-target="#tabShelterContent" type="button" role="tab">
                                     <i class="fa-solid fa-house-circle-check text-success me-1"></i>Điểm sơ tán (<span id="shelter-badge-count">0</span>)
                                 </button>
                             </li>
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const liveMap = L.map("liveMapCanvas").setView(defaultCenter, 10);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap contributors | CứuNạn 24/7',
+        attribution: '&copy; OpenStreetMap contributors | Cứu Nạn 24/7',
         maxZoom: 19
     }).addTo(liveMap);
 

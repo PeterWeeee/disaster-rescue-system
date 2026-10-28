@@ -130,7 +130,7 @@
                             <i class="fa-solid fa-clock-rotate-left me-1"></i> Đã điều phối
                         </a>
                         <a th:href="@{/coordinator/dashboard(status='IN_PROGRESS', province=${currentProvince})}"
-                           th:class="'btn ' + (${currentStatusFilter == 'IN_PROGRESS' ? 'btn-info text-white active' : 'btn-outline-info'})">
+                           th:class="'btn ' + (${currentStatusFilter == 'IN_PROGRESS' ? 'btn-info text-dark fw-bold active' : 'btn-outline-info'})">
                             <i class="fa-solid fa-person-digging me-1"></i> Đang tiếp cận
                         </a>
                         <a th:href="@{/coordinator/dashboard(status='RESOLVED', province=${currentProvince})}"
@@ -500,7 +500,7 @@
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap contributors | CứuNạn 24/7'
+            attribution: '© OpenStreetMap contributors | Cứu Nạn 24/7'
         }).addTo(map);
 
         setTimeout(() => {

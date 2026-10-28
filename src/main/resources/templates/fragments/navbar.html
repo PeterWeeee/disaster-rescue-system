@@ -8,7 +8,7 @@
         <div class="app-header-inner">
             <div class="d-flex align-items-center gap-3">
                 <button sec:authorize="hasAnyRole('RESCUER','COORDINATOR','ADMIN')" class="btn btn-outline-secondary btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Mở menu"><i class="fa-solid fa-bars"></i></button>
-                <a class="app-header-brand" th:href="@{/}"><span class="brand-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span><span class="app-header-brand-copy">CỨUNẠN <b>24/7</b><small>KẾT NỐI CỨU TRỢ CỘNG ĐỒNG</small></span></a>
+                <a class="app-header-brand" th:href="@{/}"><span class="brand-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span><span class="app-header-brand-copy">CỨU NẠN <b>24/7</b><small>KẾT NỐI CỨU TRỢ CỘNG ĐỒNG</small></span></a>
                 <span class="header-context d-none d-md-inline" sec:authorize="hasRole('RESCUER') and !hasRole('ADMIN')">Không gian đội cứu hộ</span>
                 <span class="header-context d-none d-md-inline" sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')">Trung tâm điều phối</span>
                 <span class="header-context d-none d-md-inline" sec:authorize="hasRole('ADMIN')">Quản trị hệ thống</span>
@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="public-nav" sec:authorize="!hasAnyRole('RESCUER','COORDINATOR','ADMIN')">
-        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a th:href="@{/map(layer='shelters')}">Điểm sơ tán</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
+        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
     </div>
     <div class="offcanvas offcanvas-start app-mobile-sidebar" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
         <div class="offcanvas-header"><h5 class="offcanvas-title" id="mobileSidebarLabel">Điều hướng</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button></div>

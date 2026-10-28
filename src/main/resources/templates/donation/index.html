@@ -1,15 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/main :: layout('Cổng Quyên Góp & Ủng Hộ Cứu Trợ Lũ Lụt - CứuNạn 24/7', ~{::#donation-content})}">
+      th:replace="~{layout/main :: layout('Cổng Quyên Góp & Ủng Hộ Cứu Trợ Lũ Lụt - Cứu Nạn 24/7', ~{::#donation-content})}">
 <body>
 
 <div id="donation-content">
 
-    <!-- CSS tùy biến riêng cho trang Quyên góp & Cứu trợ -->
+    <!-- CSS tùy biến riêng cho trang Quyên góp & Cứu trợ: Tràn viền 100% toàn màn hình -->
     <style>
-        .donation-hero {
+        body:has(#donation-content),
+        body.donation-page-body {
+            background: #09111e !important;
+        }
+        body:has(#donation-content) .app-workspace,
+        body.donation-page-body .app-workspace {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #09111e !important;
+        }
+        body:has(#donation-content) .app-main,
+        body.donation-page-body .app-main,
+        body:has(#donation-content) .app-content,
+        body.donation-page-body .app-content {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+        body:has(#donation-content) #donation-content,
+        body.donation-page-body #donation-content {
+            margin: 0 !important;
+            width: 100% !important;
+            min-height: calc(100vh - 80px);
             background: linear-gradient(135deg, #09111e 0%, #0f172a 40%, #1e293b 70%, #7f1d1d 100%) !important;
+            padding-bottom: 80px;
+        }
+        body:has(#donation-content) .app-footer,
+        body.donation-page-body .app-footer {
+            background: #09111e !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #94a3b8 !important;
+        }
+        body:has(#donation-content) .app-footer a,
+        body.donation-page-body .app-footer a {
+            color: #cbd5e1 !important;
+        }
+        body:has(#donation-content) .app-footer a:hover,
+        body.donation-page-body .app-footer a:hover {
+            color: #f87171 !important;
+        }
+        .donation-hero {
+            background: transparent !important;
             color: #ffffff !important;
         }
         .donation-stat-card {
@@ -105,7 +149,7 @@
     </section>
 
     <!-- Main Content Section: Form & Golden Book -->
-    <section class="py-5 bg-light">
+    <section class="py-5">
         <div class="container">
 
             <!-- Flash Error Alert -->
@@ -119,7 +163,7 @@
 
                 <!-- Left Column: Donation Form Card -->
                 <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                    <div class="card border-0 rounded-4 p-4 p-md-5 bg-white donation-floating-card">
                         <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
                             <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle">
                                 <i class="fa-solid fa-hand-holding-heart fa-2x"></i>
@@ -275,7 +319,7 @@
 
                 <!-- Right Column: Sổ Vàng Tri Ân (Live Table) -->
                 <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="card border-0 rounded-4 p-4 p-md-5 bg-white h-100 donation-floating-card">
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                             <h5 class="fw-bold mb-0 text-dark">
                                 <i class="fa-solid fa-award text-warning me-2"></i> BẢNG VÀNG TRI ÂN
@@ -322,7 +366,7 @@
                         <!-- Cam kết minh bạch -->
                         <div class="mt-4 p-3 bg-light rounded-3 border text-muted small">
                             <h6 class="fw-bold text-dark mb-2">
-                                <i class="fa-solid fa-circle-info text-primary me-1"></i> Cam Kết Của CứuNạn 24/7
+                                <i class="fa-solid fa-circle-info text-primary me-1"></i> Cam Kết Của Cứu Nạn 24/7
                             </h6>
                             <ul class="mb-0 ps-3">
                                 <li>Mọi khoản đóng góp đều được lưu vết minh bạch trên cơ sở dữ liệu hệ thống.</li>
@@ -374,6 +418,7 @@
                 });
             }
         });
+        document.body.classList.add('donation-page-body');
     </script>
 
 </div>
