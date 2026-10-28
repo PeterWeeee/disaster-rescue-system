@@ -38,21 +38,17 @@ public class FeedController {
         model.addAttribute("shelters", feedService.getAllShelters());
         model.addAttribute("hazardTypes", HazardType.values());
 
-        // Lấy đơn cứu hộ đang hoạt động của người dùng (nếu có)
-        SosRequest activeSos = null;
+        // Lịch sử các yêu cầu cứu hộ do người dùng tạo.
+        List<SosRequest> sosHistory = List.of();
         if (currentUser.getId() != null) {
             List<SosRequest> userRequests = sosService.getSosBySender(currentUser.getId());
-            if (!userRequests.isEmpty()) {
-                activeSos = userRequests.get(0);
-            }
+            sosHistory = userRequests;
         }
-        if (activeSos == null && currentUser.getPhone() != null) {
+        if (sosHistory.isEmpty() && currentUser.getPhone() != null) {
             List<SosRequest> phoneRequests = sosService.getSosByPhone(currentUser.getPhone());
-            if (!phoneRequests.isEmpty()) {
-                activeSos = phoneRequests.get(0);
-            }
+            sosHistory = phoneRequests;
         }
-        model.addAttribute("activeSos", activeSos);
+        model.addAttribute("sosHistory", sosHistory);
 
         return "feed/index";
     }

@@ -6,11 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.dto.EquipmentDispatchDto;
 import vn.edu.cuunan.dto.EquipmentReturnDto;
+import vn.edu.cuunan.dto.StartMissionRequestDto;
+import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
 import vn.edu.cuunan.dto.TeamResourcesDto;
 import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.repository.*;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -110,6 +113,155 @@ public class EquipmentService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
+    public void attachInventoryToRecommendations(RouteTerrainAnalysisDto analysis, RescueTeam team) {
+        if (analysis == null || team == null) return;
+        List<RescueEquipment> stock = equipmentRepository.findByTeamOrderByCategoryAscEquipmentNameAsc(team);
+        Map<String, RescueEquipment> byCode = new HashMap<>();
+        stock.forEach(item -> byCode.put(item.getEquipmentCode(), item));
+        Map<String, String> vehicleCodes = Map.of(
+                "TRUCK_4X4", "VEHICLE_TRUCK_4X4",
+                "AMBULANCE_SPECIAL", "VEHICLE_AMBULANCE",
+                "BOAT_MOTOR", "VEHICLE_BOAT_MOTOR",
+                "BOAT_RUBBER", "VEHICLE_BOAT_RUBBER");
+        List<RouteTerrainAnalysisDto.VehicleOptionDto> vehicles = analysis.getRecommendedVehicles();
+        if (vehicles != null) {
+            vehicles.removeIf(vehicle -> {
+                RescueEquipment item = byCode.get(vehicleCodes.get(vehicle.getId()));
+                if (item == null) return true;
+                vehicle.setEquipmentId(item.getId());
+                vehicle.setAvailableQuantity(item.getAvailableQuantity());
+                vehicle.setUnit(item.getUnit());
+                return false;
+            });
+        }
+
+        Map<String, String> itemCodes = Map.ofEntries(
+                Map.entry("LIFE_JACKET", "AO_PHAO"), Map.entry("LIFE_BUOY", "PHAO_TRON"),
+                Map.entry("THROW_ROPE", "DAY_CUU_HO"), Map.entry("WATERPROOF_LIGHT", "DEN_PIN"),
+                Map.entry("FIRST_AID_KIT", "TUI_SO_CUU"), Map.entry("CLIMBING_ROPE", "DAY_CUU_HO"),
+                Map.entry("WATER_FOOD", "LUONG_KHO"), Map.entry("CHILD_VEST", "AO_PHAO"));
+        List<RouteTerrainAnalysisDto.EquipmentItemDto> items = analysis.getRecommendedEquipment();
+        if (items != null) {
+            Set<Long> included = new HashSet<>();
+            items.removeIf(recommended -> {
+                RescueEquipment item = byCode.get(itemCodes.get(recommended.getId()));
+                if (item == null || !included.add(item.getId())) return true;
+                int suggested = 1;
+                java.util.regex.Matcher count = java.util.regex.Pattern.compile("\\((\\d+)\\s+chiếc\\)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(recommended.getName());
+                if (count.find()) suggested = Integer.parseInt(count.group(1));
+                recommended.setEquipmentId(item.getId());
+                recommended.setName(item.getEquipmentName());
+                recommended.setCategory(item.getCategory());
+                recommended.setCategoryName(categoryLabel(item.getCategory()));
+                recommended.setUnit(item.getUnit());
+                recommended.setAvailableQuantity(item.getAvailableQuantity());
+                recommended.setRecommendedQuantity(suggested);
+                return false;
+            });
+        }
+    }
+
+    private String categoryLabel(String category) {
+        return switch (category == null ? "" : category.toUpperCase()) {
+            case "SAFETY" -> "An toàn cứu sinh";
+            case "MEDICAL" -> "Y tế & sơ cứu";
+            case "SUPPLY" -> "Nhu yếu phẩm";
+            default -> "Công binh & cơ động";
+        };
+    }
+
+    @Transactional
+    public List<EquipmentAssignment> dispatchMissionSelection(Long assignmentId, StartMissionRequestDto selection, User rescuer) {
+        RescueAssignment assignment = rescueAssignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ #" + assignmentId));
+        Map<Long, Integer> requested = new LinkedHashMap<>();
+        if (selection.getVehicleType() != null && !selection.getVehicleType().isBlank()
+                && selection.getVehicleEquipmentId() == null) {
+            throw new IllegalArgumentException("Phương tiện chưa được liên kết với kho của đội.");
+        }
+        if (selection.getVehicleEquipmentId() != null) {
+            String expectedCode = switch (selection.getVehicleType() == null ? "" : selection.getVehicleType()) {
+                case "TRUCK_4X4" -> "VEHICLE_TRUCK_4X4";
+                case "AMBULANCE_SPECIAL" -> "VEHICLE_AMBULANCE";
+                case "BOAT_MOTOR" -> "VEHICLE_BOAT_MOTOR";
+                case "BOAT_RUBBER" -> "VEHICLE_BOAT_RUBBER";
+                default -> throw new IllegalArgumentException("Phương tiện đã chọn không hợp lệ.");
+            };
+            RescueEquipment vehicle = equipmentRepository.findById(selection.getVehicleEquipmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phương tiện đã chọn trong kho."));
+            if (!expectedCode.equals(vehicle.getEquipmentCode())) {
+                throw new IllegalArgumentException("Phương tiện không khớp với loại phương tiện đã chọn.");
+            }
+            requested.merge(selection.getVehicleEquipmentId(), 1, Integer::sum);
+        }
+        if (selection.getEquipmentItems() != null) {
+            for (StartMissionRequestDto.SelectedEquipmentItem item : selection.getEquipmentItems()) {
+                if (item == null || item.getEquipmentId() == null || item.getQuantity() < 1) {
+                    throw new IllegalArgumentException("Số lượng trang bị đã chọn không hợp lệ.");
+                }
+                requested.merge(item.getEquipmentId(), item.getQuantity(), Integer::sum);
+            }
+        }
+        if (requested.isEmpty()) return List.of();
+
+        List<EquipmentAssignment> current = eqAssignmentRepository.findByRescueAssignmentIdAndStatus(assignmentId, "DISPATCHED");
+        if (!current.isEmpty()) {
+            Map<Long, Integer> existing = new LinkedHashMap<>();
+            current.forEach(ea -> existing.merge(ea.getEquipment().getId(), ea.getQuantityDispatched(), Integer::sum));
+            if (existing.equals(requested)) return current;
+            throw new IllegalStateException("Trang bị của nhiệm vụ này đã xuất kho và không thể thay đổi sau khi xuất kích.");
+        }
+
+        EquipmentDispatchDto dispatch = new EquipmentDispatchDto();
+        List<EquipmentDispatchDto.DispatchItem> dispatchItems = new ArrayList<>();
+        for (Map.Entry<Long, Integer> entry : requested.entrySet()) {
+            RescueEquipment item = equipmentRepository.findById(entry.getKey())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang bị đã chọn trong kho."));
+            if (item.getTeam() == null || !Objects.equals(item.getTeam().getId(), assignment.getTeam().getId())) {
+                throw new IllegalArgumentException("Trang bị đã chọn không thuộc kho của đội bạn.");
+            }
+            if (entry.getValue() > item.getAvailableQuantity()) {
+                throw new IllegalStateException("Kho chỉ còn " + item.getAvailableQuantity() + " " + item.getUnit() + " " + item.getEquipmentName() + ". Hãy điều chỉnh số lượng.");
+            }
+            dispatchItems.add(new EquipmentDispatchDto.DispatchItem(entry.getKey(), entry.getValue()));
+        }
+        dispatch.setItems(dispatchItems);
+        dispatch.setNotes("Tự động xuất kho theo phương tiện và trang bị xác nhận khi xuất kích.");
+        return dispatchEquipment(assignmentId, dispatch, rescuer);
+    }
+
+    @Transactional
+    public void returnAllIntact(Long assignmentId, User rescuer) {
+        List<EquipmentAssignment> dispatched = eqAssignmentRepository.findByRescueAssignmentIdAndStatus(assignmentId, "DISPATCHED");
+        EquipmentReturnDto dto = new EquipmentReturnDto();
+        List<EquipmentReturnDto.ReturnItem> items = new ArrayList<>();
+        for (EquipmentAssignment ea : dispatched) {
+            items.add(new EquipmentReturnDto.ReturnItem(ea.getId(), ea.getQuantityDispatched(), 0, 0, 0));
+        }
+        dto.setItems(items);
+        dto.setReportNotes("Tự động hoàn kho toàn bộ phương tiện và trang bị nguyên vẹn khi nhiệm vụ hoàn thành.");
+        returnEquipment(assignmentId, dto, rescuer);
+    }
+
+    @Transactional
+    public RescueEquipment updateUnitPrice(Long equipmentId, BigDecimal unitPrice, User administrator) {
+        if (administrator == null || administrator.getRole() == null
+                || !"ROLE_ADMIN".equalsIgnoreCase(administrator.getRole().getName())) {
+            throw new IllegalArgumentException("Chỉ quản trị viên được cập nhật đơn giá.");
+        }
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Đơn giá phải lớn hơn 0 VNĐ.");
+        }
+        if (unitPrice.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException("Đơn giá VNĐ chỉ nhận số nguyên.");
+        }
+        RescueEquipment equipment = equipmentRepository.findById(equipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy vật dụng trong kho."));
+        equipment.setUnitPrice(unitPrice);
+        return equipmentRepository.save(equipment);
+    }
+
     @Transactional
     public List<EquipmentAssignment> dispatchEquipment(Long assignmentId, EquipmentDispatchDto dto, User rescuer) {
         RescueAssignment assignment = rescueAssignmentRepository.findById(assignmentId)
@@ -178,16 +330,21 @@ public class EquipmentService {
             for (EquipmentReturnDto.ReturnItem rItem : dto.getItems()) {
                 EquipmentAssignment ea = map.get(rItem.getAssignmentEquipmentId());
                 if (ea == null || !"DISPATCHED".equals(ea.getStatus())) {
-                    continue; // Anti duplicate return guard
+                    throw new IllegalArgumentException("Phiếu đối soát có thiết bị không hợp lệ hoặc bị lặp.");
                 }
+                map.remove(rItem.getAssignmentEquipmentId());
 
                 RescueEquipment eq = ea.getEquipment();
+                if (rItem.getIntactQuantity() < 0 || rItem.getDamagedQuantity() < 0
+                        || rItem.getLostQuantity() < 0 || rItem.getConsumedQuantity() < 0) {
+                    throw new IllegalArgumentException("Số lượng kiểm kê không được âm.");
+                }
                 int totalReturnedThisItem = rItem.getIntactQuantity() + rItem.getDamagedQuantity()
                         + rItem.getLostQuantity() + rItem.getConsumedQuantity();
 
-                // Đảm bảo không thu hồi vượt quá số đã cấp phát
-                if (totalReturnedThisItem > ea.getQuantityDispatched()) {
-                    throw new IllegalArgumentException("Số lượng thu hồi vượt quá số lượng đã cấp phát ban đầu (" + ea.getQuantityDispatched() + ")");
+                // Mỗi phiếu xuất phải được đối soát đủ trước khi đóng.
+                if (totalReturnedThisItem != ea.getQuantityDispatched()) {
+                    throw new IllegalArgumentException("Tổng số nguyên vẹn, hư hỏng, mất và tiêu hao phải bằng số đã cấp phát (" + ea.getQuantityDispatched() + ").");
                 }
 
                 // Cập nhật kho
@@ -195,8 +352,9 @@ public class EquipmentService {
                 eq.setAvailableQuantity(eq.getAvailableQuantity() + rItem.getIntactQuantity());
                 eq.setDamagedQuantity(eq.getDamagedQuantity() + rItem.getDamagedQuantity());
 
-                if (rItem.getLostQuantity() > 0) {
-                    eq.setTotalQuantity(Math.max(0, eq.getTotalQuantity() - rItem.getLostQuantity()));
+                int permanentlyRemoved = rItem.getLostQuantity() + rItem.getConsumedQuantity();
+                if (permanentlyRemoved > 0) {
+                    eq.setTotalQuantity(Math.max(0, eq.getTotalQuantity() - permanentlyRemoved));
                 }
                 equipmentRepository.save(eq);
 
@@ -220,6 +378,9 @@ public class EquipmentService {
                             "/rescuer/resources");
                 }
             }
+        }
+        if (!map.isEmpty()) {
+            throw new IllegalArgumentException("Cần kiểm kê đầy đủ toàn bộ phương tiện và trang bị đã cấp phát.");
         }
 
         // Ghi nhật ký kiểm toán

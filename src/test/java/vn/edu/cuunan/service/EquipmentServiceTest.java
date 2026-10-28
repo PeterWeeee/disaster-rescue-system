@@ -8,11 +8,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.edu.cuunan.dto.EquipmentDispatchDto;
 import vn.edu.cuunan.dto.EquipmentReturnDto;
+import vn.edu.cuunan.dto.StartMissionRequestDto;
 import vn.edu.cuunan.dto.TeamResourcesDto;
 import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.repository.*;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,6 +72,57 @@ class EquipmentServiceTest {
 
         lifeJacket = new RescueEquipment(team, "AO_PHAO", "Áo phao tiêu chuẩn", "SAFETY", "chiếc", 20, "Hàng hải");
         lifeJacket.setId(101L);
+    }
+
+    @Test
+    @DisplayName("Xuất kích trừ kho, hoàn thành tự nhập lại thiết bị nguyên vẹn")
+    void missionDispatchAndIntactReturnStayInSyncWithWarehouse() {
+        List<EquipmentAssignment> openDispatches = new ArrayList<>();
+        when(rescueAssignmentRepository.findById(50L)).thenReturn(Optional.of(assignment));
+        when(equipmentRepository.findById(101L)).thenReturn(Optional.of(lifeJacket));
+        when(eqAssignmentRepository.findByRescueAssignmentIdAndStatus(50L, "DISPATCHED")).thenAnswer(inv ->
+                openDispatches.stream().filter(ea -> "DISPATCHED".equals(ea.getStatus())).toList());
+        when(eqAssignmentRepository.save(any(EquipmentAssignment.class))).thenAnswer(inv -> {
+            EquipmentAssignment saved = inv.getArgument(0);
+            if (!openDispatches.contains(saved)) openDispatches.add(saved);
+            return saved;
+        });
+        when(equipmentRepository.save(any(RescueEquipment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        StartMissionRequestDto selection = new StartMissionRequestDto();
+        selection.setEquipmentItems(List.of(new StartMissionRequestDto.SelectedEquipmentItem(101L, 3)));
+        equipmentService.dispatchMissionSelection(50L, selection, rescuer);
+
+        assertEquals(17, lifeJacket.getAvailableQuantity());
+        assertEquals(3, lifeJacket.getDispatchedQuantity());
+
+        equipmentService.returnAllIntact(50L, rescuer);
+
+        assertEquals(20, lifeJacket.getAvailableQuantity());
+        assertEquals(0, lifeJacket.getDispatchedQuantity());
+        assertEquals("RETURNED", openDispatches.get(0).getStatus());
+    }
+
+    @Test
+    @DisplayName("Trang bị hư hỏng không được hoàn lại vào số khả dụng")
+    void damagedEquipmentIsRecordedWithoutReturningToAvailableStock() {
+        EquipmentAssignment dispatch = new EquipmentAssignment(assignment, lifeJacket, 3);
+        dispatch.setId(901L);
+        lifeJacket.setAvailableQuantity(17);
+        lifeJacket.setDispatchedQuantity(3);
+        when(rescueAssignmentRepository.findById(50L)).thenReturn(Optional.of(assignment));
+        when(eqAssignmentRepository.findByRescueAssignmentIdAndStatus(50L, "DISPATCHED")).thenReturn(List.of(dispatch));
+        when(equipmentRepository.save(any(RescueEquipment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(eqAssignmentRepository.save(any(EquipmentAssignment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EquipmentReturnDto dto = new EquipmentReturnDto();
+        dto.setItems(List.of(new EquipmentReturnDto.ReturnItem(901L, 2, 1, 0, 0)));
+        dto.setReportNotes("Một áo phao bị rách");
+        equipmentService.returnEquipment(50L, dto, rescuer);
+
+        assertEquals(19, lifeJacket.getAvailableQuantity());
+        assertEquals(1, lifeJacket.getDamagedQuantity());
+        assertEquals(0, lifeJacket.getDispatchedQuantity());
     }
 
     @Test

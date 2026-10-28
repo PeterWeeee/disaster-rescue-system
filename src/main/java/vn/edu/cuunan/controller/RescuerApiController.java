@@ -2,6 +2,9 @@ package vn.edu.cuunan.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +20,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/rescuer")
 @PreAuthorize("hasAnyRole('RESCUER', 'ADMIN')")
 public class RescuerApiController {
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final RescuerService rescuerService;
     private final EquipmentService equipmentService;
@@ -58,6 +66,22 @@ public class RescuerApiController {
         }
         TeamResourcesDto resources = equipmentService.getTeamResources(team.get());
         return ResponseEntity.ok(resources);
+    }
+
+    @PutMapping("/resources/{equipmentId}/price")
+    public ResponseEntity<?> updateEquipmentPrice(@PathVariable Long equipmentId,
+                                                  @RequestBody Map<String, BigDecimal> body,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        try {
+            RescueEquipment equipment = equipmentService.updateUnitPrice(equipmentId,
+                    body == null ? null : body.get("unitPrice"), userDetails.getUser());
+            return ResponseEntity.ok(Map.of("success", true, "unitPrice", equipment.getUnitPrice()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        }
     }
 
     @PostMapping("/budget-requests")
@@ -103,11 +127,30 @@ public class RescuerApiController {
         try {
             User user = userDetails.getUser();
             RouteTerrainAnalysisDto result = rescuerService.getRouteAndTerrainAnalysis(id, user);
+            equipmentService.attachInventoryToRecommendations(result, rescuerService.getAssignmentTeam(id, user));
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phân tích lộ trình: " + ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/assignments/{id}/equipment")
+    public ResponseEntity<?> getMissionEquipment(@PathVariable("id") Long id,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+        }
+        try {
+            List<Map<String, Object>> items = new ArrayList<>();
+            for (EquipmentAssignment ea : rescuerService.getMissionEquipment(id, userDetails.getUser())) {
+                items.add(Map.of("assignmentEquipmentId", ea.getId(), "equipmentName", ea.getEquipment().getEquipmentName(),
+                        "unit", ea.getEquipment().getUnit(), "quantityDispatched", ea.getQuantityDispatched()));
+            }
+            return ResponseEntity.ok(items);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         }
     }
 
@@ -178,13 +221,22 @@ public class RescuerApiController {
     public ResponseEntity<?> completeMission(@PathVariable("id") Long id,
                                              @RequestParam("reportNotes") String reportNotes,
                                              @RequestParam(value = "reportImage", required = false) MultipartFile reportImage,
+                                             @RequestParam(value = "equipmentReturns", required = false) String equipmentReturnsJson,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null || userDetails.getUser() == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
         }
         try {
             User user = userDetails.getUser();
-            RescueAssignment assignment = rescuerService.completeAssignment(id, user, reportNotes, reportImage);
+            EquipmentReturnDto equipmentReturns = null;
+            if (equipmentReturnsJson != null && !equipmentReturnsJson.isBlank()) {
+                try {
+                    equipmentReturns = objectMapper.readValue(equipmentReturnsJson, EquipmentReturnDto.class);
+                } catch (JsonProcessingException ex) {
+                    return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Dữ liệu kiểm kê trang bị không hợp lệ."));
+                }
+            }
+            RescueAssignment assignment = rescuerService.completeAssignment(id, user, reportNotes, reportImage, equipmentReturns);
             Map<String, Object> res = new HashMap<>();
             res.put("success", true);
             res.put("message", "Chúc mừng! Báo cáo hoàn tất ca cứu nạn #" + id + " thành công!");

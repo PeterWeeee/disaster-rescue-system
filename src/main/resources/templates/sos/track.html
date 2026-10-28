@@ -7,48 +7,6 @@
 <div id="track-content" class="py-5">
     <div class="container">
         
-        <!-- Search Bar Section -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <form th:action="@{/sos/track}" method="get" class="row g-3 align-items-center justify-content-between">
-                    <div class="col-md-5">
-                        <label class="form-label small fw-bold text-uppercase text-secondary mb-1">
-                            <i class="fa-solid fa-hashtag me-1 text-danger"></i> Tra cứu theo Mã Ca SOS
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light fw-bold text-danger">#SOS-</span>
-                            <input type="text" name="code" class="form-control" placeholder="Vd: 12 hoặc nhập số bất kỳ">
-                            <button type="submit" class="btn btn-danger fw-semibold">
-                                <i class="fa-solid fa-magnifying-glass me-1"></i> Tra cứu
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label small fw-bold text-uppercase text-secondary mb-1">
-                            <i class="fa-solid fa-phone me-1 text-primary"></i> Hoặc tra cứu theo Số Điện Thoại
-                        </label>
-                        <div class="input-group">
-                            <input type="tel" name="phone" th:value="${searchedPhone}" class="form-control" placeholder="Vd: 0987654321">
-                            <button type="submit" class="btn btn-primary fw-semibold">
-                                <i class="fa-solid fa-phone me-1"></i> Tìm ca của tôi
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-2 text-md-end text-center mt-3 mt-md-0">
-                        <a sec:authorize="hasRole('COORDINATOR')" th:href="@{/coordinator/dashboard}" class="btn btn-navy fw-bold w-100">
-                            <i class="fa-solid fa-arrow-left me-1"></i> Bàn điều phối
-                        </a>
-                        <a sec:authorize="hasRole('RESCUER')" th:href="@{/rescuer/missions}" class="btn btn-navy fw-bold w-100">
-                            <i class="fa-solid fa-arrow-left me-1"></i> Nhiệm vụ đội
-                        </a>
-                        <a sec:authorize="!hasAnyRole('COORDINATOR', 'ADMIN', 'RESCUER')" th:href="@{/sos}" class="btn btn-outline-danger fw-bold w-100">
-                            <i class="fa-solid fa-plus me-1"></i> Gửi SOS mới
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- Success Message Flash -->
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm mb-4 border-2 border-success" role="alert">
             <div class="d-flex align-items-center gap-2">

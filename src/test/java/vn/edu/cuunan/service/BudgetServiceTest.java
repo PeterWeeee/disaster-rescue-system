@@ -8,14 +8,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 import vn.edu.cuunan.dto.GeneralFundSummaryDto;
 import vn.edu.cuunan.dto.TeamFundRequestDto;
 import vn.edu.cuunan.entity.RescueTeam;
+import vn.edu.cuunan.entity.RescueEquipment;
 import vn.edu.cuunan.entity.Role;
 import vn.edu.cuunan.entity.TeamFundRequest;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.repository.DonationRepository;
 import vn.edu.cuunan.repository.RescueTeamRepository;
+import vn.edu.cuunan.repository.RescueEquipmentRepository;
 import vn.edu.cuunan.repository.TeamFundRequestRepository;
 
 import java.math.BigDecimal;
@@ -35,6 +38,9 @@ class BudgetServiceTest {
 
     @Mock
     private RescueTeamRepository rescueTeamRepository;
+
+    @Mock
+    private RescueEquipmentRepository equipmentRepository;
 
     @Mock
     private DonationRepository donationRepository;
@@ -60,6 +66,7 @@ class BudgetServiceTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(budgetService, "equipmentRepository", equipmentRepository);
         Role rescuerRole = new Role(3, "ROLE_RESCUER");
         Role coordRole = new Role(2, "ROLE_COORDINATOR");
 
@@ -153,6 +160,38 @@ class BudgetServiceTest {
         when(rescuerService.getMyTeam(rescuerUser)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> budgetService.createFundRequest(rescuerUser, dto));
+        verify(fundRequestRepository, never()).save(any(TeamFundRequest.class));
+    }
+
+    @Test
+    @DisplayName("Giỏ tiếp tế lưu tên vật dụng xác thực từ kho và giữ trạng thái chờ duyệt")
+    void testCreateFundRequestWithValidatedCart() {
+        RescueEquipment equipment = new RescueEquipment(rescueTeam, "MED-1", "Túi sơ cứu", "MEDICAL", "bộ", 4, null);
+        equipment.setId(31L);
+        equipment.setUnitPrice(new BigDecimal("150000"));
+        TeamFundRequestDto dto = new TeamFundRequestDto(new BigDecimal("2000000"), "Bổ sung cho ca cứu hộ sắp tới", "MEDICAL", "HIGH");
+        dto.setItems(List.of(new TeamFundRequestDto.CartItem(31L, 3)));
+        when(rescuerService.getMyTeam(rescuerUser)).thenReturn(Optional.of(rescueTeam));
+        when(equipmentRepository.findById(31L)).thenReturn(Optional.of(equipment));
+        when(fundRequestRepository.save(any(TeamFundRequest.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        TeamFundRequest created = budgetService.createFundRequest(rescuerUser, dto);
+
+        assertEquals("PENDING", created.getStatus());
+        assertEquals(new BigDecimal("450000"), created.getAmount());
+        assertTrue(created.getPurpose().contains("Túi sơ cứu x 3 bộ"));
+        verify(fundRequestRepository).save(any(TeamFundRequest.class));
+    }
+
+    @Test
+    @DisplayName("Không nhận số lượng giỏ bằng 0")
+    void testCreateFundRequestRejectsInvalidCartQuantity() {
+        TeamFundRequestDto dto = new TeamFundRequestDto(new BigDecimal("2000000"), "Bổ sung cho nhiệm vụ", "SUPPLY", "HIGH");
+        dto.setItems(List.of(new TeamFundRequestDto.CartItem(31L, 0)));
+        when(rescuerService.getMyTeam(rescuerUser)).thenReturn(Optional.of(rescueTeam));
+
+        assertThrows(IllegalArgumentException.class, () -> budgetService.createFundRequest(rescuerUser, dto));
+        verify(equipmentRepository, never()).findById(anyLong());
         verify(fundRequestRepository, never()).save(any(TeamFundRequest.class));
     }
 

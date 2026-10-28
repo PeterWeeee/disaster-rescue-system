@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#guide-content})}">
+<body>
+<div id="guide-content" class="disaster-guide-page">
+    <section class="guide-hero">
+        <div class="container-xl guide-hero-inner">
+            <a class="guide-back-link" th:href="@{/auth/login}"><i class="fa-solid fa-arrow-left me-2" aria-hidden="true"></i>Quay lại đăng nhập</a>
+            <div class="guide-hero-copy">
+                <span class="guide-eyebrow"><i class="fa-solid fa-shield-heart me-2" aria-hidden="true"></i>CỨU NẠN 24/7 · KIẾN THỨC AN TOÀN</span>
+                <h1>Cẩm nang ứng phó thiên tai</h1>
+                <p>Chuẩn bị đúng cách – Ứng phó an toàn – Bảo vệ bản thân và gia đình</p>
+            </div>
+            <div class="guide-principle" role="note">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <div><strong>Nguyên tắc an toàn</strong><span>Theo dõi cảnh báo chính thức, không đi vào vùng nguy hiểm và sơ tán theo hướng dẫn của cơ quan chức năng.</span></div>
+            </div>
+            <a class="guide-emergency-link" href="#guide-emergency"><i class="fa-solid fa-phone-volume me-2" aria-hidden="true"></i>Khi cần hỗ trợ khẩn cấp</a>
+        </div>
+    </section>
+
+    <main class="container-xl guide-main">
+        <section class="guide-quick-nav" aria-labelledby="guide-topics-title">
+            <div class="guide-section-heading">
+                <span class="guide-kicker">CHỌN TÌNH HUỐNG</span>
+                <h2 id="guide-topics-title">Hướng dẫn nhanh theo loại thiên tai</h2>
+                <p>Chọn một chủ đề để đến phần hướng dẫn. Nếu đang gặp nguy hiểm, hãy ưu tiên rời khỏi khu vực nguy hiểm và gọi trợ giúp.</p>
+            </div>
+            <div class="guide-topic-grid">
+                <a href="#guide-preparation" class="guide-topic-card"><span class="guide-topic-icon topic-blue"><i class="fa-solid fa-kit-medical" aria-hidden="true"></i></span><span><strong>Chuẩn bị trước</strong><small>Túi đồ và kế hoạch gia đình</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-storm" class="guide-topic-card"><span class="guide-topic-icon topic-red"><i class="fa-solid fa-wind" aria-hidden="true"></i></span><span><strong>Bão, gió mạnh</strong><small>Trú ẩn và sơ tán an toàn</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-flood" class="guide-topic-card"><span class="guide-topic-icon topic-teal"><i class="fa-solid fa-house-flood-water" aria-hidden="true"></i></span><span><strong>Lũ lụt, ngập sâu</strong><small>Nước chảy xiết và điện</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-landslide" class="guide-topic-card"><span class="guide-topic-icon topic-amber"><i class="fa-solid fa-mountain-sun" aria-hidden="true"></i></span><span><strong>Lũ quét, sạt lở</strong><small>Dấu hiệu và đường thoát</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-lightning" class="guide-topic-card"><span class="guide-topic-icon topic-purple"><i class="fa-solid fa-cloud-bolt" aria-hidden="true"></i></span><span><strong>Dông, sét</strong><small>Chọn nơi trú phù hợp</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-earthquake" class="guide-topic-card"><span class="guide-topic-icon topic-blue"><i class="fa-solid fa-house-crack" aria-hidden="true"></i></span><span><strong>Động đất</strong><small>Che chắn và đề phòng dư chấn</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-after" class="guide-topic-card"><span class="guide-topic-icon topic-green"><i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i></span><span><strong>Sau thiên tai</strong><small>Trở về và vệ sinh an toàn</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-emergency" class="guide-topic-card"><span class="guide-topic-icon topic-red"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span><span><strong>Cần trợ giúp</strong><small>SOS và số khẩn cấp</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+            </div>
+        </section>
+
+        <section class="guide-instructions" aria-labelledby="guide-instructions-title">
+            <div class="guide-section-heading">
+                <span class="guide-kicker">HÀNH ĐỘNG THIẾT THỰC</span>
+                <h2 id="guide-instructions-title">Các bước cần nhớ</h2>
+            </div>
+            <article id="guide-preparation" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-blue"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">01 · TRƯỚC KHI THIÊN TAI</span><h3>Chuẩn bị sẵn cho gia đình</h3>
+                    <ul><li>Theo dõi thông báo từ cơ quan chức năng và chính quyền địa phương.</li><li>Chuẩn bị túi khẩn cấp: nước uống, thực phẩm, đèn pin, pin dự phòng, thuốc cần thiết, giấy tờ quan trọng và vật dụng sơ cứu.</li><li>Lưu số liên lạc khẩn cấp, địa điểm sơ tán và thống nhất cách liên lạc với người thân.</li><li>Bọc kín giấy tờ, bảo vệ thiết bị điện và tài sản thiết yếu khi có thể làm an toàn.</li></ul>
+                </div>
+            </article>
+            <article id="guide-storm" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-red"><i class="fa-solid fa-wind" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">02 · BÃO VÀ GIÓ MẠNH</span><h3>Ở trong nơi trú ẩn kiên cố</h3>
+                    <ul><li>Theo dõi cảnh báo chính thức; gia cố nhà cửa khi điều kiện còn an toàn.</li><li>Đóng cửa, tránh xa cửa kính và các vật có nguy cơ rơi hoặc vỡ.</li><li>Không ra ngoài khi gió mạnh; tránh cây lớn, biển quảng cáo, cột điện và công trình không an toàn.</li><li>Sơ tán theo hướng dẫn của cơ quan chức năng khi được yêu cầu.</li></ul>
+                </div>
+            </article>
+            <article id="guide-flood" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-teal"><i class="fa-solid fa-house-flood-water" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">03 · LŨ LỤT VÀ NGẬP SÂU</span><h3>Tránh nước chảy và nguy cơ điện giật</h3>
+                    <ul><li>Di chuyển đến nơi cao, an toàn theo tuyến sơ tán được hướng dẫn.</li><li>Không đi bộ, đi xe máy hoặc lái ô tô qua dòng nước chảy xiết hay đoạn ngập không rõ độ sâu.</li><li>Chỉ ngắt điện nếu có thể làm từ nơi khô ráo, an toàn; không chạm thiết bị điện khi đang đứng trong nước.</li><li>Không uống nước bị ô nhiễm; không quay lại vùng nguy hiểm cho đến khi có thông báo an toàn.</li></ul>
+                </div>
+            </article>
+            <article id="guide-landslide" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-amber"><i class="fa-solid fa-mountain-sun" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">04 · LŨ QUÉT VÀ SẠT LỞ ĐẤT</span><h3>Rời khu vực có dấu hiệu bất thường</h3>
+                    <ul><li>Chú ý đất đá dịch chuyển, vết nứt mới, nước suối đổi màu hoặc mực nước thay đổi đột ngột.</li><li>Khi có cảnh báo, rời khu vực theo tuyến sơ tán an toàn; tránh ven suối, chân taluy và sườn dốc có nguy cơ.</li><li>Không cố vượt dòng lũ hoặc khu vực đất đá đang sạt trượt.</li><li>Báo cho cơ quan chức năng khi phát hiện dấu hiệu nguy hiểm, nếu có thể thực hiện an toàn.</li></ul>
+                </div>
+            </article>
+            <article id="guide-lightning" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-purple"><i class="fa-solid fa-cloud-bolt" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">05 · DÔNG VÀ SÉT</span><h3>Tìm nơi trú kín, chắc chắn</h3>
+                    <ul><li>Vào trong nhà kiên cố hoặc phương tiện có mái che phù hợp.</li><li>Tránh cây đơn độc, cột điện, nơi trống trải và khu vực có nước.</li><li>Hạn chế sử dụng thiết bị điện có dây trong lúc dông sét.</li><li>Không trú mưa dưới cây lớn hoặc công trình không bảo đảm an toàn.</li></ul>
+                </div>
+            </article>
+            <article id="guide-earthquake" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-blue"><i class="fa-solid fa-house-crack" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">06 · ĐỘNG ĐẤT</span><h3>Che chắn đầu và cổ</h3>
+                    <ul><li>Nếu đang ở trong nhà, cúi thấp, che đầu và cổ; bám giữ dưới bàn chắc chắn nếu có thể.</li><li>Tránh cửa kính, tủ cao và vật có thể rơi; không dùng thang máy trong hoặc ngay sau rung chấn.</li><li>Sau rung chấn, di chuyển đến nơi an toàn khi có thể và đề phòng dư chấn.</li><li>Làm theo hướng dẫn của lực lượng chức năng.</li></ul>
+                </div>
+            </article>
+            <article id="guide-after" class="guide-instruction-card">
+                <div class="guide-instruction-icon topic-green"><i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i></div>
+                <div><span class="guide-step-label">07 · SAU THIÊN TAI</span><h3>Chỉ trở về khi đã an toàn</h3>
+                    <ul><li>Chỉ trở về khi khu vực được xác nhận an toàn.</li><li>Tránh dây điện đứt, công trình hư hỏng và nguồn nước ô nhiễm.</li><li>Kiểm tra sức khỏe, sơ cứu khi cần và tìm hỗ trợ y tế phù hợp.</li><li>Ghi nhận thiệt hại chỉ khi an toàn; không vào vùng nguy hiểm để chụp ảnh.</li><li>Dùng nước sạch, thực phẩm an toàn và giữ vệ sinh môi trường.</li></ul>
+                </div>
+            </article>
+        </section>
+
+        <section class="guide-checklist" aria-labelledby="guide-checklist-title">
+            <div class="guide-checklist-copy"><span class="guide-kicker">KIỂM TRA NHANH</span><h2 id="guide-checklist-title">Túi đồ khẩn cấp của bạn đã sẵn sàng?</h2><p>Rà soát những vật dụng thiết yếu để gia đình sẵn sàng khi cần sơ tán.</p></div>
+            <div class="guide-checklist-items">
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Nước uống và thực phẩm đủ dùng</span></div>
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Đèn pin, pin dự phòng và radio</span></div>
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Thuốc thiết yếu và bộ sơ cứu</span></div>
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Giấy tờ quan trọng được bọc kín</span></div>
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Số liên lạc và điểm sơ tán đã lưu</span></div>
+                <div class="guide-check-item"><span class="guide-checklist-bullet" aria-hidden="true"></span><span>Kế hoạch liên lạc với người thân</span></div>
+            </div>
+        </section>
+
+        <section id="guide-emergency" class="guide-emergency-section" aria-labelledby="guide-emergency-title">
+            <div class="guide-emergency-copy"><span class="guide-kicker">KHI CẦN HỖ TRỢ KHẨN CẤP</span><h2 id="guide-emergency-title">Ưu tiên đến nơi an toàn và gọi trợ giúp</h2><p>Nếu có thể thực hiện an toàn, cung cấp vị trí, số người cần giúp đỡ, tình trạng nguy hiểm và cách liên hệ lại. Không coi yêu cầu SOS là đã được tiếp nhận cho đến khi hệ thống xác nhận.</p><a th:href="@{/sos}" class="guide-sos-button"><i class="fa-solid fa-tower-broadcast me-2" aria-hidden="true"></i>Mở chức năng SOS</a></div>
+            <div class="guide-hotline-list">
+                <a href="tel:112"><span class="guide-hotline-number">112</span><span><strong>Cứu nạn, thiên tai và tình huống nguy cấp</strong><small>Tổng đài khẩn cấp quốc gia, tiếp nhận 24/7</small></span><i class="fa-solid fa-phone" aria-hidden="true"></i></a>
+                <a href="tel:114"><span class="guide-hotline-number">114</span><span><strong>Phòng cháy, chữa cháy và cứu nạn</strong><small>Đường dây khẩn cấp PCCC và CNCH</small></span><i class="fa-solid fa-phone" aria-hidden="true"></i></a>
+                <a href="tel:115"><span class="guide-hotline-number">115</span><span><strong>Cấp cứu y tế</strong><small>Gọi khi cần hỗ trợ cấp cứu</small></span><i class="fa-solid fa-phone" aria-hidden="true"></i></a>
+                <small class="guide-hotline-source">Thông tin về 112: <a href="https://xaydungchinhsach.chinhphu.vn/tong-dai-so-112-tiep-nhan-24-7-cac-thong-tin-ve-su-co-thien-tai-tham-hoa-119250902150528929.htm" target="_blank" rel="noopener noreferrer">Cổng Thông tin điện tử Chính phủ</a>.</small>
+            </div>
+        </section>
+
+        <div class="guide-disclaimer"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><p>Cẩm nang chỉ mang tính hướng dẫn chung, không thay thế cảnh báo và chỉ dẫn của cơ quan chức năng tại thời điểm xảy ra thiên tai. Luôn làm theo thông tin chính thức tại địa phương.</p></div>
+        <div class="guide-footer-actions"><a th:href="@{/auth/login}" class="guide-login-button"><i class="fa-solid fa-arrow-left me-2" aria-hidden="true"></i>Quay lại đăng nhập Citizen</a><a th:href="@{/}" class="guide-home-link">Về trang chủ</a></div>
+    </main>
+</div>
+</body>
+</html>
