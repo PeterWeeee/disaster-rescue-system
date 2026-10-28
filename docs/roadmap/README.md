@@ -18,6 +18,7 @@
 | **09** | Tân trang Giao diện Hệ thống & Tinh gọn Nội dung Thừa (UI Redesign) | **SV 24110329** | [`session-09-ui-redesign.md`](session-09-ui-redesign.md) | ✅ Đã hoàn thành |
 | **10** | Nâng cấp Giao diện, Sửa lỗi Bản đồ, Quyên góp & Phân trang (UI Fixes) | **PeterWeeee** | [`session-10-ui-fixes.md`](session-10-ui-fixes.md) | ✅ Đã hoàn thành |
 | **11** | Bổ sung Chức năng Thống kê Thu - Chi dành cho Admin (Admin Finance) | **PeterWeeee** | [`session-11-admin-revenue-expense-statistics.md`](session-11-admin-revenue-expense-statistics.md) | ✅ Đã hoàn thành |
+| **12** | Khung Chat Trực Tuyến Thời Gian Thực Khi Đang Tiếp Cận (Live Mission Chat) | **PeterWeeee** | [`session-12-mission-live-chat.md`](session-12-mission-live-chat.md) | 🆕 Mới tạo / Sẵn sàng |
 | **Cuối** | Tối ưu UI/UX Mobile, Kiểm thử Toàn diện & Kịch bản Demo bảo vệ | **Cả nhóm** | [`session-chua-lam-mobile-testing-demo-script.md`](session-chua-lam-mobile-testing-demo-script.md) | ⏸️ Chưa làm trong project này |
 
 ---

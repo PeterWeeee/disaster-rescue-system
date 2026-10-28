@@ -28,6 +28,8 @@ Dự án được phân chia thành các phiên làm việc (Session) hoàn toà
 │ • Session 05: WebSocket STOMP   │ • Kiểm thử luồng gửi SOS        │ • Session 08: Admin & Broadcast │
 │ • Session 10: UI Fixes & Page   │                                 │ • Session 09: UI Redesign       │
 │ • Session 11: Admin Finance     │                                 │   (Tân trang web & tinh gọn)    │
+│ • Session 12: Mission Live Chat │                                 │                                 │
+│   (Khung chat khi tiếp cận)     │                                 │                                 │
 │ • Review & Tích hợp mã nguồn    │                                 │                                 │
 └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
  [SESSION CHƯA LÀM]: Tối ưu UI/UX Mobile & Kịch bản bảo vệ (Dời về cuối lộ trình - Chưa làm trong project này)
@@ -59,6 +61,11 @@ Dự án được phân chia thành các phiên làm việc (Session) hoàn toà
   - Bổ sung phân hệ Báo cáo & Thống kê Thu - Chi minh bạch dành cho Quản trị viên (`ROLE_ADMIN`) tại `/admin/dashboard?view=finance` và `/admin/finance`.
   - Thống kê dòng tiền Thu (Quỹ cơ sở 500tr + Quyên góp từ nhà hảo tâm) và dòng tiền Chi (giải ngân cấp phát cho các đội cứu hộ).
   - 4 thẻ KPI tài chính, 2 biểu đồ Chart.js trực quan (Thu vs Chi và Phân bổ phương thức thanh toán), bảng kê quyên góp và bảng kê giải ngân có phân trang.
+- **Session 12 (🆕 Sẵn sàng triển khai):**
+  - Tích hợp Khung Chat Trực Tuyến Thời Gian Thực giữa Nạn nhân SOS và Đội cứu hộ khi đang tiếp cận (`IN_PROGRESS`).
+  - Hiển thị khung chat trên màn hình theo dõi cứu nạn của người dân (`templates/sos/track.html`) và màn hình bản đồ lộ trình di chuyển của đội cứu hộ (`templates/rescuer/routes.html`).
+  - Truyền tải tin nhắn 2 chiều qua WebSocket STOMP (`/topic/chat/{sosId}`) kết hợp REST API fallback và cơ chế lưu trữ bền vững trong cơ sở dữ liệu (`rescue_chat_messages`).
+  - Bộ nút gợi ý tin nhắn nhanh khẩn cấp 1-chạm (Quick SOS chips) cho cả hai phía.
 
 ---
 

@@ -31,6 +31,9 @@
 │    ↓                                                                   │
 │ Session 11: Bổ sung Chức năng Thống kê Thu - Chi cho Admin             │
 │    ↓                                                                   │
+│ Session 12: Khung Chat Trực Tuyến Thời Gian Thực Khi Đang Tiếp Cận     │
+│             (Live Chat Giữa Nạn Nhân SOS và Đội Cứu Hộ Phân Công)      │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -62,5 +65,7 @@
     - Bản nâng cấp sâu trực tiếp của `ui-redesign`: Sửa lỗi hiển thị bản đồ Leaflet (z-index & resize), sửa triệt để lỗi encoding UTF-8 tiếng Việt trong SQL/Seeder, nâng cấp Cổng Quyên Góp Fullwidth Seamless Dark Theme sang trọng, triển khai Phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống, tách riêng trang Lịch sử điều phối (`coordinator/history.html`).
 11. **[Session 11: Bổ Sung Chức Năng Thống Kê Thu - Chi Dành Cho Quản Trị Viên (Admin Finance)](roadmap/session-11-admin-revenue-expense-statistics.md)** *(✅ Đã hoàn thành)*
     - Phân hệ Thống kê Thu - Chi minh bạch cho Admin: Thống kê nguồn thu từ quyên góp (VNPay, MoMo, VietQR) và ngân sách chi giải ngân cấp phát cho các đội cứu hộ, 4 card KPI tài chính, 2 biểu đồ so sánh Thu - Chi và phân bổ nguồn thu, 2 bảng kê dòng tiền Thu và Chi chi tiết có phân trang.
-12. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+12. **[Session 12: Khung Chat Trực Tuyến Thời Gian Thực Khi Đang Tiếp Cận (Live Mission Chat)](roadmap/session-12-mission-live-chat.md)** *(🆕 Mới tạo / Sẵn sàng triển khai)*
+    - Tích hợp khung chat thời gian thực (WebSocket STOMP & REST fallback) xuất hiện khi đội cứu hộ chuyển sang trạng thái "Đang tiếp cận" (`IN_PROGRESS`). Hiển thị đồng bộ trên màn hình Theo dõi SOS (`sos/track.html`) của người dân và màn hình Bản đồ & Lộ trình di chuyển (`rescuer/routes.html`) của đội cứu hộ được phân công, hỗ trợ nhắn tin 2 chiều và gửi tin nhắn tình huống khẩn cấp 1-chạm (Quick SOS chips).
+13. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

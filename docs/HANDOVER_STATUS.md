@@ -10,6 +10,7 @@
   - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
   - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
   - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
+  - **SESSION 12 (Khung Chat Trực Tuyến Thời Gian Thực Giữa Nạn Nhân SOS và Đội Cứu Hộ Khi Đang Tiếp Cận - Nhánh `ui-fixes` / `feature/mission-chat`)** 🆕 Đã lập đặc tả kỹ thuật và sẵn sàng triển khai.
 - **Trạng thái tổng quan:** Toàn bộ **101/101 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
@@ -42,7 +43,18 @@
 
 ---
 
-## 3. Tồn Đọng / Kế Hoạch Sau Này (Session Chưa Làm - Đưa Về Cuối)
+## 3. Phiên Tiếp Theo Cần Triển Khai (Upcoming Session)
+- **Tên phiên:** [`session-12-mission-live-chat.md`](roadmap/session-12-mission-live-chat.md)
+- **Trạng thái:** 🆕 **Sẵn sàng triển khai mã nguồn** (Specification completed)
+- **Nội dung trọng tâm:**
+  1. Tự động kích hoạt Khung Chat trực tuyến tại màn hình Theo dõi SOS (`templates/sos/track.html`) khi ca chuyển sang trạng thái `IN_PROGRESS` (Đội cứu hộ đang tiếp cận hiện trường).
+  2. Kích hoạt Khung Chat đồng bộ tại màn hình Bản đồ & Lộ trình cứu hộ (`templates/rescuer/routes.html`) của đội cứu hộ được chỉ định.
+  3. Nhắn tin 2 chiều tức thời qua WebSocket STOMP (`/topic/chat/{sosId}`) và lưu trữ bền vững trong CSDL (`rescue_chat_messages`).
+  4. Bộ nút gửi tin nhắn nhanh tình huống khẩn cấp 1-chạm (Quick SOS chips).
+
+---
+
+## 4. Tồn Đọng / Kế Hoạch Sau Này (Session Chưa Làm - Đưa Về Cuối)
 - **Tên phiên:** [`session-chua-lam-mobile-testing-demo-script.md`](roadmap/session-chua-lam-mobile-testing-demo-script.md)
 - **Trạng thái:** ⏸️ **Chưa thực hiện trong project này** (Backlog / Tồn đọng cho các giai đoạn nâng cấp tiếp theo)
 - **Nội dung dự kiến:**
