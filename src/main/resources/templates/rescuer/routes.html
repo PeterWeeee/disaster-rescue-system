@@ -386,7 +386,7 @@
                 if (!sosId) return;
 
                 if (citizenNameEl) citizenNameEl.textContent = contactName || 'Nạn nhân SOS';
-                if (citizenPhoneEl) citizenPhoneEl.textContent = contactPhone ? ( + contactPhone + ) : '';
+                if (citizenPhoneEl) citizenPhoneEl.textContent = contactPhone ? '(' + contactPhone + ')' : '';
 
                 const canSend = (status === 'IN_PROGRESS');
                 if (chatForm) chatForm.style.display = canSend ? 'flex' : 'none';
@@ -540,7 +540,7 @@
             });
 
             // Khởi tạo trang: tự động nhận diện ca nhiệm vụ từ URL và vẽ bản đồ ngay lập tức
-            window.addEventListener('DOMContentLoaded', () => {
+            function startPage() {
                 initMap();
                 const urlParams = new URLSearchParams(window.location.search);
                 const targetAssignmentId = urlParams.get('assignmentId');
@@ -559,7 +559,8 @@
                         loadMissionRoute(targetBtn.dataset.id);
                     }
                 }
-            });
+            };
+            if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', startPage); } else { startPage(); }
         })();
     </script>
 </div>
