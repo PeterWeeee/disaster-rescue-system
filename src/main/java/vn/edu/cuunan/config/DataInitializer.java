@@ -764,7 +764,7 @@ public class DataInitializer implements CommandLineRunner {
     private CommunityPost initPost(User author, String authorName, HazardType hazardType, String content,
                                   String locationName, Double lat, Double lng, VerificationStatus status,
                                   int upvotes, int comments, SosRequest sosRequest) {
-        Optional<CommunityPost> postOpt = communityPostRepository.findFirstByContent(content);
+        Optional<CommunityPost> postOpt = (locationName != null) ? communityPostRepository.findFirstByLocationName(locationName) : Optional.empty();
         if (postOpt.isPresent()) {
             return postOpt.get();
         }

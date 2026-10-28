@@ -12,6 +12,5 @@ import java.util.Optional;
 public interface CommunityPostRepository extends JpaRepository<CommunityPost, Long> {
     List<CommunityPost> findAllByOrderByCreatedAtDesc();
     List<CommunityPost> findByHazardTypeOrderByCreatedAtDesc(HazardType hazardType);
-    boolean existsByContent(String content);
-    Optional<CommunityPost> findFirstByContent(String content);
+    Optional<CommunityPost> findFirstByLocationName(String locationName);
 }
