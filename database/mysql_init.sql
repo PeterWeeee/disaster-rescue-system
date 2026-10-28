@@ -1,4 +1,4 @@
-﻿-- =========================================================================
+-- =========================================================================
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: mysql_init.sql
@@ -300,4 +300,22 @@ CREATE TABLE IF NOT EXISTS `team_fund_requests` (
     CONSTRAINT `fk_team_fund_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
     INDEX `idx_team_fund_status` (`status`),
     INDEX `idx_team_fund_team_id` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 19. Bảng Khung chat trực tuyến thời gian thực giữa nạn nhân SOS và đội cứu hộ (rescue_chat_messages)
+CREATE TABLE IF NOT EXISTS rescue_chat_messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sos_request_id BIGINT NOT NULL,
+    assignment_id BIGINT NULL,
+    sender_type VARCHAR(20) NOT NULL,
+    sender_name VARCHAR(100) NOT NULL,
+    sender_phone VARCHAR(20) NULL,
+    content TEXT NOT NULL,
+    message_type VARCHAR(30) DEFAULT 'TEXT',
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_chat_sos (sos_request_id, created_at),
+    CONSTRAINT fk_chat_sos FOREIGN KEY (sos_request_id) REFERENCES sos_requests (id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_assignment FOREIGN KEY (assignment_id) REFERENCES rescue_assignments (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,4 +1,4 @@
-﻿-- =========================================================================
+-- =========================================================================
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: 02_create_tables.sql
@@ -394,5 +394,29 @@ BEGIN
     CREATE INDEX [IX_team_fund_status] ON [dbo].[team_fund_requests]([status]);
     CREATE INDEX [IX_team_fund_team_id] ON [dbo].[team_fund_requests]([team_id]);
     PRINT N'>>> Đã tạo bảng team_fund_requests';
+END
+GO
+
+
+-- 19. Bảng Khung chat trực tuyến thời gian thực giữa nạn nhân SOS và đội cứu hộ (rescue_chat_messages)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'rescue_chat_messages')
+BEGIN
+    CREATE TABLE [dbo].[rescue_chat_messages] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL,
+        [sos_request_id] BIGINT NOT NULL,
+        [assignment_id] BIGINT NULL,
+        [sender_type] VARCHAR(20) NOT NULL,       -- 'CITIZEN', 'RESCUER', 'COORDINATOR', 'SYSTEM'
+        [sender_name] NVARCHAR(100) NOT NULL,      -- Tên người gửi (Vd: Nguyễn Văn A hoặc Đội Hải Châu 1)
+        [sender_phone] VARCHAR(20) NULL,           -- SĐT người gửi
+        [content] NVARCHAR(1000) NOT NULL,         -- Nội dung tin nhắn
+        [message_type] VARCHAR(30) DEFAULT 'TEXT', -- 'TEXT', 'QUICK_ALERT', 'LOCATION_PING', 'SYSTEM_INFO'
+        [is_read] BIT DEFAULT 0,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [PK_rescue_chat_messages] PRIMARY KEY CLUSTERED ([id] ASC),
+        CONSTRAINT [FK_chat_sos] FOREIGN KEY ([sos_request_id]) REFERENCES [dbo].[sos_requests] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_chat_assignment] FOREIGN KEY ([assignment_id]) REFERENCES [dbo].[rescue_assignments] ([id])
+    );
+    CREATE INDEX [IX_rescue_chat_sos_time] ON [dbo].[rescue_chat_messages] ([sos_request_id], [created_at] ASC);
+    PRINT N'>>> Đã tạo bảng rescue_chat_messages';
 END
 GO

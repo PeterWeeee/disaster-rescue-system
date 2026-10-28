@@ -1,5 +1,5 @@
 # PHIÊN LÀM VIỆC #12: TÍCH HỢP KHUNG CHAT TRỰC TUYẾN THỜI GIAN THỰC GIỮA NẠN NHÂN SOS VÀ ĐỘI CỨU HỘ KHI ĐANG TIẾP CẬN (REAL-TIME RESCUE MISSION CHAT)
-> **Trạng thái:** 🆕 SẴN SÀNG TRIỂN KHAI (SPECIFICATION COMPLETED - READY FOR IMPLEMENTATION)  
+> **Trạng thái:** ✅ ĐÃ HOÀN THÀNH 100% (IMPLEMENTATION COMPLETED & VERIFIED 100%)  
 > **Người phụ trách:** **Tri Thai (PeterWeeee - `NguyenTT162.4@gmail.com`)**  
 > **Thời điểm lập:** 28/10/2026  
 > **Nhánh thực hiện dự kiến:** `ui-fixes` / `feature/mission-chat`
@@ -168,48 +168,48 @@ CREATE TABLE IF NOT EXISTS rescue_chat_messages (
 ## 4. Kế Hoạch Triển Khai Chi Tiết (Implementation Checklist)
 
 ### 4.1. Cơ Sở Dữ Liệu & Entity Model
-- [ ] Bổ sung bảng `rescue_chat_messages` vào các script `database/02_create_tables.sql` và `database/mysql_init.sql`.
-- [ ] Tạo JPA Entity `vn.edu.cuunan.entity.RescueChatMessage.java`.
-- [ ] Tạo Spring Data JPA Repository `vn.edu.cuunan.repository.RescueChatMessageRepository.java`.
+- [x] Bổ sung bảng `rescue_chat_messages` vào các script `database/02_create_tables.sql` và `database/mysql_init.sql`.
+- [x] Tạo JPA Entity `vn.edu.cuunan.entity.RescueChatMessage.java`.
+- [x] Tạo Spring Data JPA Repository `vn.edu.cuunan.repository.RescueChatMessageRepository.java`.
 
 ### 4.2. DTO & Backend Service
-- [ ] Tạo DTO `ChatMessageDto.java` và `SendChatMessageRequest.java`.
-- [ ] Xây dựng `ChatService.java`:
+- [x] Tạo DTO `ChatMessageDto.java` và `SendChatMessageRequest.java`.
+- [x] Xây dựng `ChatService.java`:
   - `List<ChatMessageDto> getMessagesBySosId(Long sosId, User currentUser, String citizenPhone);`
   - `ChatMessageDto saveAndBroadcastMessage(Long sosId, SendChatMessageRequest request, User currentUser);`
   - `boolean isChatAllowed(Long sosId);` (Kiểm tra `status == 'IN_PROGRESS'`).
 
 ### 4.3. WebSocket Handler & REST Controller
-- [ ] Tạo `ChatApiController.java` tiếp nhận REST API (`/api/chat/sos/{sosId}/messages`).
-- [ ] Bổ sung WebSocket Message Handler `@MessageMapping("/chat/{sosId}/send")` bắn dữ liệu qua `SimpMessagingTemplate` tới `/topic/chat/{sosId}`.
+- [x] Tạo `ChatApiController.java` tiếp nhận REST API (`/api/chat/sos/{sosId}/messages`).
+- [x] Bổ sung WebSocket Message Handler `@MessageMapping("/chat/{sosId}/send")` bắn dữ liệu qua `SimpMessagingTemplate` tới `/topic/chat/{sosId}`.
 
 ### 4.4. Tích Hợp Frontend
-- [ ] **Màn hình `sos/track.html`:**
+- [x] **Màn hình `sos/track.html`:**
   - Bổ sung khối giao diện HTML Chat Box vào vị trí hiển thị ca `IN_PROGRESS`.
   - Viết module Javascript kết nối SockJS + STOMP lắng nghe kênh `/topic/chat/{sosId}`.
   - Kích hoạt gửi tin qua WebSocket hoặc fetch POST fallback.
   - Xử lý các nút Quick Action Chips.
-- [ ] **Màn hình `rescuer/routes.html`:**
+- [x] **Màn hình `rescuer/routes.html`:**
   - Bổ sung khối HTML Chat Box cho Đội cứu hộ.
   - Lập trình JS tự động đổi kênh chat khi đội viên bấm chọn ca nhiệm vụ khác trong danh sách.
   - Xử lý gửi tin nhắn hướng dẫn và cập nhật trạng thái thời gian thực.
 
 ### 4.5. Kiểm Thử Hệ Thống (Automated Testing)
-- [ ] Viết `ChatServiceTest.java`: Kiểm thử lưu tin nhắn, kiểm tra quyền truy cập ca cứu hộ, kiểm tra điều kiện trạng thái `IN_PROGRESS`.
-- [ ] Viết `ChatApiControllerTest.java`: Kiểm thử API lấy lịch sử tin nhắn và gửi tin nhắn HTTP 200 OK.
-- [ ] Kiểm thử tích hợp WebSocket STOMP messaging.
+- [x] Viết `ChatServiceTest.java`: Kiểm thử lưu tin nhắn, kiểm tra quyền truy cập ca cứu hộ, kiểm tra điều kiện trạng thái `IN_PROGRESS`.
+- [x] Viết `ChatApiControllerTest.java`: Kiểm thử API lấy lịch sử tin nhắn và gửi tin nhắn HTTP 200 OK.
+- [x] Kiểm thử tích hợp WebSocket STOMP messaging.
 
 ---
 
 ## 5. Tiêu Chí Nghiệm Thu (Definition of Done - DoD)
 
-- [ ] **Kích hoạt đúng thời điểm:**
+- [x] **Kích hoạt đúng thời điểm:**
   - Khi ca SOS ở trạng thái `PENDING` hoặc `DISPATCHED`: Khung chat chưa mở, hiển thị thông báo thân thiện *"Kênh chat trực tuyến sẽ tự động mở khi đội cứu hộ bắt đầu di chuyển tiếp cận"*.
   - Khi ca chuyển sang `IN_PROGRESS` (Đang tiếp cận): Cả màn hình `sos/track.html` và `rescuer/routes.html` đều kích hoạt khung chat.
-- [ ] **Trao đổi 2 chiều tức thời:**
+- [x] **Trao đổi 2 chiều tức thời:**
   - Tin nhắn gửi từ màn hình theo dõi của người dân hiển thị trên màn hình lộ trình cứu hộ của đội trong vòng dưới **1 giây** không cần F5.
   - Tin nhắn gửi từ đội cứu hộ hiển thị trên màn hình của người dân tức thời.
-- [ ] **Bền vững dữ liệu:** Khi F5 tải lại trang, toàn bộ lịch sử tin nhắn cũ hiển thị đầy đủ, đúng thứ tự thời gian.
-- [ ] **Bộ phím tắt nhanh 1-chạm:** Các phím tin nhắn tình huống khẩn cấp hoạt động mượt mà, bấm là gửi ngay.
-- [ ] **Đóng ca nghiệm thu:** Khi ca chuyển sang `COMPLETED` / `RESOLVED`, khung chat hiển thị huy hiệu *"Ca cứu nạn đã hoàn tất - Kênh chat đã lưu trữ"* và vô hiệu hóa ô nhập liệu.
-- [ ] **Kiểm thử tự động:** Toàn bộ test case mới và cũ đều đạt **BUILD SUCCESS 100%**.
+- [x] **Bền vững dữ liệu:** Khi F5 tải lại trang, toàn bộ lịch sử tin nhắn cũ hiển thị đầy đủ, đúng thứ tự thời gian.
+- [x] **Bộ phím tắt nhanh 1-chạm:** Các phím tin nhắn tình huống khẩn cấp hoạt động mượt mà, bấm là gửi ngay.
+- [x] **Đóng ca nghiệm thu:** Khi ca chuyển sang `COMPLETED` / `RESOLVED`, khung chat hiển thị huy hiệu *"Ca cứu nạn đã hoàn tất - Kênh chat đã lưu trữ"* và vô hiệu hóa ô nhập liệu.
+- [x] **Kiểm thử tự động:** Toàn bộ test case mới và cũ đều đạt **BUILD SUCCESS 100%**.

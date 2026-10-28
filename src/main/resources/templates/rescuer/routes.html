@@ -49,7 +49,7 @@
                                     th:each="a, iterStat : ${assignments}"
                                     class="list-group-item list-group-item-action p-3 mission-item-btn"
                                     th:classappend="${iterStat.first ? 'active' : ''}"
-                                    th:attr="data-id=${a.id}, data-status=${a.status}">
+                                    th:attr="data-id=${a.id}, data-status=${a.status}, data-sos-id=${a.sosRequest.id}, data-contact-name=${a.sosRequest.contactName}, data-contact-phone=${a.sosRequest.contactPhone}">
                                 <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                                     <strong class="text-truncate" th:text="${a.sosRequest.contactName}">Nạn nhân</strong>
                                     <span class="badge"
@@ -220,6 +220,18 @@
                     const noticeEl = document.getElementById('pendingMissionNotice');
                     if (noticeEl) noticeEl.style.display = isPending ? 'block' : 'none';
 
+                    // Kích hoạt khung chat cho ca SOS tương ứng
+                    const activeMissionBtn = document.querySelector(`.mission-item-btn[data-id="${assignmentId}"]`);
+                    if (activeMissionBtn) {
+                        const targetSosId = activeMissionBtn.getAttribute('data-sos-id') || data.sosId;
+                        const targetContactName = activeMissionBtn.getAttribute('data-contact-name') || '';
+                        const targetContactPhone = activeMissionBtn.getAttribute('data-contact-phone') || '';
+                        const targetStatus = activeMissionBtn.getAttribute('data-status') || '';
+                        if (targetSosId) {
+                            switchChatRoom(targetSosId, targetContactName, targetContactPhone, targetStatus);
+                        }
+                    }
+
                     // Cập nhật thông tin chi tiết
                     document.getElementById('panelDistance').textContent = (data.routeDistanceKm || '--') + ' km';
                     document.getElementById('panelDuration').textContent = '~' + (data.routeDurationMinutes || '--') + ' phút';
@@ -304,6 +316,218 @@
                     console.error('Lỗi tải lộ trình:', e);
                 }
             }
+
+            // =========================================================
+            // SESSION 12: RESCUER MISSION LIVE CHAT CLIENT
+            // =========================================================
+            let currentChatSosId = null;
+            let chatStompClient = null;
+            let chatStompSubscription = null;
+
+            const chatMsgList = document.getElementById('rescuerChatMessageList');
+            const chatEmptyNotice = document.getElementById('rescuerChatEmptyNotice');
+            const chatForm = document.getElementById('rescuerChatForm');
+            const chatInput = document.getElementById('rescuerChatInput');
+            const quickChips = document.getElementById('rescuerQuickChipsContainer');
+            const closedNotice = document.getElementById('rescuerChatClosedNotice');
+            const citizenNameEl = document.getElementById('chatCitizenName');
+            const citizenPhoneEl = document.getElementById('chatCitizenPhone');
+            const chatBadge = document.getElementById('rescuerChatStatusBadge');
+
+            function appendRescuerChatMessage(msg) {
+                if (chatEmptyNotice) chatEmptyNotice.style.display = 'none';
+
+                const isMine = (msg.senderType === 'RESCUER');
+                const row = document.createElement('div');
+                row.className = 'd-flex mb-2 ' + (isMine ? 'justify-content-end' : 'justify-content-start');
+
+                const bubble = document.createElement('div');
+                bubble.style.maxWidth = '84%';
+                bubble.className = isMine
+                    ? 'p-2 px-3 rounded-4 bg-primary text-white shadow-sm'
+                    : 'p-2 px-3 rounded-4 bg-white text-dark border shadow-sm';
+
+                if (isMine) {
+                    bubble.style.borderBottomRightRadius = '4px';
+                } else {
+                    bubble.style.borderBottomLeftRadius = '4px';
+                }
+
+                const senderHeader = document.createElement('div');
+                senderHeader.className = 'small fw-bold mb-1 ' + (isMine ? 'text-white-50 text-end' : 'text-danger');
+
+                if (isMine) {
+                    senderHeader.innerHTML = '<i class="fa-solid fa-truck-medical me-1"></i> ' + (msg.senderName || 'Đội Cứu Hộ');
+                } else {
+                    senderHeader.innerHTML = '<i class="fa-solid fa-person-shelter me-1"></i> Nạn nhân (' + (msg.senderName || 'Người dân') + ')';
+                }
+
+                const content = document.createElement('div');
+                content.className = 'text-break small';
+                content.style.whiteSpace = 'pre-wrap';
+                content.textContent = msg.content;
+
+                const time = document.createElement('div');
+                time.className = 'mt-1 ' + (isMine ? 'text-white-50 text-end' : 'text-muted text-end');
+                time.style.fontSize = '0.7rem';
+                time.innerHTML = '<i class="fa-regular fa-clock me-1"></i>' + (msg.formattedTime || '');
+
+                bubble.appendChild(senderHeader);
+                bubble.appendChild(content);
+                bubble.appendChild(time);
+                row.appendChild(bubble);
+                chatMsgList.appendChild(row);
+
+                chatMsgList.scrollTop = chatMsgList.scrollHeight;
+            }
+
+            async function switchChatRoom(sosId, contactName, contactPhone, status) {
+                currentChatSosId = sosId;
+                if (!sosId) return;
+
+                if (citizenNameEl) citizenNameEl.textContent = contactName || 'Nạn nhân SOS';
+                if (citizenPhoneEl) citizenPhoneEl.textContent = contactPhone ? ( + contactPhone + ) : '';
+
+                const canSend = (status === 'IN_PROGRESS');
+                if (chatForm) chatForm.style.display = canSend ? 'flex' : 'none';
+                if (quickChips) quickChips.style.display = canSend ? 'block' : 'none';
+                if (closedNotice) {
+                    closedNotice.style.display = canSend ? 'none' : 'block';
+                    if (status === 'PENDING') {
+                        closedNotice.innerHTML = '<i class="fa-solid fa-hourglass-half me-1"></i> Đội cần bấm Tiếp nhận & Xuất kích để mở chat trực tuyến.';
+                    } else if (status === 'COMPLETED' || status === 'RESOLVED') {
+                        closedNotice.innerHTML = '<i class="fa-solid fa-box-archive me-1"></i> Ca cứu nạn đã hoàn tất - Kênh chat đã lưu trữ.';
+                    } else {
+                        closedNotice.innerHTML = '<i class="fa-solid fa-lock me-1"></i> Kênh chat mở khi trạng thái ca là Đang Tiếp Cận.';
+                    }
+                }
+
+                if (chatMsgList) {
+                    chatMsgList.innerHTML = '';
+                    if (chatEmptyNotice) {
+                        chatEmptyNotice.style.display = 'block';
+                        chatEmptyNotice.innerHTML = '<div class="spinner-border spinner-border-sm text-primary mb-1"></div><div>Đang tải tin nhắn ca SOS #' + sosId + '...</div>';
+                        chatMsgList.appendChild(chatEmptyNotice);
+                    }
+                }
+
+                try {
+                    const res = await fetch('/api/chat/sos/' + sosId + '/messages');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (chatEmptyNotice) chatEmptyNotice.style.display = 'none';
+                        if (Array.isArray(data) && data.length > 0) {
+                            data.forEach(appendRescuerChatMessage);
+                        } else {
+                            if (chatEmptyNotice) {
+                                chatEmptyNotice.style.display = 'block';
+                                chatEmptyNotice.innerHTML = '<i class="fa-solid fa-comments text-muted mb-1 fa-2x"></i><div>Chưa có tin nhắn nào trong ca này.</div>';
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Lỗi tải tin nhắn ca #' + sosId, e);
+                }
+
+                subscribeToChatTopic(sosId);
+            }
+
+            function subscribeToChatTopic(sosId) {
+                if (!window.SockJS || !window.Stomp) return;
+
+                function doSubscribe() {
+                    if (chatStompSubscription) {
+                        try { chatStompSubscription.unsubscribe(); } catch (_) {}
+                        chatStompSubscription = null;
+                    }
+                    if (chatStompClient && chatStompClient.connected) {
+                        chatStompSubscription = chatStompClient.subscribe('/topic/chat/' + sosId, function(frame) {
+                            try {
+                                const msg = JSON.parse(frame.body);
+                                appendRescuerChatMessage(msg);
+                            } catch (err) {
+                                console.error('Lỗi phân tích tin nhắn WebSocket:', err);
+                            }
+                        });
+                        if (chatBadge) {
+                            chatBadge.className = 'badge bg-success';
+                            chatBadge.innerHTML = '<i class="fa-solid fa-signal me-1"></i> Trực Tuyến';
+                        }
+                    }
+                }
+
+                if (!chatStompClient) {
+                    try {
+                        chatStompClient = Stomp.over(new SockJS('/ws'));
+                        chatStompClient.debug = null;
+                        chatStompClient.connect({}, function() {
+                            doSubscribe();
+                        }, function() {
+                            if (chatBadge) {
+                                chatBadge.className = 'badge bg-warning text-dark';
+                                chatBadge.innerHTML = '<i class="fa-solid fa-rotate fa-spin me-1"></i> Đang kết nối...';
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Lỗi kết nối STOMP:', e);
+                    }
+                } else if (chatStompClient.connected) {
+                    doSubscribe();
+                }
+            }
+
+            async function sendRescuerMessage(content, messageType = 'TEXT') {
+                const text = (content || '').trim();
+                if (!text || !currentChatSosId) return;
+
+                const payload = {
+                    content: text,
+                    senderType: 'RESCUER',
+                    messageType: messageType
+                };
+
+                if (chatInput) chatInput.value = '';
+
+                let sent = false;
+                if (chatStompClient && chatStompClient.connected) {
+                    try {
+                        chatStompClient.send('/app/chat/' + currentChatSosId + '/send', {}, JSON.stringify(payload));
+                        sent = true;
+                    } catch (_) { sent = false; }
+                }
+
+                if (!sent) {
+                    try {
+                        const res = await fetch('/api/chat/sos/' + currentChatSosId + '/messages', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            const saved = await res.json();
+                            if (!chatStompClient || !chatStompClient.connected) {
+                                appendRescuerChatMessage(saved);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Lỗi gửi tin nhắn qua REST API:', err);
+                    }
+                }
+            }
+
+            if (chatForm) {
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (chatInput) sendRescuerMessage(chatInput.value, 'TEXT');
+                });
+            }
+
+            document.querySelectorAll('.rescuer-quick-chip').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.getAttribute('data-text');
+                    if (text) sendRescuerMessage(text, 'QUICK_ALERT');
+                });
+            });
 
             // Gắn sự kiện chọn nhiệm vụ
             document.querySelectorAll('.mission-item-btn').forEach(btn => {

@@ -96,7 +96,9 @@ public class SecurityConfig {
                     "/donations",
                     "/donations/**",
                     "/api/donations",
-                    "/api/donations/**"
+                    "/api/donations/**",
+                    "/api/chat",
+                    "/api/chat/**"
                 ).permitAll()
 
                 // Cẩm nang chỉ dành cho người dân đã đăng nhập

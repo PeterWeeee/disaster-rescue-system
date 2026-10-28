@@ -2,6 +2,7 @@ package vn.edu.cuunan.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,9 @@ public class DataInitializer implements CommandLineRunner {
     private final ActivityLogRepository activityLogRepository;
     private final TeamFundRequestRepository teamFundRequestRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired(required = false)
+    private RescueChatMessageRepository rescueChatMessageRepository;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
@@ -618,6 +622,20 @@ public class DataInitializer implements CommandLineRunner {
             log.info("  [TeamFundRequest] Đã khởi tạo 3 yêu cầu tiếp tế ngân sách mẫu (2 Chờ duyệt, 1 Đã duyệt)");
         }
 
+        // Khởi tạo Tin nhắn trao đổi trực tuyến mẫu (RescueChatMessages)
+        if (rescueChatMessageRepository != null && rescueChatMessageRepository.count() == 0) {
+            RescueAssignment assignDN1 = rescueAssignmentRepository.findTopBySosRequestIdOrderByAssignedAtDesc(sosDN1.getId()).orElse(null);
+            initChatMessage(sosDN1, assignDN1, "CITIZEN", "Trần Thị Bích", "0912345678",
+                    "Nước ngập lên gần gác xép rồi đội ơi, nhà có 2 cháu nhỏ đang rất lạnh!", "QUICK_ALERT", LocalDateTime.now().minusMinutes(35));
+            initChatMessage(sosDN1, assignDN1, "RESCUER", "Đội Cứu Hộ Hải Châu", "0905111222",
+                    "Đội Hải Châu đã tiếp nhận và đang điều xuồng máy vào hẻm số 5 đường Mẹ Suốt, mọi người giữ bình tĩnh nhé!", "TEXT", LocalDateTime.now().minusMinutes(30));
+            initChatMessage(sosDN1, assignDN1, "CITIZEN", "Trần Thị Bích", "0912345678",
+                    "Vâng đội ơi, nhà em ở ngay cạnh cây bàng lớn, em đang vẫy đèn pin xanh báo hiệu!", "TEXT", LocalDateTime.now().minusMinutes(22));
+            initChatMessage(sosDN1, assignDN1, "RESCUER", "Đội Cứu Hộ Hải Châu", "0905111222",
+                    "Đã thấy tín hiệu đèn pin của gia đình, xuồng cách nhà khoảng 200m, đội đang tiếp cận ngay!", "TEXT", LocalDateTime.now().minusMinutes(15));
+            log.info("  [RescueChatMessage] Đã khởi tạo 4 tin nhắn mẫu cho ca SOS #1 (Đang tiếp cận)");
+        }
+
         log.info("==========================================================================");
         log.info(">>> [HOÀN THÀNH SEED DỮ LIỆU MIỀN TRUNG]:");
         log.info("    + 4 Roles chuẩn");
@@ -873,5 +891,20 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             mediaFileRepository.save(file);
         }
+    }
+    private void initChatMessage(SosRequest sos, RescueAssignment assignment, String senderType, String senderName,
+                                 String senderPhone, String content, String messageType, LocalDateTime createdAt) {
+        if (sos == null || rescueChatMessageRepository == null) return;
+        RescueChatMessage msg = new RescueChatMessage();
+        msg.setSosRequest(sos);
+        msg.setAssignment(assignment);
+        msg.setSenderType(senderType);
+        msg.setSenderName(senderName);
+        msg.setSenderPhone(senderPhone);
+        msg.setContent(content);
+        msg.setMessageType(messageType != null ? messageType : "TEXT");
+        msg.setIsRead(false);
+        msg.setCreatedAt(createdAt != null ? createdAt : LocalDateTime.now());
+        rescueChatMessageRepository.save(msg);
     }
 }
