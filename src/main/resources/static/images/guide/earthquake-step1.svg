@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="eqBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="eqAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#eqBg)"/>
+  
+  <!-- Subtle Grid Lines -->
+  <g opacity="0.08" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="90" x2="800" y2="90" />
+    <line x1="0" y1="180" x2="800" y2="180" />
+    <line x1="0" y1="270" x2="800" y2="270" />
+    <line x1="0" y1="360" x2="800" y2="360" />
+    <line x1="160" y1="0" x2="160" y2="450" />
+    <line x1="320" y1="0" x2="320" y2="450" />
+    <line x1="480" y1="0" x2="480" y2="450" />
+    <line x1="640" y1="0" x2="640" y2="450" />
+  </g>
+
+  <!-- Header Banner -->
+  <rect x="50" y="30" width="700" height="60" rx="12" fill="rgba(30, 41, 59, 0.85)" stroke="#38bdf8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="75" y="68" fill="#38bdf8" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="20" letter-spacing="1">QUY TẮC AN TOÀN ĐỘNG ĐẤT: DROP · COVER · HOLD ON</text>
+  <rect x="635" y="46" width="100" height="28" rx="6" fill="#10b981"/>
+  <text x="685" y="65" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="12" text-anchor="middle">CHUẨN QUỐC TẾ</text>
+
+  <!-- Step 1: DROP (Cúi xuống) -->
+  <g transform="translate(60, 120)">
+    <rect width="210" height="270" rx="14" fill="#1e293b" stroke="#334155" stroke-width="2" filter="url(#shadow)"/>
+    <circle cx="105" cy="45" r="28" fill="#3b82f6" fill-opacity="0.2" stroke="#3b82f6" stroke-width="2"/>
+    <text x="105" y="53" fill="#60a5fa" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" text-anchor="middle">1</text>
+    
+    <!-- Graphic Illustration: Person dropping down -->
+    <g transform="translate(45, 90)">
+      <!-- Floor line -->
+      <line x1="10" y1="90" x2="110" y2="90" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+      <!-- Crouching Person -->
+      <circle cx="50" cy="45" r="14" fill="#38bdf8"/>
+      <path d="M50 59 C50 68, 62 72, 75 88" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M50 59 C42 66, 32 75, 25 88" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M50 62 L65 72" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+      <!-- Downward Arrow -->
+      <path d="M90 30 L90 55 M83 48 L90 55 L97 48" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <text x="105" y="215" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="17" text-anchor="middle">BƯỚC 1: CÚI THẤP</text>
+    <text x="105" y="238" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">Hạ thấp trọng tâm ngay lập</text>
+    <text x="105" y="256" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">tức trước khi bị ngã</text>
+  </g>
+
+  <!-- Step 2: COVER (Che chắn) -->
+  <g transform="translate(295, 120)">
+    <rect width="210" height="270" rx="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2" filter="url(#shadow)"/>
+    <circle cx="105" cy="45" r="28" fill="#0284c7" fill-opacity="0.2" stroke="#38bdf8" stroke-width="2"/>
+    <text x="105" y="53" fill="#38bdf8" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" text-anchor="middle">2</text>
+    
+    <!-- Graphic Illustration: Table and Person under it -->
+    <g transform="translate(35, 85)">
+      <!-- Table Top -->
+      <rect x="15" y="30" width="110" height="10" rx="3" fill="#f59e0b"/>
+      <!-- Table Legs -->
+      <rect x="22" y="40" width="8" height="55" rx="2" fill="#d97706"/>
+      <rect x="110" y="40" width="8" height="55" rx="2" fill="#d97706"/>
+      <!-- Person Under Table protecting head -->
+      <circle cx="65" cy="55" r="12" fill="#38bdf8"/>
+      <path d="M65 67 C65 74, 55 80, 52 92" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M65 67 C72 73, 85 82, 88 92" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <!-- Arm protecting head -->
+      <path d="M65 67 Q75 50 65 44" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <!-- Shield Icon -->
+      <path d="M125 15 Q135 15 135 25 Q135 40 125 45 Q115 40 115 25 Q115 15 125 15 Z" fill="#10b981"/>
+      <path d="M121 28 L124 31 L129 25" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+
+    <text x="105" y="215" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="17" text-anchor="middle">BƯỚC 2: CHE CHẮN</text>
+    <text x="105" y="238" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">Chui xuống gầm bàn chắc chắn,</text>
+    <text x="105" y="256" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">dùng tay che đầu và cổ</text>
+  </g>
+
+  <!-- Step 3: HOLD ON (Bám chặt) -->
+  <g transform="translate(530, 120)">
+    <rect width="210" height="270" rx="14" fill="#1e293b" stroke="#334155" stroke-width="2" filter="url(#shadow)"/>
+    <circle cx="105" cy="45" r="28" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2"/>
+    <text x="105" y="53" fill="#34d399" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" text-anchor="middle">3</text>
+    
+    <!-- Graphic Illustration: Holding Table Leg tightly -->
+    <g transform="translate(40, 85)">
+      <!-- Table Leg -->
+      <rect x="50" y="15" width="14" height="85" rx="3" fill="#d97706"/>
+      <!-- Hand Gripping tightly -->
+      <circle cx="57" cy="55" r="18" fill="rgba(16, 185, 129, 0.25)" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3"/>
+      <!-- Grip lines -->
+      <path d="M40 65 C45 55, 60 55, 68 55" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <!-- Shake ripples (vibration) -->
+      <path d="M15 45 Q20 50 15 55" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M90 45 Q95 50 90 55" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M100 40 Q107 50 100 60" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <text x="105" y="215" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="17" text-anchor="middle">BƯỚC 3: BÁM CHẶT</text>
+    <text x="105" y="238" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">Nắm chặt chân bàn cho tới khi</text>
+    <text x="105" y="256" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">rung chấn dứt hoàn toàn</text>
+  </g>
+</svg>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="stBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#182747" />
+      <stop offset="100%" stop-color="#0b1325" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#stBg)"/>
+
+  <!-- Title Banner -->
+  <rect x="50" y="25" width="700" height="60" rx="12" fill="rgba(24, 39, 71, 0.9)" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="400" y="62" fill="#f87171" font-family="system-ui, sans-serif" font-weight="800" font-size="20" text-anchor="middle">TUYỆT ĐỐI KHÔNG RA ĐƯỜNG KHI BÃO ĐANG ĐỔ BỘ VÀ TÂM BÃO ĐI QUA</text>
+
+  <!-- Left Card: Flying Debris & Falling Trees -->
+  <g transform="translate(60, 110)">
+    <rect width="320" height="290" rx="16" fill="#131e33" stroke="#ef4444" stroke-width="2.5"/>
+    <rect x="20" y="20" width="150" height="28" rx="6" fill="#7f1d1d"/>
+    <text x="95" y="39" fill="#fca5a5" font-family="system-ui, sans-serif" font-weight="800" font-size="13" text-anchor="middle">CÂY ĐỔ &amp; TÔN BAY NGUY HIỂM</text>
+
+    <!-- Fallen Tree & Wind -->
+    <path d="M70 190 Q120 180 180 150 Q230 130 270 110" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 8" fill="none"/>
+    <path d="M90 200 L160 170 L210 130" stroke="#78350f" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="210" cy="130" r="35" fill="#166534" opacity="0.8"/>
+    
+    <!-- Flying Corrugated Metal Roof Sheet -->
+    <polygon points="120,110 170,90 190,120 140,140" fill="#94a3b8" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- Warning badge -->
+    <circle cx="260" cy="70" r="22" fill="#ef4444"/>
+    <text x="260" y="78" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="22" text-anchor="middle">!</text>
+
+    <text x="160" y="240" fill="#fca5a5" font-family="system-ui, sans-serif" font-weight="700" font-size="16" text-anchor="middle">Gió giật cuốn tôn bay và quật đổ cây</text>
+    <text x="160" y="265" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Có thể gây chấn thương chí mạng</text>
+  </g>
+
+  <!-- Right Card: Fallen Power Lines & Eye of the Storm Trap -->
+  <g transform="translate(420, 110)">
+    <rect width="320" height="290" rx="16" fill="#131e33" stroke="#f59e0b" stroke-width="2.5"/>
+    <rect x="20" y="20" width="160" height="28" rx="6" fill="#78350f"/>
+    <text x="100" y="39" fill="#fde68a" font-family="system-ui, sans-serif" font-weight="800" font-size="13" text-anchor="middle">CẢNH GIÁC BẪY TÂM BÃO LẶNG GIÓ</text>
+
+    <!-- Fallen Power Pole & Sparking Wires -->
+    <line x1="120" y1="90" x2="190" y2="190" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M110 90 Q150 140 230 180" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6 3" fill="none"/>
+    <!-- Sparks -->
+    <polygon points="230,175 240,185 235,188 245,195 232,192" fill="#facc15"/>
+
+    <circle cx="260" cy="70" r="22" fill="#f59e0b"/>
+    <text x="260" y="78" fill="#1e293b" font-family="system-ui, sans-serif" font-weight="900" font-size="20" text-anchor="middle">⚡</text>
+
+    <text x="160" y="240" fill="#fde68a" font-family="system-ui, sans-serif" font-weight="700" font-size="16" text-anchor="middle">Không lầm tưởng bão đã tan</text>
+    <text x="160" y="265" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Gió sẽ đảo hướng và giật mạnh khủng khiếp sau tâm bão</text>
+  </g>
+</svg>

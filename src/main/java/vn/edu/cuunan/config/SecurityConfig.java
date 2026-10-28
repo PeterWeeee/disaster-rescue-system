@@ -100,7 +100,7 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // Cẩm nang chỉ dành cho người dân đã đăng nhập
-                .requestMatchers("/guide/disaster").hasRole("CITIZEN")
+                .requestMatchers("/guide/**").hasRole("CITIZEN")
 
                 // Phân hệ Điều Phối Viên (Coordinator & Admin)
                 .requestMatchers("/coordinator/**", "/api/coordinator/**").hasAnyRole("COORDINATOR", "ADMIN")

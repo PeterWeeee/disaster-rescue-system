@@ -102,6 +102,80 @@ public class CloudinaryService {
     }
 
     /**
+     * Tải ảnh cho một bước trong cẩm nang cứu nạn lên Cloudinary (hoặc fallback cục bộ).
+     *
+     * @param file       File ảnh cẩm nang
+     * @param guideSlug  Mã loại thiên tai (vd: "preparation", "storm", "flood")
+     * @param stepNumber Thứ tự bước hướng dẫn
+     * @return URL ảnh từ Cloudinary hoặc Local Storage
+     */
+    public String uploadGuideImage(MultipartFile file, String guideSlug, int stepNumber) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File ảnh cẩm nang không được để trống!");
+        }
+        validateImageFile(file);
+        String safeFolder = "guide_images";
+        String publicId = (guideSlug != null ? guideSlug.trim() : "general") + "_step" + stepNumber + "_" + System.currentTimeMillis();
+
+        if (isCloudinaryConfigured()) {
+            try {
+                log.info("Đang tải ảnh cẩm nang ({}_step{}) lên Cloudinary...", guideSlug, stepNumber);
+                @SuppressWarnings("rawtypes")
+                Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                        "folder", "cuunan247/" + safeFolder,
+                        "resource_type", "image",
+                        "public_id", publicId
+                ));
+                String secureUrl = (String) uploadResult.get("secure_url");
+                String returnedPublicId = (String) uploadResult.get("public_id");
+                log.info(">>> Tải ảnh cẩm nang lên Cloudinary thành công: {}", secureUrl);
+                recordMediaFile(file, secureUrl, "CLOUDINARY", returnedPublicId, null, null);
+                return secureUrl;
+            } catch (Exception ex) {
+                log.warn("Lỗi khi tải ảnh cẩm nang lên Cloudinary: {}. Sử dụng fallback cục bộ!", ex.getMessage());
+            }
+        }
+        return uploadToLocalStorage(file, safeFolder, null, null);
+    }
+
+    /**
+     * Tải file cục bộ lên Cloudinary (dùng để đồng bộ ảnh cẩm nang có sẵn lên Cloudinary CDN).
+     *
+     * @param file       File nguồn trên đĩa
+     * @param folderName Thư mục lưu trữ Cloudinary
+     * @param publicId   Mã định danh ảnh trên Cloudinary
+     * @return HTTPS URL từ Cloudinary, hoặc null nếu chưa cấu hình hoặc thất bại
+     */
+    public String uploadLocalFile(File file, String folderName, String publicId) {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("File nguồn không tồn tại!");
+        }
+
+        String safeFolder = (folderName != null && !folderName.isBlank()) ? folderName.trim() : "guide_images";
+
+        if (isCloudinaryConfigured()) {
+            try {
+                log.info("Đang đồng bộ file '{}' lên Cloudinary [folder: cuunan247/{}]...", file.getName(), safeFolder);
+                Map<String, Object> params = new HashMap<>();
+                params.put("folder", "cuunan247/" + safeFolder);
+                params.put("resource_type", "image");
+                if (publicId != null && !publicId.isBlank()) {
+                    params.put("public_id", publicId.trim());
+                }
+
+                @SuppressWarnings("rawtypes")
+                Map uploadResult = cloudinary.uploader().upload(file, params);
+                String secureUrl = (String) uploadResult.get("secure_url");
+                log.info(">>> Đồng bộ ảnh cẩm nang lên Cloudinary thành công! URL: {}", secureUrl);
+                return secureUrl;
+            } catch (Exception ex) {
+                log.warn("Không thể tải file lên Cloudinary: {}. Giữ nguyên đường dẫn cục bộ.", ex.getMessage());
+            }
+        }
+        return null;
+    }
+
+    /**
      * Tải ảnh kèm liên kết trực tiếp với ca SOS và Người tải.
      */
     public String uploadImageWithContext(MultipartFile file, String folderName, SosRequest sosRequest, User uploadedBy) {

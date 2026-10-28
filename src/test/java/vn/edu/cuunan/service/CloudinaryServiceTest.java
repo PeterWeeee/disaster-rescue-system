@@ -82,4 +82,32 @@ class CloudinaryServiceTest {
             Files.deleteIfExists(expectedPath);
         } catch (Exception ignored) {}
     }
+
+    @Test
+    @DisplayName("Upload ảnh cẩm nang khi chưa có Cloudinary -> fallback lưu vào uploads/guide_images/")
+    void testUploadGuideImageFallback() {
+        MockMultipartFile guideImage = new MockMultipartFile(
+                "file", "prep_step1.jpg", "image/jpeg", "fake guide image bytes".getBytes()
+        );
+
+        String resultUrl = cloudinaryService.uploadGuideImage(guideImage, "preparation", 1);
+
+        assertNotNull(resultUrl);
+        assertTrue(resultUrl.startsWith("/uploads/guide_images/"));
+        assertTrue(resultUrl.endsWith(".jpg"));
+
+        Path expectedPath = Paths.get(resultUrl.substring(1));
+        assertTrue(Files.exists(expectedPath));
+
+        try {
+            Files.deleteIfExists(expectedPath);
+        } catch (Exception ignored) {}
+    }
+
+    @Test
+    @DisplayName("Upload file cục bộ null hoặc không tồn tại -> ném IllegalArgumentException")
+    void testUploadNonExistentLocalFile() {
+        assertThrows(IllegalArgumentException.class, () ->
+                cloudinaryService.uploadLocalFile(new File("non_existent_file.xyz"), "guide_images", "test_id"));
+    }
 }

@@ -1493,6 +1493,261 @@ body.donation-page-body .app-footer a:hover {
 .guide-login-button:hover { color: #fff; background: #173fae; }
 .guide-home-link { color: #1d4ed8; font-weight: 700; text-decoration: none; }
 .guide-home-link:hover { text-decoration: underline; }
+/* Card action & detail button in handbook overview */
+.guide-card-action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed #dce6f0;
+}
+.guide-step-count-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: .8rem;
+    font-weight: 650;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+.guide-btn-detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 7px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all .18s ease;
+}
+.guide-btn-detail:hover {
+    color: #fff;
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, .25);
+    transform: translateY(-1px);
+}
+
+/* Disaster Detail Page */
+.disaster-detail-page .guide-hero {
+    padding: 24px 0 32px;
+}
+.guide-breadcrumb {
+    font-size: .86rem;
+}
+.guide-breadcrumb a {
+    color: #cbd5e1;
+    text-decoration: none;
+}
+.guide-breadcrumb a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+.guide-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, .5);
+}
+
+/* Sidebar Disaster Navigation (Left Column, Static in layout) */
+.disaster-detail-page .guide-main {
+    max-width: 1320px;
+}
+.guide-sidebar-card {
+    background: #fff;
+    border: 1px solid #dce6f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(16, 42, 67, .05);
+    overflow: hidden;
+    position: static;
+}
+.guide-sidebar-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 18px;
+}
+.guide-sidebar-kicker {
+    font-size: 0.72rem;
+    letter-spacing: .08em;
+    color: #1d4ed8;
+    font-weight: 800;
+}
+.guide-sidebar-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 4px 0 2px;
+}
+.guide-sidebar-sub {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+.guide-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+.guide-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    text-decoration: none;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    border-left: 4px solid transparent;
+    transition: all .16s ease;
+    background: #fff;
+}
+.guide-sidebar-item:hover {
+    background: #f0f7ff;
+    color: #1d4ed8;
+    border-left-color: #93c5fd;
+}
+.guide-sidebar-item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-left-color: #1d4ed8;
+    font-weight: 700;
+}
+.guide-sidebar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    background: #f1f5f9;
+    flex-shrink: 0;
+    transition: all .16s ease;
+}
+.guide-sidebar-item:hover .guide-sidebar-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.guide-sidebar-item.active .guide-sidebar-badge {
+    background: #1d4ed8;
+    color: #fff;
+}
+.guide-sidebar-item-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-grow: 1;
+}
+.guide-sidebar-item-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: normal;
+}
+.guide-sidebar-item-cat {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+.guide-sidebar-item.active .guide-sidebar-item-cat {
+    color: #3b82f6;
+}
+.guide-sidebar-arrow {
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform .16s ease, color .16s ease;
+}
+.guide-sidebar-item:hover .guide-sidebar-arrow,
+.guide-sidebar-item.active .guide-sidebar-arrow {
+    color: #1d4ed8;
+    transform: translateX(2px);
+}
+.guide-sidebar-footer {
+    padding: 14px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Step Card */
+.guide-step-card {
+    background: #fff;
+    border: 1px solid #dce6f0;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(16, 42, 67, .05);
+    overflow: hidden;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.guide-step-card:hover {
+    border-color: #b9d5f7;
+    box-shadow: 0 8px 24px rgba(16, 42, 67, .08);
+}
+.guide-step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    font-weight: 850;
+    letter-spacing: .06em;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 6px 14px;
+    border-radius: 8px;
+}
+.guide-ai-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #0f766e;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 5px 12px;
+    border-radius: 999px;
+}
+.guide-ai-illustration {
+    transition: transform .35s ease;
+    aspect-ratio: 16 / 9;
+    max-height: 380px;
+}
+.guide-img-frame:hover .guide-ai-illustration {
+    transform: scale(1.025);
+}
+.guide-action-card {
+    box-shadow: 0 2px 8px rgba(29, 78, 216, .04);
+}
+.guide-action-list li {
+    padding-left: 2px;
+    line-height: 1.5;
+}
+.guide-dos-box ul, .guide-donts-box ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+.guide-dos-box li::before {
+    content: "✓ ";
+    color: #16a34a;
+    font-weight: bold;
+}
+.guide-donts-box li::before {
+    content: "✕ ";
+    color: #dc2626;
+    font-weight: bold;
+}
+.guide-tip-callout {
+    border-left: 4px solid #f59e0b !important;
+}
+
 @media (max-width: 900px) {
     .guide-topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

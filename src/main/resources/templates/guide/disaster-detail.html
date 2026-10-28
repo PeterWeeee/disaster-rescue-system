@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#guide-detail-content})}">
+<body>
+<div id="guide-detail-content" class="disaster-guide-page disaster-detail-page">
+
+    <!-- Detail Hero Section -->
+    <section class="guide-hero">
+        <div class="container-xl guide-hero-inner">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb guide-breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a th:href="@{/}"><i class="fa-solid fa-house me-1"></i>Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/guide/disaster}">Cẩm nang ứng phó</a></li>
+                    <li class="breadcrumb-item active text-white fw-bold" aria-current="page" th:text="${guide.title}">Chi tiết</li>
+                </ol>
+            </nav>
+
+            <div class="guide-hero-copy">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="guide-eyebrow"><i class="fa-solid fa-shield-heart me-1" aria-hidden="true"></i>HƯỚNG DẪN CHI TIẾT TỪNG BƯỚC</span>
+                    <span class="badge rounded-pill text-bg-light px-3 py-1 fw-bold" th:text="${guide.category}">DANH MỤC</span>
+                </div>
+                <h1 th:text="${guide.title}">Chuẩn bị sẵn cho gia đình</h1>
+                <p th:text="${guide.summary}">Sự chuẩn bị kỹ lưỡng từ trước là chìa khóa bảo vệ an toàn cao nhất cho bạn và người thân.</p>
+            </div>
+
+            <div class="guide-principle" role="note">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <div>
+                    <strong>Nguyên tắc sống còn</strong>
+                    <span th:text="${guide.principle}">Theo dõi cảnh báo chính thức, không đi vào vùng nguy hiểm và sơ tán theo hướng dẫn của cơ quan chức năng.</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+                <a class="guide-emergency-link" th:href="@{/guide/disaster}">
+                    <i class="fa-solid fa-arrow-left me-2" aria-hidden="true"></i>Tất cả cẩm nang
+                </a>
+                <button type="button" class="guide-emergency-link bg-transparent text-white border-white-50" onclick="window.print()">
+                    <i class="fa-solid fa-print me-2" aria-hidden="true"></i>In hướng dẫn
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <main class="container-xl guide-main py-4">
+        <div class="row g-4 align-items-start">
+
+            <!-- CỘT TRÁI: Thanh chọn các tình huống cẩm nang (Cố định vị trí ở cột trái, không trôi/đè khi cuộn trang) -->
+            <aside class="col-lg-3 col-md-4">
+                <div class="guide-sidebar-card shadow-sm">
+                    <div class="guide-sidebar-header">
+                        <span class="guide-sidebar-kicker"><i class="fa-solid fa-list-check me-1"></i>DANH MỤC CẨM NANG</span>
+                        <h2 class="guide-sidebar-title">Các tình huống đối phó</h2>
+                        <p class="guide-sidebar-sub">Chọn tình huống bên dưới để chuyển nhanh sang các bước và hình ảnh hướng dẫn:</p>
+                    </div>
+
+                    <nav class="guide-sidebar-nav" aria-label="Danh mục hướng dẫn thiên tai">
+                        <a th:each="g : ${allGuides}"
+                           th:href="@{'/guide/disaster/' + ${g.id}}"
+                           th:classappend="${g.id == guide.id} ? 'active' : ''"
+                           class="guide-sidebar-item">
+                            <span class="guide-sidebar-badge" th:text="${g.stepCode}">01</span>
+                            <div class="guide-sidebar-item-content">
+                                <span class="guide-sidebar-item-title" th:text="${g.title}">Chuẩn bị sẵn cho gia đình</span>
+                                <span class="guide-sidebar-item-cat">
+                                    <i th:class="${g.iconClass} + ' me-1'"></i>
+                                    <span th:text="${g.category}">CHUẨN BỊ</span>
+                                </span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right guide-sidebar-arrow" aria-hidden="true"></i>
+                        </a>
+                    </nav>
+
+                    <div class="guide-sidebar-footer">
+                        <a th:href="@{/guide/disaster}" class="btn btn-outline-primary btn-sm w-100 fw-bold">
+                            <i class="fa-solid fa-table-cells-large me-2"></i>Tất cả cẩm nang
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- CỘT PHẢI: Nội dung chi tiết các bước đối phó kèm ảnh AI và thông tin an toàn -->
+            <div class="col-lg-9 col-md-8">
+
+                <!-- Detailed Steps Heading -->
+                <div class="guide-section-heading mb-4">
+                    <span class="guide-kicker"><i class="fa-solid fa-wand-magic-sparkles me-1 text-primary"></i>QUY TRÌNH HÀNH ĐỘNG THỰC TẾ · KÈM HÌNH ẢNH MINH HỌA DO AI TẠO</span>
+                    <h2 class="h3 fw-bold text-dark mt-1">Các bước đối phó chi tiết</h2>
+                    <p class="text-secondary">Thực hiện tuần tự các bước dưới đây để bảo vệ an toàn tính mạng cho bản thân và người thân. Mỗi bước được mô phỏng trực quan bằng hình ảnh AI chuyên sâu tải từ Cloudinary.</p>
+                </div>
+
+                <!-- Step List -->
+                <section class="guide-steps-container" aria-label="Danh sách các bước chi tiết">
+                    <article th:each="step, iterStat : ${guide.steps}"
+                             class="guide-step-card mb-4"
+                             th:id="'step-' + ${step.stepNumber}">
+
+                        <div class="guide-step-card-header d-flex flex-wrap align-items-center justify-content-between gap-2 p-3 p-md-4 border-bottom bg-light-subtle">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="guide-step-badge" th:text="'BƯỚC ' + ${step.stepNumber < 10 ? '0' + step.stepNumber : step.stepNumber}">BƯỚC 01</span>
+                                <div>
+                                    <h3 class="h5 fw-bold mb-1 text-dark" th:text="${step.stepTitle}">Tiêu đề bước</h3>
+                                    <span class="badge bg-primary-subtle text-primary fw-semibold" th:text="${step.headline}">Khái quát</span>
+                                </div>
+                            </div>
+                            <span class="guide-ai-tag-pill">
+                                <i class="fa-solid fa-wand-magic-sparkles text-primary me-1"></i>Ảnh do AI tạo
+                            </span>
+                        </div>
+
+                        <div class="guide-step-card-body p-3 p-md-4">
+                            <div class="row g-4 align-items-stretch">
+                                <!-- Left Column: Visual AI Illustration -->
+                                <div class="col-xl-6 col-lg-12">
+                                    <div class="guide-img-container h-100 d-flex flex-column">
+                                        <div class="guide-img-frame flex-grow-1 position-relative overflow-hidden rounded-3 shadow-sm">
+                                            <img th:src="${step.imageUrl}"
+                                                 th:data-fallback="@{${step.fallbackUrl}}"
+                                                 onerror="if (this.dataset.fallback && this.src !== this.dataset.fallback) { this.src = this.dataset.fallback; }"
+                                                 th:alt="${step.stepTitle}"
+                                                 class="guide-ai-illustration w-100 h-100 object-fit-cover"
+                                                 loading="lazy" />
+                                            <div class="guide-img-badge-overlay position-absolute top-0 start-0 m-3 d-flex flex-wrap gap-2">
+                                                <span class="px-3 py-1 rounded-pill bg-dark bg-opacity-75 text-white small fw-bold">
+                                                    <i class="fa-solid fa-robot me-1 text-info"></i>Ảnh do AI tạo
+                                                </span>
+                                                <span th:if="${step.imageUrl != null and step.imageUrl.contains('cloudinary')}"
+                                                      class="px-3 py-1 rounded-pill bg-primary bg-opacity-90 text-white small fw-bold shadow-sm">
+                                                    <i class="fa-solid fa-cloud me-1"></i>Cloudinary CDN
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="guide-img-caption-box mt-2 p-2 px-3 rounded-2 bg-light border text-secondary small">
+                                            <i class="fa-solid fa-camera-retro me-1 text-primary"></i>
+                                            <span class="fw-semibold text-dark">Mô tả trực quan:</span>
+                                            <span th:text="${step.imageCaption}">Mô tả chi tiết ảnh AI minh họa</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Step Guidance & Safety Rules -->
+                                <div class="col-xl-6 col-lg-12">
+                                    <div class="guide-step-content-box d-flex flex-column h-100 justify-content-between">
+                                        <div>
+                                            <p class="lead text-dark fs-6 mb-3 lh-base" th:text="${step.description}">Mô tả chi tiết các tình huống và cách ứng phó trong bước này.</p>
+
+                                            <!-- Key Actions -->
+                                            <div class="guide-action-card p-3 rounded-3 bg-white border border-primary-subtle mb-3">
+                                                <h4 class="h6 fw-bold text-primary mb-2">
+                                                    <i class="fa-solid fa-list-check me-2"></i>Hành động thiết thực cần làm:
+                                                </h4>
+                                                <ul class="guide-action-list ps-3 mb-0">
+                                                    <li th:each="act : ${step.actions}" th:text="${act}" class="mb-1 text-secondary">Hành động cụ thể</li>
+                                                </ul>
+                                            </div>
+
+                                            <!-- DOs and DON'Ts side by side -->
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-sm-6">
+                                                    <div class="guide-dos-box p-3 rounded-3 bg-success-subtle border border-success-subtle h-100">
+                                                        <h5 class="fw-bold text-success fs-6 mb-2">
+                                                            <i class="fa-solid fa-circle-check me-1"></i>NÊN LÀM
+                                                        </h5>
+                                                        <ul class="small ps-3 mb-0 text-dark">
+                                                            <li th:each="d : ${step.dos}" th:text="${d}" class="mb-1">Việc nên làm</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="guide-donts-box p-3 rounded-3 bg-danger-subtle border border-danger-subtle h-100">
+                                                        <h5 class="fw-bold text-danger fs-6 mb-2">
+                                                            <i class="fa-solid fa-triangle-exclamation me-1"></i>KHÔNG NÊN LÀM
+                                                        </h5>
+                                                        <ul class="small ps-3 mb-0 text-dark">
+                                                            <li th:each="dn : ${step.donts}" th:text="${dn}" class="mb-1">Việc tránh làm</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Survival Tip -->
+                                        <div class="guide-tip-callout p-3 rounded-3 bg-warning-subtle border border-warning-subtle text-dark" th:if="${step.safetyTip != null}">
+                                            <div class="d-flex align-items-start gap-2">
+                                                <i class="fa-solid fa-lightbulb text-warning fs-5 flex-shrink-0 mt-1"></i>
+                                                <div class="small">
+                                                    <strong class="d-block text-warning-emphasis mb-1">Mẹo an toàn sống còn:</strong>
+                                                    <span th:text="${step.safetyTip}">Nội dung mẹo</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- Readiness Checklist for this Disaster -->
+                <section class="guide-checklist mb-4" aria-labelledby="checklist-title">
+                    <div class="guide-checklist-copy">
+                        <span class="guide-kicker">DANH SÁCH KIỂM TRA</span>
+                        <h2 id="checklist-title" class="h4 fw-bold">Checklist sẵn sàng cho tình huống này</h2>
+                        <p>Đảm bảo gia đình bạn đã rà soát toàn bộ các tiêu chí an toàn dưới đây trước và trong khi thiên tai xảy ra.</p>
+                        <div class="mt-3 p-3 bg-white rounded-3 border small text-secondary" th:if="${guide.emergencyNote != null}">
+                            <strong class="text-danger d-block mb-1"><i class="fa-solid fa-bell me-1"></i>Lưu ý đặc biệt:</strong>
+                            <span th:text="${guide.emergencyNote}">Lưu ý</span>
+                        </div>
+                    </div>
+                    <div class="guide-checklist-items">
+                        <div class="guide-check-item" th:each="item : ${guide.checklist}">
+                            <span class="guide-checklist-bullet" aria-hidden="true"></span>
+                            <span th:text="${item}">Hạng mục kiểm tra</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Emergency Hotline Section (NO SOS BUTTON) -->
+                <section id="guide-emergency" class="guide-emergency-section mb-4" aria-labelledby="emergency-hotline-title">
+                    <div class="guide-emergency-copy">
+                        <span class="guide-kicker">KHI GẶP NGUY HIỂM TÍNH MẠNG</span>
+                        <h2 id="emergency-hotline-title">Ưu tiên gọi trợ giúp cứu nạn ngay lập tức</h2>
+                        <p>Nếu bạn hoặc người thân bị mắc kẹt, thương tích hoặc cần cứu hộ khẩn cấp, hãy liên hệ trực tiếp với các số điện thoại khẩn cấp quốc gia trực 24/7 bên cạnh để được hỗ trợ kịp thời.</p>
+                    </div>
+                    <div class="guide-hotline-list">
+                        <a href="tel:112">
+                            <span class="guide-hotline-number">112</span>
+                            <span><strong>Cứu nạn, thiên tai và tìm kiếm cứu hộ</strong><small>Tổng đài khẩn cấp quốc gia, trực 24/7 toàn quốc</small></span>
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                        </a>
+                        <a href="tel:114">
+                            <span class="guide-hotline-number">114</span>
+                            <span><strong>Cứu hỏa và cứu nạn cứu hộ (PCCC & CNCH)</strong><small>Đường dây khẩn cấp tiếp cận hiện trường nhanh</small></span>
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                        </a>
+                        <a href="tel:115">
+                            <span class="guide-hotline-number">115</span>
+                            <span><strong>Cấp cứu y tế khẩn cấp</strong><small>Hỗ trợ y tế và xe cấp cứu chuyên dụng</small></span>
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Previous / Next Navigation Bar -->
+                <nav class="guide-pagination-nav d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 p-md-4 rounded-3 bg-white border shadow-sm mb-4">
+                    <div>
+                        <a th:if="${prevGuide != null}" th:href="@{'/guide/disaster/' + ${prevGuide.id}}" class="btn btn-outline-secondary px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-chevron-left me-2"></i>
+                            <span>Trước: </span><span class="d-none d-sm-inline" th:text="${prevGuide.title}">Bài trước</span>
+                        </a>
+                    </div>
+
+                    <a th:href="@{/guide/disaster}" class="btn btn-primary px-4 py-2 fw-bold">
+                        <i class="fa-solid fa-table-cells-large me-2"></i>Tất cả cẩm nang
+                    </a>
+
+                    <div>
+                        <a th:if="${nextGuide != null}" th:href="@{'/guide/disaster/' + ${nextGuide.id}}" class="btn btn-outline-secondary px-3 py-2 fw-semibold">
+                            <span>Sau: </span><span class="d-none d-sm-inline" th:text="${nextGuide.title}">Bài sau</span>
+                            <i class="fa-solid fa-chevron-right ms-2"></i>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="guide-disclaimer">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <p>Tài liệu này được biên soạn bởi hệ thống Cứu Nạn 24/7 dựa trên khuyến nghị từ Ban chỉ đạo Quốc gia về Phòng, chống thiên tai và các tổ chức cứu hộ quốc tế. Trong tình huống thực tế, hãy luôn chấp hành mệnh lệnh điều phối của lực lượng chức năng tại hiện trường.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

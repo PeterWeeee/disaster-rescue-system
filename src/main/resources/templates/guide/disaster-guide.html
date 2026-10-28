@@ -24,7 +24,7 @@
             <div class="guide-section-heading">
                 <span class="guide-kicker">CHỌN TÌNH HUỐNG</span>
                 <h2 id="guide-topics-title">Hướng dẫn nhanh theo loại thiên tai</h2>
-                <p>Chọn một chủ đề để đến phần hướng dẫn. Nếu đang gặp nguy hiểm, hãy ưu tiên rời khỏi khu vực nguy hiểm và gọi trợ giúp.</p>
+                <p>Chọn một chủ đề để xem hướng dẫn tóm tắt hoặc nhấp <strong>Xem chi tiết</strong> để xem hướng dẫn từng bước có hình ảnh AI mô tả trực quan.</p>
             </div>
             <div class="guide-topic-grid">
                 <a href="#guide-preparation" class="guide-topic-card"><span class="guide-topic-icon topic-blue"><i class="fa-solid fa-kit-medical" aria-hidden="true"></i></span><span><strong>Chuẩn bị trước</strong><small>Túi đồ và kế hoạch gia đình</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
@@ -34,7 +34,7 @@
                 <a href="#guide-lightning" class="guide-topic-card"><span class="guide-topic-icon topic-purple"><i class="fa-solid fa-cloud-bolt" aria-hidden="true"></i></span><span><strong>Dông, sét</strong><small>Chọn nơi trú phù hợp</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
                 <a href="#guide-earthquake" class="guide-topic-card"><span class="guide-topic-icon topic-blue"><i class="fa-solid fa-house-crack" aria-hidden="true"></i></span><span><strong>Động đất</strong><small>Che chắn và đề phòng dư chấn</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
                 <a href="#guide-after" class="guide-topic-card"><span class="guide-topic-icon topic-green"><i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i></span><span><strong>Sau thiên tai</strong><small>Trở về và vệ sinh an toàn</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
-                <a href="#guide-emergency" class="guide-topic-card"><span class="guide-topic-icon topic-red"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span><span><strong>Cần trợ giúp</strong><small>SOS và số khẩn cấp</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+                <a href="#guide-emergency" class="guide-topic-card"><span class="guide-topic-icon topic-red"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span><span><strong>Cần trợ giúp</strong><small>Số điện thoại khẩn cấp</small></span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
             </div>
         </section>
 
@@ -45,44 +45,149 @@
             </div>
             <article id="guide-preparation" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-blue"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">01 · TRƯỚC KHI THIÊN TAI</span><h3>Chuẩn bị sẵn cho gia đình</h3>
-                    <ul><li>Theo dõi thông báo từ cơ quan chức năng và chính quyền địa phương.</li><li>Chuẩn bị túi khẩn cấp: nước uống, thực phẩm, đèn pin, pin dự phòng, thuốc cần thiết, giấy tờ quan trọng và vật dụng sơ cứu.</li><li>Lưu số liên lạc khẩn cấp, địa điểm sơ tán và thống nhất cách liên lạc với người thân.</li><li>Bọc kín giấy tờ, bảo vệ thiết bị điện và tài sản thiết yếu khi có thể làm an toàn.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">01 · TRƯỚC KHI THIÊN TAI</span>
+                    <h3>Chuẩn bị sẵn cho gia đình</h3>
+                    <ul>
+                        <li>Theo dõi thông báo từ cơ quan chức năng và chính quyền địa phương.</li>
+                        <li>Chuẩn bị túi khẩn cấp: nước uống, thực phẩm, đèn pin, pin dự phòng, thuốc cần thiết, giấy tờ quan trọng và vật dụng sơ cứu.</li>
+                        <li>Lưu số liên lạc khẩn cấp, địa điểm sơ tán và thống nhất cách liên lạc với người thân.</li>
+                        <li>Bọc kín giấy tờ, bảo vệ thiết bị điện và tài sản thiết yếu khi có thể làm an toàn.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-primary"></i>4 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/preparation}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-storm" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-red"><i class="fa-solid fa-wind" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">02 · BÃO VÀ GIÓ MẠNH</span><h3>Ở trong nơi trú ẩn kiên cố</h3>
-                    <ul><li>Theo dõi cảnh báo chính thức; gia cố nhà cửa khi điều kiện còn an toàn.</li><li>Đóng cửa, tránh xa cửa kính và các vật có nguy cơ rơi hoặc vỡ.</li><li>Không ra ngoài khi gió mạnh; tránh cây lớn, biển quảng cáo, cột điện và công trình không an toàn.</li><li>Sơ tán theo hướng dẫn của cơ quan chức năng khi được yêu cầu.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">02 · BÃO VÀ GIÓ MẠNH</span>
+                    <h3>Ở trong nơi trú ẩn kiên cố</h3>
+                    <ul>
+                        <li>Theo dõi cảnh báo chính thức; gia cố nhà cửa khi điều kiện còn an toàn.</li>
+                        <li>Đóng cửa, tránh xa cửa kính và các vật có nguy cơ rơi hoặc vỡ.</li>
+                        <li>Không ra ngoài khi gió mạnh; tránh cây lớn, biển quảng cáo, cột điện và công trình không an toàn.</li>
+                        <li>Sơ tán theo hướng dẫn của cơ quan chức năng khi được yêu cầu.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-danger"></i>3 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/storm}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-flood" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-teal"><i class="fa-solid fa-house-flood-water" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">03 · LŨ LỤT VÀ NGẬP SÂU</span><h3>Tránh nước chảy và nguy cơ điện giật</h3>
-                    <ul><li>Di chuyển đến nơi cao, an toàn theo tuyến sơ tán được hướng dẫn.</li><li>Không đi bộ, đi xe máy hoặc lái ô tô qua dòng nước chảy xiết hay đoạn ngập không rõ độ sâu.</li><li>Chỉ ngắt điện nếu có thể làm từ nơi khô ráo, an toàn; không chạm thiết bị điện khi đang đứng trong nước.</li><li>Không uống nước bị ô nhiễm; không quay lại vùng nguy hiểm cho đến khi có thông báo an toàn.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">03 · LŨ LỤT VÀ NGẬP SÂU</span>
+                    <h3>Tránh nước chảy và nguy cơ điện giật</h3>
+                    <ul>
+                        <li>Di chuyển đến nơi cao, an toàn theo tuyến sơ tán được hướng dẫn.</li>
+                        <li>Không đi bộ, đi xe máy hoặc lái ô tô qua dòng nước chảy xiết hay đoạn ngập không rõ độ sâu.</li>
+                        <li>Chỉ ngắt điện nếu có thể làm từ nơi khô ráo, an toàn; không chạm thiết bị điện khi đang đứng trong nước.</li>
+                        <li>Không uống nước bị ô nhiễm; không quay lại vùng nguy hiểm cho đến khi có thông báo an toàn.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-info"></i>2 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/flood}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-landslide" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-amber"><i class="fa-solid fa-mountain-sun" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">04 · LŨ QUÉT VÀ SẠT LỞ ĐẤT</span><h3>Rời khu vực có dấu hiệu bất thường</h3>
-                    <ul><li>Chú ý đất đá dịch chuyển, vết nứt mới, nước suối đổi màu hoặc mực nước thay đổi đột ngột.</li><li>Khi có cảnh báo, rời khu vực theo tuyến sơ tán an toàn; tránh ven suối, chân taluy và sườn dốc có nguy cơ.</li><li>Không cố vượt dòng lũ hoặc khu vực đất đá đang sạt trượt.</li><li>Báo cho cơ quan chức năng khi phát hiện dấu hiệu nguy hiểm, nếu có thể thực hiện an toàn.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">04 · LŨ QUÉT VÀ SẠT LỞ ĐẤT</span>
+                    <h3>Rời khu vực có dấu hiệu bất thường</h3>
+                    <ul>
+                        <li>Chú ý đất đá dịch chuyển, vết nứt mới, nước suối đổi màu hoặc mực nước thay đổi đột ngột.</li>
+                        <li>Khi có cảnh báo, rời khu vực theo tuyến sơ tán an toàn; tránh ven suối, chân taluy và sườn dốc có nguy cơ.</li>
+                        <li>Không cố vượt dòng lũ hoặc khu vực đất đá đang sạt trượt.</li>
+                        <li>Báo cho cơ quan chức năng khi phát hiện dấu hiệu nguy hiểm, nếu có thể thực hiện an toàn.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-warning"></i>3 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/landslide}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-lightning" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-purple"><i class="fa-solid fa-cloud-bolt" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">05 · DÔNG VÀ SÉT</span><h3>Tìm nơi trú kín, chắc chắn</h3>
-                    <ul><li>Vào trong nhà kiên cố hoặc phương tiện có mái che phù hợp.</li><li>Tránh cây đơn độc, cột điện, nơi trống trải và khu vực có nước.</li><li>Hạn chế sử dụng thiết bị điện có dây trong lúc dông sét.</li><li>Không trú mưa dưới cây lớn hoặc công trình không bảo đảm an toàn.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">05 · DÔNG VÀ SÉT</span>
+                    <h3>Tìm nơi trú kín, chắc chắn</h3>
+                    <ul>
+                        <li>Vào trong nhà kiên cố hoặc phương tiện có mái che phù hợp.</li>
+                        <li>Tránh cây đơn độc, cột điện, nơi trống trải và khu vực có nước.</li>
+                        <li>Hạn chế sử dụng thiết bị điện có dây trong lúc dông sét.</li>
+                        <li>Không trú mưa dưới cây lớn hoặc công trình không bảo đảm an toàn.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-primary"></i>2 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/lightning}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-earthquake" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-blue"><i class="fa-solid fa-house-crack" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">06 · ĐỘNG ĐẤT</span><h3>Che chắn đầu và cổ</h3>
-                    <ul><li>Nếu đang ở trong nhà, cúi thấp, che đầu và cổ; bám giữ dưới bàn chắc chắn nếu có thể.</li><li>Tránh cửa kính, tủ cao và vật có thể rơi; không dùng thang máy trong hoặc ngay sau rung chấn.</li><li>Sau rung chấn, di chuyển đến nơi an toàn khi có thể và đề phòng dư chấn.</li><li>Làm theo hướng dẫn của lực lượng chức năng.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">06 · ĐỘNG ĐẤT</span>
+                    <h3>Che chắn đầu và cổ</h3>
+                    <ul>
+                        <li>Nếu đang ở trong nhà, cúi thấp, che đầu và cổ; bám giữ dưới bàn chắc chắn nếu có thể.</li>
+                        <li>Tránh cửa kính, tủ cao và vật có thể rơi; không dùng thang máy trong hoặc ngay sau rung chấn.</li>
+                        <li>Sau rung chấn, di chuyển đến nơi an toàn khi có thể và đề phòng dư chấn.</li>
+                        <li>Làm theo hướng dẫn của lực lượng chức năng.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-primary"></i>2 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/earthquake}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
+
             <article id="guide-after" class="guide-instruction-card">
                 <div class="guide-instruction-icon topic-green"><i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i></div>
-                <div><span class="guide-step-label">07 · SAU THIÊN TAI</span><h3>Chỉ trở về khi đã an toàn</h3>
-                    <ul><li>Chỉ trở về khi khu vực được xác nhận an toàn.</li><li>Tránh dây điện đứt, công trình hư hỏng và nguồn nước ô nhiễm.</li><li>Kiểm tra sức khỏe, sơ cứu khi cần và tìm hỗ trợ y tế phù hợp.</li><li>Ghi nhận thiệt hại chỉ khi an toàn; không vào vùng nguy hiểm để chụp ảnh.</li><li>Dùng nước sạch, thực phẩm an toàn và giữ vệ sinh môi trường.</li></ul>
+                <div class="guide-instruction-body">
+                    <span class="guide-step-label">07 · SAU THIÊN TAI</span>
+                    <h3>Chỉ trở về khi đã an toàn</h3>
+                    <ul>
+                        <li>Chỉ trở về khi khu vực được xác nhận an toàn.</li>
+                        <li>Tránh dây điện đứt, công trình hư hỏng và nguồn nước ô nhiễm.</li>
+                        <li>Kiểm tra sức khỏe, sơ cứu khi cần và tìm hỗ trợ y tế phù hợp.</li>
+                        <li>Ghi nhận thiệt hại chỉ khi an toàn; không vào vùng nguy hiểm để chụp ảnh.</li>
+                        <li>Dùng nước sạch, thực phẩm an toàn và giữ vệ sinh môi trường.</li>
+                    </ul>
+                    <div class="guide-card-action">
+                        <span class="guide-step-count-pill"><i class="fa-solid fa-wand-magic-sparkles me-1 text-success"></i>2 bước kèm ảnh AI mô tả</span>
+                        <a th:href="@{/guide/disaster/after}" class="guide-btn-detail">
+                            <span>Xem chi tiết các bước</span>
+                            <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
         </section>
@@ -100,7 +205,11 @@
         </section>
 
         <section id="guide-emergency" class="guide-emergency-section" aria-labelledby="guide-emergency-title">
-            <div class="guide-emergency-copy"><span class="guide-kicker">KHI CẦN HỖ TRỢ KHẨN CẤP</span><h2 id="guide-emergency-title">Ưu tiên đến nơi an toàn và gọi trợ giúp</h2><p>Nếu có thể thực hiện an toàn, cung cấp vị trí, số người cần giúp đỡ, tình trạng nguy hiểm và cách liên hệ lại. Không coi yêu cầu SOS là đã được tiếp nhận cho đến khi hệ thống xác nhận.</p><a th:href="@{/sos}" class="guide-sos-button"><i class="fa-solid fa-tower-broadcast me-2" aria-hidden="true"></i>Mở chức năng SOS</a></div>
+            <div class="guide-emergency-copy">
+                <span class="guide-kicker">KHI CẦN HỖ TRỢ KHẨN CẤP</span>
+                <h2 id="guide-emergency-title">Ưu tiên đến nơi an toàn và gọi trợ giúp</h2>
+                <p>Nếu có thể thực hiện an toàn, hãy liên hệ trực tiếp đến các số điện thoại khẩn cấp quốc gia trực 24/7 dưới đây để cung cấp vị trí, số người cần giúp đỡ và tình trạng nguy hiểm.</p>
+            </div>
             <div class="guide-hotline-list">
                 <a href="tel:112"><span class="guide-hotline-number">112</span><span><strong>Cứu nạn, thiên tai và tình huống nguy cấp</strong><small>Tổng đài khẩn cấp quốc gia, tiếp nhận 24/7</small></span><i class="fa-solid fa-phone" aria-hidden="true"></i></a>
                 <a href="tel:114"><span class="guide-hotline-number">114</span><span><strong>Phòng cháy, chữa cháy và cứu nạn</strong><small>Đường dây khẩn cấp PCCC và CNCH</small></span><i class="fa-solid fa-phone" aria-hidden="true"></i></a>

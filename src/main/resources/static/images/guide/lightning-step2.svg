@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ltBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1035" />
+      <stop offset="100%" stop-color="#0b081d" />
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#ltBg)"/>
+
+  <!-- Storm Clouds in background -->
+  <path d="M100 80 Q150 40 220 70 Q280 30 360 60 Q420 40 480 80 Q560 50 640 85 Q720 60 760 110 L800 130 L0 130 Z" fill="#2d1b4e" opacity="0.6"/>
+  <!-- Lightning Bolt -->
+  <path d="M380 40 L350 110 L390 110 L330 210" stroke="url(#boltGrad)" stroke-width="6" fill="none" filter="url(#glow)"/>
+
+  <!-- Left: Safe Shelter (House / Car) -->
+  <g transform="translate(60, 110)">
+    <rect width="320" height="290" rx="16" fill="#1c1936" stroke="#10b981" stroke-width="2.5"/>
+    <rect x="20" y="20" width="120" height="28" rx="6" fill="#065f46"/>
+    <text x="80" y="39" fill="#34d399" font-family="system-ui, sans-serif" font-weight="800" font-size="13" text-anchor="middle">NƠI AN TOÀN NÊN VÀO</text>
+
+    <!-- House Icon -->
+    <path d="M90 140 L160 85 L230 140 L220 140 L220 200 L100 200 L100 140 Z" fill="#334155" stroke="#94a3b8" stroke-width="3"/>
+    <rect x="140" y="150" width="40" height="50" rx="4" fill="#10b981"/>
+    <!-- Checkmark Badge -->
+    <circle cx="250" cy="90" r="24" fill="#10b981"/>
+    <path d="M240 90 L247 97 L260 83" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <text x="160" y="235" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="700" font-size="16" text-anchor="middle">Vào nhà kiên cố hoặc ô tô đóng kín</text>
+    <text x="160" y="260" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Đóng chặt cửa sổ, tránh xa tường ngoài</text>
+  </g>
+
+  <!-- Right: Dangerous Places (Tall Trees, Poles, Open Water) -->
+  <g transform="translate(420, 110)">
+    <rect width="320" height="290" rx="16" fill="#1c1936" stroke="#ef4444" stroke-width="2.5"/>
+    <rect x="20" y="20" width="120" height="28" rx="6" fill="#7f1d1d"/>
+    <text x="80" y="39" fill="#f87171" font-family="system-ui, sans-serif" font-weight="800" font-size="13" text-anchor="middle">CỰC KỲ NGUY HIỂM</text>
+
+    <!-- Tree and Solitary Pole with warning -->
+    <path d="M160 80 L120 160 L145 160 L110 200 L210 200 L175 160 L200 160 Z" fill="#475569" stroke="#64748b" stroke-width="2"/>
+    <rect x="153" y="200" width="14" height="20" fill="#78350f"/>
+    <!-- Danger Cross Badge -->
+    <circle cx="250" cy="90" r="24" fill="#ef4444"/>
+    <path d="M240 80 L260 100 M260 80 L240 100" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+
+    <text x="160" y="235" fill="#fca5a5" font-family="system-ui, sans-serif" font-weight="700" font-size="16" text-anchor="middle">Tránh xa cây to, cột điện, bãi trống</text>
+    <text x="160" y="260" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Không cầm vật dụng kim loại, ô cán sắt</text>
+  </g>
+
+  <text x="400" y="45" fill="#fef08a" font-family="system-ui, sans-serif" font-weight="800" font-size="20" text-anchor="middle" letter-spacing="1">QUY TẮC CHỌN NƠI TRÚ ẨN AN TOÀN TRONG CƠN DÔNG SÉT</text>
+</svg>

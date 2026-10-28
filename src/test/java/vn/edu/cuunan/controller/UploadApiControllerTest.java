@@ -59,4 +59,26 @@ class UploadApiControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
+
+    @Test
+    @DisplayName("POST /api/upload/guide-image với file hợp lệ -> Trả về 200 OK kèm URL Cloudinary và cập nhật cẩm nang")
+    void testUploadGuideImageSuccess() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "prep1.jpg", "image/jpeg", "image bytes".getBytes()
+        );
+
+        Mockito.when(cloudinaryService.uploadGuideImage(any(), Mockito.eq("preparation"), Mockito.eq(1)))
+                .thenReturn("https://res.cloudinary.com/cuunan247/image/upload/v1234/prep1.jpg");
+
+        mockMvc.perform(multipart("/api/upload/guide-image")
+                        .file(file)
+                        .param("guideSlug", "preparation")
+                        .param("stepNumber", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.url").value("https://res.cloudinary.com/cuunan247/image/upload/v1234/prep1.jpg"))
+                .andExpect(jsonPath("$.guideSlug").value("preparation"))
+                .andExpect(jsonPath("$.stepNumber").value(1))
+                .andExpect(jsonPath("$.guideUpdated").value(true));
+    }
 }
