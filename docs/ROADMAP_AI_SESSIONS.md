@@ -49,6 +49,9 @@
 │ Session 17: Tích Hợp Ảnh Hiện Trường Thiên Tai Từ Cloudinary CDN        │
 │             (Community Feed Cloudinary Media Integration)              │
 │    ↓                                                                   │
+│ Session 18: Khung Chat Nổi Toàn Hệ Thống & Đa Cảm Xúc / Bình Luận Feed │
+│             (Floating Chat Dock, Multi-Reactions, Comments & Cleanup)  │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -90,5 +93,9 @@
     - Khắc phục lỗi thẻ đóng sớm trong Thymeleaf layout của trang Bảng Tin (`feed/index.html`), chuẩn hóa mục cảnh báo khẩn thiên tai lấy trực tiếp từ database `disaster_alerts` theo chuẩn quy trình quản lý thiên tai.
 16. **[Session 16: Khắc Phục Lỗi WebSocket STOMP - Đồng Bộ Chat Thời Gian Thực](sessions/session-16-realtime-chat-websocket-fix.md)** *(✅ Đã hoàn thành)*
     - Khắc phục triệt để lỗi người dân không nhận được tin nhắn thời gian thực từ đội cứu hộ do SockJS/Stomp tải trễ ở cuối layout. Tối ưu nạp sớm thư viện trong `<head>`, bao bọc `DOMContentLoaded`, bổ sung bộ đếm reconnect timer, cơ chế chống trùng lặp tin nhắn `chat-msg-{id}`, tự động bù đắp tin nhắn và polling dự phòng mỗi 10s.
-17. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+17. **[Session 17: Tích Hợp Ảnh Hiện Trường Thiên Tai Từ Cloudinary CDN](roadmap/session-17-community-feed-cloudinary-media.md)** *(✅ Đã hoàn thành)*
+    - Tích hợp bộ ảnh thiên tai thực địa chất lượng cao lưu trữ tại Cloudinary CDN (`cuunan247/community_feed`) cho Bảng Tin Cộng Đồng (`/feed`). Nâng cấp giao diện xem ảnh phóng to toàn màn hình, huy hiệu Cloudinary CDN và chuẩn hóa `th:data-*` theo Thymeleaf 3.1+.
+18. **[Session 18: Khung Chat Nổi Toàn Hệ Thống & Đa Cảm Xúc / Bình Luận Bảng Tin](roadmap/session-18-floating-chat-dock-feed-reactions-cleanup.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Tích hợp Khung Chat Nổi toàn hệ thống (Persistent Floating Chat Dock) phong cách Facebook Messenger, tự động phát hiện ca cứu hộ qua `/api/chat/active-session`. Loại bỏ 2 khung chat inline dư thừa trên `sos/track.html` và `rescuer/routes.html`. Gỡ bỏ triệt để Toast popup đè màn hình. Nâng cấp Bảng Tin: 5 trạng thái cảm xúc (Multi-Reactions), bình luận bài viết (`post_comments`), sửa lỗi UTF-8 BOM SQL Server và cơ chế tự phục hồi bình luận mẫu (Self-Healing Comments), sửa lỗi lệch avatar người dùng và xóa thẻ khẩn cấp 24/7.
+19. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

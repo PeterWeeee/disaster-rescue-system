@@ -21,7 +21,7 @@
     let messagesBodyEl, chatFormEl, chatInputEl;
     let partnerNameEl, partnerSubtitleEl, partnerInitialEl, sosBadgeEl;
     let callBtnEl, trackLinkEl, minimizeBtnEl, closeBtnEl;
-    let sosAddressEl, statusPillEl, quickChipsEl, toastEl;
+    let sosAddressEl, statusPillEl, quickChipsEl;
 
     function initDomElements() {
         dockEl = document.getElementById('floatingChatDock');
@@ -47,7 +47,7 @@
         sosAddressEl = document.getElementById('floatingSosAddress');
         statusPillEl = document.getElementById('floatingStatusPill');
         quickChipsEl = document.getElementById('floatingQuickChips');
-        toastEl = document.getElementById('floatingChatToast');
+        // Toast element removed
 
         return true;
     }
@@ -90,7 +90,7 @@
 
         launcherEl.style.display = 'none';
         windowEl.style.display = 'flex';
-        if (toastEl) toastEl.style.display = 'none';
+        
 
         // Xóa thông báo chưa đọc
         unreadCount = 0;
@@ -155,8 +155,8 @@
         return msg.isMine === true;
     }
 
-    // Thêm tin nhắn vào giao diện
-    function appendMessage(msg) {
+    // Thêm tin nhắn vào giao diện (isInitial: tải lịch sử ban đầu, không pop toast và không kêu chuông)
+    function appendMessage(msg, isInitial = false) {
         if (!msg || !messagesBodyEl) return;
         if (msg.id && renderedMessageIds.has(msg.id)) return;
         if (msg.id) renderedMessageIds.add(msg.id);
@@ -201,8 +201,8 @@
         messagesBodyEl.appendChild(row);
         scrollToBottom();
 
-        // Xử lý thông báo khi nhận tin nhắn từ người khác
-        if (!isMine) {
+        // Xử lý thông báo khi nhận tin nhắn mới thời gian thực từ người khác
+        if (!isMine && !isInitial) {
             if (!isWindowOpen) {
                 unreadCount++;
                 sessionStorage.setItem('floating_chat_unread', unreadCount.toString());
@@ -211,29 +211,12 @@
                     unreadBadgeEl.style.display = 'block';
                 }
                 playChimeSound();
-                showToastNotification(msg.senderName || 'Tin nhắn mới', msg.content);
+                
             }
         }
     }
 
     // Hiển thị toast nổi phía trên bong bóng chat
-    function showToastNotification(sender, content) {
-        if (!toastEl || isWindowOpen || (windowEl && windowEl.style.display !== 'none')) return;
-        const senderEl = document.getElementById('floatingToastSender');
-        const contentEl = document.getElementById('floatingToastContent');
-        const initialEl = document.getElementById('floatingToastInitial');
-
-        if (senderEl) senderEl.textContent = sender;
-        if (contentEl) contentEl.textContent = content;
-        if (initialEl) initialEl.textContent = sender.charAt(0).toUpperCase();
-
-        toastEl.style.display = 'flex';
-        clearTimeout(toastEl._timer);
-        toastEl._timer = setTimeout(() => {
-            toastEl.style.display = 'none';
-        }, 6000);
-    }
-
     function escapeHtml(str) {
         if (!str) return '';
         return str
@@ -244,8 +227,8 @@
             .replace(/'/g, '&#039;');
     }
 
-    // Tải lịch sử tin nhắn
-    function loadHistory() {
+    // Tải lịch sử tin nhắn (isInitial: mặc định là true khi nạp phiên)
+    function loadHistory(isInitial = false) {
         if (!currentSession || !currentSession.sosId) return;
         fetch(`/api/chat/sos/${currentSession.sosId}/messages`)
             .then(res => res.json())
@@ -253,7 +236,7 @@
                 if (Array.isArray(messages)) {
                     const loading = document.getElementById('floatingChatLoading');
                     if (loading) loading.remove();
-                    messages.forEach(msg => appendMessage(msg));
+                    messages.forEach(msg => appendMessage(msg, isInitial));
                     scrollToBottom();
                 }
             })
@@ -436,8 +419,8 @@
                         subscribeChatRoom(data.sosId);
                     }
 
-                    // Tải lịch sử tin nhắn
-                    loadHistory();
+                    // Tải lịch sử tin nhắn ban đầu (không pop toast các tin cũ)
+                    loadHistory(true);
 
                     // Xác định trạng thái mở hay thu nhỏ
                     const savedState = sessionStorage.getItem('floating_chat_state');
@@ -489,22 +472,6 @@
             headerTitleArea.addEventListener('click', () => {
                 if (isWindowOpen) minimizeChatWindow();
                 else openChatWindow();
-            });
-        }
-        if (toastEl) {
-            toastEl.addEventListener('click', (e) => {
-                if (e.target && e.target.id === 'floatingToastClose') {
-                    toastEl.style.display = 'none';
-                    return;
-                }
-                openChatWindow();
-            });
-        }
-        const toastClose = document.getElementById('floatingToastClose');
-        if (toastClose) {
-            toastClose.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toastEl.style.display = 'none';
             });
         }
         if (chatFormEl && chatInputEl) {

@@ -1,4 +1,4 @@
--- =========================================================================
+﻿-- =========================================================================
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: 03_seed_data.sql
@@ -229,11 +229,22 @@ GO
 
 -- 7. Nạp Bình luận mẫu cho bài đăng cộng đồng (Post Comments) & Cảm xúc (Reactions)
 DECLARE @p1Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Trà Mai%');
+IF @p1Id IS NULL SET @p1Id = (SELECT TOP 1 [id] FROM [dbo].[community_posts] ORDER BY [id] ASC);
+
 DECLARE @p2Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Cẩm Phô%');
+IF @p2Id IS NULL SET @p2Id = (SELECT [id] FROM (SELECT [id], ROW_NUMBER() OVER(ORDER BY [id]) AS rn FROM [dbo].[community_posts]) t WHERE rn = 2);
+
 DECLARE @p3Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Tam Kỳ%');
+IF @p3Id IS NULL SET @p3Id = (SELECT [id] FROM (SELECT [id], ROW_NUMBER() OVER(ORDER BY [id]) AS rn FROM [dbo].[community_posts]) t WHERE rn = 3);
+
 DECLARE @p4Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%');
+IF @p4Id IS NULL SET @p4Id = (SELECT [id] FROM (SELECT [id], ROW_NUMBER() OVER(ORDER BY [id]) AS rn FROM [dbo].[community_posts]) t WHERE rn = 4);
+
 DECLARE @p5Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Quế Long%');
+IF @p5Id IS NULL SET @p5Id = (SELECT [id] FROM (SELECT [id], ROW_NUMBER() OVER(ORDER BY [id]) AS rn FROM [dbo].[community_posts]) t WHERE rn = 5);
+
 DECLARE @p6Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Nông Sơn%');
+IF @p6Id IS NULL SET @p6Id = (SELECT [id] FROM (SELECT [id], ROW_NUMBER() OVER(ORDER BY [id]) AS rn FROM [dbo].[community_posts]) t WHERE rn = 6);
 
 -- 7.1. Bình luận mẫu cho Post 1 (Trà Mai)
 IF @p1Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p1Id)
@@ -337,6 +348,11 @@ IF @p6Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [p
     (@p6Id, 120, 'LIKE', GETDATE()),
     (@p6Id, 121, 'CARE', GETDATE()),
     (@p6Id, 122, 'WARNING', GETDATE());
+
+-- Đồng bộ số lượng comment_count chính xác cho từng bài viết
+UPDATE cp
+SET cp.[comment_count] = ISNULL((SELECT COUNT(*) FROM [dbo].[post_comments] c WHERE c.[post_id] = cp.[id]), 0)
+FROM [dbo].[community_posts] cp;
 
 PRINT N'>>> Đã nạp Bình luận mẫu và Phản ứng icon cảm xúc cho các bài đăng cộng đồng!';
 GO

@@ -111,20 +111,7 @@
 
         </div>
 
-        <!-- Toast thông báo tin nhắn mới khi đang thu nhỏ -->
-        <div id="floatingChatToast" class="floating-chat-toast shadow-lg rounded-4 p-2.5 bg-white border d-flex align-items-center gap-2 cursor-pointer" style="display: none;">
-            <div class="avatar-circle rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                 style="width: 32px; height: 32px; font-size: 0.8rem;">
-                <span id="floatingToastInitial">C</span>
-            </div>
-            <div class="overflow-hidden flex-grow-1" style="max-width: 220px;">
-                <div class="fw-bold small text-dark text-truncate" id="floatingToastSender">Đội Cứu Hộ</div>
-                <div class="text-secondary small text-truncate" id="floatingToastContent" style="font-size: 0.75rem;">Tin nhắn mới...</div>
-            </div>
-            <button type="button" class="btn-close btn-close-sm" id="floatingToastClose" aria-label="Đóng"></button>
         </div>
-
-    </div>
 
     <!-- STYLES CHO FLOATING CHAT DOCK (PHONG CÁCH FACEBOOK MESSENGER) -->
     <style>
@@ -344,19 +331,6 @@
             color: #1d4ed8;
             border-color: #93c5fd;
             transform: translateY(-1px);
-        }
-
-        /* Floating Toast */
-        .floating-chat-toast {
-            position: absolute;
-            bottom: 70px;
-            right: 0;
-            z-index: 1065;
-            animation: toastPop 0.25s ease;
-        }
-        @keyframes toastPop {
-            from { opacity: 0; transform: translateY(10px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .cursor-pointer {

@@ -8,7 +8,7 @@
 > - **Repository GitHub:** [https://github.com/PeterWeeee/disaster-rescue-system.git](https://github.com/PeterWeeee/disaster-rescue-system.git)  
 > - **Nhánh phát triển chính (Default Branch):** `develop`  
 > - **Công nghệ nền tảng:** Java 17/25, Spring Boot 3.3.5, Spring Security 6 (Stateless JWT Cookie), Thymeleaf, Bootstrap 5, Leaflet GIS Map, WebSocket STOMP, OSRM Routing, Cloudinary, Dual DB (MySQL / SQL Server / H2).  
-> - **Trạng thái kiểm thử tự động (Unit & Integration Tests):** **97/97 tests pass 100% (BUILD SUCCESS)**.
+> - **Trạng thái kiểm thử tự động (Unit & Integration Tests):** **131/131 tests pass 100% (BUILD SUCCESS)**.
 
 ---
 
@@ -16,7 +16,7 @@
 
 | STT | Họ và tên | Mã số SV | Vai trò trong nhóm | Trách nhiệm chuyên môn chính | Mức độ đóng góp |
 | :---: | :--- | :---: | :--- | :--- | :---: |
-| **1** | **Tri Thai (PeterWeeee)** | *Nhóm trưởng* | Trưởng nhóm / Backend Lead | Kiến trúc hạ tầng Core Spring Boot, Dual DB (MySQL/SQL Server), Cloudinary Media, WebSocket STOMP thời gian thực | **100%** |
+| **1** | **Tri Thai (PeterWeeee)** | *Nhóm trưởng* | Trưởng nhóm / Backend Lead | Kiến trúc hạ tầng Core Spring Boot, Dual DB (MySQL/SQL Server), Cloudinary Media, WebSocket STOMP thời gian thực, Khung Chat Nổi Facebook Messenger & Đa Cảm Xúc / Bình Luận Bảng Tin, SQL Server Unicode UTF-8 BOM Seeder | **100%** |
 | **2** | **Võ Văn Thịnh** | **24110329** | Fullstack / Security Specialist | Bảo mật Spring Security 6, JWT HttpOnly Cookie, Xác thực OTP Email, Phân hệ Người dân SOS & Bản đồ GIS Leaflet, Cổng quyên góp VNPay/MoMo/VietQR | **100%** |
 | **3** | **Sinh viên phụ trách Điều phối & Admin** | *Thành viên* | Fullstack / GIS Routing Specialist | Phân hệ Điều phối viên (Thuật toán Haversine), Phân hệ Đội cứu hộ (Định tuyến OSRM), Phân hệ Admin, Quỹ cứu trợ & Cảnh báo khẩn cấp | **100%** |
 
@@ -92,7 +92,7 @@
 | **Trang chi tiết sản phẩm / ca cứu trợ** | - Xem chi tiết ca cứu nạn: Tọa độ GPS hiện trường, mô tả tình trạng ngập, người già/trẻ em, số người cần cứu, lịch sử nhật ký cứu hộ.<br>- Bản đồ thu nhỏ chỉ đường từ căn cứ đội cứu hộ đến vị trí người gặp nạn. | - [`SosController.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/controller/SosController.java)<br>- [`sos/track.html`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/resources/templates/sos/track.html) | **100% (Đạt)** |
 | **Giỏ hàng lưu trên Database & Thanh toán (COD, VNPAY, MOMO)** | - Xây dựng **Cổng Quyên Góp & Tiếp Tế Kinh Phí Nhu Yếu Phẩm Cứu Trợ Lũ Lụt** lưu trữ đầy đủ trong bảng `donations` của Database.<br>- Tích hợp đa kênh thanh toán điện tử thực tế:<br>  1. **VNPay Sandbox:** Sinh URL thanh toán với thuật toán HMAC-SHA512 checksum chuẩn.<br>  2. **MoMo / VietQR:** Tự động sinh mã VietQR động theo chuẩn Napas 24/7 với mã đơn hàng và số tiền.<br>  3. **Chuyển khoản trực tiếp:** Ghi nhận và đối soát tự động. | - [`DonationService.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/service/DonationService.java)<br>- [`DonationController.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/controller/DonationController.java)<br>- [`donation/pay.html`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/resources/templates/donation/pay.html)<br>- [`donation/success.html`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/resources/templates/donation/success.html) | **100% (Vượt trội)** |
 | **Quản lý lịch sử theo trạng thái** | - Quản lý lịch sử cứu hộ cá nhân theo 5 trạng thái vòng đời: `PENDING` (Mới gửi) -> `ASSIGNED` (Đã điều động) -> `IN_PROGRESS` (Đang tiếp cận) -> `COMPLETED` (Đã giải cứu thành công) -> `REJECTED/CANCELLED` (Đã hủy).<br>- Quản lý lịch sử các lượt quyên góp ủng hộ với trạng thái `PENDING` -> `SUCCESS` -> `FAILED`. | - [`SosService.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/service/SosService.java)<br>- [`DonationRepository.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/repository/DonationRepository.java) | **100% (Đạt)** |
-| **Thích, Đánh giá, Bình luận (Text > 50 ký tự, Hình ảnh/Video)** | - Tính năng Bảng tin cộng đồng (**Community Feed**): Người dân đăng tải tình hình ngập lụt thực tế với nội dung mô tả chi tiết, tải ảnh hiện trường lên **Cloudinary**.<br>- Chức năng **Thích / Upvote** bài viết cộng đồng.<br>- Bình luận tương tác, phản ánh tọa độ nước dâng nguy hiểm. | - [`CommunityPost.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/entity/CommunityPost.java)<br>- [`FeedApiController.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/controller/FeedApiController.java)<br>- [`CloudinaryService.java`](file:///C:/Users/Thinh/.gemini/antigravity/scratch/disaster-rescue-system/src/main/java/vn/edu/cuunan/service/CloudinaryService.java) | **100% (Đạt)** |
+| **Thích, Đánh giá, Bình luận (Text > 50 ký tự, Hình ảnh/Video)** | - Tính năng Bảng tin cộng đồng (**Community Feed**): Người dân đăng tải tình hình ngập lụt thực tế với nội dung mô tả chi tiết, ảnh hiện trường thực địa lưu trữ và nạp qua **Cloudinary CDN**.<br>- Hệ thống **đa cảm xúc 5 trạng thái** (Multi-Reactions: Thích 👍, Thương thương ❤️, Cầu nguyện 🙏, Cảnh giác ⚠️, Chia buồn 😢) kèm thanh popover animated mượt mà.<br>- Phân hệ **bình luận thời gian thực** (`post_comments`), gửi và hiển thị bình luận tức thời bằng AJAX.<br>- **Khung Chat Nổi Toàn Hệ Thống (Floating Chat Dock)** phong cách Facebook Messenger thường trực góc màn hình, kết nối trực tiếp nạn nhân với đội cứu hộ bằng WebSocket STOMP. | - [`CommunityPost.java`](file:///c:/Users/Will/Projects/disaster-rescue-system/src/main/java/vn/edu/cuunan/entity/CommunityPost.java)<br>- [`PostComment.java`](file:///c:/Users/Will/Projects/disaster-rescue-system/src/main/java/vn/edu/cuunan/entity/PostComment.java)<br>- [`FeedApiController.java`](file:///c:/Users/Will/Projects/disaster-rescue-system/src/main/java/vn/edu/cuunan/controller/FeedApiController.java)<br>- [`ChatApiController.java`](file:///c:/Users/Will/Projects/disaster-rescue-system/src/main/java/vn/edu/cuunan/controller/ChatApiController.java)<br>- [`floating-chat.js`](file:///c:/Users/Will/Projects/disaster-rescue-system/src/main/resources/static/js/floating-chat.js) | **100% (Vượt trội)** |
 
 ---
 
@@ -165,11 +165,12 @@
 2. **Giao thức Thời Gian Thực (WebSocket STOMP over SockJS):**
    - Phản hồi tức thời: Khi có ca SOS mới hoặc khi vị trí đội cứu hộ di chuyển ngoài thực địa, dữ liệu được truyền thẳng lên màn hình Điều phối viên và Người dân mà không cần F5 trình duyệt.
    - Cảnh báo bão lũ diện rộng khẩn cấp tức thời (Emergency Broadcast).
+   - **Khung Chat Nổi Toàn Hệ Thống (Persistent Floating Chat Dock):** Nhắn tin hai chiều thời gian thực giữa người dân và đội cứu hộ được phân công qua kênh WebSocket STOMP `/topic/chat/{sosId}` (có REST fallback), tự động kích hoạt khi ca tiếp cận (`IN_PROGRESS`) và lưu trữ lịch sử bền vững.
 3. **Bảo Mật Hiện Đại & Tối Ưu UX:**
    - Kết hợp ưu điểm bảo mật của **JWT Token** (Stateless, scalable) với sự tiện dụng của **Thymeleaf SSR** thông qua cơ chế lưu trữ an toàn trong **HttpOnly Cookie** (chống lại tấn công XSS và đánh cắp token).
    - Xác thực danh tính 2 lớp qua Email OTP chống tài khoản ảo phá hoại hệ thống cứu nạn.
 4. **Chất Lượng Mã Nguồn & Kiểm Thử Tự Động Toàn Diện:**
-   - Dự án sở hữu bộ test tự động gồm **97 Unit & Integration Tests** bao phủ toàn diện từ Security, Controller, Service, Repository đến Thuật toán địa hình OSRM/Haversine, đạt tỷ lệ thành công tuyệt đối **100% Pass**.
+   - Dự án sở hữu bộ test tự động gồm **131 Unit & Integration Tests** bao phủ toàn diện từ Security, Controller, Service, Repository đến Thuật toán địa hình OSRM/Haversine, đạt tỷ lệ thành công tuyệt đối **100% Pass** (BUILD SUCCESS).
 
 ---
 

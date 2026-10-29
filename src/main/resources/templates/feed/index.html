@@ -1,1089 +1,2253 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/main :: layout('Bảng Tin Cộng Đồng - Cứu Nạn 24/7', ~{::#feed-content})}">
-<body>
-
-<div id="feed-content" class="py-4">
-    <div class="container-xl">
-
-        <!-- HEADER BANNER VỚI NỀN THIÊN TAI THỰC TẾ -->
-        <div class="feed-header-banner p-4 rounded-4 shadow-sm mb-4 position-relative overflow-hidden"
-             style="background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important; color: #fff !important;">
-            <div class="position-relative z-1 d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div>
-                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger text-white small fw-bold mb-2">
-                        <span class="pulse-dot"></span>
-                        <span>MẠNG XÃ HỘI CỨU TRỢ 24/7</span>
-                    </div>
-                    <h1 class="h3 fw-extrabold mb-1" style="color: #fff !important;">Bảng Tin Cảnh Báo Thiên Tai Cộng Đồng</h1>
-                    <p class="small mb-0" style="color: #fff !important; opacity: .92;">
-                        Thông tin hiện trường do người dân chia sẻ theo thời gian thực · Ban Điều Phối xác minh và phân phối lực lượng cứu trợ.
-                    </p>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-danger fw-bold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span>Đăng Tin Cảnh Báo</span>
-                    </button>
-                    <a th:href="@{/map}" class="btn btn-outline-light fw-bold shadow-sm">
-                        <i class="fa-solid fa-map-location-dot me-1"></i> Bản Đồ Trực Tuyến
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3-COLUMN WORKSPACE FRAME -->
-        <div class="row g-4">
-
-            <!-- ============================================================== -->
-            <!-- CỘT 1: SIDEBAR TRÁI (3 COLS) - CỨU NẠN KHẨN CẤP & ĐƠN CỦA TÔI -->
-            <!-- ============================================================== -->
-            <aside class="col-lg-3 col-md-4">
-                <div class="d-flex flex-column gap-3 sticky-top" style="top: 80px; z-index: 10;">
-
-                    <!-- Card Cứu Nạn Khẩn Cấp -->
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                        <div class="card-body p-3 text-center">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-danger text-uppercase fw-bold">Khẩn Cấp 24/7</span>
-                                <small class="text-muted fw-semibold">Đường dây nóng: 112</small>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-2">Gặp Nguy Hiểm Tính Mạng?</h6>
-                            <a th:href="@{/sos}" class="btn btn-danger btn-lg w-full fw-extrabold shadow pulse-button py-2.5 d-flex align-items-center justify-content-center gap-2 rounded-3">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                <span>GỬI YÊU CẦU SOS</span>
-                            </a>
-                            <small class="text-muted d-block mt-2 font-monospace" style="font-size: 0.75rem;">
-                                Tự bắt GPS vệ tinh · Gửi trong 10 giây
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Card Lịch Sử Cứu Hộ -->
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark small"><i class="fa-solid fa-clock-rotate-left text-primary me-1"></i>Lịch sử cứu hộ của bạn</span>
-                                <span class="badge bg-primary-subtle text-primary fw-semibold" th:text="${#lists.size(sosHistory)} + ' ca'"></span>
-                            </div>
-
-                            <div th:if="${!#lists.isEmpty(sosHistory)}" class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
-                                <div th:each="historyItem : ${sosHistory}" class="border rounded-3 p-2">
-                                    <div class="d-flex justify-content-between align-items-center gap-2">
-                                        <span class="fw-bold text-danger font-monospace" th:text="'SOS-' + ${historyItem.id}">SOS-1042</span>
-                                        <span th:if="${historyItem.status == 'PENDING'}" class="badge bg-secondary">Chờ tiếp nhận</span>
-                                        <span th:if="${historyItem.status == 'DISPATCHED'}" class="badge bg-info text-dark">Đã điều phối</span>
-                                        <span th:if="${historyItem.status == 'IN_PROGRESS'}" class="badge bg-warning text-dark">Đang cứu nạn</span>
-                                        <span th:if="${historyItem.status == 'RESOLVED' || historyItem.status == 'COMPLETED'}" class="badge bg-success">Đã hoàn thành</span>
-                                        <span th:if="${historyItem.status == 'CANCELLED'}" class="badge bg-dark">Đã hủy</span>
-                                        <span th:if="${historyItem.status != 'PENDING' and historyItem.status != 'DISPATCHED' and historyItem.status != 'IN_PROGRESS' and historyItem.status != 'RESOLVED' and historyItem.status != 'COMPLETED' and historyItem.status != 'CANCELLED'}"
-                                              class="badge bg-secondary" th:text="${historyItem.status}">Đang xử lý</span>
-                                    </div>
-                                    <p class="small text-muted mb-2 mt-1 text-truncate" th:text="${historyItem.addressDetail != null ? historyItem.addressDetail : 'Đang cập nhật vị trí'}">Vị trí cứu hộ</p>
-                                    <a th:href="@{'/sos/track/' + ${historyItem.id}}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3">
-                                        <i class="fa-solid fa-location-crosshairs me-1"></i> Mở chi tiết ca SOS
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div th:if="${#lists.isEmpty(sosHistory)}" class="text-center py-2 text-muted small">
-                                <i class="fa-solid fa-shield-heart fa-2x text-success mb-2 opacity-50"></i>
-                                <p class="mb-0">Bạn chưa có yêu cầu cứu hộ nào.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card Tiện Ích -->
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-3">
-                            <h6 class="fw-bold text-uppercase text-secondary small mb-2 tracking-wider">Tiện ích nhanh</h6>
-                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small fw-semibold">
-                                <li>
-                                    <a th:href="@{/map}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
-                                        <i class="fa-solid fa-map-location-dot text-danger"></i>
-                                        <span>Bản đồ cứu hộ & điểm sơ tán</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a th:href="@{/sos/track}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
-                                        <i class="fa-solid fa-magnifying-glass text-primary"></i>
-                                        <span>Tra cứu theo số điện thoại</span>
-                                    </a>
-                                </li>
-                                <li class="pt-2 border-top">
-                                    <div class="d-flex justify-content-between align-items-center text-muted">
-                                        <span>Số khẩn cấp:</span>
-                                        <span class="text-danger fw-bold">112 · 114 · 115</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
-            </aside>
-
-            <!-- ============================================================== -->
-            <!-- CỘT 2: TRUNG TÂM (6 COLS) - HỘP ĐĂNG TIN FACEBOOK & FEED STREAM -->
-            <!-- ============================================================== -->
-            <main class="col-lg-6 col-md-8">
-
-                <!-- FACEBOOK-STYLE POST COMPOSER CARD -->
-                <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
-                    <!-- Top Input Row -->
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle bg-danger text-white fw-extrabold d-flex align-items-center justify-center shadow-sm"
-                             style="width: 44px; height: 44px; font-size: 1.1rem; line-height: 44px; text-align: center;">
-                            <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">N</span>
-                        </div>
-                        <button type="button" class="btn rounded-pill flex-grow-1 text-start px-4 py-2.5 small fw-semibold shadow-xs"
-                                style="background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;"
-                                data-bs-toggle="modal" data-bs-target="#createPostModal">
-                            Bạn đang thấy hiểm họa gì quanh khu vực? Chia sẻ để cảnh báo...
-                        </button>
-                    </div>
-
-                    <!-- Divider -->
-                    <hr class="my-2 text-secondary opacity-25">
-
-                    <!-- Facebook Action Buttons -->
-                    <div class="row g-1 pt-1 text-center">
-                        <div class="col-4">
-                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
-                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
-                                <i class="fa-solid fa-camera text-success fs-6"></i>
-                                <span class="small">Ảnh hiện trường</span>
-                            </button>
-                        </div>
-                        <div class="col-4">
-                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
-                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
-                                <i class="fa-solid fa-location-dot text-danger fs-6"></i>
-                                <span class="small">Ghim GPS</span>
-                            </button>
-                        </div>
-                        <div class="col-4">
-                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
-                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
-                                <i class="fa-solid fa-tags text-warning fs-6"></i>
-                                <span class="small">Loại thiên tai</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FEED STREAM CONTAINER -->
-                <div id="postsStream" class="d-flex flex-column gap-3">
-
-                    <!-- Loop through posts -->
-                    <article th:each="post : ${posts}" th:id="'post-' + ${post.id}" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
-                        <div class="card-body p-3 p-sm-4">
-
-                            <!-- Header Author -->
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
-                                         style="width: 42px; height: 42px; font-size: 1rem; line-height: 42px; text-align: center;">
-                                        <span th:text="${post.authorName != null ? #strings.substring(post.authorName, 0, 1) : 'T'}">T</span>
-                                    </div>
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                            <span class="fw-bold text-dark fs-6" th:text="${post.authorName}">Tên Tác Giả</span>
-                                            <span class="badge fw-bold"
-                                                  th:style="'background-color: ' + ${post.hazardType.badgeColor} + '; color: #fff;'"
-                                                  th:text="${post.hazardType.shortName}">SẠT LỞ</span>
-                                        </div>
-                                        <div class="text-muted small">
-                                            <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'HH:mm - dd/MM/yyyy') : 'Vừa xong'}">Vừa xong</span>
-                                            <span th:if="${post.locationName != null}"> · <i class="fa-solid fa-location-dot text-danger"></i> <span th:text="${post.locationName}">Địa điểm</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Verification Status Badge -->
-                                <div>
-                                    <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-2.5 py-1.5 rounded-pill shadow-xs">
-                                        <i class="fa-solid fa-check me-1"></i> Đã xác minh
-                                    </span>
-                                    <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-2.5 py-1.5 rounded-pill">
-                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
-                                    </span>
-                                    <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-2.5 py-1.5 rounded-pill">
-                                        Đã bác bỏ
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Content text -->
-                            <p class="post-content-text mb-3" th:text="${post.content}">
-                                Nội dung chi tiết bài viết cảnh báo thiên tai từ hiện trường...
-                            </p>
-
-                            <!-- Media Image (Cloudinary CDN) -->
-                            <div th:if="${post.imageUrl != null && !#strings.isEmpty(post.imageUrl)}" class="mb-3 rounded-3 overflow-hidden shadow-xs border position-relative bg-light">
-                                <img th:src="${post.imageUrl}"
-                                     class="img-fluid w-100 object-fit-cover feed-post-image"
-                                     style="max-height: 400px; cursor: pointer; transition: transform 0.25s ease;"
-                                     alt="Ảnh hiện trường cảnh báo thiên tai"
-                                     loading="lazy"
-                                     th:data-src="${post.imageUrl}"
-                                     th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' · ' + post.hazardType.description}"
-                                     onclick="previewFeedImage(this.dataset.src, this.dataset.caption)">
-                                <div class="position-absolute top-0 end-0 m-2 d-flex align-items-center gap-1.5">
-                                    <span th:if="${#strings.contains(post.imageUrl, 'cloudinary')}"
-                                          class="badge bg-dark bg-opacity-75 text-white small fw-semibold px-2 py-1 rounded-pill shadow-xs"
-                                          style="backdrop-filter: blur(4px);">
-                                        <i class="fa-solid fa-camera text-info me-1"></i>Ảnh hiện trường
-                                    </span>
-                                    <button type="button" class="btn btn-dark btn-sm bg-opacity-75 text-white py-0 px-2 rounded-pill shadow-xs"
-                                            style="backdrop-filter: blur(4px); font-size: 0.75rem;"
-                                            th:data-src="${post.imageUrl}"
-                                            th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' - ' + post.hazardType.shortName}"
-                                            onclick="previewFeedImage(this.dataset.src, this.dataset.caption)"
-                                            title="Bấm xem ảnh cỡ lớn">
-                                        <i class="fa-solid fa-expand me-1"></i>Xem ảnh
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Converted SOS Notice Badge (if already converted) -->
-                            <div th:if="${post.convertedSosRequest != null}" class="alert alert-danger py-2 px-3 small fw-bold d-flex align-items-center justify-content-between mb-3 rounded-3">
-                                <span><i class="fa-solid fa-tower-broadcast me-1"></i> Đã chuyển thành ca cứu hộ chính thức:</span>
-                                <a th:href="@{'/sos/track?code=' + ${post.convertedSosRequest.id}}" class="btn btn-outline-danger btn-sm py-0 fw-bold">
-                                    Xem SOS-<span th:text="${post.convertedSosRequest.id}">1042</span>
-                                </a>
-                            </div>
-
-                            <!-- Thống Kê Phản Ứng & Số Lượng Bình Luận -->
-                            <div class="d-flex align-items-center justify-content-between px-1 mb-2 small">
-                                <div class="d-flex align-items-center gap-1.5 reaction-summary-bar" th:id="'reaction-summary-' + ${post.id}">
-                                    <span class="d-inline-flex align-items-center gap-1 reaction-icons-stack">
-                                        <span class="badge rounded-pill bg-primary-subtle text-primary border px-2 py-0.5" style="font-size: 0.73rem;" title="Xác nhận tin">
-                                            👍 <span class="ms-0.5 count-LIKE" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('LIKE') : 0}">0</span>
-                                        </span>
-                                        <span class="badge rounded-pill bg-danger-subtle text-danger border px-2 py-0.5" style="font-size: 0.73rem;" title="Thương thương / Ủng hộ">
-                                            ❤️ <span class="ms-0.5 count-CARE" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('CARE') : 0}">0</span>
-                                        </span>
-                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border px-2 py-0.5" style="font-size: 0.73rem;" title="Cầu bình an">
-                                            🙏 <span class="ms-0.5 count-PRAY" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('PRAY') : 0}">0</span>
-                                        </span>
-                                        <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border px-2 py-0.5" style="font-size: 0.73rem;" title="Cảnh giác nguy hiểm">
-                                            ⚠️ <span class="ms-0.5 count-WARNING" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('WARNING') : 0}">0</span>
-                                        </span>
-                                    </span>
-                                    <span class="text-muted ms-1 small">
-                                        · <span class="total-reactions fw-bold" th:text="${post.upvoteCount}">24</span> tương tác
-                                    </span>
-                                </div>
-                                <div>
-                                    <a role="button" class="text-secondary text-decoration-none small fw-semibold"
-                                       th:data-bs-target="'#comments-section-' + ${post.id}"
-                                       data-bs-toggle="collapse"
-                                       aria-expanded="false">
-                                        <span class="comment-count-text" th:text="${post.commentCount} + ' bình luận'">3 bình luận</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Footer Actions Bar -->
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- Reaction Container với Popover Emojis Nổi -->
-                                    <div class="reaction-container position-relative" th:id="'reaction-container-' + ${post.id}">
-                                        <!-- Khung Chọn Cảm Xúc Nổi (Hover / Tap) -->
-                                        <div class="reaction-popover shadow-lg rounded-pill p-1 bg-white border d-flex align-items-center gap-1">
-                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'LIKE\')'" title="Xác nhận tin">
-                                                <span class="emoji-anim">👍</span>
-                                                <span class="reaction-tooltip">Xác nhận</span>
-                                            </button>
-                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'CARE\')'" title="Thương thương / Ủng hộ">
-                                                <span class="emoji-anim">❤️</span>
-                                                <span class="reaction-tooltip">Thương thương</span>
-                                            </button>
-                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'PRAY\')'" title="Cầu bình an">
-                                                <span class="emoji-anim">🙏</span>
-                                                <span class="reaction-tooltip">Cầu an</span>
-                                            </button>
-                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'WARNING\')'" title="Cảnh giác nguy hiểm">
-                                                <span class="emoji-anim">⚠️</span>
-                                                <span class="reaction-tooltip">Cảnh giác</span>
-                                            </button>
-                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'SAD\')'" title="Xót xa / Chia sẻ">
-                                                <span class="emoji-anim">😢</span>
-                                                <span class="reaction-tooltip">Xót xa</span>
-                                            </button>
-                                        </div>
-
-                                        <!-- Nút Thả Cảm Xúc Chính -->
-                                        <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold btn-reaction-main"
-                                                th:id="'react-btn-' + ${post.id}"
-                                                th:classappend="${userReactions != null && userReactions.containsKey(post.id) ? 'btn-reacted react-' + userReactions.get(post.id) : 'btn-outline-secondary'}"
-                                                th:data-post-id="${post.id}"
-                                                th:data-reaction="${userReactions != null ? userReactions.get(post.id) : ''}"
-                                                th:onclick="'handleDefaultReact(' + ${post.id} + ')'">
-                                            <span class="reaction-display-icon">
-                                                <span th:if="${userReactions == null || !userReactions.containsKey(post.id)}">👍</span>
-                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'LIKE'}">👍</span>
-                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'CARE'}">❤️</span>
-                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'PRAY'}">🙏</span>
-                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'WARNING'}">⚠️</span>
-                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'SAD'}">😢</span>
-                                            </span>
-                                            <span class="reaction-display-label ms-1"
-                                                  th:text="${userReactions == null || !userReactions.containsKey(post.id) ? 'Cảm xúc' : (userReactions.get(post.id) == 'CARE' ? 'Thương thương' : (userReactions.get(post.id) == 'PRAY' ? 'Cầu an' : (userReactions.get(post.id) == 'WARNING' ? 'Cảnh giác' : (userReactions.get(post.id) == 'SAD' ? 'Xót xa' : 'Xác nhận'))))}">
-                                                Cảm xúc
-                                            </span>
-                                            (<span class="vote-count" th:text="${post.upvoteCount}">24</span>)
-                                        </button>
-                                    </div>
-
-                                    <!-- Button Mở Hộp Bình Luận -->
-                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold btn-toggle-comments"
-                                            th:data-bs-target="'#comments-section-' + ${post.id}"
-                                            data-bs-toggle="collapse"
-                                            aria-expanded="false"
-                                            th:aria-controls="'comments-section-' + ${post.id}">
-                                        <i class="fa-solid fa-comment me-1 text-info"></i>
-                                        <span>Bình luận</span> (<span class="comment-count-btn" th:text="${post.commentCount}">3</span>)
-                                    </button>
-                                </div>
-
-                                <!-- Nút Chuyển thành đơn SOS -->
-                                <button th:if="${post.convertedSosRequest == null}" type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-xs"
-                                        th:onclick="'convertToSos(' + ${post.id} + ')'">
-                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                                    <span>Chuyển thành đơn SOS</span>
-                                </button>
-                            </div>
-
-                            <!-- KHUNG BÌNH LUẬN COLLAPSIBLE (BÌNH LUẬN MẪU & GỬI BÌNH LUẬN MỚI) -->
-                            <div th:id="'comments-section-' + ${post.id}" class="collapse mt-3 pt-3 border-top bg-light-subtle rounded-3 p-3">
-                                <div class="d-flex align-items-center justify-content-between mb-2.5">
-                                    <span class="small fw-bold text-dark">
-                                        <i class="fa-regular fa-comments text-primary me-1"></i>Bình luận cộng đồng (<span class="comment-count-badge" th:text="${post.commentCount}">3</span>)
-                                    </span>
-                                    <small class="text-muted" style="font-size: 0.72rem;">Cập nhật trực tiếp</small>
-                                </div>
-
-                                <!-- Danh sách bình luận -->
-                                <div class="comments-list d-flex flex-column gap-2 mb-3" th:id="'comments-list-' + ${post.id}">
-                                    <div th:each="cmt : ${commentsMap != null && commentsMap.containsKey(post.id) ? commentsMap.get(post.id) : {}}"
-                                         class="d-flex align-items-start gap-2 comment-bubble-wrapper">
-                                        <img th:if="${cmt.authorAvatar != null && !#strings.isEmpty(cmt.authorAvatar)}"
-                                             th:src="${cmt.authorAvatar}"
-                                             class="rounded-circle object-fit-cover shadow-xs mt-1"
-                                             style="width: 32px; height: 32px; flex-shrink: 0;" alt="Avatar">
-                                        <div th:unless="${cmt.authorAvatar != null && !#strings.isEmpty(cmt.authorAvatar)}"
-                                             class="rounded-circle bg-secondary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs mt-1"
-                                             style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">
-                                            <span th:text="${#strings.substring(cmt.authorName, 0, 1)}">U</span>
-                                        </div>
-                                        <div class="bg-white p-2.5 px-3 rounded-4 shadow-xs border flex-grow-1 comment-bubble">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="fw-bold text-dark small" th:text="${cmt.authorName}">Tên người dùng</span>
-                                                <small class="text-muted" style="font-size: 0.72rem;"
-                                                       th:text="${cmt.createdAt != null ? #temporals.format(cmt.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">Vừa xong</small>
-                                            </div>
-                                            <div class="text-secondary small" th:text="${cmt.content}">Nội dung bình luận</div>
-                                        </div>
-                                    </div>
-                                    <div th:if="${commentsMap == null || !commentsMap.containsKey(post.id) || #lists.isEmpty(commentsMap.get(post.id))}"
-                                         class="text-center py-2 text-muted small empty-comment-notice">
-                                        Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
-                                    </div>
-                                </div>
-
-                                <!-- Form Nhập Bình Luận Mới -->
-                                <form class="comment-input-form d-flex align-items-center gap-2" th:data-post-id="${post.id}" onsubmit="submitComment(event, this)">
-                                    <div class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
-                                         style="width: 34px; height: 34px; font-size: 0.85rem; flex-shrink: 0;">
-                                        <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">U</span>
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control rounded-pill px-3 comment-text-input"
-                                               placeholder="Viết bình luận hoặc thông tin cứu trợ..." required maxlength="1000">
-                                        <button class="btn btn-primary rounded-pill px-3 ms-1 fw-bold d-flex align-items-center gap-1 shadow-xs" type="submit">
-                                            <span>Gửi</span>
-                                            <i class="fa-solid fa-paper-plane small"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
-                        </div>
-                    </article>
-
-                </div>
-            </main>
-
-            <!-- ============================================================== -->
-            <!-- CỘT 3: SIDEBAR PHẢI (3 COLS) - CẢNH BÁO MỚI & ĐIỂM SƠ TÁN -->
-            <!-- ============================================================== -->
-            <aside class="col-lg-3 d-none d-lg-block">
-                <div class="d-flex flex-column gap-3 sticky-top" style="top: 80px; z-index: 10;">
-
-                    <!-- Card Cảnh Báo Mới Nhất (Chính thống từ Ban Điều Phối) -->
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2.5">
-                                <h6 class="fw-bold text-dark small mb-0">
-                                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Cảnh báo khẩn mới
-                                </h6>
-                                <span class="badge bg-danger text-white"><i class="fa-solid fa-circle-dot me-1 fa-fade"></i>Trực tiếp</span>
-                            </div>
-
-                            <div th:if="${recentAlerts != null && !#lists.isEmpty(recentAlerts)}" class="d-flex flex-column gap-2 small">
-                                <div th:each="alert : ${recentAlerts}"
-                                     class="p-2 rounded-3 alert-item-card border"
-                                     th:classappend="${alert.severity == 'DANGER_RED' ? 'bg-danger-subtle border-danger-subtle text-danger' : (alert.severity == 'WARNING_ORANGE' ? 'bg-warning-subtle border-warning-subtle text-warning-emphasis' : 'bg-light border text-dark')}"
-                                     style="cursor: pointer;"
-                                     onclick="showAlertDetail(this)"
-                                     th:data-title="${alert.title}"
-                                     th:data-content="${alert.content}"
-                                     th:data-region="${alert.affectedRegion}"
-                                     th:data-severity="${alert.severity}"
-                                     title="Bấm để xem chi tiết thông báo khẩn cấp">
-                                    <div class="d-flex align-items-center gap-1.5 fw-bold">
-                                        <span th:if="${alert.severity == 'DANGER_RED'}" class="badge bg-danger">KHẨN</span>
-                                        <span th:if="${alert.severity == 'WARNING_ORANGE'}" class="badge bg-warning text-dark">CAO</span>
-                                        <span th:if="${alert.severity != 'DANGER_RED' && alert.severity != 'WARNING_ORANGE'}" class="badge bg-secondary text-white">LƯU Ý</span>
-                                        <span class="text-truncate" th:text="${alert.title}">Mưa lớn diện rộng</span>
-                                    </div>
-                                    <div class="text-muted mt-1 text-truncate" style="font-size: 0.75rem;">
-                                        <span th:text="${alert.affectedRegion != null ? alert.affectedRegion : 'Toàn khu vực'}">Khu vực</span>
-                                        <span> · </span>
-                                        <span th:text="${alert.createdAt != null ? #temporals.format(alert.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">08:30</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div th:if="${recentAlerts == null || #lists.isEmpty(recentAlerts)}" class="text-center py-3 text-muted small">
-                                <i class="fa-solid fa-circle-check text-success fa-2x mb-1 opacity-50 d-block"></i>
-                                <span>Chưa có cảnh báo nguy cấp mới nào.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card Điểm Sơ Tán Gần Bạn -->
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold text-dark small mb-0"><i class="fa-solid fa-campground text-warning me-1"></i>Điểm sơ tán an toàn</h6>
-                                <a th:href="@{/map#shelters}" class="small text-primary text-decoration-none fw-bold">Tất cả</a>
-                            </div>
-
-                            <div class="d-flex flex-column gap-3 small">
-                                <div th:each="shelter : ${shelters}" class="p-2 rounded-3 bg-light border">
-                                    <div class="d-flex justify-content-between fw-bold text-dark mb-1">
-                                        <span th:text="${shelter.name}">THCS Trưng Vương</span>
-                                        <span class="text-danger" th:text="${shelter.occupancyPercentage} + '%'">70%</span>
-                                    </div>
-                                    <!-- Progress Bar -->
-                                    <div class="progress mb-1.5" style="height: 6px;">
-                                        <div class="progress-bar bg-warning" role="progressbar"
-                                             th:style="'width: ' + ${shelter.occupancyPercentage} + '%;'"
-                                             th:aria-valuenow="${shelter.occupancyPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
-                                        <span>Còn <strong class="text-dark" th:text="${shelter.remainingCapacity}">90</strong>/<span th:text="${shelter.totalCapacity}">300</span> chỗ</span>
-                                        <span th:text="${shelter.contactPhone}">0235-3881234</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </aside>
-
-        </div>
-
-    </div>
-
-<!-- ========================================================================= -->
-<!-- MODAL TẠO BÀI ĐĂNG PHONG CÁCH FACEBOOK POPUP -->
-<!-- ========================================================================= -->
-<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-lg">
-            <div class="modal-header border-bottom py-3">
-                <h5 class="modal-title fw-bold text-dark fs-6" id="createPostModalLabel">Tạo bài viết cảnh báo thiên tai</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="createPostForm" enctype="multipart/form-data">
-                <div class="modal-body p-4">
-                    <!-- Author Row -->
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
-                             style="width: 44px; height: 44px; font-size: 1.1rem; line-height: 44px; text-align: center;">
-                            <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">N</span>
-                        </div>
-                        <div>
-                            <div class="fw-bold text-dark" th:text="${currentUser != null ? currentUser.fullName : 'Người dân'}">Nguyễn Văn A</div>
-                            <div class="d-flex align-items-center gap-1.5 mt-0.5">
-                                <span class="badge bg-light text-dark border small fw-bold">
-                                    <i class="fa-solid fa-earth-americas me-1 text-primary"></i>Công khai toàn vùng
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Content Textarea -->
-                    <div class="mb-3">
-                        <textarea class="form-control border-0 p-0 text-dark fs-6 shadow-none" id="postContent" name="content" rows="3"
-                                  placeholder="Bạn đang thấy hiểm họa gì? Nước dâng cao bao nhiêu, có ai mắc kẹt cần xuồng gấp không..." required></textarea>
-                    </div>
-
-                    <!-- Hazard Selector Pills -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Loại hiểm họa:</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            <div th:each="hazard : ${hazardTypes}">
-                                <input type="radio" class="btn-check" name="hazardType" th:id="'hazard_' + ${hazard.name()}"
-                                       th:value="${hazard.name()}" th:checked="${hazard.name() == 'LANDSLIDE'}">
-                                <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'hazard_' + ${hazard.name()}"
-                                       th:text="${hazard.shortName}">Sạt lở</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Location Row -->
-                    <div class="mb-3 p-2.5 rounded-3 bg-light border small">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-danger fw-bold"><i class="fa-solid fa-location-dot me-1"></i>Vị trí hiện trường:</span>
-                            <button type="button" id="btnScanGps" class="btn btn-link btn-sm p-0 text-primary fw-bold text-decoration-none">
-                                <i class="fa-solid fa-crosshairs me-1"></i>Lấy GPS
-                            </button>
-                        </div>
-                        <input type="text" class="form-control form-control-sm mt-1.5" id="locationName" name="locationName"
-                               placeholder="Xã/Phường, Huyện/Quận, Tỉnh/Thành phố">
-                        <input type="hidden" id="latitude" name="latitude">
-                        <input type="hidden" id="longitude" name="longitude">
-                    </div>
-
-                    <!-- Image Upload -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Ảnh hiện trường:</label>
-                        <input type="file" class="form-control form-control-sm" id="imageFile" name="imageFile" accept="image/*">
-                    </div>
-
-                </div>
-                <div class="modal-footer border-top p-3">
-                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" id="btnSubmitPost" class="btn btn-primary fw-bold px-4">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================================================= -->
-<!-- MODAL XEM CHI TIẾT ẢNH HIỆN TRƯỜNG CLOUDINARY FULL SIZE -->
-<!-- ========================================================================= -->
-<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 rounded-4 overflow-hidden bg-dark text-white shadow-lg">
-            <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary fw-bold"><i class="fa-solid fa-camera me-1"></i>Ảnh hiện trường</span>
-                    <span id="previewModalCaption" class="small text-white-50 text-truncate" style="max-width: 480px;"></span>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body text-center p-3">
-                <img id="previewModalImg" src="" class="img-fluid rounded-3 shadow" style="max-height: 72vh; width: auto;" alt="Xem trước ảnh">
-                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2 px-2">
-                    <span class="small text-white-50 font-monospace" style="font-size: 0.75rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Ảnh vệ tinh / thực địa đã xác thực</span>
-                    <a id="previewModalOpenLink" href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
-                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở ảnh gốc toàn màn hình
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    function cleanVietnameseAddress(addr) {
-        if (!addr) return '';
-        let cleaned = addr
-            .replace(/\bProvince de\s+/gi, '')
-            .replace(/\bProvince of\s+/gi, '')
-            .replace(/\bRegion of\s+/gi, '')
-            .replace(/\bDistrict of\s+/gi, '')
-            .replace(/\bCity of\s+/gi, '')
-            .replace(/\bViêt Nam\b/gi, 'Việt Nam');
-
-        if (/Cai Lậy|Cái Bè|Mỹ Tho|Gò Công|Chợ Gạo|Tân Phước/i.test(cleaned)) {
-            cleaned = cleaned.replace(/Đồng Tháp/g, 'Tiền Giang');
-        }
-
-        return cleaned.replace(/\s*,\s*,+/g, ', ').replace(/^,\s*|\s*,$/g, '').trim();
-    }
-
-    // Hàm giải mã tọa độ ngược thành địa chỉ tiếng Việt cho bài đăng
-    async function reverseGeocodeFeedLocation(lat, lng) {
-        const inputLoc = document.getElementById('locationName');
-        inputLoc.value = '🔍 Đang tra cứu địa chỉ hành chính...';
-        let resolved = '';
-
-        try {
-            const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=default`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.features && data.features.length > 0) {
-                    const p = data.features[0].properties;
-                    const parts = [];
-                    if (p.housenumber) parts.push(p.housenumber);
-                    if (p.street) parts.push(p.street);
-                    else if (p.name) parts.push(p.name);
-                    if (p.name && p.street && p.name !== p.street) parts.unshift(p.name);
-                    if (p.locality && !parts.includes(p.locality)) parts.push(p.locality);
-                    const d = p.suburb || p.district;
-                    if (d && !parts.includes(d)) parts.push(d);
-                    const c = p.county || p.city;
-                    if (c && !parts.includes(c)) parts.push(c);
-                    if (p.state && !parts.includes(p.state)) parts.push(p.state);
-                    if (p.country && !parts.includes(p.country)) parts.push(p.country);
-                    const addr = parts.filter(Boolean).join(', ');
-                    if (addr && addr.length > 3) resolved = addr;
-                }
-            }
-        } catch (e) {}
-
-        if (!resolved) {
-            try {
-                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=vi`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const parts = [];
-                    if (data.locality) parts.push(data.locality);
-                    if (data.city && data.city !== data.locality) parts.push(data.city);
-                    if (data.principalSubdivision) parts.push(data.principalSubdivision);
-                    if (data.countryName) parts.push(data.countryName);
-                    const addr = parts.filter(Boolean).join(', ');
-                    if (addr && addr.length > 3) resolved = addr;
-                }
-            } catch (e) {}
-        }
-
-        inputLoc.value = cleanVietnameseAddress(resolved) || `Tọa độ GPS [${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}]`;
-    }
-
-    // Lấy tọa độ GPS tự động khi bấm nút Lấy GPS
-    document.getElementById('btnScanGps').addEventListener('click', function() {
-        if (!navigator.geolocation) {
-            alert('Trình duyệt không hỗ trợ định vị Geolocation!');
-            return;
-        }
-        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang quét GPS...';
-        navigator.geolocation.getCurrentPosition(
-            async function(pos) {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
-                document.getElementById('btnScanGps').innerHTML = '<i class="fa-solid fa-check text-success me-1"></i>Đã có GPS';
-                await reverseGeocodeFeedLocation(lat, lng);
-            },
-            function(err) {
-                alert('Không thể lấy vị trí GPS: ' + err.message);
-                document.getElementById('btnScanGps').innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i>Thử lại';
-            },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    });
-
-    // Xử lý gửi Form Đăng tin cảnh báo
-    document.getElementById('createPostForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSubmitPost');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang đăng...';
-
-        const formData = new FormData(this);
-        if (!document.getElementById('latitude').value) {
-            formData.delete('latitude');
-        }
-        if (!document.getElementById('longitude').value) {
-            formData.delete('longitude');
-        }
-        const imgFile = document.getElementById('imageFile');
-        if (!imgFile || !imgFile.files || imgFile.files.length === 0) {
-            formData.delete('imageFile');
-        }
-
-        fetch('/api/feed/posts', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || 'Đăng tin cảnh báo thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + (data.message || 'Không thể đăng tin'));
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
-            }
-        })
-        .catch(err => {
-            alert('Lỗi kết nối máy chủ: ' + err.message);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
-        });
-    });
-
-    // Cấu hình nhãn và icon cho từng loại cảm xúc
-    const REACTION_CONFIG = {
-        LIKE: { icon: '👍', label: 'Xác nhận', colorClass: 'react-LIKE' },
-        CARE: { icon: '❤️', label: 'Thương thương', colorClass: 'react-CARE' },
-        PRAY: { icon: '🙏', label: 'Cầu an', colorClass: 'react-PRAY' },
-        WARNING: { icon: '⚠️', label: 'Cảnh giác', colorClass: 'react-WARNING' },
-        SAD: { icon: '😢', label: 'Xót xa', colorClass: 'react-SAD' }
-    };
-
-    // Xử lý khi nhấn trực tiếp vào nút Cảm xúc chính (mặc định LIKE hoặc toggle un-react)
-    function handleDefaultReact(postId) {
-        const btn = document.getElementById('react-btn-' + postId);
-        const currentReaction = btn.getAttribute('data-reaction');
-        const nextType = currentReaction ? currentReaction : 'LIKE';
-        handleReact(postId, nextType);
-    }
-
-    // Xử lý thả icon cảm xúc (LIKE, CARE, PRAY, WARNING, SAD)
-    function handleReact(postId, reactionType) {
-        fetch(`/api/feed/posts/${postId}/react?type=${encodeURIComponent(reactionType)}`, {
-            method: 'POST'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                const btn = document.getElementById('react-btn-' + postId);
-                const countEl = btn.querySelector('.vote-count');
-                const labelEl = btn.querySelector('.reaction-display-label');
-                const iconEl = btn.querySelector('.reaction-display-icon');
-
-                if (countEl) countEl.innerText = data.upvoteCount;
-
-                // Xóa các class màu cũ
-                btn.classList.remove('btn-outline-secondary', 'btn-reacted', 'react-LIKE', 'react-CARE', 'react-PRAY', 'react-WARNING', 'react-SAD');
-
-                if (data.activeReaction) {
-                    const cfg = REACTION_CONFIG[data.activeReaction] || REACTION_CONFIG.LIKE;
-                    btn.classList.add('btn-reacted', cfg.colorClass);
-                    btn.setAttribute('data-reaction', data.activeReaction);
-                    if (labelEl) labelEl.innerText = cfg.label;
-                    if (iconEl) iconEl.innerText = cfg.icon;
-                } else {
-                    btn.classList.add('btn-outline-secondary');
-                    btn.setAttribute('data-reaction', '');
-                    if (labelEl) labelEl.innerText = 'Cảm xúc';
-                    if (iconEl) iconEl.innerText = '👍';
-                }
-
-                // Cập nhật thanh tóm tắt phản ứng (reaction summary bar)
-                const summaryBar = document.getElementById('reaction-summary-' + postId);
-                if (summaryBar && data.breakdown) {
-                    for (const [rType, rCount] of Object.entries(data.breakdown)) {
-                        const countSpan = summaryBar.querySelector('.count-' + rType);
-                        if (countSpan) countSpan.innerText = rCount;
-                    }
-                    const totalSpan = summaryBar.querySelector('.total-reactions');
-                    if (totalSpan) totalSpan.innerText = data.upvoteCount;
-                }
-            } else {
-                alert(data.message || 'Lỗi khi tương tác bài viết!');
-            }
-        })
-        .catch(err => alert('Lỗi kết nối: ' + err.message));
-    }
-
-    // Xử lý gửi bình luận mới bằng AJAX
-    function submitComment(event, form) {
-        event.preventDefault();
-        const postId = form.getAttribute('data-post-id');
-        const input = form.querySelector('.comment-text-input');
-        const content = input ? input.value.trim() : '';
-
-        if (!content) return;
-
-        const formData = new URLSearchParams();
-        formData.append('content', content);
-
-        fetch(`/api/feed/posts/${postId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData.toString()
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.comment) {
-                const cmt = data.comment;
-                input.value = '';
-
-                // Xóa thông báo trống nếu có
-                const postArticle = document.getElementById('post-' + postId);
-                const emptyNotice = postArticle ? postArticle.querySelector('.empty-comment-notice') : null;
-                if (emptyNotice) emptyNotice.remove();
-
-                // Thêm bình luận mới vào danh sách
-                const commentsList = document.getElementById('comments-list-' + postId);
-                if (commentsList) {
-                    const avatarHtml = cmt.authorAvatar
-                        ? `<img src="${cmt.authorAvatar}" class="rounded-circle object-fit-cover shadow-xs mt-1" style="width: 32px; height: 32px; flex-shrink: 0;" alt="Avatar">`
-                        : `<div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs mt-1" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;"><span>${(cmt.authorName || 'U').substring(0, 1)}</span></div>`;
-
-                    const cmtDiv = document.createElement('div');
-                    cmtDiv.className = 'd-flex align-items-start gap-2 comment-bubble-wrapper';
-                    cmtDiv.innerHTML = `
-                        ${avatarHtml}
-                        <div class="bg-white p-2.5 px-3 rounded-4 shadow-xs border flex-grow-1 comment-bubble">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                <span class="fw-bold text-dark small">${cmt.authorName || 'Bạn'}</span>
-                                <small class="text-muted" style="font-size: 0.72rem;">Vừa xong</small>
-                            </div>
-                            <div class="text-secondary small">${cmt.content}</div>
-                        </div>
-                    `;
-                    commentsList.appendChild(cmtDiv);
-                }
-
-                // Cập nhật số lượng bình luận
-                if (postArticle) {
-                    const btnCount = postArticle.querySelector('.comment-count-btn');
-                    const badgeCount = postArticle.querySelector('.comment-count-badge');
-                    const textCount = postArticle.querySelector('.comment-count-text');
-
-                    const newCount = (parseInt(btnCount ? btnCount.innerText : '0') || 0) + 1;
-                    if (btnCount) btnCount.innerText = newCount;
-                    if (badgeCount) badgeCount.innerText = newCount;
-                    if (textCount) textCount.innerText = newCount + ' bình luận';
-                }
-            } else {
-                alert(data.message || 'Không thể gửi bình luận!');
-            }
-        })
-        .catch(err => alert('Lỗi kết nối khi gửi bình luận: ' + err.message));
-    }
-
-    // Hiển thị chi tiết cảnh báo khẩn cấp khi người dùng click vào card
-    function showAlertDetail(el) {
-        const title = el.getAttribute('data-title') || 'Cảnh báo khẩn cấp';
-        const content = el.getAttribute('data-content') || '';
-        const region = el.getAttribute('data-region') || 'Cảnh báo toàn khu vực';
-        const severity = el.getAttribute('data-severity') || 'DANGER_RED';
-
-        const modalElement = document.getElementById('emergencyBroadcastModal');
-        if (modalElement && window.bootstrap) {
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            const severityStyles = {
-                DANGER_RED: ['bg-danger', 'btn-danger', 'bg-danger-subtle text-danger'],
-                WARNING_ORANGE: ['bg-warning', 'btn-warning', 'bg-warning-subtle text-dark'],
-                NOTICE_YELLOW: ['bg-info', 'btn-info', 'bg-info-subtle text-info-emphasis']
-            };
-            const styles = severityStyles[severity] || severityStyles.DANGER_RED;
-            const header = document.getElementById('broadcastModalHeader');
-            const button = document.getElementById('acknowledgeBroadcast');
-            const regEl = document.getElementById('broadcastAlertRegion');
-            if (header) header.className = `modal-header text-white ${styles[0]}`;
-            if (button) button.className = `btn fw-bold px-4 ${styles[1]}`;
-            if (regEl) {
-                regEl.className = `badge mb-2 ${styles[2]}`;
-                regEl.textContent = region;
-            }
-            const titleEl = document.getElementById('broadcastAlertTitle');
-            if (titleEl) titleEl.textContent = title;
-            const contentEl = document.getElementById('broadcastAlertContent');
-            if (contentEl) contentEl.textContent = content;
-            modal.show();
-        } else {
-            alert(`${title}\n\nKhu vực: ${region}\n\n${content}`);
-        }
-    }
-
-    // Xử lý nút Chuyển thành đơn SOS
-    function convertToSos(postId) {
-        const ok = confirm('XÁC NHẬN CHUYỂN BÀI ĐĂNG NÀY THÀNH ĐƠN CỨU HỘ KHẨN CẤP?\n\nHệ thống sẽ tự động tạo một yêu cầu cứu nạn SOS với mức độ KHẨN CẤP và đưa ngay lên trung tâm Điều Phối Viên!');
-        if (!ok) return;
-
-        fetch(`/api/feed/posts/${postId}/convert-sos`, {
-            method: 'POST'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || 'Đã chuyển thành công thành đơn SOS!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + (data.message || 'Không thể chuyển thành đơn SOS'));
-            }
-        })
-        .catch(err => alert('Lỗi kết nối: ' + err.message));
-    }
-
-    // Phóng to ảnh hiện trường Cloudinary trong modal
-    function previewFeedImage(src, caption) {
-        if (!src) return;
-        const modalElement = document.getElementById('imagePreviewModal');
-        if (modalElement && window.bootstrap) {
-            document.getElementById('previewModalImg').src = src;
-            document.getElementById('previewModalCaption').textContent = caption || 'Ảnh hiện trường thiên tai';
-            document.getElementById('previewModalOpenLink').href = src;
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modal.show();
-        } else {
-            window.open(src, '_blank');
-        }
-    }
-</script>
-
-<style>
-    .feed-post-image:hover {
-        transform: scale(1.01);
-    }
-    .feed-header-banner {
-        background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important;
-        color: #fff !important;
-    }
-    .feed-header-banner h1,
-    .feed-header-banner p {
-        color: #fff !important;
-    }
-    .feed-header-banner p {
-        opacity: .92;
-    }
-    .feed-header-banner .btn-outline-light {
-        color: #fff;
-        border-color: rgba(255, 255, 255, .75);
-    }
-    .feed-header-banner .btn-outline-light:hover,
-    .feed-header-banner .btn-outline-light:focus {
-        color: #7f1d1d;
-        background-color: #fff;
-    }
-    .post-content-text {
-        color: #1e293b !important;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-    .alert-item-card {
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .alert-item-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-    }
-    /* Reaction Popover & Floating Bar */
-    .reaction-container {
-        position: relative;
-        display: inline-block;
-    }
-    .reaction-popover {
-        position: absolute;
-        bottom: 125%;
-        left: 0;
-        z-index: 1050;
-        background: #ffffff;
-        padding: 4px 10px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-        display: none;
-        align-items: center;
-        gap: 6px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        animation: popoverBounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popoverBounce {
-        from { opacity: 0; transform: translateY(8px) scale(0.9); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .reaction-container:hover .reaction-popover,
-    .reaction-container:focus-within .reaction-popover {
-        display: flex;
-    }
-    .reaction-emoji-btn {
-        background: transparent;
-        border: none;
-        padding: 4px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        transition: transform 0.18s ease;
-    }
-    .reaction-emoji-btn:hover {
-        transform: scale(1.35) translateY(-4px);
-    }
-    .emoji-anim {
-        font-size: 1.45rem;
-        line-height: 1;
-        display: inline-block;
-    }
-    .reaction-emoji-btn .reaction-tooltip {
-        position: absolute;
-        bottom: 115%;
-        background: rgba(15, 23, 42, 0.9);
-        color: #fff;
-        font-size: 0.68rem;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 20px;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.15s ease;
-    }
-    .reaction-emoji-btn:hover .reaction-tooltip {
-        opacity: 1;
-    }
-
-    /* Style cho các trạng thái đã phản ứng */
-    .btn-reacted {
-        font-weight: 700 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-    .react-LIKE {
-        background-color: #eff6ff !important;
-        color: #1d4ed8 !important;
-        border-color: #93c5fd !important;
-    }
-    .react-CARE {
-        background-color: #fff1f2 !important;
-        color: #e11d48 !important;
-        border-color: #fda4af !important;
-    }
-    .react-PRAY {
-        background-color: #fefce8 !important;
-        color: #b45309 !important;
-        border-color: #fde047 !important;
-    }
-    .react-WARNING {
-        background-color: #fff7ed !important;
-        color: #c2410c !important;
-        border-color: #fdba74 !important;
-    }
-    .react-SAD {
-        background-color: #f8fafc !important;
-        color: #475569 !important;
-        border-color: #cbd5e1 !important;
-    }
-
-    .comment-bubble {
-        background-color: #f8fafc !important;
-        border: 1px solid #e2e8f0;
-    }
-    .hover-bg:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-    }
-</style>
-
-</div>
-</body>
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+
+      th:replace="~{layout/main :: layout('Bảng Tin Cộng Đồng - Cứu Nạn 24/7', ~{::#feed-content})}">
+
+<body>
+
+
+
+<div id="feed-content" class="py-4">
+
+    <div class="container-xl">
+
+
+
+        <!-- HEADER BANNER VỚI NỀN THIÊN TAI THỰC TẾ -->
+
+        <div class="feed-header-banner p-4 rounded-4 shadow-sm mb-4 position-relative overflow-hidden"
+
+             style="background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important; color: #fff !important;">
+
+            <div class="position-relative z-1 d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+                <div>
+
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger text-white small fw-bold mb-2">
+
+                        <span class="pulse-dot"></span>
+
+                        <span>MẠNG XÃ HỘI CỨU TRỢ 24/7</span>
+
+                    </div>
+
+                    <h1 class="h3 fw-extrabold mb-1" style="color: #fff !important;">Bảng Tin Cảnh Báo Thiên Tai Cộng Đồng</h1>
+
+                    <p class="small mb-0" style="color: #fff !important; opacity: .92;">
+
+                        Thông tin hiện trường do người dân chia sẻ theo thời gian thực · Ban Điều Phối xác minh và phân phối lực lượng cứu trợ.
+
+                    </p>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <button type="button" class="btn btn-danger fw-bold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                        <i class="fa-solid fa-pen-to-square"></i>
+
+                        <span>Đăng Tin Cảnh Báo</span>
+
+                    </button>
+
+                    <a th:href="@{/map}" class="btn btn-outline-light fw-bold shadow-sm">
+
+                        <i class="fa-solid fa-map-location-dot me-1"></i> Bản Đồ Trực Tuyến
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 3-COLUMN WORKSPACE FRAME -->
+
+        <div class="row g-4">
+
+
+
+            <!-- ============================================================== -->
+
+            <!-- CỘT 1: SIDEBAR TRÁI (3 COLS) - CỨU NẠN KHẨN CẤP & ĐƠN CỦA TÔI -->
+
+            <!-- ============================================================== -->
+
+            <aside class="col-lg-3 col-md-4">
+
+                <div class="d-flex flex-column gap-3 sticky-top" style="top: 80px; z-index: 10;">
+
+
+
+                    <!-- Card Lịch Sử Cứu Hộ -->
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-body p-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                <span class="fw-bold text-dark small"><i class="fa-solid fa-clock-rotate-left text-primary me-1"></i>Lịch sử cứu hộ của bạn</span>
+
+                                <span class="badge bg-primary-subtle text-primary fw-semibold" th:text="${#lists.size(sosHistory)} + ' ca'"></span>
+
+                            </div>
+
+
+
+                            <div th:if="${!#lists.isEmpty(sosHistory)}" class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+
+                                <div th:each="historyItem : ${sosHistory}" class="border rounded-3 p-2">
+
+                                    <div class="d-flex justify-content-between align-items-center gap-2">
+
+                                        <span class="fw-bold text-danger font-monospace" th:text="'SOS-' + ${historyItem.id}">SOS-1042</span>
+
+                                        <span th:if="${historyItem.status == 'PENDING'}" class="badge bg-secondary">Chờ tiếp nhận</span>
+
+                                        <span th:if="${historyItem.status == 'DISPATCHED'}" class="badge bg-info text-dark">Đã điều phối</span>
+
+                                        <span th:if="${historyItem.status == 'IN_PROGRESS'}" class="badge bg-warning text-dark">Đang cứu nạn</span>
+
+                                        <span th:if="${historyItem.status == 'RESOLVED' || historyItem.status == 'COMPLETED'}" class="badge bg-success">Đã hoàn thành</span>
+
+                                        <span th:if="${historyItem.status == 'CANCELLED'}" class="badge bg-dark">Đã hủy</span>
+
+                                        <span th:if="${historyItem.status != 'PENDING' and historyItem.status != 'DISPATCHED' and historyItem.status != 'IN_PROGRESS' and historyItem.status != 'RESOLVED' and historyItem.status != 'COMPLETED' and historyItem.status != 'CANCELLED'}"
+
+                                              class="badge bg-secondary" th:text="${historyItem.status}">Đang xử lý</span>
+
+                                    </div>
+
+                                    <p class="small text-muted mb-2 mt-1 text-truncate" th:text="${historyItem.addressDetail != null ? historyItem.addressDetail : 'Đang cập nhật vị trí'}">Vị trí cứu hộ</p>
+
+                                    <a th:href="@{'/sos/track/' + ${historyItem.id}}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3">
+
+                                        <i class="fa-solid fa-location-crosshairs me-1"></i> Mở chi tiết ca SOS
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div th:if="${#lists.isEmpty(sosHistory)}" class="text-center py-2 text-muted small">
+
+                                <i class="fa-solid fa-shield-heart fa-2x text-success mb-2 opacity-50"></i>
+
+                                <p class="mb-0">Bạn chưa có yêu cầu cứu hộ nào.</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Card Tiện Ích -->
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-body p-3">
+
+                            <h6 class="fw-bold text-uppercase text-secondary small mb-2 tracking-wider">Tiện ích nhanh</h6>
+
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small fw-semibold">
+
+                                <li>
+
+                                    <a th:href="@{/map}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
+
+                                        <i class="fa-solid fa-map-location-dot text-danger"></i>
+
+                                        <span>Bản đồ cứu hộ & điểm sơ tán</span>
+
+                                    </a>
+
+                                </li>
+
+                                <li>
+
+                                    <a th:href="@{/sos/track}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
+
+                                        <i class="fa-solid fa-magnifying-glass text-primary"></i>
+
+                                        <span>Tra cứu theo số điện thoại</span>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="pt-2 border-top">
+
+                                    <div class="d-flex justify-content-between align-items-center text-muted">
+
+                                        <span>Số khẩn cấp:</span>
+
+                                        <span class="text-danger fw-bold">112 · 114 · 115</span>
+
+                                    </div>
+
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            </aside>
+
+
+
+            <!-- ============================================================== -->
+
+            <!-- CỘT 2: TRUNG TÂM (6 COLS) - HỘP ĐĂNG TIN FACEBOOK & FEED STREAM -->
+
+            <!-- ============================================================== -->
+
+            <main class="col-lg-6 col-md-8">
+
+
+
+                <!-- FACEBOOK-STYLE POST COMPOSER CARD -->
+
+                <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+
+                    <!-- Top Input Row -->
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div th:if="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                             class="flex-shrink-0" style="width: 44px; height: 44px;">
+
+                            <img th:src="${currentUser.avatarUrl}" class="rounded-circle object-fit-cover shadow-sm w-100 h-100" alt="Avatar">
+
+                        </div>
+
+                        <div th:unless="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                             class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
+
+                             style="width: 44px; height: 44px; min-width: 44px; font-size: 1.15rem;">
+
+                            <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">N</span>
+
+                        </div>
+
+                        <button type="button" class="btn rounded-pill flex-grow-1 text-start px-4 py-2.5 small fw-semibold shadow-xs"
+
+                                style="background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;"
+
+                                data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                            Bạn đang thấy hiểm họa gì quanh khu vực? Chia sẻ để cảnh báo...
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- Divider -->
+
+                    <hr class="my-2 text-secondary opacity-25">
+
+
+
+                    <!-- Facebook Action Buttons -->
+
+                    <div class="row g-1 pt-1 text-center">
+
+                        <div class="col-4">
+
+                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
+
+                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                                <i class="fa-solid fa-camera text-success fs-6"></i>
+
+                                <span class="small">Ảnh hiện trường</span>
+
+                            </button>
+
+                        </div>
+
+                        <div class="col-4">
+
+                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
+
+                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                                <i class="fa-solid fa-location-dot text-danger fs-6"></i>
+
+                                <span class="small">Ghim GPS</span>
+
+                            </button>
+
+                        </div>
+
+                        <div class="col-4">
+
+                            <button type="button" class="btn btn-light btn-sm w-100 fw-bold text-secondary border-0 py-2 d-flex align-items-center justify-content-center gap-1.5"
+
+                                    data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                                <i class="fa-solid fa-tags text-warning fs-6"></i>
+
+                                <span class="small">Loại thiên tai</span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- FEED STREAM CONTAINER -->
+
+                <div id="postsStream" class="d-flex flex-column gap-3">
+
+
+
+                    <!-- Loop through posts -->
+
+                    <article th:each="post : ${posts}" th:id="'post-' + ${post.id}" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+
+                        <div class="card-body p-3 p-sm-4">
+
+
+
+                            <!-- Header Author -->
+
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div th:if="${post.author != null && post.author.avatarUrl != null && !#strings.isEmpty(post.author.avatarUrl)}"
+
+                                         class="flex-shrink-0" style="width: 42px; height: 42px;">
+
+                                        <img th:src="${post.author.avatarUrl}" class="rounded-circle object-fit-cover shadow-xs w-100 h-100" alt="Avatar">
+
+                                    </div>
+
+                                    <div th:unless="${post.author != null && post.author.avatarUrl != null && !#strings.isEmpty(post.author.avatarUrl)}"
+
+                                         class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+
+                                         style="width: 42px; height: 42px; min-width: 42px; font-size: 1.05rem;">
+
+                                        <span th:text="${post.authorName != null ? #strings.substring(post.authorName, 0, 1) : 'T'}">T</span>
+
+                                    </div>
+
+                                    <div class="overflow-hidden" style="min-width: 0;">
+
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                                            <span class="fw-bold text-dark fs-6" th:text="${post.authorName}">Tên Tác Giả</span>
+
+                                            <span class="badge fw-bold"
+
+                                                  th:style="'background-color: ' + ${post.hazardType.badgeColor} + '; color: #fff;'"
+
+                                                  th:text="${post.hazardType.shortName}">SẠT LỞ</span>
+
+                                        </div>
+
+                                        <div class="text-muted small text-truncate" style="max-width: 100%;">
+
+                                            <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'HH:mm - dd/MM/yyyy') : 'Vừa xong'}">Vừa xong</span>
+
+                                            <span th:if="${post.locationName != null}"> · <i class="fa-solid fa-location-dot text-danger"></i> <span th:text="${post.locationName}">Địa điểm</span></span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- Verification Status Badge -->
+
+                                <div>
+
+                                    <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-2.5 py-1.5 rounded-pill shadow-xs">
+
+                                        <i class="fa-solid fa-check me-1"></i> Đã xác minh
+
+                                    </span>
+
+                                    <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-2.5 py-1.5 rounded-pill">
+
+                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
+
+                                    </span>
+
+                                    <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-2.5 py-1.5 rounded-pill">
+
+                                        Đã bác bỏ
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- Content text -->
+
+                            <p class="post-content-text mb-3" th:text="${post.content}">
+
+                                Nội dung chi tiết bài viết cảnh báo thiên tai từ hiện trường...
+
+                            </p>
+
+
+
+                            <!-- Media Image (Cloudinary CDN) -->
+
+                            <div th:if="${post.imageUrl != null && !#strings.isEmpty(post.imageUrl)}" class="mb-3 rounded-3 overflow-hidden shadow-xs border position-relative bg-light">
+
+                                <img th:src="${post.imageUrl}"
+
+                                     class="img-fluid w-100 object-fit-cover feed-post-image"
+
+                                     style="max-height: 400px; cursor: pointer; transition: transform 0.25s ease;"
+
+                                     alt="Ảnh hiện trường cảnh báo thiên tai"
+
+                                     loading="lazy"
+
+                                     th:data-src="${post.imageUrl}"
+
+                                     th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' · ' + post.hazardType.description}"
+
+                                     onclick="previewFeedImage(this.dataset.src, this.dataset.caption)">
+
+                                <div class="position-absolute top-0 end-0 m-2 d-flex align-items-center gap-1.5">
+
+                                    <span th:if="${#strings.contains(post.imageUrl, 'cloudinary')}"
+
+                                          class="badge bg-dark bg-opacity-75 text-white small fw-semibold px-2 py-1 rounded-pill shadow-xs"
+
+                                          style="backdrop-filter: blur(4px);">
+
+                                        <i class="fa-solid fa-camera text-info me-1"></i>Ảnh hiện trường
+
+                                    </span>
+
+                                    <button type="button" class="btn btn-dark btn-sm bg-opacity-75 text-white py-0 px-2 rounded-pill shadow-xs"
+
+                                            style="backdrop-filter: blur(4px); font-size: 0.75rem;"
+
+                                            th:data-src="${post.imageUrl}"
+
+                                            th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' - ' + post.hazardType.shortName}"
+
+                                            onclick="previewFeedImage(this.dataset.src, this.dataset.caption)"
+
+                                            title="Bấm xem ảnh cỡ lớn">
+
+                                        <i class="fa-solid fa-expand me-1"></i>Xem ảnh
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- Converted SOS Notice Badge (if already converted) -->
+
+                            <div th:if="${post.convertedSosRequest != null}" class="alert alert-danger py-2 px-3 small fw-bold d-flex align-items-center justify-content-between mb-3 rounded-3">
+
+                                <span><i class="fa-solid fa-tower-broadcast me-1"></i> Đã chuyển thành ca cứu hộ chính thức:</span>
+
+                                <a th:href="@{'/sos/track?code=' + ${post.convertedSosRequest.id}}" class="btn btn-outline-danger btn-sm py-0 fw-bold">
+
+                                    Xem SOS-<span th:text="${post.convertedSosRequest.id}">1042</span>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- Thống Kê Phản Ứng & Số Lượng Bình Luận -->
+
+                            <div class="d-flex align-items-center justify-content-between px-1 mb-2 small">
+
+                                <div class="d-flex align-items-center gap-1.5 reaction-summary-bar" th:id="'reaction-summary-' + ${post.id}">
+
+                                    <span class="d-inline-flex align-items-center gap-1 reaction-icons-stack">
+
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary border px-2 py-0.5" style="font-size: 0.73rem;" title="Xác nhận tin">
+
+                                            👍 <span class="ms-0.5 count-LIKE" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('LIKE') : 0}">0</span>
+
+                                        </span>
+
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger border px-2 py-0.5" style="font-size: 0.73rem;" title="Thương thương / Ủng hộ">
+
+                                            ❤️ <span class="ms-0.5 count-CARE" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('CARE') : 0}">0</span>
+
+                                        </span>
+
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border px-2 py-0.5" style="font-size: 0.73rem;" title="Cầu bình an">
+
+                                            🙏 <span class="ms-0.5 count-PRAY" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('PRAY') : 0}">0</span>
+
+                                        </span>
+
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border px-2 py-0.5" style="font-size: 0.73rem;" title="Cảnh giác nguy hiểm">
+
+                                            ⚠️ <span class="ms-0.5 count-WARNING" th:text="${postReactions != null && postReactions.containsKey(post.id) ? postReactions.get(post.id).get('WARNING') : 0}">0</span>
+
+                                        </span>
+
+                                    </span>
+
+                                    <span class="text-muted ms-1 small">
+
+                                        · <span class="total-reactions fw-bold" th:text="${post.upvoteCount}">24</span> tương tác
+
+                                    </span>
+
+                                </div>
+
+                                <div>
+
+                                    <a role="button" class="text-secondary text-decoration-none small fw-semibold"
+
+                                       th:data-bs-target="'#comments-section-' + ${post.id}"
+
+                                       data-bs-toggle="collapse"
+
+                                       aria-expanded="false">
+
+                                        <span class="comment-count-text" th:text="${post.commentCount} + ' bình luận'">3 bình luận</span>
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- Footer Actions Bar -->
+
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <!-- Reaction Container với Popover Emojis Nổi -->
+
+                                    <div class="reaction-container position-relative" th:id="'reaction-container-' + ${post.id}">
+
+                                        <!-- Khung Chọn Cảm Xúc Nổi (Hover / Tap) -->
+
+                                        <div class="reaction-popover shadow-lg rounded-pill p-1 bg-white border d-flex align-items-center gap-1">
+
+                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'LIKE\')'" title="Xác nhận tin">
+
+                                                <span class="emoji-anim">👍</span>
+
+                                                <span class="reaction-tooltip">Xác nhận</span>
+
+                                            </button>
+
+                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'CARE\')'" title="Thương thương / Ủng hộ">
+
+                                                <span class="emoji-anim">❤️</span>
+
+                                                <span class="reaction-tooltip">Thương thương</span>
+
+                                            </button>
+
+                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'PRAY\')'" title="Cầu bình an">
+
+                                                <span class="emoji-anim">🙏</span>
+
+                                                <span class="reaction-tooltip">Cầu an</span>
+
+                                            </button>
+
+                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'WARNING\')'" title="Cảnh giác nguy hiểm">
+
+                                                <span class="emoji-anim">⚠️</span>
+
+                                                <span class="reaction-tooltip">Cảnh giác</span>
+
+                                            </button>
+
+                                            <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'SAD\')'" title="Xót xa / Chia sẻ">
+
+                                                <span class="emoji-anim">😢</span>
+
+                                                <span class="reaction-tooltip">Xót xa</span>
+
+                                            </button>
+
+                                        </div>
+
+
+
+                                        <!-- Nút Thả Cảm Xúc Chính -->
+
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold btn-reaction-main"
+
+                                                th:id="'react-btn-' + ${post.id}"
+
+                                                th:classappend="${userReactions != null && userReactions.containsKey(post.id) ? 'btn-reacted react-' + userReactions.get(post.id) : 'btn-outline-secondary'}"
+
+                                                th:data-post-id="${post.id}"
+
+                                                th:data-reaction="${userReactions != null ? userReactions.get(post.id) : ''}"
+
+                                                th:onclick="'handleDefaultReact(' + ${post.id} + ')'">
+
+                                            <span class="reaction-display-icon">
+
+                                                <span th:if="${userReactions == null || !userReactions.containsKey(post.id)}">👍</span>
+
+                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'LIKE'}">👍</span>
+
+                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'CARE'}">❤️</span>
+
+                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'PRAY'}">🙏</span>
+
+                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'WARNING'}">⚠️</span>
+
+                                                <span th:if="${userReactions != null && userReactions.get(post.id) == 'SAD'}">😢</span>
+
+                                            </span>
+
+                                            <span class="reaction-display-label ms-1"
+
+                                                  th:text="${userReactions == null || !userReactions.containsKey(post.id) ? 'Cảm xúc' : (userReactions.get(post.id) == 'CARE' ? 'Thương thương' : (userReactions.get(post.id) == 'PRAY' ? 'Cầu an' : (userReactions.get(post.id) == 'WARNING' ? 'Cảnh giác' : (userReactions.get(post.id) == 'SAD' ? 'Xót xa' : 'Xác nhận'))))}">
+
+                                                Cảm xúc
+
+                                            </span>
+
+                                            (<span class="vote-count" th:text="${post.upvoteCount}">24</span>)
+
+                                        </button>
+
+                                    </div>
+
+
+
+                                    <!-- Button Mở Hộp Bình Luận -->
+
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold btn-toggle-comments"
+
+                                            th:data-bs-target="'#comments-section-' + ${post.id}"
+
+                                            data-bs-toggle="collapse"
+
+                                            aria-expanded="false"
+
+                                            th:aria-controls="'comments-section-' + ${post.id}">
+
+                                        <i class="fa-solid fa-comment me-1 text-info"></i>
+
+                                        <span>Bình luận</span> (<span class="comment-count-btn" th:text="${post.commentCount}">3</span>)
+
+                                    </button>
+
+                                </div>
+
+
+
+                            </div>
+
+
+
+                            <!-- KHUNG BÌNH LUẬN COLLAPSIBLE (BÌNH LUẬN MẪU & GỬI BÌNH LUẬN MỚI) -->
+
+                            <div th:id="'comments-section-' + ${post.id}" class="collapse mt-3 pt-3 border-top bg-light-subtle rounded-3 p-3">
+
+                                <div class="d-flex align-items-center justify-content-between mb-2.5">
+
+                                    <span class="small fw-bold text-dark">
+
+                                        <i class="fa-regular fa-comments text-primary me-1"></i>Bình luận cộng đồng (<span class="comment-count-badge" th:text="${post.commentCount}">3</span>)
+
+                                    </span>
+
+                                    <small class="text-muted" style="font-size: 0.72rem;">Cập nhật trực tiếp</small>
+
+                                </div>
+
+
+
+                                <!-- Danh sách bình luận -->
+
+                                <div class="comments-list d-flex flex-column gap-2 mb-3" th:id="'comments-list-' + ${post.id}">
+
+                                    <div th:each="cmt : ${commentsMap != null && commentsMap[post.id] != null ? commentsMap[post.id] : {}}"
+
+                                         class="d-flex align-items-start gap-2 comment-bubble-wrapper">
+
+                                        <img th:if="${cmt.authorAvatar != null && !#strings.isEmpty(cmt.authorAvatar)}"
+
+                                             th:src="${cmt.authorAvatar}"
+
+                                             class="rounded-circle object-fit-cover shadow-xs mt-1"
+
+                                             style="width: 32px; height: 32px; flex-shrink: 0;" alt="Avatar">
+
+                                        <div th:unless="${cmt.authorAvatar != null && !#strings.isEmpty(cmt.authorAvatar)}"
+
+                                             class="rounded-circle bg-secondary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs mt-1"
+
+                                             style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">
+
+                                            <span th:text="${#strings.substring(cmt.authorName, 0, 1)}">U</span>
+
+                                        </div>
+
+                                        <div class="bg-white p-2.5 px-3 rounded-4 shadow-xs border flex-grow-1 comment-bubble">
+
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+
+                                                <span class="fw-bold text-dark small" th:text="${cmt.authorName}">Tên người dùng</span>
+
+                                                <small class="text-muted" style="font-size: 0.72rem;"
+
+                                                       th:text="${cmt.createdAt != null ? #temporals.format(cmt.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">Vừa xong</small>
+
+                                            </div>
+
+                                            <div class="text-secondary small" th:text="${cmt.content}">Nội dung bình luận</div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div th:if="${commentsMap == null || commentsMap[post.id] == null || #lists.isEmpty(commentsMap[post.id])}"
+
+                                         class="text-center py-2 text-muted small empty-comment-notice">
+
+                                        Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- Form Nhập Bình Luận Mới -->
+
+                                <form class="comment-input-form d-flex align-items-center gap-2" th:data-post-id="${post.id}" onsubmit="submitComment(event, this)">
+
+                                    <div th:if="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                                         class="flex-shrink-0" style="width: 34px; height: 34px;">
+
+                                        <img th:src="${currentUser.avatarUrl}" class="rounded-circle object-fit-cover shadow-xs w-100 h-100" alt="Avatar">
+
+                                    </div>
+
+                                    <div th:unless="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                                         class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+
+                                         style="width: 34px; height: 34px; min-width: 34px; font-size: 0.85rem;">
+
+                                        <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">U</span>
+
+                                    </div>
+
+                                    <div class="input-group input-group-sm">
+
+                                        <input type="text" class="form-control rounded-pill px-3 comment-text-input"
+
+                                               placeholder="Viết bình luận hoặc thông tin cứu trợ..." required maxlength="1000">
+
+                                        <button class="btn btn-primary rounded-pill px-3 ms-1 fw-bold d-flex align-items-center gap-1 shadow-xs" type="submit">
+
+                                            <span>Gửi</span>
+
+                                            <i class="fa-solid fa-paper-plane small"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+
+
+                        </div>
+
+                    </article>
+
+
+
+                </div>
+
+            </main>
+
+
+
+            <!-- ============================================================== -->
+
+            <!-- CỘT 3: SIDEBAR PHẢI (3 COLS) - CẢNH BÁO MỚI & ĐIỂM SƠ TÁN -->
+
+            <!-- ============================================================== -->
+
+            <aside class="col-lg-3 d-none d-lg-block">
+
+                <div class="d-flex flex-column gap-3 sticky-top" style="top: 80px; z-index: 10;">
+
+
+
+                    <!-- Card Cảnh Báo Mới Nhất (Chính thống từ Ban Điều Phối) -->
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-body p-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2.5">
+
+                                <h6 class="fw-bold text-dark small mb-0">
+
+                                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Cảnh báo khẩn mới
+
+                                </h6>
+
+                                <span class="badge bg-danger text-white"><i class="fa-solid fa-circle-dot me-1 fa-fade"></i>Trực tiếp</span>
+
+                            </div>
+
+
+
+                            <div th:if="${recentAlerts != null && !#lists.isEmpty(recentAlerts)}" class="d-flex flex-column gap-2 small">
+
+                                <div th:each="alert : ${recentAlerts}"
+
+                                     class="p-2 rounded-3 alert-item-card border"
+
+                                     th:classappend="${alert.severity == 'DANGER_RED' ? 'bg-danger-subtle border-danger-subtle text-danger' : (alert.severity == 'WARNING_ORANGE' ? 'bg-warning-subtle border-warning-subtle text-warning-emphasis' : 'bg-light border text-dark')}"
+
+                                     style="cursor: pointer;"
+
+                                     onclick="showAlertDetail(this)"
+
+                                     th:data-title="${alert.title}"
+
+                                     th:data-content="${alert.content}"
+
+                                     th:data-region="${alert.affectedRegion}"
+
+                                     th:data-severity="${alert.severity}"
+
+                                     title="Bấm để xem chi tiết thông báo khẩn cấp">
+
+                                    <div class="d-flex align-items-center gap-1.5 fw-bold">
+
+                                        <span th:if="${alert.severity == 'DANGER_RED'}" class="badge bg-danger">KHẨN</span>
+
+                                        <span th:if="${alert.severity == 'WARNING_ORANGE'}" class="badge bg-warning text-dark">CAO</span>
+
+                                        <span th:if="${alert.severity != 'DANGER_RED' && alert.severity != 'WARNING_ORANGE'}" class="badge bg-secondary text-white">LƯU Ý</span>
+
+                                        <span class="text-truncate" th:text="${alert.title}">Mưa lớn diện rộng</span>
+
+                                    </div>
+
+                                    <div class="text-muted mt-1 text-truncate" style="font-size: 0.75rem;">
+
+                                        <span th:text="${alert.affectedRegion != null ? alert.affectedRegion : 'Toàn khu vực'}">Khu vực</span>
+
+                                        <span> · </span>
+
+                                        <span th:text="${alert.createdAt != null ? #temporals.format(alert.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">08:30</span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div th:if="${recentAlerts == null || #lists.isEmpty(recentAlerts)}" class="text-center py-3 text-muted small">
+
+                                <i class="fa-solid fa-circle-check text-success fa-2x mb-1 opacity-50 d-block"></i>
+
+                                <span>Chưa có cảnh báo nguy cấp mới nào.</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Card Điểm Sơ Tán Gần Bạn -->
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-body p-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <h6 class="fw-bold text-dark small mb-0"><i class="fa-solid fa-campground text-warning me-1"></i>Điểm sơ tán an toàn</h6>
+
+                                <a th:href="@{/map#shelters}" class="small text-primary text-decoration-none fw-bold">Tất cả</a>
+
+                            </div>
+
+
+
+                            <div class="d-flex flex-column gap-3 small">
+
+                                <div th:each="shelter : ${shelters}" class="p-2 rounded-3 bg-light border">
+
+                                    <div class="d-flex justify-content-between fw-bold text-dark mb-1">
+
+                                        <span th:text="${shelter.name}">THCS Trưng Vương</span>
+
+                                        <span class="text-danger" th:text="${shelter.occupancyPercentage} + '%'">70%</span>
+
+                                    </div>
+
+                                    <!-- Progress Bar -->
+
+                                    <div class="progress mb-1.5" style="height: 6px;">
+
+                                        <div class="progress-bar bg-warning" role="progressbar"
+
+                                             th:style="'width: ' + ${shelter.occupancyPercentage} + '%;'"
+
+                                             th:aria-valuenow="${shelter.occupancyPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+
+                                    </div>
+
+                                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+
+                                        <span>Còn <strong class="text-dark" th:text="${shelter.remainingCapacity}">90</strong>/<span th:text="${shelter.totalCapacity}">300</span> chỗ</span>
+
+                                        <span th:text="${shelter.contactPhone}">0235-3881234</span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            </aside>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+<!-- ========================================================================= -->
+
+<!-- MODAL TẠO BÀI ĐĂNG PHONG CÁCH FACEBOOK POPUP -->
+
+<!-- ========================================================================= -->
+
+<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+
+            <div class="modal-header border-bottom py-3">
+
+                <h5 class="modal-title fw-bold text-dark fs-6" id="createPostModalLabel">Tạo bài viết cảnh báo thiên tai</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <form id="createPostForm" enctype="multipart/form-data">
+
+                <div class="modal-body p-4">
+
+                    <!-- Author Row -->
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div th:if="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                             class="flex-shrink-0" style="width: 44px; height: 44px;">
+
+                            <img th:src="${currentUser.avatarUrl}" class="rounded-circle object-fit-cover shadow-xs w-100 h-100" alt="Avatar">
+
+                        </div>
+
+                        <div th:unless="${currentUser != null && currentUser.avatarUrl != null && !#strings.isEmpty(currentUser.avatarUrl)}"
+
+                             class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+
+                             style="width: 44px; height: 44px; min-width: 44px; font-size: 1.15rem;">
+
+                            <span th:text="${currentUser != null && currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}">N</span>
+
+                        </div>
+
+                        <div>
+
+                            <div class="fw-bold text-dark" th:text="${currentUser != null ? currentUser.fullName : 'Người dân'}">Nguyễn Văn A</div>
+
+                            <div class="d-flex align-items-center gap-1.5 mt-0.5">
+
+                                <span class="badge bg-light text-dark border small fw-bold">
+
+                                    <i class="fa-solid fa-earth-americas me-1 text-primary"></i>Công khai toàn vùng
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Content Textarea -->
+
+                    <div class="mb-3">
+
+                        <textarea class="form-control border-0 p-0 text-dark fs-6 shadow-none" id="postContent" name="content" rows="3"
+
+                                  placeholder="Bạn đang thấy hiểm họa gì? Nước dâng cao bao nhiêu, có ai mắc kẹt cần xuồng gấp không..." required></textarea>
+
+                    </div>
+
+
+
+                    <!-- Hazard Selector Pills -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Loại hiểm họa:</label>
+
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <div th:each="hazard : ${hazardTypes}">
+
+                                <input type="radio" class="btn-check" name="hazardType" th:id="'hazard_' + ${hazard.name()}"
+
+                                       th:value="${hazard.name()}" th:checked="${hazard.name() == 'LANDSLIDE'}">
+
+                                <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'hazard_' + ${hazard.name()}"
+
+                                       th:text="${hazard.shortName}">Sạt lở</label>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Location Row -->
+
+                    <div class="mb-3 p-2.5 rounded-3 bg-light border small">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <span class="text-danger fw-bold"><i class="fa-solid fa-location-dot me-1"></i>Vị trí hiện trường:</span>
+
+                            <button type="button" id="btnScanGps" class="btn btn-link btn-sm p-0 text-primary fw-bold text-decoration-none">
+
+                                <i class="fa-solid fa-crosshairs me-1"></i>Lấy GPS
+
+                            </button>
+
+                        </div>
+
+                        <input type="text" class="form-control form-control-sm mt-1.5" id="locationName" name="locationName"
+
+                               placeholder="Xã/Phường, Huyện/Quận, Tỉnh/Thành phố">
+
+                        <input type="hidden" id="latitude" name="latitude">
+
+                        <input type="hidden" id="longitude" name="longitude">
+
+                    </div>
+
+
+
+                    <!-- Image Upload -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Ảnh hiện trường:</label>
+
+                        <input type="file" class="form-control form-control-sm" id="imageFile" name="imageFile" accept="image/*">
+
+                    </div>
+
+
+
+                </div>
+
+                <div class="modal-footer border-top p-3">
+
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+
+                    <button type="submit" id="btnSubmitPost" class="btn btn-primary fw-bold px-4">
+
+                        <i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ========================================================================= -->
+
+<!-- MODAL XEM CHI TIẾT ẢNH HIỆN TRƯỜNG CLOUDINARY FULL SIZE -->
+
+<!-- ========================================================================= -->
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content border-0 rounded-4 overflow-hidden bg-dark text-white shadow-lg">
+
+            <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <span class="badge bg-primary fw-bold"><i class="fa-solid fa-camera me-1"></i>Ảnh hiện trường</span>
+
+                    <span id="previewModalCaption" class="small text-white-50 text-truncate" style="max-width: 480px;"></span>
+
+                </div>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+
+            </div>
+
+            <div class="modal-body text-center p-3">
+
+                <img id="previewModalImg" src="" class="img-fluid rounded-3 shadow" style="max-height: 72vh; width: auto;" alt="Xem trước ảnh">
+
+                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2 px-2">
+
+                    <span class="small text-white-50 font-monospace" style="font-size: 0.75rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Ảnh vệ tinh / thực địa đã xác thực</span>
+
+                    <a id="previewModalOpenLink" href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+
+                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở ảnh gốc toàn màn hình
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    function cleanVietnameseAddress(addr) {
+
+        if (!addr) return '';
+
+        let cleaned = addr
+
+            .replace(/\bProvince de\s+/gi, '')
+
+            .replace(/\bProvince of\s+/gi, '')
+
+            .replace(/\bRegion of\s+/gi, '')
+
+            .replace(/\bDistrict of\s+/gi, '')
+
+            .replace(/\bCity of\s+/gi, '')
+
+            .replace(/\bViêt Nam\b/gi, 'Việt Nam');
+
+
+
+        if (/Cai Lậy|Cái Bè|Mỹ Tho|Gò Công|Chợ Gạo|Tân Phước/i.test(cleaned)) {
+
+            cleaned = cleaned.replace(/Đồng Tháp/g, 'Tiền Giang');
+
+        }
+
+
+
+        return cleaned.replace(/\s*,\s*,+/g, ', ').replace(/^,\s*|\s*,$/g, '').trim();
+
+    }
+
+
+
+    // Hàm giải mã tọa độ ngược thành địa chỉ tiếng Việt cho bài đăng
+
+    async function reverseGeocodeFeedLocation(lat, lng) {
+
+        const inputLoc = document.getElementById('locationName');
+
+        inputLoc.value = '🔍 Đang tra cứu địa chỉ hành chính...';
+
+        let resolved = '';
+
+
+
+        try {
+
+            const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=default`);
+
+            if (res.ok) {
+
+                const data = await res.json();
+
+                if (data && data.features && data.features.length > 0) {
+
+                    const p = data.features[0].properties;
+
+                    const parts = [];
+
+                    if (p.housenumber) parts.push(p.housenumber);
+
+                    if (p.street) parts.push(p.street);
+
+                    else if (p.name) parts.push(p.name);
+
+                    if (p.name && p.street && p.name !== p.street) parts.unshift(p.name);
+
+                    if (p.locality && !parts.includes(p.locality)) parts.push(p.locality);
+
+                    const d = p.suburb || p.district;
+
+                    if (d && !parts.includes(d)) parts.push(d);
+
+                    const c = p.county || p.city;
+
+                    if (c && !parts.includes(c)) parts.push(c);
+
+                    if (p.state && !parts.includes(p.state)) parts.push(p.state);
+
+                    if (p.country && !parts.includes(p.country)) parts.push(p.country);
+
+                    const addr = parts.filter(Boolean).join(', ');
+
+                    if (addr && addr.length > 3) resolved = addr;
+
+                }
+
+            }
+
+        } catch (e) {}
+
+
+
+        if (!resolved) {
+
+            try {
+
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=vi`);
+
+                if (res.ok) {
+
+                    const data = await res.json();
+
+                    const parts = [];
+
+                    if (data.locality) parts.push(data.locality);
+
+                    if (data.city && data.city !== data.locality) parts.push(data.city);
+
+                    if (data.principalSubdivision) parts.push(data.principalSubdivision);
+
+                    if (data.countryName) parts.push(data.countryName);
+
+                    const addr = parts.filter(Boolean).join(', ');
+
+                    if (addr && addr.length > 3) resolved = addr;
+
+                }
+
+            } catch (e) {}
+
+        }
+
+
+
+        inputLoc.value = cleanVietnameseAddress(resolved) || `Tọa độ GPS [${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}]`;
+
+    }
+
+
+
+    // Lấy tọa độ GPS tự động khi bấm nút Lấy GPS
+
+    document.getElementById('btnScanGps').addEventListener('click', function() {
+
+        if (!navigator.geolocation) {
+
+            alert('Trình duyệt không hỗ trợ định vị Geolocation!');
+
+            return;
+
+        }
+
+        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang quét GPS...';
+
+        navigator.geolocation.getCurrentPosition(
+
+            async function(pos) {
+
+                const lat = pos.coords.latitude;
+
+                const lng = pos.coords.longitude;
+
+                document.getElementById('latitude').value = lat;
+
+                document.getElementById('longitude').value = lng;
+
+                document.getElementById('btnScanGps').innerHTML = '<i class="fa-solid fa-check text-success me-1"></i>Đã có GPS';
+
+                await reverseGeocodeFeedLocation(lat, lng);
+
+            },
+
+            function(err) {
+
+                alert('Không thể lấy vị trí GPS: ' + err.message);
+
+                document.getElementById('btnScanGps').innerHTML = '<i class="fa-solid fa-crosshairs me-1"></i>Thử lại';
+
+            },
+
+            { enableHighAccuracy: true, timeout: 8000 }
+
+        );
+
+    });
+
+
+
+    // Xử lý gửi Form Đăng tin cảnh báo
+
+    document.getElementById('createPostForm').addEventListener('submit', function(e) {
+
+        e.preventDefault();
+
+        const btn = document.getElementById('btnSubmitPost');
+
+        btn.disabled = true;
+
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang đăng...';
+
+
+
+        const formData = new FormData(this);
+
+        if (!document.getElementById('latitude').value) {
+
+            formData.delete('latitude');
+
+        }
+
+        if (!document.getElementById('longitude').value) {
+
+            formData.delete('longitude');
+
+        }
+
+        const imgFile = document.getElementById('imageFile');
+
+        if (!imgFile || !imgFile.files || imgFile.files.length === 0) {
+
+            formData.delete('imageFile');
+
+        }
+
+
+
+        fetch('/api/feed/posts', {
+
+            method: 'POST',
+
+            body: formData
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                alert(data.message || 'Đăng tin cảnh báo thành công!');
+
+                window.location.reload();
+
+            } else {
+
+                alert('Lỗi: ' + (data.message || 'Không thể đăng tin'));
+
+                btn.disabled = false;
+
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
+
+            }
+
+        })
+
+        .catch(err => {
+
+            alert('Lỗi kết nối máy chủ: ' + err.message);
+
+            btn.disabled = false;
+
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
+
+        });
+
+    });
+
+
+
+    // Cấu hình nhãn và icon cho từng loại cảm xúc
+
+    const REACTION_CONFIG = {
+
+        LIKE: { icon: '👍', label: 'Xác nhận', colorClass: 'react-LIKE' },
+
+        CARE: { icon: '❤️', label: 'Thương thương', colorClass: 'react-CARE' },
+
+        PRAY: { icon: '🙏', label: 'Cầu an', colorClass: 'react-PRAY' },
+
+        WARNING: { icon: '⚠️', label: 'Cảnh giác', colorClass: 'react-WARNING' },
+
+        SAD: { icon: '😢', label: 'Xót xa', colorClass: 'react-SAD' }
+
+    };
+
+
+
+    // Xử lý khi nhấn trực tiếp vào nút Cảm xúc chính (mặc định LIKE hoặc toggle un-react)
+
+    function handleDefaultReact(postId) {
+
+        const btn = document.getElementById('react-btn-' + postId);
+
+        const currentReaction = btn.getAttribute('data-reaction');
+
+        const nextType = currentReaction ? currentReaction : 'LIKE';
+
+        handleReact(postId, nextType);
+
+    }
+
+
+
+    // Xử lý thả icon cảm xúc (LIKE, CARE, PRAY, WARNING, SAD)
+
+    function handleReact(postId, reactionType) {
+
+        fetch(`/api/feed/posts/${postId}/react?type=${encodeURIComponent(reactionType)}`, {
+
+            method: 'POST'
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                const btn = document.getElementById('react-btn-' + postId);
+
+                const countEl = btn.querySelector('.vote-count');
+
+                const labelEl = btn.querySelector('.reaction-display-label');
+
+                const iconEl = btn.querySelector('.reaction-display-icon');
+
+
+
+                if (countEl) countEl.innerText = data.upvoteCount;
+
+
+
+                // Xóa các class màu cũ
+
+                btn.classList.remove('btn-outline-secondary', 'btn-reacted', 'react-LIKE', 'react-CARE', 'react-PRAY', 'react-WARNING', 'react-SAD');
+
+
+
+                if (data.activeReaction) {
+
+                    const cfg = REACTION_CONFIG[data.activeReaction] || REACTION_CONFIG.LIKE;
+
+                    btn.classList.add('btn-reacted', cfg.colorClass);
+
+                    btn.setAttribute('data-reaction', data.activeReaction);
+
+                    if (labelEl) labelEl.innerText = cfg.label;
+
+                    if (iconEl) iconEl.innerText = cfg.icon;
+
+                } else {
+
+                    btn.classList.add('btn-outline-secondary');
+
+                    btn.setAttribute('data-reaction', '');
+
+                    if (labelEl) labelEl.innerText = 'Cảm xúc';
+
+                    if (iconEl) iconEl.innerText = '👍';
+
+                }
+
+
+
+                // Cập nhật thanh tóm tắt phản ứng (reaction summary bar)
+
+                const summaryBar = document.getElementById('reaction-summary-' + postId);
+
+                if (summaryBar && data.breakdown) {
+
+                    for (const [rType, rCount] of Object.entries(data.breakdown)) {
+
+                        const countSpan = summaryBar.querySelector('.count-' + rType);
+
+                        if (countSpan) countSpan.innerText = rCount;
+
+                    }
+
+                    const totalSpan = summaryBar.querySelector('.total-reactions');
+
+                    if (totalSpan) totalSpan.innerText = data.upvoteCount;
+
+                }
+
+            } else {
+
+                alert(data.message || 'Lỗi khi tương tác bài viết!');
+
+            }
+
+        })
+
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+
+    }
+
+
+
+    // Xử lý gửi bình luận mới bằng AJAX
+
+    function submitComment(event, form) {
+
+        event.preventDefault();
+
+        const postId = form.getAttribute('data-post-id');
+
+        const input = form.querySelector('.comment-text-input');
+
+        const content = input ? input.value.trim() : '';
+
+
+
+        if (!content) return;
+
+
+
+        const formData = new URLSearchParams();
+
+        formData.append('content', content);
+
+
+
+        fetch(`/api/feed/posts/${postId}/comments`, {
+
+            method: 'POST',
+
+            headers: {
+
+                'Content-Type': 'application/x-www-form-urlencoded'
+
+            },
+
+            body: formData.toString()
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success && data.comment) {
+
+                const cmt = data.comment;
+
+                input.value = '';
+
+
+
+                // Xóa thông báo trống nếu có
+
+                const postArticle = document.getElementById('post-' + postId);
+
+                const emptyNotice = postArticle ? postArticle.querySelector('.empty-comment-notice') : null;
+
+                if (emptyNotice) emptyNotice.remove();
+
+
+
+                // Thêm bình luận mới vào danh sách
+
+                const commentsList = document.getElementById('comments-list-' + postId);
+
+                if (commentsList) {
+
+                    const avatarHtml = cmt.authorAvatar
+
+                        ? `<img src="${cmt.authorAvatar}" class="rounded-circle object-fit-cover shadow-xs mt-1" style="width: 32px; height: 32px; flex-shrink: 0;" alt="Avatar">`
+
+                        : `<div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs mt-1" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;"><span>${(cmt.authorName || 'U').substring(0, 1)}</span></div>`;
+
+
+
+                    const cmtDiv = document.createElement('div');
+
+                    cmtDiv.className = 'd-flex align-items-start gap-2 comment-bubble-wrapper';
+
+                    cmtDiv.innerHTML = `
+
+                        ${avatarHtml}
+
+                        <div class="bg-white p-2.5 px-3 rounded-4 shadow-xs border flex-grow-1 comment-bubble">
+
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+
+                                <span class="fw-bold text-dark small">${cmt.authorName || 'Bạn'}</span>
+
+                                <small class="text-muted" style="font-size: 0.72rem;">Vừa xong</small>
+
+                            </div>
+
+                            <div class="text-secondary small">${cmt.content}</div>
+
+                        </div>
+
+                    `;
+
+                    commentsList.appendChild(cmtDiv);
+
+                }
+
+
+
+                // Cập nhật số lượng bình luận
+
+                if (postArticle) {
+
+                    const btnCount = postArticle.querySelector('.comment-count-btn');
+
+                    const badgeCount = postArticle.querySelector('.comment-count-badge');
+
+                    const textCount = postArticle.querySelector('.comment-count-text');
+
+
+
+                    const newCount = (parseInt(btnCount ? btnCount.innerText : '0') || 0) + 1;
+
+                    if (btnCount) btnCount.innerText = newCount;
+
+                    if (badgeCount) badgeCount.innerText = newCount;
+
+                    if (textCount) textCount.innerText = newCount + ' bình luận';
+
+                }
+
+            } else {
+
+                alert(data.message || 'Không thể gửi bình luận!');
+
+            }
+
+        })
+
+        .catch(err => alert('Lỗi kết nối khi gửi bình luận: ' + err.message));
+
+    }
+
+
+
+    // Hiển thị chi tiết cảnh báo khẩn cấp khi người dùng click vào card
+
+    function showAlertDetail(el) {
+
+        const title = el.getAttribute('data-title') || 'Cảnh báo khẩn cấp';
+
+        const content = el.getAttribute('data-content') || '';
+
+        const region = el.getAttribute('data-region') || 'Cảnh báo toàn khu vực';
+
+        const severity = el.getAttribute('data-severity') || 'DANGER_RED';
+
+
+
+        const modalElement = document.getElementById('emergencyBroadcastModal');
+
+        if (modalElement && window.bootstrap) {
+
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+            const severityStyles = {
+
+                DANGER_RED: ['bg-danger', 'btn-danger', 'bg-danger-subtle text-danger'],
+
+                WARNING_ORANGE: ['bg-warning', 'btn-warning', 'bg-warning-subtle text-dark'],
+
+                NOTICE_YELLOW: ['bg-info', 'btn-info', 'bg-info-subtle text-info-emphasis']
+
+            };
+
+            const styles = severityStyles[severity] || severityStyles.DANGER_RED;
+
+            const header = document.getElementById('broadcastModalHeader');
+
+            const button = document.getElementById('acknowledgeBroadcast');
+
+            const regEl = document.getElementById('broadcastAlertRegion');
+
+            if (header) header.className = `modal-header text-white ${styles[0]}`;
+
+            if (button) button.className = `btn fw-bold px-4 ${styles[1]}`;
+
+            if (regEl) {
+
+                regEl.className = `badge mb-2 ${styles[2]}`;
+
+                regEl.textContent = region;
+
+            }
+
+            const titleEl = document.getElementById('broadcastAlertTitle');
+
+            if (titleEl) titleEl.textContent = title;
+
+            const contentEl = document.getElementById('broadcastAlertContent');
+
+            if (contentEl) contentEl.textContent = content;
+
+            modal.show();
+
+        } else {
+
+            alert(`${title}\n\nKhu vực: ${region}\n\n${content}`);
+
+        }
+
+    }
+
+
+
+    // Xử lý nút Chuyển thành đơn SOS
+
+    function convertToSos(postId) {
+
+        const ok = confirm('XÁC NHẬN CHUYỂN BÀI ĐĂNG NÀY THÀNH ĐƠN CỨU HỘ KHẨN CẤP?\n\nHệ thống sẽ tự động tạo một yêu cầu cứu nạn SOS với mức độ KHẨN CẤP và đưa ngay lên trung tâm Điều Phối Viên!');
+
+        if (!ok) return;
+
+
+
+        fetch(`/api/feed/posts/${postId}/convert-sos`, {
+
+            method: 'POST'
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                alert(data.message || 'Đã chuyển thành công thành đơn SOS!');
+
+                window.location.reload();
+
+            } else {
+
+                alert('Lỗi: ' + (data.message || 'Không thể chuyển thành đơn SOS'));
+
+            }
+
+        })
+
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+
+    }
+
+
+
+    // Phóng to ảnh hiện trường Cloudinary trong modal
+
+    function previewFeedImage(src, caption) {
+
+        if (!src) return;
+
+        const modalElement = document.getElementById('imagePreviewModal');
+
+        if (modalElement && window.bootstrap) {
+
+            document.getElementById('previewModalImg').src = src;
+
+            document.getElementById('previewModalCaption').textContent = caption || 'Ảnh hiện trường thiên tai';
+
+            document.getElementById('previewModalOpenLink').href = src;
+
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+            modal.show();
+
+        } else {
+
+            window.open(src, '_blank');
+
+        }
+
+    }
+
+
+    // Tự động tải/làm mới bình luận từ REST API khi người dùng mở hộp bình luận
+    function loadCommentsForPost(postId) {
+        if (!postId) return;
+        const commentsList = document.getElementById('comments-list-' + postId);
+        if (!commentsList) return;
+
+        fetch(`/api/feed/posts/${postId}/comments`)
+            .then(res => res.json())
+            .then(comments => {
+                if (Array.isArray(comments) && comments.length > 0) {
+                    commentsList.innerHTML = '';
+                    comments.forEach(cmt => {
+                        const avatarHtml = (cmt.authorAvatar && cmt.authorAvatar.trim() !== '')
+                            ? `<img src="${cmt.authorAvatar}" class="rounded-circle object-fit-cover shadow-xs mt-1" style="width: 32px; height: 32px; flex-shrink: 0;" alt="Avatar">`
+                            : `<div class="rounded-circle bg-secondary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs mt-1" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;"><span>${(cmt.authorName || 'U').substring(0, 1)}</span></div>`;
+
+                        const timeStr = cmt.createdAt ? formatCommentDateTime(cmt.createdAt) : 'Vừa xong';
+                        const cmtDiv = document.createElement('div');
+                        cmtDiv.className = 'd-flex align-items-start gap-2 comment-bubble-wrapper';
+                        cmtDiv.innerHTML = `
+                            ${avatarHtml}
+                            <div class="bg-white p-2.5 px-3 rounded-4 shadow-xs border flex-grow-1 comment-bubble">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="fw-bold text-dark small">${escapeFeedHtml(cmt.authorName || 'Người dân')}</span>
+                                    <small class="text-muted" style="font-size: 0.72rem;">${timeStr}</small>
+                                </div>
+                                <div class="text-secondary small">${escapeFeedHtml(cmt.content || '')}</div>
+                            </div>
+                        `;
+                        commentsList.appendChild(cmtDiv);
+                    });
+
+                    // Cập nhật số lượng bình luận trên các nhãn
+                    const postArticle = document.getElementById('post-' + postId);
+                    if (postArticle) {
+                        const countBtns = postArticle.querySelectorAll('.comment-count-btn, .comment-count-badge');
+                        countBtns.forEach(el => el.textContent = comments.length);
+                        const countText = postArticle.querySelector('.comment-count-text');
+                        if (countText) countText.textContent = comments.length + ' bình luận';
+                    }
+                }
+            })
+            .catch(err => console.debug('Không thể tải bình luận:', err));
+    }
+
+    function escapeFeedHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatCommentDateTime(iso) {
+        if (!iso) return 'Vừa xong';
+        try {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return 'Vừa xong';
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const MM = String(d.getMonth() + 1).padStart(2, '0');
+            return `${hh}:${mm} - ${dd}/${MM}`;
+        } catch (_) {
+            return 'Vừa xong';
+        }
+    }
+
+    // Đăng ký sự kiện mở hộp bình luận để tự động fetch API
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btn-toggle-comments').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetSelector = this.getAttribute('data-bs-target');
+                const postId = targetSelector ? targetSelector.replace('#comments-section-', '') : null;
+                if (postId) {
+                    loadCommentsForPost(postId);
+                }
+            });
+        });
+    });
+
+</script>
+
+
+
+<style>
+
+    .feed-post-image:hover {
+
+        transform: scale(1.01);
+
+    }
+
+    .feed-header-banner {
+
+        background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important;
+
+        color: #fff !important;
+
+    }
+
+    .feed-header-banner h1,
+
+    .feed-header-banner p {
+
+        color: #fff !important;
+
+    }
+
+    .feed-header-banner p {
+
+        opacity: .92;
+
+    }
+
+    .feed-header-banner .btn-outline-light {
+
+        color: #fff;
+
+        border-color: rgba(255, 255, 255, .75);
+
+    }
+
+    .feed-header-banner .btn-outline-light:hover,
+
+    .feed-header-banner .btn-outline-light:focus {
+
+        color: #7f1d1d;
+
+        background-color: #fff;
+
+    }
+
+    .post-content-text {
+
+        color: #1e293b !important;
+
+        font-size: 0.95rem;
+
+        line-height: 1.6;
+
+    }
+
+    .alert-item-card {
+
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    }
+
+    .alert-item-card:hover {
+
+        transform: translateY(-2px);
+
+        box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+
+    }
+
+    /* Reaction Popover & Floating Bar */
+
+    .reaction-container {
+
+        position: relative;
+
+        display: inline-block;
+
+    }
+
+    .reaction-popover {
+
+        position: absolute;
+
+        bottom: 125%;
+
+        left: 0;
+
+        z-index: 1050;
+
+        background: #ffffff;
+
+        padding: 4px 10px;
+
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+
+        display: none;
+
+        align-items: center;
+
+        gap: 6px;
+
+        border: 1px solid rgba(0, 0, 0, 0.08);
+
+        animation: popoverBounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    }
+
+    @keyframes popoverBounce {
+
+        from { opacity: 0; transform: translateY(8px) scale(0.9); }
+
+        to { opacity: 1; transform: translateY(0) scale(1); }
+
+    }
+
+    .reaction-container:hover .reaction-popover,
+
+    .reaction-container:focus-within .reaction-popover {
+
+        display: flex;
+
+    }
+
+    .reaction-emoji-btn {
+
+        background: transparent;
+
+        border: none;
+
+        padding: 4px;
+
+        border-radius: 50%;
+
+        cursor: pointer;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        position: relative;
+
+        transition: transform 0.18s ease;
+
+    }
+
+    .reaction-emoji-btn:hover {
+
+        transform: scale(1.35) translateY(-4px);
+
+    }
+
+    .emoji-anim {
+
+        font-size: 1.45rem;
+
+        line-height: 1;
+
+        display: inline-block;
+
+    }
+
+    .reaction-emoji-btn .reaction-tooltip {
+
+        position: absolute;
+
+        bottom: 115%;
+
+        background: rgba(15, 23, 42, 0.9);
+
+        color: #fff;
+
+        font-size: 0.68rem;
+
+        font-weight: 700;
+
+        padding: 2px 8px;
+
+        border-radius: 20px;
+
+        white-space: nowrap;
+
+        opacity: 0;
+
+        pointer-events: none;
+
+        transition: opacity 0.15s ease;
+
+    }
+
+    .reaction-emoji-btn:hover .reaction-tooltip {
+
+        opacity: 1;
+
+    }
+
+
+
+    /* Style cho các trạng thái đã phản ứng */
+
+    .btn-reacted {
+
+        font-weight: 700 !important;
+
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    }
+
+    .react-LIKE {
+
+        background-color: #eff6ff !important;
+
+        color: #1d4ed8 !important;
+
+        border-color: #93c5fd !important;
+
+    }
+
+    .react-CARE {
+
+        background-color: #fff1f2 !important;
+
+        color: #e11d48 !important;
+
+        border-color: #fda4af !important;
+
+    }
+
+    .react-PRAY {
+
+        background-color: #fefce8 !important;
+
+        color: #b45309 !important;
+
+        border-color: #fde047 !important;
+
+    }
+
+    .react-WARNING {
+
+        background-color: #fff7ed !important;
+
+        color: #c2410c !important;
+
+        border-color: #fdba74 !important;
+
+    }
+
+    .react-SAD {
+
+        background-color: #f8fafc !important;
+
+        color: #475569 !important;
+
+        border-color: #cbd5e1 !important;
+
+    }
+
+
+
+    .comment-bubble {
+
+        background-color: #f8fafc !important;
+
+        border: 1px solid #e2e8f0;
+
+    }
+
+    .hover-bg:hover {
+
+        background-color: rgba(0, 0, 0, 0.04);
+
+    }
+
+</style>
+
+
+
+</div>
+
+</body>
+
 </html>

@@ -99,6 +99,78 @@
 - `created_at` (DATETIME)
 - `expires_at` (DATETIME)
 
+### 2.8. Bảng `evacuation_shelters` (Điểm sơ tán an toàn)
+- `id` (BIGINT, PK, Identity)
+- `name` (VARCHAR(150), Not Null)
+- `address` (VARCHAR(255), Not Null)
+- `latitude` (DOUBLE, Not Null)
+- `longitude` (DOUBLE, Not Null)
+- `capacity` (INT, Not Null)
+- `current_occupancy` (INT, Default 0)
+- `contact_phone` (VARCHAR(20))
+- `is_active` (BOOLEAN, Default true)
+- `created_at` (DATETIME)
+
+### 2.9. Bảng `community_posts` (Bảng tin cảnh báo cộng đồng)
+- `id` (BIGINT, PK, Identity)
+- `user_id` (BIGINT, FK -> `users.id`)
+- `author_name` (VARCHAR(150))
+- `hazard_type` (VARCHAR(50)) - `FLOOD`, `LANDSLIDE`, `STORM`, `OTHER`
+- `content` (NVARCHAR(MAX) / TEXT, Not Null)
+- `location_name` (VARCHAR(255))
+- `latitude` (DOUBLE)
+- `longitude` (DOUBLE)
+- `image_url` (VARCHAR(500)) - Link ảnh Cloudinary CDN
+- `upvote_count` (INT, Default 0)
+- `comment_count` (INT, Default 0)
+- `verification_status` (VARCHAR(30)) - `PENDING`, `VERIFIED`, `REJECTED`
+- `created_at` (DATETIME)
+
+### 2.10. Bảng `post_upvotes` (Tương tác cảm xúc bài viết)
+- `id` (BIGINT, PK, Identity)
+- `post_id` (BIGINT, FK -> `community_posts.id` ON DELETE CASCADE)
+- `user_id` (BIGINT, FK -> `users.id`)
+- `reaction_type` (VARCHAR(20), Default 'LIKE') - `LIKE`, `CARE`, `PRAY`, `WARNING`, `SAD`
+- `created_at` (DATETIME)
+- *Ràng buộc:* Khóa duy nhất phức hợp `UNIQUE (post_id, user_id)`
+
+### 2.11. Bảng `post_comments` (Bình luận bài viết cộng đồng)
+- `id` (BIGINT, PK, Identity)
+- `post_id` (BIGINT, FK -> `community_posts.id` ON DELETE CASCADE)
+- `user_id` (BIGINT, FK -> `users.id`)
+- `content` (NVARCHAR(MAX) / TEXT, Not Null)
+- `created_at` (DATETIME)
+
+### 2.12. Bảng `rescue_chat_messages` (Tin nhắn trực tuyến ca cứu nạn)
+- `id` (BIGINT, PK, Identity)
+- `sos_id` (BIGINT, FK -> `sos_requests.id` ON DELETE CASCADE)
+- `sender_type` (VARCHAR(20), Not Null) - `CITIZEN`, `RESCUER`, `SYSTEM`
+- `sender_name` (VARCHAR(150), Not Null)
+- `sender_phone` (VARCHAR(20))
+- `content` (NVARCHAR(MAX) / TEXT, Not Null)
+- `message_type` (VARCHAR(30), Default 'TEXT') - `TEXT`, `SOS_CHIP`, `IMAGE`, `LOCATION`
+- `is_read` (BOOLEAN, Default false)
+- `created_at` (DATETIME)
+
+### 2.13. Bảng `donations` (Quyên góp ủng hộ quỹ cứu trợ)
+- `id` (BIGINT, PK, Identity)
+- `donor_name` (VARCHAR(150))
+- `amount` (DECIMAL(15,2), Not Null)
+- `payment_method` (VARCHAR(50)) - `VNPAY`, `MOMO`, `VIETQR`, `BANK_TRANSFER`
+- `transaction_code` (VARCHAR(100), Unique)
+- `status` (VARCHAR(30)) - `PENDING`, `SUCCESS`, `FAILED`
+- `created_at` (DATETIME)
+
+### 2.14. Bảng `team_fund_requests` (Yêu cầu tiếp tế ngân sách đội cứu hộ)
+- `id` (BIGINT, PK, Identity)
+- `team_id` (BIGINT, FK -> `rescue_teams.id`)
+- `amount` (DECIMAL(15,2), Not Null)
+- `reason` (NVARCHAR(MAX) / TEXT, Not Null)
+- `status` (VARCHAR(30)) - `PENDING`, `APPROVED`, `REJECTED`
+- `approved_by` (BIGINT, FK -> `users.id`)
+- `created_at` (DATETIME)
+
+
 ---
 
 ## 3. Mẫu Cấu Hình Đa CSDL (`application.yml`)

@@ -247,7 +247,7 @@ public class CommunityFeedService {
         initSampleReactions();
     }
 
-    private void initSampleComments() {
+    public void initSampleComments() {
         if (commentRepository.count() == 0) {
             log.info("Khởi tạo danh sách bình luận mẫu cho các bài đăng cộng đồng...");
             List<CommunityPost> posts = postRepository.findAll();
@@ -311,7 +311,7 @@ public class CommunityFeedService {
         }
     }
 
-    private void initSampleReactions() {
+    public void initSampleReactions() {
         if (upvoteRepository.count() == 0) {
             log.info("Khởi tạo danh sách phản ứng icon cảm xúc mẫu cho các bài đăng...");
             List<CommunityPost> posts = postRepository.findAll();
@@ -332,6 +332,9 @@ public class CommunityFeedService {
     }
 
     public List<CommunityPost> getRecentPosts() {
+        if (commentRepository.count() == 0 && postRepository.count() > 0) {
+            initSampleComments();
+        }
         return postRepository.findAllByOrderByCreatedAtDesc();
     }
 
@@ -340,10 +343,16 @@ public class CommunityFeedService {
     }
 
     public List<PostComment> getCommentsByPostId(Long postId) {
+        if (commentRepository.count() == 0 && postRepository.count() > 0) {
+            initSampleComments();
+        }
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
     }
 
     public Map<Long, List<PostComment>> getAllCommentsGroupedByPostId() {
+        if (commentRepository.count() == 0 && postRepository.count() > 0) {
+            initSampleComments();
+        }
         List<PostComment> all = commentRepository.findAll();
         Map<Long, List<PostComment>> map = new LinkedHashMap<>();
         for (PostComment c : all) {

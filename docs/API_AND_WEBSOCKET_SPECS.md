@@ -61,3 +61,12 @@
 - `GET /api/chat/sos/{sosId}/messages?phone={phone}` - Lấy toàn bộ lịch sử tin nhắn của ca SOS theo thứ tự thời gian tăng dần.
 - `POST /api/chat/sos/{sosId}/messages` - Gửi tin nhắn qua REST API (cơ chế fallback khi STOMP kết nối chập chờn).
 - `GET /api/chat/sos/{sosId}/status` - Kiểm tra điều kiện mở phòng chat (`IN_PROGRESS`), trạng thái ca và thông tin đội tiếp cận.
+- `GET /api/chat/active-session` - Kiểm tra ca cứu nạn đang hoạt động cần chat của người dùng hiện tại (Citizen hoặc Rescuer), phục vụ Khung Chat Nổi Toàn Hệ Thống phong cách Facebook Messenger.
+
+### 2.7. Bảng Tin Cộng Đồng & Tương Tác Mạng Xã Hội (`/api/feed`)
+- `GET /api/feed/posts` - Lấy danh sách các bài đăng cảnh báo thiên tai mới nhất.
+- `POST /api/feed/posts` - Đăng bài cảnh báo thiên tai mới (kèm vị trí GPS, loại hiểm họa, nội dung, ảnh hiện trường tải lên Cloudinary).
+- `POST /api/feed/posts/{id}/react?type={reactionType}` - Thả cảm xúc bài viết với 5 trạng thái (`LIKE`, `CARE`, `PRAY`, `WARNING`, `SAD`).
+- `GET /api/feed/posts/{id}/comments` - Lấy danh sách các bình luận của bài viết theo thứ tự thời gian.
+- `POST /api/feed/posts/{id}/comments` - Gửi bình luận mới cho bài viết (tham số: `content`).
+- `GET /api/feed/shelters` - Lấy danh sách các điểm sơ tán tránh trú bão lũ an toàn.
