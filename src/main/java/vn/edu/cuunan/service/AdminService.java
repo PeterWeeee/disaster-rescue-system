@@ -17,7 +17,6 @@ import vn.edu.cuunan.repository.RoleRepository;
 import vn.edu.cuunan.repository.SosRequestRepository;
 import vn.edu.cuunan.repository.UserRepository;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -150,17 +149,12 @@ public class AdminService {
             byUrgency.put(urgency, sosRequestRepository.countByUrgencyLevel(urgency));
         Map<String, Long> byRegion = requests.stream()
                 .collect(Collectors.groupingBy(this::regionOf, TreeMap::new, Collectors.counting()));
-        double averageResponseMinutes = requests.stream()
-                .filter(s -> s.getResolvedAt() != null && s.getCreatedAt() != null)
-                .mapToLong(s -> Math.max(0, Duration.between(s.getCreatedAt(), s.getResolvedAt()).toMinutes()))
-                .average().orElse(0);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("totalCases", requests.size());
         result.put("pendingCases", sosRequestRepository.countByStatus("PENDING"));
         result.put("activeCases", sosRequestRepository.countByStatus("DISPATCHED") + sosRequestRepository.countByStatus("IN_PROGRESS"));
         result.put("resolvedCases", sosRequestRepository.countByStatus("RESOLVED"));
         result.put("rescuedPeople", Optional.ofNullable(sosRequestRepository.sumRescuedPeople()).orElse(0L));
-        result.put("averageResponseMinutes", Math.round(averageResponseMinutes * 10.0) / 10.0);
         result.put("byUrgency", byUrgency);
         result.put("byRegion", byRegion);
         return result;

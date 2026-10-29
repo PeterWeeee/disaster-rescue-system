@@ -18,13 +18,18 @@
         </div>
 
         <!-- 1. TAB OVERVIEW (TỔNG QUAN) -->
-        <div class="row g-3 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đã giải quyết</div><div class="fs-3 fw-bold text-success" th:text="${stats.resolvedCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Thời gian xử lý TB</div><div class="fs-3 fw-bold"><span th:text="${stats.averageResponseMinutes}">0</span><small class="fs-6"> phút</small></div></div></div></div>
+        <div class="row row-cols-2 row-cols-xl-5 g-3 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
+
+            <div><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
+
+            <div><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
+
+            <div><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
+
+            <div><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Đã giải quyết</div><div class="fs-3 fw-bold text-success" th:text="${stats.resolvedCases}">0</div></div></div></div>
+
+            <div><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
+
         </div>
         <div class="row g-4 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
             <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Phân bố mức độ SOS</div><div class="card-body"><canvas id="urgencyChart" height="220"></canvas></div></div></div>

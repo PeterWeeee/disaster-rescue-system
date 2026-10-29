@@ -37,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
     private final NotificationRepository notificationRepository;
     private final ActivityLogRepository activityLogRepository;
     private final TeamFundRequestRepository teamFundRequestRepository;
+    private final DonationRepository donationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired(required = false)
@@ -60,6 +61,7 @@ public class DataInitializer implements CommandLineRunner {
                            NotificationRepository notificationRepository,
                            ActivityLogRepository activityLogRepository,
                            TeamFundRequestRepository teamFundRequestRepository,
+                           DonationRepository donationRepository,
                            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -76,6 +78,7 @@ public class DataInitializer implements CommandLineRunner {
         this.notificationRepository = notificationRepository;
         this.activityLogRepository = activityLogRepository;
         this.teamFundRequestRepository = teamFundRequestRepository;
+        this.donationRepository = donationRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -447,6 +450,84 @@ public class DataInitializer implements CommandLineRunner {
                 "PENDING", null
         );
 
+        // Bổ sung dữ liệu demo để biểu đồ quản trị có mật độ và phân bố đa dạng hơn.
+        // Dùng số điện thoại riêng để lần khởi động sau không tạo bản ghi trùng.
+        getOrCreateSos(citizen01, "Đặng Thị Hòa", "0930001001", null,
+                16.0730, 108.2100, "Đường Trưng Nữ Vương, Hải Châu, Đà Nẵng",
+                "HIGH", 3, false, true, false,
+                "Nước mưa tràn vào nhà, gia đình cần hỗ trợ di chuyển người già và trẻ nhỏ đến điểm trú an toàn.",
+                "RESOLVED", LocalDateTime.now().minusHours(5));
+        getOrCreateSos(citizen01, "Phan Quốc Bảo", "0930001002", null,
+                16.0560, 108.1850, "Khu dân cư Hòa Minh, Liên Chiểu, Đà Nẵng",
+                "MEDIUM", 2, false, false, false,
+                "Cây xanh gãy đổ chắn lối đi, người dân cần hỗ trợ dọn đường và kiểm tra dây điện.",
+                "PENDING", null);
+        getOrCreateSos(citizenTH, "Nguyễn Thị Hạnh", "0930001003", null,
+                19.8100, 105.7700, "Phường Đông Sơn, Thành phố Thanh Hóa, Thanh Hóa",
+                "HIGH", 4, true, false, false,
+                "Mưa lớn gây ngập tầng một, gia đình đang trú trên tầng hai và cần nước uống cùng hỗ trợ sơ tán.",
+                "IN_PROGRESS", null);
+        getOrCreateSos(citizenTH, "Bùi Văn Phúc", "0930001004", null,
+                19.4300, 105.7900, "Xã Ninh Hải, Thị xã Nghi Sơn, Thanh Hóa",
+                "LOW", 1, false, false, false,
+                "Đường vào thôn bị đất đá vùi lấp, cần khảo sát và cảnh báo phương tiện không đi qua.",
+                "RESOLVED", LocalDateTime.now().minusHours(2));
+        getOrCreateSos(citizenNA, "Trần Thị Hương", "0930001005", null,
+                18.6700, 105.6900, "Xã Hưng Trung, Huyện Hưng Nguyên, Nghệ An",
+                "CRITICAL", 5, true, true, true,
+                "Nước lên nhanh, có người bị thương và trẻ nhỏ trong nhà; cần xuồng và nhân viên y tế.",
+                "PENDING", null);
+        getOrCreateSos(citizenNA, "Lương Văn Bình", "0930001006", null,
+                19.3600, 104.1600, "Bản Ta Đo, Huyện Kỳ Sơn, Nghệ An",
+                "MEDIUM", 3, false, false, false,
+                "Sạt lở nhỏ làm chia cắt đường liên bản, nhóm người dân cần được hướng dẫn đến nơi tập kết.",
+                "CANCELLED", null);
+        getOrCreateSos(citizenHT, "Đinh Thị Vân", "0930001007", null,
+                18.3500, 105.9000, "Xã Thạch Đài, Huyện Thạch Hà, Hà Tĩnh",
+                "HIGH", 3, false, true, false,
+                "Nước tràn qua đường vào khu dân cư, cần hỗ trợ đưa trẻ nhỏ và giấy tờ đến điểm tránh trú.",
+                "DISPATCHED", null);
+        getOrCreateSos(citizenHue, "Lê Hoàng Nam", "0930001008", null,
+                16.4700, 107.5900, "Phường Phú Hậu, Quận Phú Xuân, Thành phố Huế",
+                "CRITICAL", 6, true, true, true,
+                "Nước lũ chảy xiết quanh nhà, có người cao tuổi cần thuốc và một người bị chấn thương.",
+                "IN_PROGRESS", null);
+        getOrCreateSos(citizenQT, "Nguyễn Thị Sen", "0930001009", null,
+                16.8000, 107.1000, "Xã Gio Mai, Huyện Gio Linh, Quảng Trị",
+                "MEDIUM", 2, false, false, false,
+                "Mái nhà bị tốc do gió mạnh, cần bạt che và hỗ trợ gia cố tạm thời.",
+                "RESOLVED", LocalDateTime.now().minusHours(4));
+        getOrCreateSos(citizenQN, "Phạm Văn Lộc", "0930001010", null,
+                15.3000, 108.7600, "Xã Bình Chánh, Huyện Bình Sơn, Quảng Ngãi",
+                "HIGH", 4, false, true, false,
+                "Nước dâng làm ngập lối ra, gia đình cần được đưa đến nhà văn hóa xã.",
+                "PENDING", null);
+        getOrCreateSos(citizenGL, "Ksor H'Lan", "0930001011", null,
+                13.9700, 107.8800, "Xã Ia Krai, Huyện Ia Grai, Gia Lai",
+                "LOW", 2, false, false, false,
+                "Gió lớn làm cây đổ gần đường dân sinh, cần kiểm tra và cảnh báo khu vực.",
+                "RESOLVED", LocalDateTime.now().minusHours(7));
+        getOrCreateSos(citizenDL, "Y Mơ Niê", "0930001012", null,
+                12.6800, 108.0500, "Xã Ea Tu, Thành phố Buôn Ma Thuột, Đắk Lắk",
+                "MEDIUM", 3, true, false, false,
+                "Mưa kéo dài làm nước suối dâng, người dân cần hỗ trợ di chuyển vật dụng và lương thực.",
+                "DISPATCHED", null);
+        getOrCreateSos(citizenKH, "Trần Quốc Khánh", "0930001013", null,
+                12.2500, 109.1900, "Phường Vĩnh Phước, Thành phố Nha Trang, Khánh Hòa",
+                "CRITICAL", 4, false, true, true,
+                "Nước chảy tràn qua khu dân cư, có người bị thương cần sơ cứu và di chuyển khẩn cấp.",
+                "PENDING", null);
+        getOrCreateSos(citizenLD, "Hoàng Thị Lan", "0930001014", null,
+                11.9300, 108.4400, "Phường 7, Thành phố Đà Lạt, Lâm Đồng",
+                "HIGH", 2, false, false, true,
+                "Đất đá sạt xuống lối vào nhà, một người bị xây xát; cần hỗ trợ y tế và kiểm tra taluy.",
+                "IN_PROGRESS", null);
+        getOrCreateSos(citizenHue, "Phan Thị Thu", "0930001015", null,
+                16.4500, 107.5700, "Xã Quảng Thành, Huyện Quảng Điền, Thành phố Huế",
+                "MEDIUM", 3, false, true, false,
+                "Nước ngập đường liên thôn, cần hướng dẫn tuyến di chuyển an toàn đến điểm sơ tán.",
+                "PENDING", null);
+
         // 6. Khởi tạo Phân công cứu hộ (RescueAssignments)
         // Nhiệm vụ 1: Đà Nẵng (Đội Hải Châu) - PENDING
         initAssignment(sosDN2, teamDN01, coordCentral, "PENDING",
@@ -718,6 +799,8 @@ public class DataInitializer implements CommandLineRunner {
             log.info("  [TeamFundRequest] Đã khởi tạo 3 yêu cầu tiếp tế ngân sách mẫu (2 Chờ duyệt, 1 Đã duyệt)");
         }
 
+        initDemoDonations();
+
         // Khởi tạo Tin nhắn trao đổi trực tuyến mẫu (RescueChatMessages)
         if (rescueChatMessageRepository != null && rescueChatMessageRepository.count() == 0) {
             RescueAssignment assignDN1 = rescueAssignmentRepository.findTopBySosRequestIdOrderByAssignedAtDesc(sosDN1.getId()).orElse(null);
@@ -966,8 +1049,50 @@ public class DataInitializer implements CommandLineRunner {
                     .status(status)
                     .resolvedAt(resolvedAt)
                     .build();
-            return sosRequestRepository.save(sos);
+            SosRequest saved = sosRequestRepository.save(sos);
+            if (resolvedAt != null) {
+                saved.setCreatedAt(resolvedAt.minusMinutes(35));
+                saved.setUpdatedAt(resolvedAt);
+                return sosRequestRepository.save(saved);
+            }
+            return saved;
         });
+    }
+
+    private void initDemoDonations() {
+        LocalDateTime now = LocalDateTime.now();
+        Object[][] samples = {
+                {"Nhóm thiện nguyện Ánh Dương", "0905001001", "2500000", "VNPAY", "Đà Nẵng", "DEMO-DON-001", 1},
+                {"Nguyễn Thị Minh", "0905001002", "1200000", "MOMO", "Nghệ An", "DEMO-DON-002", 3},
+                {"Công ty An Tâm", "0905001003", "5000000", "VIETQR", "Hà Tĩnh", "DEMO-DON-003", 5},
+                {"Trần Văn Phúc", "0905001004", "800000", "VNPAY", "Quảng Trị", "DEMO-DON-004", 7},
+                {"Lê Hoàng Yến", "0905001005", "1500000", "MOMO", "Thành phố Huế", "DEMO-DON-005", 9},
+                {"Hội đồng hương miền Trung", "0905001006", "7500000", "VIETQR", "TOAN_MIEN_TRUNG", "DEMO-DON-006", 12},
+                {"Phạm Quốc Bảo", "0905001007", "600000", "VNPAY", "Quảng Ngãi", "DEMO-DON-007", 14},
+                {"Đặng Thị Hồng", "0905001008", "900000", "MOMO", "Khánh Hòa", "DEMO-DON-008", 16},
+                {"Cửa hàng Bình Minh", "0905001009", "3000000", "VIETQR", "Lâm Đồng", "DEMO-DON-009", 20}
+        };
+        int created = 0;
+        for (Object[] sample : samples) {
+            String transactionCode = (String) sample[5];
+            if (donationRepository.findByTransactionCode(transactionCode).isPresent()) continue;
+            LocalDateTime paidAt = now.minusDays((Integer) sample[6]);
+            Donation donation = Donation.builder()
+                    .donorName((String) sample[0])
+                    .donorPhone((String) sample[1])
+                    .amount(new BigDecimal((String) sample[2]))
+                    .paymentMethod((String) sample[3])
+                    .targetProvince((String) sample[4])
+                    .message("Ủng hộ hoạt động cứu trợ và hỗ trợ người dân vùng thiên tai.")
+                    .transactionCode(transactionCode)
+                    .status("SUCCESS")
+                    .createdAt(paidAt.minusMinutes(5))
+                    .paidAt(paidAt)
+                    .build();
+            donationRepository.save(donation);
+            created++;
+        }
+        if (created > 0) log.info("  [Donation] Đã khởi tạo {} giao dịch quyên góp demo thành công", created);
     }
 
     private void initAssignment(SosRequest sos, RescueTeam team, User assignedBy, String status,

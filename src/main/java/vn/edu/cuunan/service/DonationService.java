@@ -183,10 +183,15 @@ public class DonationService {
 
         long totalCount = donationRepository.countByStatus("SUCCESS");
 
+        Map<String, BigDecimal> byMethod = new LinkedHashMap<>();
+        donationRepository.findAllByStatusOrderByPaidAtDesc("SUCCESS").forEach(donation ->
+                byMethod.merge(donation.getPaymentMethod(), donation.getAmount(), BigDecimal::add));
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalAmount", totalAmount);
         stats.put("totalCount", totalCount);
         stats.put("targetAmount", new BigDecimal("500000000")); // Mục tiêu 500 triệu đồng
+        stats.put("byMethod", byMethod);
         return stats;
     }
 
