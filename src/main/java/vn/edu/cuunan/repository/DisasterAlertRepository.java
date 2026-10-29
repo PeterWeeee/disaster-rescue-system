@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface DisasterAlertRepository extends JpaRepository<DisasterAlert, Long> {
     List<DisasterAlert> findByIsBroadcastTrueOrderByCreatedAtDesc();
     List<DisasterAlert> findAllByOrderByCreatedAtDesc();
+    List<DisasterAlert> findTop5ByOrderByCreatedAtDesc();
     boolean existsByTitle(String title);
     Optional<DisasterAlert> findFirstByTitle(String title);
 }

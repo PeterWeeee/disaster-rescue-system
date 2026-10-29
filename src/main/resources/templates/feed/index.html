@@ -262,35 +262,44 @@
             <aside class="col-lg-3 d-none d-lg-block">
                 <div class="d-flex flex-column gap-3 sticky-top" style="top: 80px; z-index: 10;">
 
-                    <!-- Card Cảnh Báo Mới Nhất -->
+                    <!-- Card Cảnh Báo Mới Nhất (Chính thống từ Ban Điều Phối) -->
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between align-items-center mb-2.5">
-                                <h6 class="fw-bold text-dark small mb-0"><i class="fa-solid fa-bell text-warning me-1"></i>Cảnh báo khẩn mới</h6>
+                                <h6 class="fw-bold text-dark small mb-0">
+                                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Cảnh báo khẩn mới
+                                </h6>
                                 <span class="badge bg-danger text-white">Live</span>
                             </div>
-                            <div class="d-flex flex-column gap-2 small">
-                                <div class="p-2 rounded-3 bg-danger-subtle border border-danger-subtle">
-                                    <div class="d-flex align-items-center gap-1.5 fw-bold text-danger">
-                                        <span class="badge bg-danger">KHẨN</span>
-                                        <span>Mưa lớn trên 200 mm</span>
+
+                            <div th:if="${recentAlerts != null && !#lists.isEmpty(recentAlerts)}" class="d-flex flex-column gap-2 small">
+                                <div th:each="alert : ${recentAlerts}"
+                                     class="p-2 rounded-3 alert-item-card border"
+                                     th:classappend="${alert.severity == 'DANGER_RED' ? 'bg-danger-subtle border-danger-subtle text-danger' : (alert.severity == 'WARNING_ORANGE' ? 'bg-warning-subtle border-warning-subtle text-warning-emphasis' : 'bg-light border text-dark')}"
+                                     style="cursor: pointer;"
+                                     onclick="showAlertDetail(this)"
+                                     th:data-title="${alert.title}"
+                                     th:data-content="${alert.content}"
+                                     th:data-region="${alert.affectedRegion}"
+                                     th:data-severity="${alert.severity}"
+                                     title="Bấm để xem chi tiết thông báo khẩn cấp">
+                                    <div class="d-flex align-items-center gap-1.5 fw-bold">
+                                        <span th:if="${alert.severity == 'DANGER_RED'}" class="badge bg-danger">KHẨN</span>
+                                        <span th:if="${alert.severity == 'WARNING_ORANGE'}" class="badge bg-warning text-dark">CAO</span>
+                                        <span th:if="${alert.severity != 'DANGER_RED' && alert.severity != 'WARNING_ORANGE'}" class="badge bg-secondary text-white">LƯU Ý</span>
+                                        <span class="text-truncate" th:text="${alert.title}">Mưa lớn diện rộng</span>
                                     </div>
-                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">Quảng Nam, Quảng Ngãi · 08:30</div>
-                                </div>
-                                <div class="p-2 rounded-3 bg-warning-subtle border border-warning-subtle">
-                                    <div class="d-flex align-items-center gap-1.5 fw-bold text-warning-emphasis">
-                                        <span class="badge bg-warning text-dark">CAO</span>
-                                        <span>Lũ trên báo động 3</span>
+                                    <div class="text-muted mt-1 text-truncate" style="font-size: 0.75rem;">
+                                        <span th:text="${alert.affectedRegion != null ? alert.affectedRegion : 'Toàn khu vực'}">Khu vực</span>
+                                        <span> · </span>
+                                        <span th:text="${alert.createdAt != null ? #temporals.format(alert.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">08:30</span>
                                     </div>
-                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">Sông Thu Bồn · 07:45</div>
                                 </div>
-                                <div class="p-2 rounded-3 bg-light border">
-                                    <div class="d-flex align-items-center gap-1.5 fw-bold text-dark">
-                                        <span class="badge bg-secondary text-white">LƯU Ý</span>
-                                        <span>Nguy cơ sạt lở đồi</span>
-                                    </div>
-                                    <div class="text-secondary mt-1 fw-medium" style="font-size: 0.75rem;">Các huyện vùng cao · 06:10</div>
-                                </div>
+                            </div>
+
+                            <div th:if="${recentAlerts == null || #lists.isEmpty(recentAlerts)}" class="text-center py-3 text-muted small">
+                                <i class="fa-solid fa-circle-check text-success fa-2x mb-1 opacity-50 d-block"></i>
+                                <span>Chưa có cảnh báo nguy cấp mới nào.</span>
                             </div>
                         </div>
                     </div>
@@ -330,7 +339,6 @@
         </div>
 
     </div>
-</div>
 
 <!-- ========================================================================= -->
 <!-- MODAL TẠO BÀI ĐĂNG PHONG CÁCH FACEBOOK POPUP -->
@@ -513,6 +521,16 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang đăng...';
 
         const formData = new FormData(this);
+        if (!document.getElementById('latitude').value) {
+            formData.delete('latitude');
+        }
+        if (!document.getElementById('longitude').value) {
+            formData.delete('longitude');
+        }
+        const imgFile = document.getElementById('imageFile');
+        if (!imgFile || !imgFile.files || imgFile.files.length === 0) {
+            formData.delete('imageFile');
+        }
 
         fetch('/api/feed/posts', {
             method: 'POST',
@@ -564,6 +582,41 @@
         .catch(err => alert('Lỗi kết nối: ' + err.message));
     }
 
+    // Hiển thị chi tiết cảnh báo khẩn cấp khi người dùng click vào card
+    function showAlertDetail(el) {
+        const title = el.getAttribute('data-title') || 'Cảnh báo khẩn cấp';
+        const content = el.getAttribute('data-content') || '';
+        const region = el.getAttribute('data-region') || 'Cảnh báo toàn khu vực';
+        const severity = el.getAttribute('data-severity') || 'DANGER_RED';
+
+        const modalElement = document.getElementById('emergencyBroadcastModal');
+        if (modalElement && window.bootstrap) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            const severityStyles = {
+                DANGER_RED: ['bg-danger', 'btn-danger', 'bg-danger-subtle text-danger'],
+                WARNING_ORANGE: ['bg-warning', 'btn-warning', 'bg-warning-subtle text-dark'],
+                NOTICE_YELLOW: ['bg-info', 'btn-info', 'bg-info-subtle text-info-emphasis']
+            };
+            const styles = severityStyles[severity] || severityStyles.DANGER_RED;
+            const header = document.getElementById('broadcastModalHeader');
+            const button = document.getElementById('acknowledgeBroadcast');
+            const regEl = document.getElementById('broadcastAlertRegion');
+            if (header) header.className = `modal-header text-white ${styles[0]}`;
+            if (button) button.className = `btn fw-bold px-4 ${styles[1]}`;
+            if (regEl) {
+                regEl.className = `badge mb-2 ${styles[2]}`;
+                regEl.textContent = region;
+            }
+            const titleEl = document.getElementById('broadcastAlertTitle');
+            if (titleEl) titleEl.textContent = title;
+            const contentEl = document.getElementById('broadcastAlertContent');
+            if (contentEl) contentEl.textContent = content;
+            modal.show();
+        } else {
+            alert(`${title}\n\nKhu vực: ${region}\n\n${content}`);
+        }
+    }
+
     // Xử lý nút Chuyển thành đơn SOS
     function convertToSos(postId) {
         const ok = confirm('XÁC NHẬN CHUYỂN BÀI ĐĂNG NÀY THÀNH ĐƠN CỨU HỘ KHẨN CẤP?\n\nHệ thống sẽ tự động tạo một yêu cầu cứu nạn SOS với mức độ KHẨN CẤP và đưa ngay lên trung tâm Điều Phối Viên!');
@@ -610,6 +663,13 @@
         color: #1e293b !important;
         font-size: 0.95rem;
         line-height: 1.6;
+    }
+    .alert-item-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .alert-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.06);
     }
     .btn-upvoted {
         background-color: #0d6efd !important;

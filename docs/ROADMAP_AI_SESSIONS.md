@@ -40,6 +40,9 @@
 │ Session 14: Chuẩn Hóa Unicode SQL Server & Sửa Triệt Để Lỗi Font       │
 │             (NVARCHAR, @Lob Cross-DB, Schema Self-Healing & Re-seed)   │
 │    ↓                                                                   │
+│ Session 15: Sửa Lỗi Đăng Tin Cảnh Báo & Động Hóa Cảnh Báo Thiên Tai     │
+│             (Thymeleaf Layout Fix & Dynamic Disaster Alerts)           │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘

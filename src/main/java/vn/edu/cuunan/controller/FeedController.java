@@ -10,6 +10,7 @@ import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.security.CustomUserDetails;
 import vn.edu.cuunan.service.CommunityFeedService;
+import vn.edu.cuunan.repository.DisasterAlertRepository;
 import vn.edu.cuunan.service.SosService;
 
 import java.util.List;
@@ -20,10 +21,14 @@ public class FeedController {
 
     private final CommunityFeedService feedService;
     private final SosService sosService;
+    private final DisasterAlertRepository disasterAlertRepository;
 
-    public FeedController(CommunityFeedService feedService, SosService sosService) {
+    public FeedController(CommunityFeedService feedService,
+                          SosService sosService,
+                          DisasterAlertRepository disasterAlertRepository) {
         this.feedService = feedService;
         this.sosService = sosService;
+        this.disasterAlertRepository = disasterAlertRepository;
     }
 
     @GetMapping
@@ -37,6 +42,7 @@ public class FeedController {
         model.addAttribute("posts", feedService.getRecentPosts());
         model.addAttribute("shelters", feedService.getAllShelters());
         model.addAttribute("hazardTypes", HazardType.values());
+        model.addAttribute("recentAlerts", disasterAlertRepository.findTop5ByOrderByCreatedAtDesc());
 
         // Lịch sử các yêu cầu cứu hộ do người dùng tạo.
         List<SosRequest> sosHistory = List.of();

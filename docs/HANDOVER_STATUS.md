@@ -6,7 +6,7 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 29/10/2026
 - **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat, và chuẩn hóa Unicode SQL Server)
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 14):
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 15):
   - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
   - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
   - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
@@ -55,6 +55,13 @@
   - [x] Tích hợp dịch vụ lưu trữ đám mây Cloudinary: Upload và phục vụ ảnh trực tiếp từ Cloudinary CDN (`CLOUDINARY_GUIDE_BASE_URL`) qua API `/api/upload/guide-image`, kèm fallback an toàn về Local Storage.
   - [x] Thiết kế thanh chọn các tình huống thiên tai ở cột bên trái màn hình (`col-lg-3`), vị trí tĩnh chuẩn (non-floating), không trôi đè lên ảnh và nội dung bài viết khi lướt cuộn trang.
   - [x] Loại bỏ hoàn toàn nút "Phát tín hiệu SOS" trên tất cả các trang cẩm nang (`/guide/disaster` và `/guide/disaster/{slug}`).
+- [x] **SESSION 15 (PeterWeeee - Nhánh `develop`):**
+  - [x] Khắc phục triệt để lỗi nút "Đăng tin cảnh báo" không hoạt động trên Bảng Tin Cộng Đồng (`feed/index.html`) do thẻ đóng sớm trong Thymeleaf fragment layout.
+  - [x] Bổ sung cơ chế tự động dọn dẹp các trường rỗng `latitude`, `longitude`, `imageFile` trước khi gửi AJAX lên `/api/feed/posts`.
+  - [x] Chuẩn hóa nghiệp vụ cứu trợ mục "Cảnh báo khẩn mới": Thay thế dữ liệu tĩnh mẫu bằng dữ liệu động kết nối trực tiếp với bảng `disaster_alerts` qua `DisasterAlertRepository.findTop5ByOrderByCreatedAtDesc()`.
+  - [x] Phân loại màu sắc và huy hiệu theo mức độ nghiêm trọng (`DANGER_RED`, `WARNING_ORANGE`, `NOTICE_YELLOW`) kèm địa phương ảnh hưởng và mốc thời gian.
+  - [x] Tích hợp tương tác click mở modal chi tiết cảnh báo khẩn cấp `emergencyBroadcastModal` để người dân nắm rõ hướng dẫn an toàn.
+  - [x] Làm rõ cơ chế kiến trúc Avatar/Logo của hệ thống: Tối ưu tải nhẹ qua FontAwesome và Letter Avatar trích xuất ký tự đầu từ họ tên người dùng.
 - [x] **SESSION 14 (PeterWeeee - Nhánh `develop`):**
   - [x] Khắc phục triệt để lỗi mất dấu font tiếng Việt (biến thành `?`) trong các bảng Thông báo (`notifications`), Lịch sử hoạt động (`activity_logs`), và bảng dữ liệu tác nghiệp trên SQL Server.
   - [x] Chuẩn hóa toàn bộ trường văn bản dài từ `@Column(columnDefinition = "TEXT")` sang JPA tiêu chuẩn `@Lob` trên 10 Entities (`Notification`, `SosRequest`, `CommunityPost`, `DisasterAlert`, `ActivityLog`, `RescueTeam`, `RescueAssignment`, `RescueEquipment`, `EquipmentAssignment`, `RescueChatMessage`). Hibernate 6 tự động ánh xạ thông minh thành `NVARCHAR(MAX)` trên SQL Server (hỗ trợ so sánh `=`, `LIKE`) và `LONGTEXT` trên MySQL.
