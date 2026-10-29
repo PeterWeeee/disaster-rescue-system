@@ -570,7 +570,7 @@
 
                                         <!-- Khung Chọn Cảm Xúc Nổi (Hover / Tap) -->
 
-                                        <div class="reaction-popover shadow-lg rounded-pill p-1 bg-white border d-flex align-items-center gap-1">
+                                        <div class="reaction-popover shadow-lg rounded-pill p-1 bg-white border align-items-center gap-1">
 
                                             <button type="button" class="reaction-emoji-btn" th:onclick="'handleReact(' + ${post.id} + ', \'LIKE\')'" title="Xác nhận tin">
 
@@ -710,7 +710,7 @@
 
                                 <div class="comments-list d-flex flex-column gap-2 mb-3" th:id="'comments-list-' + ${post.id}">
 
-                                    <div th:each="cmt : ${commentsMap != null && commentsMap[post.id] != null ? commentsMap[post.id] : {}}"
+                                    <div th:each="cmt : ${commentsMap != null && commentsMap.get(post.id) != null ? commentsMap.get(post.id) : {}}"
 
                                          class="d-flex align-items-start gap-2 comment-bubble-wrapper">
 
@@ -750,7 +750,7 @@
 
                                     </div>
 
-                                    <div th:if="${commentsMap == null || commentsMap[post.id] == null || #lists.isEmpty(commentsMap[post.id])}"
+                                    <div th:if="${commentsMap == null || commentsMap.get(post.id) == null || #lists.isEmpty(commentsMap.get(post.id))}"
 
                                          class="text-center py-2 text-muted small empty-comment-notice">
 
@@ -1886,7 +1886,11 @@
         fetch(`/api/feed/posts/${postId}/comments`)
             .then(res => res.json())
             .then(comments => {
-                if (Array.isArray(comments) && comments.length > 0) {
+                if (Array.isArray(comments)) {
+                    commentsList.innerHTML = '';
+                    if (comments.length === 0) {
+                        commentsList.innerHTML = '<div class="text-center py-2 text-muted small empty-comment-notice">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</div>';
+                    } else {
                     commentsList.innerHTML = '';
                     comments.forEach(cmt => {
                         const avatarHtml = (cmt.authorAvatar && cmt.authorAvatar.trim() !== '')
@@ -1908,6 +1912,7 @@
                         `;
                         commentsList.appendChild(cmtDiv);
                     });
+                    }
 
                     // Cập nhật số lượng bình luận trên các nhãn
                     const postArticle = document.getElementById('post-' + postId);
@@ -2050,7 +2055,7 @@
 
         position: absolute;
 
-        bottom: 125%;
+        bottom: calc(100% + 8px);
 
         left: 0;
 
@@ -2062,7 +2067,9 @@
 
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
 
-        display: none;
+        display: none !important;
+
+        pointer-events: none;
 
         align-items: center;
 
@@ -2071,6 +2078,16 @@
         border: 1px solid rgba(0, 0, 0, 0.08);
 
         animation: popoverBounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .reaction-popover::after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        background: transparent;
 
     }
 
@@ -2085,8 +2102,10 @@
     .reaction-container:hover .reaction-popover,
 
     .reaction-container:focus-within .reaction-popover {
+        display: flex !important;
+        pointer-events: auto;
 
-        display: flex;
+
 
     }
 
@@ -2101,8 +2120,9 @@
         border-radius: 50%;
 
         cursor: pointer;
+        display: inline-flex;
 
-        display: flex;
+
 
         flex-direction: column;
 

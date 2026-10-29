@@ -24,6 +24,8 @@
 | **15** | Sửa Lỗi Đăng Tin Cảnh Báo & Động Hóa Cảnh Báo Khẩn Thiên Tai | **PeterWeeee** | [`session-15-community-feed-post-fix-and-dynamic-alerts.md`](session-15-community-feed-post-fix-and-dynamic-alerts.md) | ✅ Đã hoàn thành |
 | **16** | Khắc Phục Lỗi WebSocket STOMP - Đồng Bộ Chat Thời Gian Thực 2 Chiều | **PeterWeeee** | [`../sessions/session-16-realtime-chat-websocket-fix.md`](../sessions/session-16-realtime-chat-websocket-fix.md) | ✅ Đã hoàn thành |
 | **17** | Tích Hợp Ảnh Hiện Trường Thiên Tai Từ Cloudinary CDN Cho Bảng Tin Cộng Đồng | **PeterWeeee** | [`session-17-community-feed-cloudinary-media.md`](session-17-community-feed-cloudinary-media.md) | ✅ Đã hoàn thành |
+| **18** | Khung Chat Nổi Toàn Hệ Thống, Đa Cảm Xúc 5 Trạng Thái & Bình Luận Bảng Tin | **Vo Van Thinh** | [`session-18-floating-chat-dock-feed-reactions-cleanup.md`](session-18-floating-chat-dock-feed-reactions-cleanup.md) | ✅ Đã hoàn thành |
+| **19** | Popover Cảm Xúc Hover, Đồng Bộ Bình Luận & Tự Phục Hồi Unicode Database | **PeterWeeee** | [`session-19-feed-reaction-popover-comment-sync-unicode-healing.md`](session-19-feed-reaction-popover-comment-sync-unicode-healing.md) | ✅ Đã hoàn thành |
 | **Cuối** | Tối ưu UI/UX Mobile, Kiểm thử Toàn diện & Kịch bản Demo bảo vệ | **Cả nhóm** | [`session-chua-lam-mobile-testing-demo-script.md`](session-chua-lam-mobile-testing-demo-script.md) | ⏸️ Chưa làm trong project này |
 
 ---

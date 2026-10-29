@@ -248,53 +248,58 @@ public class CommunityFeedService {
     }
 
     public void initSampleComments() {
-        if (commentRepository.count() == 0) {
-            log.info("Khởi tạo danh sách bình luận mẫu cho các bài đăng cộng đồng...");
-            List<CommunityPost> posts = postRepository.findAll();
-            if (posts.isEmpty()) return;
+        List<CommunityPost> posts = postRepository.findAll();
+        if (posts.isEmpty()) return;
 
-            Map<Integer, List<String[]>> sampleCommentsData = new HashMap<>();
+        Map<Integer, List<String[]>> sampleCommentsData = new HashMap<>();
 
-            // Post 1 (Sạt lở Trà Mai)
-            sampleCommentsData.put(0, List.of(
-                    new String[]{"Nguyễn Văn Hùng", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80", "Bà con xóm 2 chú ý tuyệt đối không đi đường tắt qua khe suối nhé, đất đá trên đồi vẫn đang có dấu hiệu trượt tiếp!"},
-                    new String[]{"Trần Đình Điều Phối", "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80", "Đội dân quân xã và lực lượng công an đã chốt chặn hai đầu ngõ rồi ạ. Đề nghị bà con bình tĩnh chờ lệnh sơ tán."},
-                    new String[]{"Lê Thị Mai", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80", "Cầu mong không có ai bị thương, nhìn vết nứt mà thót cả tim! Mọi người cố gắng giữ an toàn nhé."}
-            ));
+        // Post 1 (Sạt lở Trà Mai / Mẹ Suốt)
+        sampleCommentsData.put(0, List.of(
+                new String[]{"Nguyễn Văn Hùng", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80", "Bà con khu vực gần sườn đồi chú ý tuyệt đối không đi đường tắt qua khe suối nhé, đất bùn vẫn đang có dấu hiệu trượt tiếp!"},
+                new String[]{"Trần Đình Điều Phối", "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80", "Lực lượng dân quân và công an địa phương đã chốt chặn hai đầu ngõ rồi ạ. Đề nghị bà con bình tĩnh chờ lệnh sơ tán."},
+                new String[]{"Lê Thị Mai", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80", "Cầu mong không có ai bị thương, nhìn vết nứt mà thót cả tim! Mọi người cố gắng giữ an toàn nhé."}
+        ));
 
-            // Post 2 (Ngập sâu Hội An)
-            sampleCommentsData.put(1, List.of(
-                    new String[]{"Võ Thị Mỹ Linh", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80", "Có gia đình bà Bảy ở số 28 Nguyễn Thị Minh Khai đang bị kẹt trên gác lửng, nước lên sát sàn rồi, đội ca nô ghé đón với ạ!"},
-                    new String[]{"Đội Cứu Hộ Đà Nẵng", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80", "Đội 02 đã tiếp nhận thông tin nhà bà Bảy, xuồng máy đang rẽ vào hẻm tiếp cận ngay đây!"}
-            ));
+        // Post 2 (Ngập sâu Hội An / Thạch Nham Tây)
+        sampleCommentsData.put(1, List.of(
+                new String[]{"Võ Thị Mỹ Linh", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80", "Có gia đình bà Bảy ở cụm xóm Trong đang bị kẹt trên gác lửng, nước lên sát sàn rồi, đội ca nô ghé đón với ạ!"},
+                new String[]{"Đội Cứu Hộ Đà Nẵng", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80", "Đội 02 đã tiếp nhận thông tin nhà bà Bảy, xuồng máy đang rẽ vào hẻm tiếp cận ngay đây!"}
+        ));
 
-            // Post 3 (Cây xà cừ đứt dây điện)
-            sampleCommentsData.put(2, List.of(
-                    new String[]{"Phạm Văn Bình", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80", "Điện lực Tam Kỳ đã cắt điện trạm biến áp số 4 từ 15 phút trước rồi, bà con an tâm nhưng vẫn tránh xa dây chùng nhé."},
-                    new String[]{"Nguyễn Thị Đào", "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80", "Cảm ơn các bác thợ điện đã xử lý kịp thời, dông lốc kinh khủng quá!"}
-            ));
+        // Post 3 (Cây xà cừ đứt dây điện / Sông Hương)
+        sampleCommentsData.put(2, List.of(
+                new String[]{"Phạm Văn Bình", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80", "Điện lực Tam Kỳ đã cắt điện trạm biến áp số 4 từ 15 phút trước rồi, bà con an tâm nhưng vẫn tránh xa dây chùng nhé."},
+                new String[]{"Nguyễn Thị Đào", "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80", "Cảm ơn các bác thợ điện đã xử lý kịp thời, dông lốc kinh khủng quá!"}
+        ));
 
-            // Post 4 (Xuồng máy tiếp cận thôn An Lạc)
-            sampleCommentsData.put(3, List.of(
-                    new String[]{"Trần Anh Tuấn", "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=120&q=80", "Tuyệt vời quá các chiến sĩ ơi! Người nhà mình ở An Lạc vừa gọi điện báo đã được lên xuồng an toàn rồi."},
-                    new String[]{"Lê Văn Thành", "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80", "Ấm lòng mùa bão lũ. Chúc toàn đội nhiều sức khỏe và an toàn trên từng chuyến xuồng!"},
-                    new String[]{"Bùi Thu Trang", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80", "Biết ơn các anh cứu hộ vô cùng, bà con nhớ mặc áo phao cẩn thận."}
-            ));
+        // Post 4 (Đèo Prenn sạt lở / Xuồng máy An Lạc)
+        sampleCommentsData.put(3, List.of(
+                new String[]{"Nguyễn Hoàng Nam", "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=120&q=80", "Lực lượng CSGT và thanh tra Lâm Đồng đã cắm biển cảnh báo hai đầu đèo Prenn rồi, anh em tài xế chú ý giảm tốc độ hoặc chuyển sang đèo Sacom!"},
+                new String[]{"Trần Thị Lan", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80", "Trời đang mưa to ở Đà Lạt, sườn đồi rất dễ sạt lở tiếp, các bác tài tuyệt đối không dừng đỗ sát chân taluy dương nhé."}
+        ));
 
-            // Post 5 (Cầu tràn chia cắt)
-            sampleCommentsData.put(4, List.of(
-                    new String[]{"Đặng Hữu Phúc", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80", "Bên mình đang tập kết thêm 200 suất bánh chưng và nước suối tại UBND xã Quế Long, ai cần tiếp tế thêm liên hệ nhé."},
-                    new String[]{"Hoàng Thị Tuyết", "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80", "Bà con khu xóm Trong đang rất thiếu nước sạch, may quá có đoàn về hỗ trợ kịp thời!"}
-            ));
+        // Post 5 (Cầu tràn Quế Long / Cây đổ Vinh)
+        sampleCommentsData.put(4, List.of(
+                new String[]{"Đặng Hữu Phúc", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80", "Bên mình đang tập kết thêm 200 suất bánh chưng và nước suối tại UBND xã Quế Long, ai cần tiếp tế thêm liên hệ nhé."},
+                new String[]{"Hoàng Thị Tuyết", "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80", "Bà con khu xóm Trong đang rất thiếu nước sạch, may quá có đoàn về hỗ trợ kịp thời!"}
+        ));
 
-            // Post 6 (Đèo Le sạt lở)
-            sampleCommentsData.put(5, List.of(
-                    new String[]{"Hoàng Văn Nam", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80", "Đoạn Đèo Le đá rơi nhiều, các xe cứu trợ không có dẫn đường thì tạm thời dừng chờ ở chân đèo nhé bà con."},
-                    new String[]{"Nguyễn Quang Huy", "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=120&q=80", "Lực lượng chức năng đang làm việc rất khẩn trương, hy vọng đầu giờ chiều sẽ thông được một làn đường."}
-            ));
+        // Post 6 (Đèo Le sạt lở / Sóng biển Nha Trang)
+        sampleCommentsData.put(5, List.of(
+                new String[]{"Hoàng Văn Nam", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80", "Đoạn Đèo Le đá rơi nhiều, các xe cứu trợ không có dẫn đường thì tạm thời dừng chờ ở chân đèo nhé bà con."},
+                new String[]{"Nguyễn Quang Huy", "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=120&q=80", "Lực lượng chức năng đang làm việc rất khẩn trương, hy vọng đầu giờ chiều sẽ thông được một làn đường."}
+        ));
 
-            for (int i = 0; i < posts.size(); i++) {
-                CommunityPost post = posts.get(i);
+        // Post 7 (Tin đồn đập Krông Pa)
+        sampleCommentsData.put(6, List.of(
+                new String[]{"Bùi Thế Cường", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80", "Mọi người theo dõi thông báo chính thống từ Ban chỉ huy PCTT địa phương nhé, tránh chia sẻ tin đồn thất thiệt gây hoang mang."},
+                new String[]{"Lê Thị Hồng", "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80", "Cảm ơn chính quyền địa phương đã phát loa đính chính kịp thời cho bà con yên tâm."}
+        ));
+
+        for (int i = 0; i < posts.size(); i++) {
+            CommunityPost post = posts.get(i);
+            long countInDb = commentRepository.countByPostId(post.getId());
+            if (countInDb == 0) {
                 List<String[]> comments = sampleCommentsData.get(i % sampleCommentsData.size());
                 if (comments != null) {
                     int cIndex = 0;
@@ -307,19 +312,21 @@ public class CommunityFeedService {
                     post.setCommentCount(comments.size());
                     postRepository.save(post);
                 }
+            } else if (post.getCommentCount() != (int) countInDb) {
+                post.setCommentCount((int) countInDb);
+                postRepository.save(post);
             }
         }
     }
 
     public void initSampleReactions() {
-        if (upvoteRepository.count() == 0) {
-            log.info("Khởi tạo danh sách phản ứng icon cảm xúc mẫu cho các bài đăng...");
-            List<CommunityPost> posts = postRepository.findAll();
-            String[] reactions = {"LIKE", "CARE", "PRAY", "WARNING", "SAD"};
-            long fakeUserId = 100L;
+        List<CommunityPost> posts = postRepository.findAll();
+        String[] reactions = {"LIKE", "CARE", "PRAY", "WARNING", "SAD"};
+        long fakeUserId = 100L;
 
-            for (CommunityPost post : posts) {
-                // Tạo một vài lượt react mẫu phân bố các icon
+        for (CommunityPost post : posts) {
+            long countInDb = upvoteRepository.countByPostId(post.getId());
+            if (countInDb == 0) {
                 int sampleCount = 6 + (int)(post.getId() % 5);
                 for (int j = 0; j < sampleCount; j++) {
                     String rType = reactions[j % reactions.length];
@@ -327,14 +334,15 @@ public class CommunityFeedService {
                 }
                 post.setUpvoteCount((int) upvoteRepository.countByPostId(post.getId()));
                 postRepository.save(post);
+            } else if (post.getUpvoteCount() != (int) countInDb) {
+                post.setUpvoteCount((int) countInDb);
+                postRepository.save(post);
             }
         }
     }
 
     public List<CommunityPost> getRecentPosts() {
-        if (commentRepository.count() == 0 && postRepository.count() > 0) {
-            initSampleComments();
-        }
+        ensureCleanSampleComments();
         return postRepository.findAllByOrderByCreatedAtDesc();
     }
 
@@ -342,17 +350,28 @@ public class CommunityFeedService {
         return shelterRepository.findByStatusNotOrderByNameAsc("CLOSED");
     }
 
-    public List<PostComment> getCommentsByPostId(Long postId) {
-        if (commentRepository.count() == 0 && postRepository.count() > 0) {
+    public void ensureCleanSampleComments() {
+        if (postRepository.count() == 0) return;
+        List<PostComment> all = commentRepository.findAll();
+        boolean hasCorrupted = all.stream().anyMatch(c ->
+                (c.getContent() != null && c.getContent().contains("?")) ||
+                (c.getAuthorName() != null && c.getAuthorName().contains("?")));
+        if (hasCorrupted || all.isEmpty()) {
+            if (hasCorrupted) {
+                log.warn("Phát hiện bình luận bị lỗi font (dấu hỏi ?), đang tự động làm sạch và nạp lại...");
+                commentRepository.deleteAll();
+            }
             initSampleComments();
         }
+    }
+
+    public List<PostComment> getCommentsByPostId(Long postId) {
+        ensureCleanSampleComments();
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
     }
 
     public Map<Long, List<PostComment>> getAllCommentsGroupedByPostId() {
-        if (commentRepository.count() == 0 && postRepository.count() > 0) {
-            initSampleComments();
-        }
+        ensureCleanSampleComments();
         List<PostComment> all = commentRepository.findAll();
         Map<Long, List<PostComment>> map = new LinkedHashMap<>();
         for (PostComment c : all) {

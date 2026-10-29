@@ -36,6 +36,8 @@ Dự án được phân chia thành các phiên làm việc (Session) hoàn toà
 │ • Session 17: Feed Cloudinary   │                                 │                                 │
 │ • Session 18: Floating Chat     │                                 │                                 │
 │   Dock & Feed Reactions/Comments│                                 │                                 │
+│ • Session 19: Reaction Hover &  │                                 │                                 │
+│   Comment Unicode Healing       │                                 │                                 │
 │ • Review & Tích hợp mã nguồn    │                                 │                                 │
 └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
  [SESSION CHƯA LÀM]: Tối ưu UI/UX Mobile & Kịch bản bảo vệ (Dời về cuối lộ trình - Chưa làm trong project này)
@@ -93,6 +95,12 @@ Dự án được phân chia thành các phiên làm việc (Session) hoàn toà
   - Xây dựng phân hệ bình luận thời gian thực cho bài đăng cộng đồng (`PostComment.java`, `PostCommentRepository`, `/api/feed/posts/{id}/comments`), hiển thị và nạp bình luận bằng AJAX.
   - Chuẩn hóa CSDL và Seed Data mẫu bình luận/cảm xúc: Sửa lỗi mã hóa UTF-8 BOM cho SQL Server trong `03_seed_data.sql`, bổ sung fallback ID và query đồng bộ `comment_count`. Tự động phục hồi bình luận mẫu (Self-Healing Comments) trong `CommunityFeedService.java`.
   - Tinh gọn giao diện Bảng Tin: Xóa card "Khẩn Cấp 24/7", sửa lỗi co ép méo avatar người dùng (`flex-shrink-0`, `min-width: 44px`, `text-truncate` cho địa chỉ), xóa nút "Chuyển thành đơn SOS".
+- **Session 19 (✅ Đã hoàn thành):**
+  - Khắc phục triệt để lỗi thanh chọn cảm xúc `reaction-popover` bị lơ lửng đè lên số lượt tương tác bài viết: Gỡ bỏ Bootstrap `d-flex` có `!important`, thiết lập CSS `display: none !important;` mặc định và chỉ hiển thị `display: flex !important;` khi hover/focus vào container, bổ sung cầu nối chuột `::after` chống rung giật.
+  - Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map key lookup từ `${commentsMap[post.id]}` sang `${commentsMap.get(post.id)}`, bổ sung API fetch động `loadCommentsForPost(postId)` tự động đồng bộ số lượng khi mở hộp bình luận.
+  - Khắc phục triệt để lỗi font tiếng Việt (dấu hỏi `?`) do nạp seed data trên SQL Server: Bổ sung phương thức tự phục hồi Unicode tiếng Việt đa tầng `repairCorruptedUnicodeData()` trong `DataInitializer.java` (quét và sửa thông báo, nhật ký kiểm toán hệ thống, bài đăng cộng đồng 13 vùng miền, cảnh báo thiên tai và bình luận).
+  - Thêm cơ chế tự động làm sạch bình luận `ensureCleanSampleComments()` trong `CommunityFeedService.java`: Phát hiện bản ghi chứa dấu hỏi `?`, tự động xóa và tái tạo bình luận cứu nạn tiếng Việt chuẩn UTF-8.
+  - Chuẩn hóa `database/fix_sqlserver_encoding.sql` lưu dưới định dạng **UTF-8 with BOM** (`0xEF 0xBB 0xBF`), bổ sung lệnh ALTER TABLE cho 15 bảng và UPDATE/DELETE bản ghi lỗi font.
 
 ---
 

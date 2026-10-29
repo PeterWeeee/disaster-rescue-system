@@ -95,6 +95,13 @@
   - [x] Đồng bộ DDL CSDL và Seed Data mẫu bình luận/cảm xúc trên cả SQL Server (`02_create_tables.sql`, `03_seed_data.sql`, `fix_sqlserver_encoding.sql`), MySQL (`mysql_init.sql`) và `DataInitializer.java`.
   - [x] Tinh gọn giao diện Bảng Tin: Xóa card "Khẩn Cấp 24/7", sửa lỗi co ép méo avatar người dùng (`flex-shrink-0`, `min-width: 44px`, `text-truncate` cho địa chỉ), xóa nút "Chuyển thành đơn SOS".
   - [x] Toàn bộ **131/131 tests đạt BUILD SUCCESS 100%**.
+- [x] **SESSION 19 (PeterWeeee - Nhánh `develop`):**
+  - [x] Khắc phục triệt để lỗi thanh chọn cảm xúc `reaction-popover` bị lơ lửng đè lên số lượt tương tác bài viết: Gỡ bỏ Bootstrap `d-flex` có `!important`, thiết lập CSS `display: none !important;` mặc định và chỉ hiển thị `display: flex !important;` khi hover/focus vào container, bổ sung cầu nối chuột `::after` chống rung giật.
+  - [x] Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map key lookup từ `${commentsMap[post.id]}` sang `${commentsMap.get(post.id)}`, bổ sung API fetch động `loadCommentsForPost(postId)` tự động đồng bộ số lượng khi mở hộp bình luận.
+  - [x] Khắc phục triệt để lỗi font tiếng Việt (dấu hỏi `?`) do nạp seed data trên SQL Server: Bổ sung phương thức tự phục hồi Unicode tiếng Việt đa tầng `repairCorruptedUnicodeData()` trong `DataInitializer.java` (quét và sửa thông báo, nhật ký kiểm toán hệ thống, bài đăng cộng đồng 13 vùng miền, cảnh báo thiên tai và bình luận).
+  - [x] Thêm cơ chế tự động làm sạch bình luận `ensureCleanSampleComments()` trong `CommunityFeedService.java`: Phát hiện bản ghi chứa dấu hỏi `?`, tự động xóa và tái tạo bình luận cứu nạn tiếng Việt chuẩn UTF-8.
+  - [x] Chuẩn hóa `database/fix_sqlserver_encoding.sql` lưu dưới định dạng **UTF-8 with BOM** (`0xEF 0xBB 0xBF`), bổ sung lệnh ALTER TABLE cho 15 bảng và UPDATE/DELETE bản ghi lỗi font.
+  - [x] Toàn bộ **131/131 tests đạt BUILD SUCCESS 100%**.
 
 ---
 

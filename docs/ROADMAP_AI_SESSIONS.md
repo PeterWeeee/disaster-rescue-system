@@ -52,6 +52,9 @@
 │ Session 18: Khung Chat Nổi Toàn Hệ Thống & Đa Cảm Xúc / Bình Luận Feed │
 │             (Floating Chat Dock, Multi-Reactions, Comments & Cleanup)  │
 │    ↓                                                                   │
+│ Session 19: Popover Cảm Xúc Hover, Đồng Bộ Bình Luận & Tự Phục Hồi Font│
+│             (Reaction Hover, Comment Sync & Unicode Self-Healing)      │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -97,5 +100,11 @@
     - Tích hợp bộ ảnh thiên tai thực địa chất lượng cao lưu trữ tại Cloudinary CDN (`cuunan247/community_feed`) cho Bảng Tin Cộng Đồng (`/feed`). Nâng cấp giao diện xem ảnh phóng to toàn màn hình, huy hiệu Cloudinary CDN và chuẩn hóa `th:data-*` theo Thymeleaf 3.1+.
 18. **[Session 18: Khung Chat Nổi Toàn Hệ Thống & Đa Cảm Xúc / Bình Luận Bảng Tin](roadmap/session-18-floating-chat-dock-feed-reactions-cleanup.md)** *(✅ Đã hoàn thành - PeterWeeee)*
     - Tích hợp Khung Chat Nổi toàn hệ thống (Persistent Floating Chat Dock) phong cách Facebook Messenger, tự động phát hiện ca cứu hộ qua `/api/chat/active-session`. Loại bỏ 2 khung chat inline dư thừa trên `sos/track.html` và `rescuer/routes.html`. Gỡ bỏ triệt để Toast popup đè màn hình. Nâng cấp Bảng Tin: 5 trạng thái cảm xúc (Multi-Reactions), bình luận bài viết (`post_comments`), sửa lỗi UTF-8 BOM SQL Server và cơ chế tự phục hồi bình luận mẫu (Self-Healing Comments), sửa lỗi lệch avatar người dùng và xóa thẻ khẩn cấp 24/7.
-19. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+19. **[Session 19: Khắc Phục Popover Cảm Xúc Hover, Đồng Bộ Bình Luận & Tự Phục Hồi Unicode Database (Feed Reaction Popover & Unicode Healing)](roadmap/session-19-feed-reaction-popover-comment-sync-unicode-healing.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Khắc phục lỗi thanh chọn cảm xúc 
+eaction-popover bị lơ lửng đè lên thanh tóm tắt phản ứng: Gỡ bỏ Bootstrap d-flex ghi đè !important, định nghĩa CSS display: none !important; mặc định và kích hoạt display: flex !important; khi hover/focus, bổ sung pseudo-element ::after làm cầu nối rê chuột chống rung giật.
+    - Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map lookup ${commentsMap.get(post.id)}, bổ sung API fetch động loadCommentsForPost(postId) tự động đồng bộ số lượng khi mở hộp bình luận.
+    - Cơ chế tự phục hồi lỗi font tiếng Việt (dấu hỏi ?) do seed data: Bổ sung phương thức đa tầng 
+epairCorruptedUnicodeData() trong DataInitializer.java và ensureCleanSampleComments() trong CommunityFeedService.java tự động làm sạch và nạp lại dữ liệu tiếng Việt chuẩn cho thông báo, bài viết, nhật ký hệ thống, cảnh báo và bình luận; lưu file database/fix_sqlserver_encoding.sql chuẩn UTF-8 with BOM.
+20. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).
