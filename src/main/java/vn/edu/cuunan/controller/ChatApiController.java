@@ -89,6 +89,24 @@ public class ChatApiController {
      * REST API kiểm tra ca cứu nạn đang hoạt động cần chat của người dùng hiện tại (Citizen hoặc Rescuer).
      * Phục vụ khung chat nổi toàn hệ thống phong cách Facebook Messenger.
      */
+    @GetMapping("/api/chat/active-sessions")
+    public ResponseEntity<?> getActiveChatSessions(@RequestParam(value = "sosId", required = false) Long requestedSosId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User currentUser = (userDetails != null) ? userDetails.getUser() : null;
+            Map<String, Object> sessionMap = chatService.getActiveChatSession(currentUser, requestedSosId);
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> sessions = (List<Map<String, Object>>) sessionMap.get("activeSessions");
+            if (sessions == null) {
+                sessions = chatService.getActiveChatSessions(currentUser);
+            }
+            return ResponseEntity.ok(sessions);
+        } catch (Exception ex) {
+            log.error("Lỗi khi lấy active chat sessions: ", ex);
+            return ResponseEntity.ok(List.of());
+        }
+    }
+
     @GetMapping("/api/chat/active-session")
     public ResponseEntity<?> getActiveChatSession(@RequestParam(value = "sosId", required = false) Long requestedSosId,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {

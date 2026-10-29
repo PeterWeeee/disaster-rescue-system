@@ -213,7 +213,9 @@ public class CoordinatorService {
         SosRequest sos = sosRequestRepository.findById(sosRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ca cứu nạn #" + sosRequestId));
 
-        List<RescueTeam> teams = rescueTeamRepository.findByStatus("AVAILABLE");
+        List<RescueTeam> teams = rescueTeamRepository.findAll().stream()
+                .filter(t -> !"OFFLINE".equalsIgnoreCase(t.getStatus()) && !"INACTIVE".equalsIgnoreCase(t.getStatus()))
+                .toList();
         return toDistanceDtos(sos, teams);
     }
 
@@ -231,6 +233,12 @@ public class CoordinatorService {
                 );
             }
 
+            int activeCount = (team.getId() != null)
+                    ? (int) rescueAssignmentRepository.countActiveAssignmentsByTeamId(team.getId())
+                    : 0;
+
+            String effectiveStatus = activeCount > 0 ? "BUSY" : (team.getStatus() != null ? team.getStatus() : "AVAILABLE");
+
             RescueTeamDistanceDto dto = RescueTeamDistanceDto.builder()
                     .teamId(team.getId())
                     .id(team.getId())
@@ -241,8 +249,9 @@ public class CoordinatorService {
                     .equipmentNotes(team.getEquipmentNotes())
                     .currentLatitude(team.getCurrentLatitude())
                     .currentLongitude(team.getCurrentLongitude())
-                    .status(team.getStatus())
+                    .status(effectiveStatus)
                     .distanceKm(distanceKm)
+                    .activeMissionsCount(activeCount)
                     .build();
 
             result.add(dto);
@@ -254,6 +263,7 @@ public class CoordinatorService {
 
     /**
      * Phân công nhiệm vụ cứu nạn cho Đội cứu hộ (Hỗ trợ ca PENDING và đổi đội cho ca DISPATCHED).
+     * Cho phép điều phối nhiều nhiệm vụ cùng lúc cho một đội cứu hộ khi đang tác nghiệp.
      */
     @Transactional
     public RescueAssignment assignSosToTeam(AssignTaskRequestDto dto, Long coordinatorUserId) {
@@ -267,8 +277,17 @@ public class CoordinatorService {
         RescueTeam team = rescueTeamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đội cứu hộ #" + dto.getTeamId()));
 
-        if (!"AVAILABLE".equalsIgnoreCase(team.getStatus())) {
-            throw new IllegalStateException("Đội cứu hộ '" + team.getTeamName() + "' hiện không sẵn sàng nhận nhiệm vụ!");
+        if ("OFFLINE".equalsIgnoreCase(team.getStatus()) || "INACTIVE".equalsIgnoreCase(team.getStatus())) {
+            throw new IllegalStateException("Đội cứu hộ '" + team.getTeamName() + "' hiện đang ngoại tuyến hoặc ngừng hoạt động!");
+        }
+
+        // Kiểm tra tránh phân công trùng cùng một ca SOS cho cùng một đội
+        List<RescueAssignment> existingAssignments = rescueAssignmentRepository.findBySosRequestId(sos.getId());
+        boolean alreadyAssignedToThisTeam = existingAssignments.stream()
+                .anyMatch(a -> a.getTeam() != null && a.getTeam().getId().equals(team.getId())
+                        && ("PENDING".equalsIgnoreCase(a.getStatus()) || "ACCEPTED".equalsIgnoreCase(a.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(a.getStatus())));
+        if (alreadyAssignedToThisTeam) {
+            throw new IllegalStateException("Ca cứu nạn #" + sos.getId() + " đã được phân công cho đội '" + team.getTeamName() + "' rồi!");
         }
 
         // Nếu ca SOS đang ở trạng thái DISPATCHED (đổi đội điều phối): Hủy phân công cũ đang PENDING
@@ -282,8 +301,11 @@ public class CoordinatorService {
 
                     RescueTeam oldTeam = old.getTeam();
                     if (oldTeam != null && !oldTeam.getId().equals(team.getId())) {
-                        oldTeam.setStatus("AVAILABLE");
-                        rescueTeamRepository.save(oldTeam);
+                        long activeForOld = rescueAssignmentRepository.countActiveAssignmentsByTeamId(oldTeam.getId());
+                        if (activeForOld == 0) {
+                            oldTeam.setStatus("AVAILABLE");
+                            rescueTeamRepository.save(oldTeam);
+                        }
                     }
                 }
             }
@@ -311,10 +333,8 @@ public class CoordinatorService {
         sosRequestRepository.save(sos);
 
         // Cập nhật trạng thái đội thành BUSY
-        if ("AVAILABLE".equalsIgnoreCase(team.getStatus())) {
-            team.setStatus("BUSY");
-            rescueTeamRepository.save(team);
-        }
+        team.setStatus("BUSY");
+        rescueTeamRepository.save(team);
 
         log.info(">>> ĐIỀU PHỐI THÀNH CÔNG: Ca SOS #{} -> Đội '{}' (Mã phân công #{})",
                 sos.getId(), team.getTeamName(), savedAssignment.getId());

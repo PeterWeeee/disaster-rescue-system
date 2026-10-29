@@ -38,7 +38,10 @@ import vn.edu.cuunan.repository.SosRequestRepository;
 
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -459,163 +462,130 @@ public class ChatService {
      */
 
     @Transactional(readOnly = true)
-
-    public Map<String, Object> getActiveChatSession(User currentUser, Long requestedSosId) {
-
-        Map<String, Object> response = new HashMap<>();
-
-
-
-        // 1. Nếu có chỉ định sosId cụ thể (vd: khi nạn nhân tra cứu theo mã SOS trên url)
-
-        if (requestedSosId != null) {
-
-            Optional<SosRequest> optSos = sosRequestRepository.findById(requestedSosId);
-
-            if (optSos.isPresent()) {
-
-                SosRequest sos = optSos.get();
-
-                if ("IN_PROGRESS".equalsIgnoreCase(sos.getStatus()) || "ACCEPTED".equalsIgnoreCase(sos.getStatus())) {
-
-                    return buildSessionResponse(sos, currentUser, "GUEST_OR_USER");
-
-                }
-
-            }
-
-        }
-
-
-
+    public List<Map<String, Object>> getActiveChatSessions(User currentUser) {
         if (currentUser == null) {
-
-            response.put("hasActiveChat", false);
-
-            return response;
-
+            return Collections.emptyList();
         }
-
-
 
         String role = currentUser.getRole() != null ? currentUser.getRole().getName() : "";
+        List<Map<String, Object>> sessions = new ArrayList<>();
 
-
-
-        // 2. Nếu là Đội cứu hộ (RESCUER)
-
+        // 1. Nếu là Đội cứu hộ (RESCUER) - Hỗ trợ n ca cùng lúc
         if ("ROLE_RESCUER".equalsIgnoreCase(role)) {
-
             Optional<RescueTeam> teamOpt = rescuerService.getMyTeam(currentUser);
-
             if (teamOpt.isPresent()) {
-
                 RescueTeam team = teamOpt.get();
-
                 List<RescueAssignment> assignments = rescueAssignmentRepository.findByTeamIdWithSosRequest(team.getId());
-
-                // Tìm ca đang thực hiện (ACCEPTED hoặc IN_PROGRESS)
-
-                Optional<RescueAssignment> activeAssignment = assignments.stream()
-
-                        .filter(a -> ("IN_PROGRESS".equalsIgnoreCase(a.getStatus()) || "ACCEPTED".equalsIgnoreCase(a.getStatus()))
-
+                // Lấy tất cả ca đang thực hiện (ACCEPTED, IN_PROGRESS, PENDING)
+                List<RescueAssignment> activeAssignments = assignments.stream()
+                        .filter(a -> ("IN_PROGRESS".equalsIgnoreCase(a.getStatus()) || "ACCEPTED".equalsIgnoreCase(a.getStatus()) || "PENDING".equalsIgnoreCase(a.getStatus()))
                                 && a.getSosRequest() != null
-
                                 && !"RESOLVED".equalsIgnoreCase(a.getSosRequest().getStatus())
-
                                 && !"COMPLETED".equalsIgnoreCase(a.getSosRequest().getStatus())
-
                                 && !"CANCELLED".equalsIgnoreCase(a.getSosRequest().getStatus()))
+                        .collect(Collectors.toList());
 
-                        .findFirst();
-
-
-
-                if (activeAssignment.isPresent()) {
-
-                    RescueAssignment assignment = activeAssignment.get();
-
+                for (RescueAssignment assignment : activeAssignments) {
                     SosRequest sos = assignment.getSosRequest();
-
-                    response.put("hasActiveChat", true);
-
-                    response.put("userRole", "RESCUER");
-
-                    response.put("sosId", sos.getId());
-
-                    response.put("assignmentId", assignment.getId());
-
-                    response.put("partnerName", sos.getContactName() != null ? sos.getContactName() : "Nạn nhân SOS");
-
-                    response.put("partnerPhone", sos.getContactPhone() != null ? sos.getContactPhone() : "");
-
-                    response.put("partnerSubtitle", "Nạn nhân ca #SOS-" + sos.getId());
-
-                    response.put("partnerRole", "CITIZEN");
-
-                    response.put("mySenderType", "RESCUER");
-
-                    response.put("mySenderName", team.getTeamName());
-
-                    response.put("mySenderPhone", team.getContactPhone());
-
-                    response.put("sosAddress", sos.getAddressDetail() != null ? sos.getAddressDetail() : "Chưa rõ vị trí");
-
-                    response.put("urgencyLevel", sos.getUrgencyLevel());
-
-                    response.put("sosStatus", sos.getStatus());
-
-                    response.put("statusText", "Đang tiếp cận nạn nhân");
-
-                    return response;
-
+                    sessions.add(buildRescuerSessionMap(assignment, sos, team));
                 }
+                return sessions;
+            }
+        }
 
+        // 2. Nếu là Người dân (CITIZEN)
+        List<SosRequest> citizenSosList;
+        if (currentUser.getPhone() != null && !currentUser.getPhone().isBlank()) {
+            citizenSosList = sosRequestRepository.findByContactPhoneOrderByCreatedAtDesc(currentUser.getPhone());
+        } else {
+            citizenSosList = sosRequestRepository.findBySenderIdOrderByCreatedAtDesc(currentUser.getId());
+        }
+
+        List<SosRequest> activeCitizenSosList = citizenSosList.stream()
+                .filter(sos -> "IN_PROGRESS".equalsIgnoreCase(sos.getStatus())
+                        || "ACCEPTED".equalsIgnoreCase(sos.getStatus())
+                        || "DISPATCHED".equalsIgnoreCase(sos.getStatus()))
+                .collect(Collectors.toList());
+
+        for (SosRequest sos : activeCitizenSosList) {
+            sessions.add(buildSessionResponse(sos, currentUser, "CITIZEN"));
+        }
+
+        return sessions;
+    }
+
+    private Map<String, Object> buildRescuerSessionMap(RescueAssignment assignment, SosRequest sos, RescueTeam team) {
+        Map<String, Object> sess = new HashMap<>();
+        sess.put("hasActiveChat", true);
+        sess.put("userRole", "RESCUER");
+        sess.put("sosId", sos.getId());
+        sess.put("assignmentId", assignment.getId());
+        sess.put("partnerName", sos.getContactName() != null ? sos.getContactName() : "Nạn nhân SOS");
+        sess.put("partnerPhone", sos.getContactPhone() != null ? sos.getContactPhone() : "");
+        sess.put("partnerSubtitle", "Nạn nhân ca #SOS-" + sos.getId());
+        sess.put("partnerRole", "CITIZEN");
+        sess.put("mySenderType", "RESCUER");
+        sess.put("mySenderName", team != null ? team.getTeamName() : "Đội Cứu Hộ");
+        sess.put("mySenderPhone", team != null ? team.getContactPhone() : "");
+        sess.put("sosAddress", sos.getAddressDetail() != null ? sos.getAddressDetail() : "Chưa rõ vị trí");
+        sess.put("urgencyLevel", sos.getUrgencyLevel());
+        sess.put("sosStatus", sos.getStatus());
+        String statusText = "Đang tiếp cận nạn nhân";
+        if ("ACCEPTED".equalsIgnoreCase(assignment.getStatus())) {
+            statusText = "Đã nhận lệnh tiếp cận";
+        } else if ("PENDING".equalsIgnoreCase(assignment.getStatus())) {
+            statusText = "Chờ xuất phát";
+        }
+        sess.put("statusText", statusText);
+        return sess;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getActiveChatSession(User currentUser, Long requestedSosId) {
+        Map<String, Object> response = new HashMap<>();
+
+        List<Map<String, Object>> activeSessions = getActiveChatSessions(currentUser);
+
+        // 1. Nếu có chỉ định sosId cụ thể (vd: khi tra cứu mã SOS trên url)
+        if (requestedSosId != null) {
+            Optional<Map<String, Object>> matched = activeSessions.stream()
+                    .filter(s -> requestedSosId.equals(s.get("sosId")))
+                    .findFirst();
+            if (matched.isPresent()) {
+                response.putAll(matched.get());
+                response.put("activeSessions", activeSessions);
+                return response;
             }
 
+            Optional<SosRequest> optSos = sosRequestRepository.findById(requestedSosId);
+            if (optSos.isPresent()) {
+                SosRequest sos = optSos.get();
+                if ("IN_PROGRESS".equalsIgnoreCase(sos.getStatus()) || "ACCEPTED".equalsIgnoreCase(sos.getStatus()) || "DISPATCHED".equalsIgnoreCase(sos.getStatus())) {
+                    Map<String, Object> reqSession = buildSessionResponse(sos, currentUser, "GUEST_OR_USER");
+                    response.putAll(reqSession);
+                    List<Map<String, Object>> merged = new ArrayList<>();
+                    merged.add(reqSession);
+                    for (Map<String, Object> s : activeSessions) {
+                        if (!requestedSosId.equals(s.get("sosId"))) {
+                            merged.add(s);
+                        }
+                    }
+                    response.put("activeSessions", merged);
+                    return response;
+                }
+            }
         }
 
-
-
-        // 3. Nếu là Người dân (CITIZEN hoặc bất kỳ tài khoản người dùng nào có ca SOS đang thực hiện)
-
-        List<SosRequest> citizenSosList;
-
-        if (currentUser.getPhone() != null && !currentUser.getPhone().isBlank()) {
-
-            citizenSosList = sosRequestRepository.findByContactPhoneOrderByCreatedAtDesc(currentUser.getPhone());
-
-        } else {
-
-            citizenSosList = sosRequestRepository.findBySenderIdOrderByCreatedAtDesc(currentUser.getId());
-
+        if (!activeSessions.isEmpty()) {
+            response.putAll(activeSessions.get(0));
+            response.put("activeSessions", activeSessions);
+            response.put("hasActiveChat", true);
+            return response;
         }
-
-
-
-        Optional<SosRequest> activeCitizenSos = citizenSosList.stream()
-
-                .filter(sos -> "IN_PROGRESS".equalsIgnoreCase(sos.getStatus()))
-
-                .findFirst();
-
-
-
-        if (activeCitizenSos.isPresent()) {
-
-            SosRequest sos = activeCitizenSos.get();
-
-            return buildSessionResponse(sos, currentUser, "CITIZEN");
-
-        }
-
-
 
         response.put("hasActiveChat", false);
-
+        response.put("activeSessions", Collections.emptyList());
         return response;
-
     }
 
 

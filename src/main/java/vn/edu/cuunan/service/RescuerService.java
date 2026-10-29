@@ -228,11 +228,14 @@ public class RescuerService {
         sos.setStatus("PENDING");
         sosRequestRepository.save(sos);
 
-        RescueTeam team = assignment.getTeam();
-        team.setStatus("AVAILABLE");
-        rescueTeamRepository.save(team);
-
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
+
+        RescueTeam team = assignment.getTeam();
+        if (team != null) {
+            long remaining = rescueAssignmentRepository.countActiveAssignmentsByTeamId(team.getId());
+            team.setStatus(remaining == 0 ? "AVAILABLE" : "BUSY");
+            rescueTeamRepository.save(team);
+        }
         log.info(">>> ĐỘI '{}' TỪ CHỐI NHIỆM VỤ #{}: Lý do '{}'",
                 assignment.getTeam().getTeamName(), assignmentId, reason);
 
@@ -427,11 +430,14 @@ public class RescuerService {
         sosRequestRepository.save(sos);
 
         // 3. Đưa đội cứu hộ trở về trạng thái AVAILABLE
-        RescueTeam team = assignment.getTeam();
-        team.setStatus("AVAILABLE");
-        rescueTeamRepository.save(team);
-
         RescueAssignment saved = rescueAssignmentRepository.save(assignment);
+
+        RescueTeam team = assignment.getTeam();
+        if (team != null) {
+            long remaining = rescueAssignmentRepository.countActiveAssignmentsByTeamId(team.getId());
+            team.setStatus(remaining == 0 ? "AVAILABLE" : "BUSY");
+            rescueTeamRepository.save(team);
+        }
         log.info(">>> HOÀN TẤT CỨU NẠN: Ca SOS #{} đã được đội '{}' giải cứu an toàn!",
                 sos.getId(), team.getTeamName());
 

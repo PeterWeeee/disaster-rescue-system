@@ -102,7 +102,7 @@ class CoordinatorServiceTest {
         RescueTeam nearTeam = new RescueTeam(1L, "Đội Gần", null, "0901", 16.065, 108.205, 5, "Xuồng", "AVAILABLE");
         RescueTeam farTeam = new RescueTeam(2L, "Đội Xa", null, "0902", 16.200, 108.350, 4, "Xe lội nước", "AVAILABLE");
 
-        when(rescueTeamRepository.findByStatus("AVAILABLE")).thenReturn(List.of(farTeam, nearTeam));
+        when(rescueTeamRepository.findAll()).thenReturn(List.of(farTeam, nearTeam));
 
         List<RescueTeamDistanceDto> teams = coordinatorService.getAvailableTeamsWithDistance(1L);
 
@@ -195,5 +195,60 @@ class CoordinatorServiceTest {
         // 2. Khi chọn ALL
         List<SosRequest> allSos = coordinatorService.getSosRequests("ALL", "ALL");
         assertEquals(2, allSos.size());
+    }
+
+    @Test
+    @DisplayName("Điều phối viên có thể giao ca SOS thứ 2 cho đội cứu hộ đang BUSY")
+    void testAssignMultipleMissionsToSameTeamSuccess() {
+        SosRequest sos2 = SosRequest.builder()
+                .id(20L)
+                .status("PENDING")
+                .contactName("Nguyễn Thị Hoa")
+                .build();
+        when(sosRequestRepository.findById(20L)).thenReturn(Optional.of(sos2));
+
+        RescueTeam busyTeam = new RescueTeam(2L, "Đội Hải Châu", null, "0988", 16.06, 108.22, 6, "2 xuồng", "BUSY");
+        when(rescueTeamRepository.findById(2L)).thenReturn(Optional.of(busyTeam));
+
+        when(rescueAssignmentRepository.save(any(RescueAssignment.class))).thenAnswer(inv -> {
+            RescueAssignment a = inv.getArgument(0);
+            a.setId(501L);
+            return a;
+        });
+
+        AssignTaskRequestDto req = AssignTaskRequestDto.builder()
+                .sosRequestId(20L)
+                .teamId(2L)
+                .notes("Ca thứ 2 trên cùng trục đường ngập")
+                .build();
+
+        RescueAssignment result = coordinatorService.assignSosToTeam(req, 99L);
+
+        assertNotNull(result);
+        assertEquals(501L, result.getId());
+        assertEquals("DISPATCHED", sos2.getStatus());
+        assertEquals("BUSY", busyTeam.getStatus());
+    }
+
+    @Test
+    @DisplayName("Phân công cùng một ca SOS 2 lần cho cùng một đội sẽ bị từ chối")
+    void testAssignDuplicateSosToSameTeamThrows() {
+        SosRequest sos = SosRequest.builder().id(30L).status("PENDING").build();
+        when(sosRequestRepository.findById(30L)).thenReturn(Optional.of(sos));
+
+        RescueTeam team = new RescueTeam(2L, "Đội Hải Châu", null, "0988", 16.06, 108.22, 6, "2 xuồng", "BUSY");
+        when(rescueTeamRepository.findById(2L)).thenReturn(Optional.of(team));
+
+        RescueAssignment existing = new RescueAssignment();
+        existing.setTeam(team);
+        existing.setStatus("ACCEPTED");
+        when(rescueAssignmentRepository.findBySosRequestId(30L)).thenReturn(List.of(existing));
+
+        AssignTaskRequestDto req = AssignTaskRequestDto.builder()
+                .sosRequestId(30L)
+                .teamId(2L)
+                .build();
+
+        assertThrows(IllegalStateException.class, () -> coordinatorService.assignSosToTeam(req, 99L));
     }
 }

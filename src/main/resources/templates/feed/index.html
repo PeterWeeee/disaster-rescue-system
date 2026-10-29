@@ -126,7 +126,7 @@
 
                                     </div>
 
-                                    <p class="small text-muted mb-2 mt-1 text-truncate" th:text="${historyItem.addressDetail != null ? historyItem.addressDetail : 'Đang cập nhật vị trí'}">Vị trí cứu hộ</p>
+                                    <p class="small text-muted mb-2 mt-1 text-break" style="word-break: break-word; line-height: 1.4; white-space: normal;" th:text="${historyItem.addressDetail != null ? historyItem.addressDetail : 'Đang cập nhật vị trí'}">Vị trí cứu hộ</p>
 
                                     <a th:href="@{'/sos/track/' + ${historyItem.id}}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3">
 
@@ -360,7 +360,7 @@
 
                                     </div>
 
-                                    <div class="overflow-hidden" style="min-width: 0;">
+                                    <div class="flex-grow-1" style="min-width: 0;">
 
                                         <div class="d-flex align-items-center gap-2 flex-wrap">
 
@@ -374,11 +374,17 @@
 
                                         </div>
 
-                                        <div class="text-muted small text-truncate" style="max-width: 100%;">
+                                        <div class="text-muted small mt-0.5 text-break" style="word-break: break-word; line-height: 1.45;">
 
-                                            <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'HH:mm - dd/MM/yyyy') : 'Vừa xong'}">Vừa xong</span>
+                                            <span class="text-nowrap" th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'HH:mm - dd/MM/yyyy') : 'Vừa xong'}">Vừa xong</span>
 
-                                            <span th:if="${post.locationName != null}"> · <i class="fa-solid fa-location-dot text-danger"></i> <span th:text="${post.locationName}">Địa điểm</span></span>
+                                            <span th:if="${post.locationName != null}" class="d-inline text-break" style="word-break: break-word;">
+
+                                                <span class="mx-1 opacity-50">·</span>
+
+                                                <i class="fa-solid fa-location-dot text-danger me-1"></i><span class="text-dark-emphasis fw-medium" th:text="${post.locationName}">Địa điểm</span>
+
+                                            </span>
 
                                         </div>
 
@@ -884,13 +890,13 @@
 
                                     </div>
 
-                                    <div class="text-muted mt-1 text-truncate" style="font-size: 0.75rem;">
+                                    <div class="text-muted mt-1 text-break" style="font-size: 0.75rem; word-break: break-word; line-height: 1.35;">
 
                                         <span th:text="${alert.affectedRegion != null ? alert.affectedRegion : 'Toàn khu vực'}">Khu vực</span>
 
                                         <span> · </span>
 
-                                        <span th:text="${alert.createdAt != null ? #temporals.format(alert.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">08:30</span>
+                                        <span class="text-nowrap" th:text="${alert.createdAt != null ? #temporals.format(alert.createdAt, 'HH:mm - dd/MM') : 'Vừa xong'}">08:30</span>
 
                                     </div>
 

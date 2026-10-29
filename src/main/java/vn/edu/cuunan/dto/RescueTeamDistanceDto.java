@@ -11,11 +11,16 @@ public class RescueTeamDistanceDto {
     private String equipmentNotes;
     private String status; // AVAILABLE, BUSY, OFFLINE
     private Double distanceKm;
+    private Integer activeMissionsCount = 0;
 
     public RescueTeamDistanceDto() {
     }
 
     public RescueTeamDistanceDto(Long id, String teamName, String leaderName, String contactPhone, Double currentLatitude, Double currentLongitude, Integer memberCount, String equipmentNotes, String status, Double distanceKm) {
+        this(id, teamName, leaderName, contactPhone, currentLatitude, currentLongitude, memberCount, equipmentNotes, status, distanceKm, 0);
+    }
+
+    public RescueTeamDistanceDto(Long id, String teamName, String leaderName, String contactPhone, Double currentLatitude, Double currentLongitude, Integer memberCount, String equipmentNotes, String status, Double distanceKm, Integer activeMissionsCount) {
         this.id = id;
         this.teamName = teamName;
         this.leaderName = leaderName;
@@ -26,6 +31,7 @@ public class RescueTeamDistanceDto {
         this.equipmentNotes = equipmentNotes;
         this.status = status;
         this.distanceKm = distanceKm;
+        this.activeMissionsCount = activeMissionsCount != null ? activeMissionsCount : 0;
     }
 
     public static Builder builder() {
@@ -43,6 +49,7 @@ public class RescueTeamDistanceDto {
         private String equipmentNotes;
         private String status;
         private Double distanceKm;
+        private Integer activeMissionsCount = 0;
 
         public Builder teamId(Long teamId) { this.id = teamId; return this; }
         public Builder id(Long id) {
@@ -95,8 +102,13 @@ public class RescueTeamDistanceDto {
             return this;
         }
 
+        public Builder activeMissionsCount(Integer activeMissionsCount) {
+            this.activeMissionsCount = activeMissionsCount;
+            return this;
+        }
+
         public RescueTeamDistanceDto build() {
-            return new RescueTeamDistanceDto(id, teamName, leaderName, contactPhone, currentLatitude, currentLongitude, memberCount, equipmentNotes, status, distanceKm);
+            return new RescueTeamDistanceDto(id, teamName, leaderName, contactPhone, currentLatitude, currentLongitude, memberCount, equipmentNotes, status, distanceKm, activeMissionsCount);
         }
     }
 
@@ -178,5 +190,13 @@ public class RescueTeamDistanceDto {
 
     public void setDistanceKm(Double distanceKm) {
         this.distanceKm = distanceKm;
+    }
+
+    public Integer getActiveMissionsCount() {
+        return activeMissionsCount;
+    }
+
+    public void setActiveMissionsCount(Integer activeMissionsCount) {
+        this.activeMissionsCount = activeMissionsCount;
     }
 }

@@ -26,6 +26,9 @@ public interface RescueAssignmentRepository extends JpaRepository<RescueAssignme
 
     long countByStatus(String status);
 
+    @Query("SELECT COUNT(ra) FROM RescueAssignment ra WHERE ra.team.id = :teamId AND ra.status IN ('PENDING', 'ACCEPTED', 'IN_PROGRESS')")
+    long countActiveAssignmentsByTeamId(@Param("teamId") Long teamId);
+
     @Query("SELECT ra FROM RescueAssignment ra JOIN FETCH ra.sosRequest WHERE ra.team.id = :teamId ORDER BY ra.assignedAt DESC")
     List<RescueAssignment> findByTeamIdWithSosRequest(@Param("teamId") Long teamId);
 

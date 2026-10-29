@@ -652,9 +652,10 @@
 
                 teams.forEach((t, idx) => {
                     const isAvail = t.status === 'AVAILABLE';
+                    const activeCount = t.activeMissionsCount || 0;
                     const item = document.createElement('a');
                     item.href = 'javascript:void(0)';
-                    item.className = `list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 team-choice-item ${!isAvail ? 'bg-light text-muted' : ''}`;
+                    item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 team-choice-item';
                     item.onclick = function() {
                         selectTeam(t.id, item);
                     };
@@ -665,12 +666,16 @@
                             ? `<span class="badge bg-primary py-2 px-3"><i class="fa-solid fa-route me-1"></i> ${t.distanceKm} km</span>`
                             : `<span class="badge bg-secondary py-2 px-3">${t.distanceKm} km</span>`);
 
+                    const statusBadge = isAvail
+                        ? `<span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i> Sẵn sàng (0 ca)</span>`
+                        : `<span class="badge bg-warning text-dark"><i class="fa-solid fa-person-running me-1"></i> Đang thực hiện (${activeCount} ca)</span>`;
+
                     item.innerHTML = `
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <span class="badge bg-navy text-white">#${idx + 1}</span>
                                 <h6 class="fw-bold mb-0 text-navy">${t.teamName}</h6>
-                                <span class="badge ${isAvail ? 'bg-success' : 'bg-warning text-dark'}">${t.status}</span>
+                                ${statusBadge}
                             </div>
                             <div class="small text-muted">
                                 <i class="fa-solid fa-user-shield me-1"></i> Đội trưởng: <strong>${t.leaderName}</strong> - SĐT: ${t.contactPhone}
