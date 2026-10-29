@@ -68,12 +68,11 @@
                             <th>Hành động</th>
                             <th>Đối tượng liên quan</th>
                             <th>Chi tiết ghi nhận</th>
-                            <th>Địa chỉ IP</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${logs.empty}">
-                            <td colspan="6" class="text-center py-4 text-muted">Chưa có nhật ký hoạt động nào</td>
+                            <td colspan="5" class="text-center py-4 text-muted">Chưa có nhật ký hoạt động nào</td>
                         </tr>
                         <tr th:each="log : ${logs}" th:attr="data-action=${log.action}">
                             <td class="small text-muted" style="white-space: nowrap;">
@@ -105,7 +104,6 @@
                             <td>
                                 <span class="small text-dark" style="max-width: 380px; display: inline-block;" th:text="${log.details != null ? log.details : '—'}">Chi tiết</span>
                             </td>
-                            <td class="small text-muted" th:text="${log.ipAddress != null ? log.ipAddress : '127.0.0.1'}">IP</td>
                         </tr>
                     </tbody>
                 </table>
