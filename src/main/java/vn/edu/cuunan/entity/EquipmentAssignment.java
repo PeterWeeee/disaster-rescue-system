@@ -44,7 +44,8 @@ public class EquipmentAssignment {
     @Column(name = "returned_at")
     private LocalDateTime returnedAt;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "notes")
     private String notes;
 
     @Column(name = "created_at")

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import javax.sql.DataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired(required = false)
     private RescueChatMessageRepository rescueChatMessageRepository;
 
+    @Autowired(required = false)
+    private DataSource dataSource;
+
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
                            SosRequestRepository sosRequestRepository,
@@ -75,9 +79,65 @@ public class DataInitializer implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    private void ensureSqlServerUnicodeCompatibility() {
+        if (dataSource == null) return;
+        try (java.sql.Connection conn = dataSource.getConnection()) {
+            String dbProduct = conn.getMetaData().getDatabaseProductName();
+            if (dbProduct != null && dbProduct.toLowerCase().contains("microsoft")) {
+                log.info(">>> [SQL Server] Đang kiểm tra và chuẩn hóa kiểu dữ liệu cột sang NVARCHAR/NVARCHAR(MAX)...");
+                try (java.sql.Statement stmt = conn.createStatement()) {
+                    String[] statements = {
+                        "ALTER TABLE notifications ALTER COLUMN message NVARCHAR(MAX) NOT NULL",
+                        "ALTER TABLE notifications ALTER COLUMN title NVARCHAR(200) NOT NULL",
+                        "ALTER TABLE users ALTER COLUMN full_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE users ALTER COLUMN address NVARCHAR(255) NULL",
+                        "ALTER TABLE rescue_teams ALTER COLUMN team_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE rescue_teams ALTER COLUMN equipment_notes NVARCHAR(MAX) NULL",
+                        "ALTER TABLE sos_requests ALTER COLUMN contact_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE sos_requests ALTER COLUMN address_detail NVARCHAR(255) NULL",
+                        "ALTER TABLE sos_requests ALTER COLUMN description NVARCHAR(MAX) NULL",
+                        "ALTER TABLE rescue_assignments ALTER COLUMN report_notes NVARCHAR(MAX) NULL",
+                        "ALTER TABLE rescue_assignments ALTER COLUMN selected_equipment NVARCHAR(MAX) NULL",
+                        "ALTER TABLE rescue_assignments ALTER COLUMN rejection_reason NVARCHAR(255) NULL",
+                        "ALTER TABLE disaster_alerts ALTER COLUMN title NVARCHAR(200) NOT NULL",
+                        "ALTER TABLE disaster_alerts ALTER COLUMN content NVARCHAR(MAX) NOT NULL",
+                        "ALTER TABLE disaster_alerts ALTER COLUMN affected_region NVARCHAR(255) NULL",
+                        "ALTER TABLE evacuation_shelters ALTER COLUMN name NVARCHAR(200) NOT NULL",
+                        "ALTER TABLE evacuation_shelters ALTER COLUMN address NVARCHAR(255) NULL",
+                        "ALTER TABLE community_posts ALTER COLUMN author_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE community_posts ALTER COLUMN content NVARCHAR(MAX) NOT NULL",
+                        "ALTER TABLE community_posts ALTER COLUMN location_name NVARCHAR(255) NULL",
+                        "ALTER TABLE rescue_equipment ALTER COLUMN equipment_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE rescue_equipment ALTER COLUMN notes NVARCHAR(MAX) NULL",
+                        "ALTER TABLE equipment_assignments ALTER COLUMN notes NVARCHAR(MAX) NULL",
+                        "ALTER TABLE activity_logs ALTER COLUMN target_entity NVARCHAR(150) NULL",
+                        "ALTER TABLE activity_logs ALTER COLUMN details NVARCHAR(MAX) NULL",
+                        "ALTER TABLE donations ALTER COLUMN donor_name NVARCHAR(100) NULL",
+                        "ALTER TABLE donations ALTER COLUMN message NVARCHAR(500) NULL",
+                        "ALTER TABLE donations ALTER COLUMN target_province NVARCHAR(80) NULL",
+                        "ALTER TABLE team_fund_requests ALTER COLUMN purpose NVARCHAR(500) NOT NULL",
+                        "ALTER TABLE team_fund_requests ALTER COLUMN reject_reason NVARCHAR(500) NULL",
+                        "ALTER TABLE rescue_chat_messages ALTER COLUMN sender_name NVARCHAR(100) NOT NULL",
+                        "ALTER TABLE rescue_chat_messages ALTER COLUMN content NVARCHAR(MAX) NOT NULL"
+                    };
+                    for (String sql : statements) {
+                        try {
+                            stmt.execute(sql);
+                        } catch (Exception e) {
+                            // Bỏ qua nếu bảng chưa tạo hoặc cột đã chuẩn
+                        }
+                    }
+                }
+                log.info(">>> [SQL Server] Đã đảm bảo toàn bộ bảng tương thích Unicode tiếng Việt!");
+            }
+        } catch (Exception ex) {
+            log.warn("Không thể kiểm tra schema SQL Server: {}", ex.getMessage());
+        }
+    }
+
     @Override
-    @Transactional
     public void run(String... args) {
+        ensureSqlServerUnicodeCompatibility();
         log.info("==========================================================================");
         log.info(">>> [KHỞI TẠO CƠ SỞ DỮ LIỆU MIỀN TRUNG - HỆ THỐNG CỨU NẠN 24/7] BẮT ĐẦU...");
         log.info("==========================================================================");
@@ -535,21 +595,43 @@ public class DataInitializer implements CommandLineRunner {
             initStandardEquipment(t);
         }
 
-        // 13. Khởi tạo Thông báo mẫu (Notifications)
-        if (notificationRepository.count() == 0) {
-            User coordDn = userRepository.findByUsername("coord_danang").orElse(null);
-            if (coordDn != null) {
+        // 13. Khởi tạo & Tự động phục hồi Thông báo mẫu (Notifications)
+        User coordDn = userRepository.findByUsername("coord_danang").orElse(null);
+        if (coordDn != null) {
+            List<Notification> coordNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(coordDn);
+            boolean exists = coordNotifs.stream().anyMatch(n -> "SOS_NEW".equals(n.getType()));
+            if (!exists) {
                 notificationRepository.save(new vn.edu.cuunan.entity.Notification(
                         coordDn, "Tiếp nhận ca SOS #1 mới",
                         "Có yêu cầu cứu nạn khẩn cấp tại Mẹ Suốt, Liên Chiểu, Đà Nẵng cần điều phối.",
                         "SOS_NEW", "/coordinator/dashboard"));
+            } else {
+                for (Notification n : coordNotifs) {
+                    if ((n.getMessage() != null && n.getMessage().contains("?")) || (n.getTitle() != null && n.getTitle().contains("?"))) {
+                        n.setTitle("Tiếp nhận ca SOS #1 mới");
+                        n.setMessage("Có yêu cầu cứu nạn khẩn cấp tại Mẹ Suốt, Liên Chiểu, Đà Nẵng cần điều phối.");
+                        notificationRepository.save(n);
+                    }
+                }
             }
-            User rescuerDn = userRepository.findByUsername("rescuer_dn01").orElse(null);
-            if (rescuerDn != null) {
+        }
+        User rescuerDn = userRepository.findByUsername("rescuer_dn01").orElse(null);
+        if (rescuerDn != null) {
+            List<Notification> rescuerNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(rescuerDn);
+            boolean exists = rescuerNotifs.stream().anyMatch(n -> "MISSION_NEW".equals(n.getType()));
+            if (!exists) {
                 notificationRepository.save(new vn.edu.cuunan.entity.Notification(
                         rescuerDn, "Lệnh phân công nhiệm vụ mới",
                         "Bạn nhận lệnh cứu nạn ca SOS #1 tại K456 Tôn Đức Thắng, Đà Nẵng. Mức độ: CRITICAL.",
                         "MISSION_NEW", "/rescuer/missions"));
+            } else {
+                for (Notification n : rescuerNotifs) {
+                    if ((n.getMessage() != null && n.getMessage().contains("?")) || (n.getTitle() != null && n.getTitle().contains("?"))) {
+                        n.setTitle("Lệnh phân công nhiệm vụ mới");
+                        n.setMessage("Bạn nhận lệnh cứu nạn ca SOS #1 tại K456 Tôn Đức Thắng, Đà Nẵng. Mức độ: CRITICAL.");
+                        notificationRepository.save(n);
+                    }
+                }
             }
         }
 
@@ -558,6 +640,18 @@ public class DataInitializer implements CommandLineRunner {
             activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
                     adminUser, "SYSTEM_INIT", "Hệ thống",
                     "Khởi tạo toàn bộ dữ liệu mẫu hệ thống cứu nạn 24/7 miền Trung thành công", "127.0.0.1"));
+        } else {
+            activityLogRepository.findAll().forEach(item -> {
+                if ((item.getTargetEntity() != null && item.getTargetEntity().contains("?")) || (item.getDetails() != null && item.getDetails().contains("?"))) {
+                    if ("SYSTEM_INIT".equals(item.getAction())) {
+                        item.setTargetEntity("Hệ thống");
+                        item.setDetails("Khởi tạo toàn bộ dữ liệu mẫu hệ thống cứu nạn 24/7 miền Trung thành công");
+                        activityLogRepository.save(item);
+                    }
+                }
+            });
+        }
+        if (activityLogRepository.count() <= 1) {
             activityLogRepository.save(new vn.edu.cuunan.entity.ActivityLog(
                     coordCentral, "DISPATCH_MISSION", "Nhiệm vụ #1",
                     "Điều phối Đội cứu hộ Đà Nẵng 01 tiếp cận ca cứu nạn #1 (Nguyễn Văn An)", "192.168.1.10"));
@@ -675,6 +769,21 @@ public class DataInitializer implements CommandLineRunner {
                 item.setUnitPrice(estimatedUnitPrice(item));
                 changed = true;
             }
+            if ((item.getEquipmentName() != null && item.getEquipmentName().contains("?")) || (item.getNotes() != null && item.getNotes().contains("?"))) {
+                if ("AO_PHAO".equals(item.getEquipmentCode())) { item.setEquipmentName("Áo phao cứu sinh tiêu chuẩn"); item.setNotes("Phao cứu sinh chuẩn hàng hải"); }
+                else if ("PHAO_TRON".equals(item.getEquipmentCode())) { item.setEquipmentName("Phao tròn cứu hộ có dây ném 30m"); item.setNotes("Phao ném nổi mặt nước"); }
+                else if ("DEN_PIN".equals(item.getEquipmentCode())) { item.setEquipmentName("Đèn pin rọi cứu nạn chống nước siêu sáng"); item.setNotes("Đèn LED sạc điện 5000mAh"); }
+                else if ("TUI_SO_CUU".equals(item.getEquipmentCode())) { item.setEquipmentName("Túi sơ cứu y tế khẩn cấp (băng garo, sát khuẩn)"); item.setNotes("Chuẩn y tế dã chiến"); }
+                else if ("BO_DAM".equals(item.getEquipmentCode())) { item.setEquipmentName("Bộ đàm liên lạc Motorola cự ly 5km"); item.setNotes("Tần số khẩn cấp quốc gia"); }
+                else if ("DAY_CUU_HO".equals(item.getEquipmentCode())) { item.setEquipmentName("Dây thừng cứu nạn chịu lực (50m)"); item.setNotes("Tải trọng chịu lực 2 tấn"); }
+                else if ("XUONG_CAO_SU".equals(item.getEquipmentCode())) { item.setEquipmentName("Xuồng cứu nạn cao su 6 người"); item.setNotes("Kèm 2 mái chèo cơ động"); }
+                else if ("LUONG_KHO".equals(item.getEquipmentCode())) { item.setEquipmentName("Lương khô quân đội & nước lọc đóng chai"); item.setNotes("Hạn dùng 2028"); }
+                else if ("VEHICLE_TRUCK_4X4".equals(item.getEquipmentCode())) { item.setEquipmentName("Xe gầm cao 2 cầu 4x4"); item.setNotes("Phương tiện cứu hộ cơ động của đội"); }
+                else if ("VEHICLE_AMBULANCE".equals(item.getEquipmentCode())) { item.setEquipmentName("Xe cứu thương dã chiến chuyên dụng"); item.setNotes("Phương tiện y tế của đội"); }
+                else if ("VEHICLE_BOAT_MOTOR".equals(item.getEquipmentCode())) { item.setEquipmentName("Xuồng máy cứu hộ (Ca-nô cao tốc)"); item.setNotes("Phương tiện cứu hộ đường thủy"); }
+                else if ("VEHICLE_BOAT_RUBBER".equals(item.getEquipmentCode())) { item.setEquipmentName("Xuồng cứu nạn cao su 6 người"); item.setNotes("Phương tiện cứu hộ cơ động đường thủy"); }
+                changed = true;
+            }
         }
         if (changed) rescueEquipmentRepository.saveAll(equipment);
     }
@@ -726,12 +835,25 @@ public class DataInitializer implements CommandLineRunner {
 
     private User getOrCreateUser(String username, String rawPassword, String fullName, String phone, String email, String address, Role role) {
         return userRepository.findByUsername(username).map(existingUser -> {
+            boolean changed = false;
             // Tự động đồng bộ mật khẩu chuẩn nếu tài khoản đã tồn tại trong DB nhưng mật khẩu không khớp rawPassword (ví dụ do chạy file SQL seed cũ)
             if (!passwordEncoder.matches(rawPassword, existingUser.getPassword())) {
                 existingUser.setPassword(passwordEncoder.encode(rawPassword));
                 existingUser.setStatus("ACTIVE");
-                userRepository.save(existingUser);
+                changed = true;
                 log.info("  [User] Đã tự động cập nhật lại mật khẩu chuẩn cho tài khoản: {}", username);
+            }
+            // Tự động phục hồi tiếng Việt nếu dữ liệu cũ trong DB bị lỗi font / dấu hỏi '?'
+            if (fullName != null && (existingUser.getFullName() == null || existingUser.getFullName().contains("?") || !existingUser.getFullName().equals(fullName))) {
+                existingUser.setFullName(fullName);
+                changed = true;
+            }
+            if (address != null && (existingUser.getAddress() == null || existingUser.getAddress().contains("?") || !existingUser.getAddress().equals(address))) {
+                existingUser.setAddress(address);
+                changed = true;
+            }
+            if (changed) {
+                userRepository.save(existingUser);
             }
             return existingUser;
         }).orElseGet(() -> {
@@ -754,10 +876,24 @@ public class DataInitializer implements CommandLineRunner {
     private RescueTeam getOrCreateRescueTeam(String teamName, User leader, String contactPhone,
                                             Double lat, Double lng, Integer memberCount,
                                             String equipmentNotes, String status) {
-        RescueTeam existing = rescueTeamRepository.findByTeamName(teamName).orElse(null);
+        RescueTeam existing = rescueTeamRepository.findByTeamName(teamName)
+                .or(() -> (leader != null && leader.getId() != null) ? rescueTeamRepository.findByLeaderId(leader.getId()) : Optional.empty())
+                .orElse(null);
         if (existing != null) {
+            boolean changed = false;
+            if (existing.getTeamName() == null || existing.getTeamName().contains("?") || !existing.getTeamName().equals(teamName)) {
+                existing.setTeamName(teamName);
+                changed = true;
+            }
+            if (equipmentNotes != null && (existing.getEquipmentNotes() == null || existing.getEquipmentNotes().contains("?") || !existing.getEquipmentNotes().equals(equipmentNotes))) {
+                existing.setEquipmentNotes(equipmentNotes);
+                changed = true;
+            }
             if (existing.getBudget() == null || existing.getBudget().compareTo(BigDecimal.ZERO) == 0) {
                 existing.setBudget(new BigDecimal("10000000"));
+                changed = true;
+            }
+            if (changed) {
                 return rescueTeamRepository.save(existing);
             }
             return existing;
@@ -792,7 +928,25 @@ public class DataInitializer implements CommandLineRunner {
                                       String urgencyLevel, Integer peopleCount,
                                       Boolean hasElderly, Boolean hasChildren, Boolean hasInjured,
                                       String description, String status, LocalDateTime resolvedAt) {
-        return sosRequestRepository.findFirstByContactPhone(contactPhone).orElseGet(() -> {
+        return sosRequestRepository.findFirstByContactPhone(contactPhone).map(existing -> {
+            boolean changed = false;
+            if (contactName != null && (existing.getContactName() == null || existing.getContactName().contains("?") || !existing.getContactName().equals(contactName))) {
+                existing.setContactName(contactName);
+                changed = true;
+            }
+            if (addressDetail != null && (existing.getAddressDetail() == null || existing.getAddressDetail().contains("?") || !existing.getAddressDetail().equals(addressDetail))) {
+                existing.setAddressDetail(addressDetail);
+                changed = true;
+            }
+            if (description != null && (existing.getDescription() == null || existing.getDescription().contains("?") || !existing.getDescription().equals(description))) {
+                existing.setDescription(description);
+                changed = true;
+            }
+            if (changed) {
+                return sosRequestRepository.save(existing);
+            }
+            return existing;
+        }).orElseGet(() -> {
             SosRequest sos = SosRequest.builder()
                     .sender(sender)
                     .contactName(contactName)
@@ -833,28 +987,51 @@ public class DataInitializer implements CommandLineRunner {
             a.setReportImageUrl(reportImageUrl);
             a.setRejectionReason(rejectionReason);
             rescueAssignmentRepository.save(a);
+        } else {
+            existing.stream().filter(a -> a.getTeam().getId().equals(team.getId())).findFirst().ifPresent(a -> {
+                if (reportNotes != null && (a.getReportNotes() == null || a.getReportNotes().contains("?"))) {
+                    a.setReportNotes(reportNotes);
+                    rescueAssignmentRepository.save(a);
+                }
+            });
         }
     }
 
     private void initAlert(String title, String content, String severity, String region, boolean isBroadcast, User createdBy, LocalDateTime expiresAt) {
-        if (!disasterAlertRepository.existsByTitle(title)) {
-            DisasterAlert alert = new DisasterAlert();
-            alert.setTitle(title);
-            alert.setContent(content);
-            alert.setSeverity(severity);
-            alert.setAffectedRegion(region);
-            alert.setIsBroadcast(isBroadcast);
-            alert.setCreatedBy(createdBy);
-            alert.setExpiresAt(expiresAt);
-            disasterAlertRepository.save(alert);
+        Optional<DisasterAlert> alertOpt = disasterAlertRepository.findFirstByTitle(title);
+        if (alertOpt.isPresent()) {
+            DisasterAlert alert = alertOpt.get();
+            if ((alert.getContent() != null && alert.getContent().contains("?")) || (alert.getAffectedRegion() != null && alert.getAffectedRegion().contains("?"))) {
+                alert.setContent(content);
+                alert.setAffectedRegion(region);
+                disasterAlertRepository.save(alert);
+            }
+            return;
         }
+        DisasterAlert alert = new DisasterAlert();
+        alert.setTitle(title);
+        alert.setContent(content);
+        alert.setSeverity(severity);
+        alert.setAffectedRegion(region);
+        alert.setIsBroadcast(isBroadcast);
+        alert.setCreatedBy(createdBy);
+        alert.setExpiresAt(expiresAt);
+        disasterAlertRepository.save(alert);
     }
 
     private void initShelter(String name, String address, Double lat, Double lng, Integer capacity, Integer occupancy, String phone, String status) {
-        if (evacuationShelterRepository.findByName(name).isEmpty()) {
-            EvacuationShelter shelter = new EvacuationShelter(null, name, address, lat, lng, capacity, occupancy, phone, status);
-            evacuationShelterRepository.save(shelter);
+        Optional<EvacuationShelter> shelterOpt = evacuationShelterRepository.findByName(name);
+        if (shelterOpt.isPresent()) {
+            EvacuationShelter s = shelterOpt.get();
+            if ((s.getAddress() != null && s.getAddress().contains("?")) || (s.getName() != null && s.getName().contains("?"))) {
+                s.setName(name);
+                s.setAddress(address);
+                evacuationShelterRepository.save(s);
+            }
+            return;
         }
+        EvacuationShelter shelter = new EvacuationShelter(null, name, address, lat, lng, capacity, occupancy, phone, status);
+        evacuationShelterRepository.save(shelter);
     }
 
     private CommunityPost initPost(User author, String authorName, HazardType hazardType, String content,
@@ -862,7 +1039,24 @@ public class DataInitializer implements CommandLineRunner {
                                   int upvotes, int comments, SosRequest sosRequest) {
         Optional<CommunityPost> postOpt = (locationName != null) ? communityPostRepository.findFirstByLocationName(locationName) : Optional.empty();
         if (postOpt.isPresent()) {
-            return postOpt.get();
+            CommunityPost post = postOpt.get();
+            boolean changed = false;
+            if (authorName != null && (post.getAuthorName() == null || post.getAuthorName().contains("?") || !post.getAuthorName().equals(authorName))) {
+                post.setAuthorName(authorName);
+                changed = true;
+            }
+            if (content != null && (post.getContent() == null || post.getContent().contains("?") || !post.getContent().equals(content))) {
+                post.setContent(content);
+                changed = true;
+            }
+            if (locationName != null && (post.getLocationName() == null || post.getLocationName().contains("?") || !post.getLocationName().equals(locationName))) {
+                post.setLocationName(locationName);
+                changed = true;
+            }
+            if (changed) {
+                return communityPostRepository.save(post);
+            }
+            return post;
         }
         CommunityPost post = new CommunityPost(null, author, authorName, hazardType, content, locationName, lat, lng,
                 null, status, upvotes, comments, sosRequest);

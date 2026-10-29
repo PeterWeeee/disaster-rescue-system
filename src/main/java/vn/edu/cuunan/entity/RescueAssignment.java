@@ -44,7 +44,8 @@ public class RescueAssignment {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @Column(name = "report_notes", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "report_notes")
     private String reportNotes;
 
     @Column(name = "report_image_url", length = 500)
@@ -53,7 +54,8 @@ public class RescueAssignment {
     @Column(name = "vehicle_type", length = 50)
     private String vehicleType;
 
-    @Column(name = "selected_equipment", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "selected_equipment")
     private String selectedEquipment;
 
     @Column(name = "terrain_type", length = 50)

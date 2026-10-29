@@ -15,7 +15,8 @@ public class DisasterAlert extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Lob
+    @Column(nullable = false)
     private String content;
 
     @Column(length = 30)

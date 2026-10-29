@@ -5,8 +5,8 @@
 
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 29/10/2026
-- **Nhánh Git hiện tại:** `ui-fixes` (Đã tích hợp toàn bộ nâng cấp giao diện, sửa lỗi bản đồ, phân trang, thống kê thu chi, cẩm nang thiên tai và khung live chat thời gian thực)
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 13):
+- **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat, và chuẩn hóa Unicode SQL Server)
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 14):
   - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
   - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
   - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
@@ -55,6 +55,14 @@
   - [x] Tích hợp dịch vụ lưu trữ đám mây Cloudinary: Upload và phục vụ ảnh trực tiếp từ Cloudinary CDN (`CLOUDINARY_GUIDE_BASE_URL`) qua API `/api/upload/guide-image`, kèm fallback an toàn về Local Storage.
   - [x] Thiết kế thanh chọn các tình huống thiên tai ở cột bên trái màn hình (`col-lg-3`), vị trí tĩnh chuẩn (non-floating), không trôi đè lên ảnh và nội dung bài viết khi lướt cuộn trang.
   - [x] Loại bỏ hoàn toàn nút "Phát tín hiệu SOS" trên tất cả các trang cẩm nang (`/guide/disaster` và `/guide/disaster/{slug}`).
+- [x] **SESSION 14 (PeterWeeee - Nhánh `develop`):**
+  - [x] Khắc phục triệt để lỗi mất dấu font tiếng Việt (biến thành `?`) trong các bảng Thông báo (`notifications`), Lịch sử hoạt động (`activity_logs`), và bảng dữ liệu tác nghiệp trên SQL Server.
+  - [x] Chuẩn hóa toàn bộ trường văn bản dài từ `@Column(columnDefinition = "TEXT")` sang JPA tiêu chuẩn `@Lob` trên 10 Entities (`Notification`, `SosRequest`, `CommunityPost`, `DisasterAlert`, `ActivityLog`, `RescueTeam`, `RescueAssignment`, `RescueEquipment`, `EquipmentAssignment`, `RescueChatMessage`). Hibernate 6 tự động ánh xạ thông minh thành `NVARCHAR(MAX)` trên SQL Server (hỗ trợ so sánh `=`, `LIKE`) và `LONGTEXT` trên MySQL.
+  - [x] Bổ sung cấu hình `sendStringParametersAsUnicode=true` vào connection string trong `application-sqlserver.yml` bảo đảm tham số truy vấn luôn gửi dạng Unicode `N'...'` (UTF-16).
+  - [x] Phát hiện và sửa lỗi nghiêm trọng: Gỡ bỏ triệt để cấu hình `use_nationalized_character_data: true` và annotation `@Nationalized` gây crash `SQLServerException: The conversion from varchar to NCHAR is unsupported` khi truy vấn các cột `VARCHAR(50)` (`roles.name`, `users.username`). Quay về cơ chế `rs.getString()` đọc mượt cả `VARCHAR` lẫn `NVARCHAR`.
+  - [x] Bổ sung phương thức tự động tương thích `ensureSqlServerUnicodeCompatibility()` trong `DataInitializer.java` (chỉ chạy khi kết nối SQL Server, an toàn cho MySQL/PostgreSQL).
+  - [x] Thực hiện quy trình làm sạch toàn diện cơ sở dữ liệu: Xóa sạch dữ liệu lỗi font cũ trên toàn bộ 19 bảng, reset Identity về 0, nạp lại `03_seed_data.sql` và khởi tạo mới Notifications/ActivityLogs chuẩn tiếng Việt 100%.
+  - [x] Toàn bộ **128/128 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 

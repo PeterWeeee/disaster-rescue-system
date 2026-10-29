@@ -52,7 +52,8 @@ public class SosRequest extends BaseEntity {
     @Column(name = "has_injured")
     private Boolean hasInjured = false;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "description")
     private String description;
 
     @Column(name = "image_url", length = 500)

@@ -34,7 +34,8 @@ public class RescueTeam extends BaseEntity {
     @Column(name = "member_count")
     private Integer memberCount = 0;
 
-    @Column(name = "equipment_notes", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "equipment_notes")
     private String equipmentNotes;
 
     @Column(length = 30)

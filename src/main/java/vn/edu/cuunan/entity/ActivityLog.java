@@ -24,7 +24,8 @@ public class ActivityLog {
     @Column(name = "target_entity", length = 150)
     private String targetEntity;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "details")
     private String details;
 
     @Column(name = "ip_address", length = 50)

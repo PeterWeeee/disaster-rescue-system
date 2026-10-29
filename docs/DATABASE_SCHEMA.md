@@ -7,10 +7,11 @@
 
 ### Quy tắc JPA bắt buộc:
 1. **Khóa chính:** Luôn dùng `@GeneratedValue(strategy = GenerationType.IDENTITY)` (được cả MySQL `AUTO_INCREMENT` và SQL Server `IDENTITY(1,1)` hỗ trợ mượt mà).
-2. **Kiểu chuỗi dài:** Dùng `@Column(columnDefinition = "TEXT")` hoặc `@Lob` cho các trường mô tả dài.
+2. **Kiểu chuỗi dài (Cross-Database):** Luôn dùng `@Lob` chuẩn Jakarta Persistence cho các trường mô tả dài. Tuyệt đối không dùng cứng `@Column(columnDefinition = "TEXT")` vì kiểu `TEXT` của SQL Server đã bị deprecated, không hỗ trợ Unicode tiếng Việt đầy đủ và cấm toán tử so sánh bằng (`=`). Khi dùng `@Lob`, Hibernate 6 tự động ánh xạ thành `NVARCHAR(MAX)` trên SQL Server (hỗ trợ Unicode và so sánh `=`) và `LONGTEXT` trên MySQL.
 3. **Enum:** Luôn dùng `@Enumerated(EnumType.STRING)` để lưu tên dạng chuỗi (Vd: `'PENDING'`, `'IN_PROGRESS'`), tránh lưu số int gây nhầm lẫn khi inspect DB.
 4. **Thời gian:** Dùng `LocalDateTime` của Java 8+, map tự động sang `DATETIME` (MySQL) và `DATETIME2` (SQL Server).
 5. **Tọa độ GPS:** Dùng kiểu `Double` trong Java, map sang `DOUBLE` (MySQL) hoặc `FLOAT` (SQL Server).
+6. **Chuỗi Unicode Tiếng Việt:** Tất cả các cột chứa tiếng Việt (họ tên, địa chỉ, tiêu đề, tin nhắn) trên SQL Server bắt buộc là `NVARCHAR` / `NVARCHAR(MAX)` (trong DDL SQL) và connection string JDBC phải có `;sendStringParametersAsUnicode=true` để driver gửi Unicode `N'...'` (UTF-16). Không dùng `use_nationalized_character_data: true` vì gây lỗi conversion varchar sang NCHAR trên các cột `VARCHAR(50)`.
 
 ---
 

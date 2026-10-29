@@ -89,7 +89,14 @@ Nếu muốn chạy ứng dụng kết nối trực tiếp đến SQL Server n�
 2. **Kích hoạt profile SQL Server khi chạy Spring Boot:**
    ```powershell
    java -jar -Dspring.profiles.active=sqlserver target\disaster-rescue-system-1.0.0-SNAPSHOT.jar
+   # Hoặc chạy bằng Maven:
+   mvn spring-boot:run -Dspring-boot.run.profiles=sqlserver
    ```
+
+   > [!NOTE]
+   > - **Chuẩn mã hóa UTF-8 BOM:** Các file `01_create_database.sql`, `02_create_tables.sql`, `03_seed_data.sql` và `fix_sqlserver_encoding.sql` đều được lưu ở định dạng UTF-8 with BOM để SSMS và `sqlcmd` đọc chuẩn tiếng Việt có dấu, không bị chuyển thành dấu `?`.
+   > - **Tự động tương thích (Self-healing):** Khi khởi chạy với profile `sqlserver`, lớp `DataInitializer` sẽ tự động kiểm tra và nâng cấp các cột văn bản cũ sang `NVARCHAR(MAX)` và tự động phục hồi các bản ghi mẫu bị lỗi font.
+   > - **File vá nhanh độc lập:** Bạn cũng có thể mở `database/fix_sqlserver_encoding.sql` trong SSMS để chạy vá nhanh toàn bộ bảng và dữ liệu bất cứ lúc nào.
 
 ---
 

@@ -46,7 +46,8 @@ public class RescueEquipment {
     @Column(name = "damaged_quantity", nullable = false)
     private int damagedQuantity = 0;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "notes")
     private String notes;
 
     @Column(name = "updated_at")
