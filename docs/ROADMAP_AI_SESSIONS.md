@@ -46,6 +46,9 @@
 │ Session 16: Khắc Phục Lỗi WebSocket STOMP - Đồng Bộ Chat Thời Gian Thực│
 │             (Bi-directional Realtime Mission Chat Fix for Citizen)     │
 │    ↓                                                                   │
+│ Session 17: Tích Hợp Ảnh Hiện Trường Thiên Tai Từ Cloudinary CDN        │
+│             (Community Feed Cloudinary Media Integration)              │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘

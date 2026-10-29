@@ -6,7 +6,7 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 29/10/2026
 - **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat thời gian thực 2 chiều, bảng tin cộng đồng và chuẩn hóa Unicode SQL Server)
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 16):
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 17):
   - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
   - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
   - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
@@ -15,6 +15,7 @@
   - **SESSION 14 (Chuẩn hóa Unicode SQL Server & Sửa triệt để lỗi font tiếng Việt - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 15 (Sửa lỗi đăng tin cảnh báo & Động hóa cảnh báo thiên tai - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 16 (Khắc phục lỗi WebSocket STOMP - Đồng bộ Chat trực tuyến 2 chiều thời gian thực cho người dân và đội cứu hộ - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 17 (Tích hợp ảnh hiện trường thiên tai từ Cloudinary CDN cho Bảng Tin Cộng Đồng - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
 - **Trạng thái tổng quan:** Toàn bộ **128/128 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
@@ -78,6 +79,12 @@
   - [x] Bổ sung cơ chế chống trùng lặp tin nhắn `chat-msg-{id}` cho cả người dân và đội cứu hộ (`rescuer-chat-msg-{id}`).
   - [x] Tự động tải lại lịch sử tin nhắn khi kết nối thành công để bù đắp tin nhắn bị nhỡ; bổ sung smart polling định kỳ mỗi 10 giây dự phòng nếu mất kết nối WebSocket.
   - [x] Đạt chuẩn nhắn tin 2 chiều thời gian thực (Bi-directional Real-time Mission Chat): Người dân và đội cứu hộ trao đổi tức thời (< 500ms) không cần tải lại trang.
+- [x] **SESSION 17 (PeterWeeee - Nhánh `develop`):**
+  - [x] Tải lên bộ ảnh thực địa thiên tai đa dạng theo từng loại hiểm họa (`LANDSLIDE`, `FLOOD`, `TREE_FALL`, `ISOLATED`, v.v.) vào Cloudinary CDN folder `cuunan247/community_feed`.
+  - [x] Khai báo hằng số URL CDN và nạp tự động 6 bài đăng mẫu kèm ảnh Cloudinary trong `CommunityFeedService.java`.
+  - [x] Tích hợp cơ chế tự phục hồi (Self-healing backfill): Tự động quét và bổ sung URL ảnh Cloudinary cho các bài đăng hiện hữu trong CSDL nếu chưa có ảnh.
+  - [x] Bổ sung Seed Data mẫu bài đăng kèm ảnh Cloudinary trong cả `03_seed_data.sql` (SQL Server) và `mysql_init.sql` (MySQL).
+  - [x] Nâng cấp giao diện Bảng Tin (`feed/index.html`): Hiển thị huy hiệu `Cloudinary CDN`, modal xem ảnh phóng to `#imagePreviewModal`, nút "Mở ảnh gốc Cloudinary", chuẩn hóa `data-*` an toàn theo Thymeleaf 3.1+.
 
 ---
 

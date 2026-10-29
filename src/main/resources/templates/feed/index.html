@@ -214,9 +214,31 @@
                                 Nội dung chi tiết bài viết cảnh báo thiên tai từ hiện trường...
                             </p>
 
-                            <!-- Media Image (if any) -->
-                            <div th:if="${post.imageUrl != null && !#strings.isEmpty(post.imageUrl)}" class="mb-3 rounded-3 overflow-hidden shadow-xs border">
-                                <img th:src="${post.imageUrl}" class="img-fluid w-100 object-fit-cover" style="max-height: 380px;" alt="Ảnh hiện trường">
+                            <!-- Media Image (Cloudinary CDN) -->
+                            <div th:if="${post.imageUrl != null && !#strings.isEmpty(post.imageUrl)}" class="mb-3 rounded-3 overflow-hidden shadow-xs border position-relative bg-light">
+                                <img th:src="${post.imageUrl}" 
+                                     class="img-fluid w-100 object-fit-cover feed-post-image" 
+                                     style="max-height: 400px; cursor: pointer; transition: transform 0.25s ease;" 
+                                     alt="Ảnh hiện trường cảnh báo thiên tai"
+                                     loading="lazy"
+                                     th:data-src="${post.imageUrl}"
+                                     th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' · ' + post.hazardType.description}"
+                                     onclick="previewFeedImage(this.dataset.src, this.dataset.caption)">
+                                <div class="position-absolute top-0 end-0 m-2 d-flex align-items-center gap-1.5">
+                                    <span th:if="${#strings.contains(post.imageUrl, 'cloudinary')}" 
+                                          class="badge bg-dark bg-opacity-75 text-white small fw-semibold px-2 py-1 rounded-pill shadow-xs"
+                                          style="backdrop-filter: blur(4px);">
+                                        <i class="fa-solid fa-cloud text-info me-1"></i>Cloudinary CDN
+                                    </span>
+                                    <button type="button" class="btn btn-dark btn-sm bg-opacity-75 text-white py-0 px-2 rounded-pill shadow-xs"
+                                            style="backdrop-filter: blur(4px); font-size: 0.75rem;"
+                                            th:data-src="${post.imageUrl}"
+                                            th:data-caption="${(post.locationName != null ? post.locationName : 'Hiện trường') + ' - ' + post.hazardType.shortName}"
+                                            onclick="previewFeedImage(this.dataset.src, this.dataset.caption)"
+                                            title="Bấm xem ảnh cỡ lớn">
+                                        <i class="fa-solid fa-expand me-1"></i>Xem ảnh
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Converted SOS Notice Badge (if already converted) -->
@@ -420,8 +442,30 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT XỬ LÝ AJAX TƯƠNG TÁC CHO BẢNG TIN -->
+<!-- MODAL XEM CHI TIẾT ẢNH HIỆN TRƯỜNG CLOUDINARY FULL SIZE -->
 <!-- ========================================================================= -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 overflow-hidden bg-dark text-white shadow-lg">
+            <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary fw-bold"><i class="fa-solid fa-cloud me-1"></i>Cloudinary CDN</span>
+                    <span id="previewModalCaption" class="small text-white-50 text-truncate" style="max-width: 480px;"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body text-center p-3">
+                <img id="previewModalImg" src="" class="img-fluid rounded-3 shadow" style="max-height: 72vh; width: auto;" alt="Xem trước ảnh">
+                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2 px-2">
+                    <span class="small text-white-50 font-monospace" style="font-size: 0.75rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Ảnh vệ tinh / thực địa đã xác thực</span>
+                    <a id="previewModalOpenLink" href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở ảnh gốc Cloudinary
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function cleanVietnameseAddress(addr) {
         if (!addr) return '';
@@ -636,9 +680,27 @@
         })
         .catch(err => alert('Lỗi kết nối: ' + err.message));
     }
+
+    // Phóng to ảnh hiện trường Cloudinary trong modal
+    function previewFeedImage(src, caption) {
+        if (!src) return;
+        const modalElement = document.getElementById('imagePreviewModal');
+        if (modalElement && window.bootstrap) {
+            document.getElementById('previewModalImg').src = src;
+            document.getElementById('previewModalCaption').textContent = caption || 'Ảnh hiện trường thiên tai';
+            document.getElementById('previewModalOpenLink').href = src;
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modal.show();
+        } else {
+            window.open(src, '_blank');
+        }
+    }
 </script>
 
 <style>
+    .feed-post-image:hover {
+        transform: scale(1.01);
+    }
     .feed-header-banner {
         background: linear-gradient(110deg, #7f1d1d 0%, #b42332 48%, #172554 100%) !important;
         color: #fff !important;

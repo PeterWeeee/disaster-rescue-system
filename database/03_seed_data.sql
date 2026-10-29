@@ -1,4 +1,4 @@
-﻿-- =========================================================================
+-- =========================================================================
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: 03_seed_data.sql
@@ -188,4 +188,41 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[disaster_alerts] WHERE [title] LIKE N'%Lũ k
     VALUES (N'Lũ khẩn cấp trên các lưu vực sông Miền Trung', N'Do ảnh hưởng của mưa lũ, mực nước các sông Hương, Thu Bồn, sông Mã dâng cao trên báo động 3.', 'DANGER_RED', N'Thanh Hóa, Nghệ An, Hà Tĩnh, Thừa Thiên Huế, Đà Nẵng, Quảng Ngãi', 1, @adminId);
 
 PRINT N'>>> Đã nạp Cảnh báo thiên tai mẫu!';
+GO
+
+-- 6. Nạp Bài đăng cảnh báo cộng đồng mẫu (Community Posts) kèm ảnh Cloudinary CDN
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Trà Mai%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Trần Thị Thu', 'LANDSLIDE', N'Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.', N'Xã Trà Mai, Nam Trà My, Quảng Nam', 15.2841, 108.0821, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg', 'VERIFIED', 24, 3);
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Cẩm Phô%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Lê Minh Hoàng', 'FLOOD', N'Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!', N'Phường Cẩm Phô, TP Hội An, Quảng Nam', 15.8782, 108.3243, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg', 'PENDING', 18, 8);
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Tam Kỳ%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Nguyễn Văn Hùng', 'TREE_FALL', N'Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!', N'Đường Hùng Vương, TP Tam Kỳ, Quảng Nam', 15.5684, 108.4795, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg', 'VERIFIED', 35, 12);
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', N'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', N'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg', 'VERIFIED', 52, 14);
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Quế Long%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Phan Thanh Sơn', 'ISOLATED', N'Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.', N'Xã Quế Long, Huyện Quế Sơn, Quảng Nam', 15.6512, 108.1834, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg', 'VERIFIED', 41, 9);
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Nông Sơn%')
+    INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
+    VALUES (N'Ban Chỉ Huy PCTT & TKCN Địa Phương', 'LANDSLIDE', N'Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.', N'Đèo Le, Nông Sơn, Quảng Nam', 15.6320, 108.0670, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg', 'VERIFIED', 29, 5);
+
+-- Cập nhật bổ sung ảnh cho các bài viết hiện hữu nếu đang thiếu
+UPDATE [dbo].[community_posts]
+SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg'
+WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'LANDSLIDE';
+
+UPDATE [dbo].[community_posts]
+SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg'
+WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'FLOOD';
+
+PRINT N'>>> Đã nạp Bài đăng cảnh báo cộng đồng mẫu với ảnh Cloudinary CDN!';
 GO
