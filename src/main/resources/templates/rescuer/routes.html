@@ -408,11 +408,17 @@
             const chatBadge = document.getElementById('rescuerChatStatusBadge');
 
             function appendRescuerChatMessage(msg) {
-                if (!chatMsgList) return;
+                if (!chatMsgList || !msg) return;
+                if (msg.id && document.getElementById('rescuer-chat-msg-' + msg.id)) {
+                    return; // Đã hiển thị rồi, tránh trùng lặp tin nhắn
+                }
                 if (chatEmptyNotice) chatEmptyNotice.style.display = 'none';
 
                 const isMine = (msg.senderType === 'RESCUER');
                 const row = document.createElement('div');
+                if (msg.id) {
+                    row.id = 'rescuer-chat-msg-' + msg.id;
+                }
                 row.className = 'd-flex mb-2 ' + (isMine ? 'justify-content-end' : 'justify-content-start');
 
                 const bubble = document.createElement('div');
@@ -509,7 +515,10 @@
             }
 
             function subscribeToChatTopic(sosId) {
-                if (!window.SockJS || !window.Stomp) return;
+                if (!window.SockJS || !window.Stomp) {
+                    setTimeout(() => subscribeToChatTopic(sosId), 600);
+                    return;
+                }
 
                 function doSubscribe() {
                     if (chatStompSubscription) {
@@ -614,6 +623,13 @@
                     if (id) loadMissionRoute(id);
                 });
             });
+
+            // Dự phòng polling định kỳ mỗi 10 giây nếu WebSocket ngắt kết nối
+            setInterval(function() {
+                if (currentChatSosId && (!chatStompClient || !chatStompClient.connected)) {
+                    loadMessagesForMission(currentChatSosId);
+                }
+            }, 10000);
 
             // Khởi tạo trang: tự động nhận diện ca nhiệm vụ từ URL và vẽ bản đồ ngay lập tức
             function startPage() {

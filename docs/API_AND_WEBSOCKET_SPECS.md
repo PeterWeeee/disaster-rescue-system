@@ -18,6 +18,13 @@
 | `/topic/broadcast-alerts` | Tất cả user đang truy cập | **Cảnh báo khẩn cấp:** Admin gửi thông báo thiên tai, xả lũ, di dời đè lên toàn màn hình client. |
 | `/user/queue/assignments` | Rescuer (Đội trưởng cụ thể) | **Nhiệm vụ mới được giao:** Gửi chi tiết ca cứu hộ vừa được Coordinator phân công cho đội này. |
 | `/user/queue/sos-status` | Citizen (Nạn nhân gửi SOS) | **Cập nhật trạng thái phiếu cứu hộ:** Báo cho người dân biết đội nào đã nhận, đang di chuyển đến. |
+| `/topic/chat/{sosId}` | Citizen & Rescuer thuộc ca SOS | **Chat trực tuyến 2 chiều thời gian thực:** Gửi `ChatMessageDto` (id, sosId, senderType, senderName, content, messageType, formattedTime, createdAt). |
+
+### 1.2. Inbound Message Mappings (Client gửi tin lên qua STOMP)
+
+| STOMP Destination | Tham Số / Payload | Xử Lý Phía Backend |
+| :--- | :--- | :--- |
+| `/app/chat/{sosId}/send` | `SendChatMessageRequest` (`content`, `senderType`, `senderName`, `senderPhone`, `messageType`) | Lưu CSDL `rescue_chat_messages` và phát sóng tới `/topic/chat/{sosId}` cho cả người dân và đội cứu hộ. |
 
 ---
 
@@ -46,5 +53,11 @@
 - `PUT /api/rescuer/tasks/{assignmentId}/reject` - Từ chối nhiệm vụ (kèm lý do).
 - `PUT /api/rescuer/tasks/{assignmentId}/update-status` - Cập nhật trạng thái (`IN_PROGRESS`, `COMPLETED`, kèm ảnh báo cáo).
 
-### 2.5. Upload Tệp Lên Cloudinary (`/api/media`)
-- `POST /api/media/upload` - Multipart form upload ảnh, trả về link ảnh an toàn HTTPS của Cloudinary.
+### 2.5. Upload Tệp Lên Cloudinary (`/api/media` & `/api/upload`)
+- `POST /api/media/upload` - Multipart form upload ảnh hiện trường, trả về link ảnh an toàn HTTPS của Cloudinary.
+- `POST /api/upload/guide-image` - Upload ảnh minh họa cẩm nang cứu nạn lên thư mục `cuunan_guides` của Cloudinary CDN.
+
+### 2.6. Khung Chat Trực Tuyến Ca Cứu Hộ (`/api/chat`)
+- `GET /api/chat/sos/{sosId}/messages?phone={phone}` - Lấy toàn bộ lịch sử tin nhắn của ca SOS theo thứ tự thời gian tăng dần.
+- `POST /api/chat/sos/{sosId}/messages` - Gửi tin nhắn qua REST API (cơ chế fallback khi STOMP kết nối chập chờn).
+- `GET /api/chat/sos/{sosId}/status` - Kiểm tra điều kiện mở phòng chat (`IN_PROGRESS`), trạng thái ca và thông tin đội tiếp cận.

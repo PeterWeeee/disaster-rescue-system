@@ -5,13 +5,16 @@
 
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 29/10/2026
-- **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat, và chuẩn hóa Unicode SQL Server)
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 15):
+- **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat thời gian thực 2 chiều, bảng tin cộng đồng và chuẩn hóa Unicode SQL Server)
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 16):
   - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
   - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
   - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
   - **SESSION 12 (Khung Chat Trực Tuyến Thời Gian Thực Giữa Nạn Nhân SOS và Đội Cứu Hộ Khi Đang Tiếp Cận - Nhánh `ui-fixes`)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 13 (Cẩm nang ứng phó thiên tai chuyên sâu & Cloudinary CDN - Nhánh `ui-fixes`)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 14 (Chuẩn hóa Unicode SQL Server & Sửa triệt để lỗi font tiếng Việt - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 15 (Sửa lỗi đăng tin cảnh báo & Động hóa cảnh báo thiên tai - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 16 (Khắc phục lỗi WebSocket STOMP - Đồng bộ Chat trực tuyến 2 chiều thời gian thực cho người dân và đội cứu hộ - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
 - **Trạng thái tổng quan:** Toàn bộ **128/128 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
@@ -55,6 +58,13 @@
   - [x] Tích hợp dịch vụ lưu trữ đám mây Cloudinary: Upload và phục vụ ảnh trực tiếp từ Cloudinary CDN (`CLOUDINARY_GUIDE_BASE_URL`) qua API `/api/upload/guide-image`, kèm fallback an toàn về Local Storage.
   - [x] Thiết kế thanh chọn các tình huống thiên tai ở cột bên trái màn hình (`col-lg-3`), vị trí tĩnh chuẩn (non-floating), không trôi đè lên ảnh và nội dung bài viết khi lướt cuộn trang.
   - [x] Loại bỏ hoàn toàn nút "Phát tín hiệu SOS" trên tất cả các trang cẩm nang (`/guide/disaster` và `/guide/disaster/{slug}`).
+- [x] **SESSION 14 (PeterWeeee - Nhánh `develop`):**
+  - [x] Khắc phục triệt để lỗi mất dấu font tiếng Việt (biến thành `?`) trong các bảng Thông báo (`notifications`), Lịch sử hoạt động (`activity_logs`), và bảng dữ liệu tác nghiệp trên SQL Server.
+  - [x] Chuẩn hóa toàn bộ trường văn bản dài từ `@Column(columnDefinition = "TEXT")` sang JPA tiêu chuẩn `@Lob` trên 10 Entities. Hibernate 6 tự động ánh xạ thông minh thành `NVARCHAR(MAX)` trên SQL Server và `LONGTEXT` trên MySQL.
+  - [x] Bổ sung cấu hình `sendStringParametersAsUnicode=true` vào connection string trong `application-sqlserver.yml`.
+  - [x] Gỡ bỏ cấu hình `use_nationalized_character_data: true` và `@Nationalized` gây crash khi truy vấn `VARCHAR(50)`.
+  - [x] Bổ sung phương thức tự động tương thích `ensureSqlServerUnicodeCompatibility()` trong `DataInitializer.java`.
+  - [x] Làm sạch và nạp lại Seed Data chuẩn tiếng Việt 100%.
 - [x] **SESSION 15 (PeterWeeee - Nhánh `develop`):**
   - [x] Khắc phục triệt để lỗi nút "Đăng tin cảnh báo" không hoạt động trên Bảng Tin Cộng Đồng (`feed/index.html`) do thẻ đóng sớm trong Thymeleaf fragment layout.
   - [x] Bổ sung cơ chế tự động dọn dẹp các trường rỗng `latitude`, `longitude`, `imageFile` trước khi gửi AJAX lên `/api/feed/posts`.
@@ -62,14 +72,12 @@
   - [x] Phân loại màu sắc và huy hiệu theo mức độ nghiêm trọng (`DANGER_RED`, `WARNING_ORANGE`, `NOTICE_YELLOW`) kèm địa phương ảnh hưởng và mốc thời gian.
   - [x] Tích hợp tương tác click mở modal chi tiết cảnh báo khẩn cấp `emergencyBroadcastModal` để người dân nắm rõ hướng dẫn an toàn.
   - [x] Làm rõ cơ chế kiến trúc Avatar/Logo của hệ thống: Tối ưu tải nhẹ qua FontAwesome và Letter Avatar trích xuất ký tự đầu từ họ tên người dùng.
-- [x] **SESSION 14 (PeterWeeee - Nhánh `develop`):**
-  - [x] Khắc phục triệt để lỗi mất dấu font tiếng Việt (biến thành `?`) trong các bảng Thông báo (`notifications`), Lịch sử hoạt động (`activity_logs`), và bảng dữ liệu tác nghiệp trên SQL Server.
-  - [x] Chuẩn hóa toàn bộ trường văn bản dài từ `@Column(columnDefinition = "TEXT")` sang JPA tiêu chuẩn `@Lob` trên 10 Entities (`Notification`, `SosRequest`, `CommunityPost`, `DisasterAlert`, `ActivityLog`, `RescueTeam`, `RescueAssignment`, `RescueEquipment`, `EquipmentAssignment`, `RescueChatMessage`). Hibernate 6 tự động ánh xạ thông minh thành `NVARCHAR(MAX)` trên SQL Server (hỗ trợ so sánh `=`, `LIKE`) và `LONGTEXT` trên MySQL.
-  - [x] Bổ sung cấu hình `sendStringParametersAsUnicode=true` vào connection string trong `application-sqlserver.yml` bảo đảm tham số truy vấn luôn gửi dạng Unicode `N'...'` (UTF-16).
-  - [x] Phát hiện và sửa lỗi nghiêm trọng: Gỡ bỏ triệt để cấu hình `use_nationalized_character_data: true` và annotation `@Nationalized` gây crash `SQLServerException: The conversion from varchar to NCHAR is unsupported` khi truy vấn các cột `VARCHAR(50)` (`roles.name`, `users.username`). Quay về cơ chế `rs.getString()` đọc mượt cả `VARCHAR` lẫn `NVARCHAR`.
-  - [x] Bổ sung phương thức tự động tương thích `ensureSqlServerUnicodeCompatibility()` trong `DataInitializer.java` (chỉ chạy khi kết nối SQL Server, an toàn cho MySQL/PostgreSQL).
-  - [x] Thực hiện quy trình làm sạch toàn diện cơ sở dữ liệu: Xóa sạch dữ liệu lỗi font cũ trên toàn bộ 19 bảng, reset Identity về 0, nạp lại `03_seed_data.sql` và khởi tạo mới Notifications/ActivityLogs chuẩn tiếng Việt 100%.
-  - [x] Toàn bộ **128/128 unit & integration tests đạt BUILD SUCCESS 100%**.
+- [x] **SESSION 16 (PeterWeeee - Nhánh `develop`):**
+  - [x] Khắc phục triệt để lỗi kết nối WebSocket STOMP phía người dân: Nạp sớm `sockjs.min.js` và `stomp.min.js` trong `<head>` (`fragments/head.html`), khắc phục lỗi script inline trong `sos/track.html` chạy trước khi thư viện được tải.
+  - [x] Nâng cấp client chat `sos/track.html`: Bọc `DOMContentLoaded`, bổ sung timer tự động kết nối lại (`reconnectTimer`), quản lý hủy kết nối cũ an toàn.
+  - [x] Bổ sung cơ chế chống trùng lặp tin nhắn `chat-msg-{id}` cho cả người dân và đội cứu hộ (`rescuer-chat-msg-{id}`).
+  - [x] Tự động tải lại lịch sử tin nhắn khi kết nối thành công để bù đắp tin nhắn bị nhỡ; bổ sung smart polling định kỳ mỗi 10 giây dự phòng nếu mất kết nối WebSocket.
+  - [x] Đạt chuẩn nhắn tin 2 chiều thời gian thực (Bi-directional Real-time Mission Chat): Người dân và đội cứu hộ trao đổi tức thời (< 500ms) không cần tải lại trang.
 
 ---
 

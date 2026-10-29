@@ -1,5 +1,5 @@
 # KẾ HOẠCH CHIA NHỎ PHIÊN LÀM VIỆC CỦA AI (AI SESSIONS ROADMAP)
-> **Mục tiêu:** Tránh việc AI bị "tràn ngữ cảnh" (context window loss) dẫn đến quên code cũ hoặc code chắp vá. Kế hoạch này được tách thành các file chi tiết độc lập trong thư mục [`docs/roadmap/`](roadmap/).
+> **Mục tiêu:** Tránh việc AI bị "tràn ngữ cảnh" (context window loss) dẫn đến quên code cũ hoặc code chắp vá. Kế hoạch này được tách thành các file chi tiết độc lập trong thư mục [`docs/roadmap/`](roadmap/) và [`docs/sessions/`](sessions/).
 
 ---
 
@@ -43,6 +43,9 @@
 │ Session 15: Sửa Lỗi Đăng Tin Cảnh Báo & Động Hóa Cảnh Báo Thiên Tai     │
 │             (Thymeleaf Layout Fix & Dynamic Disaster Alerts)           │
 │    ↓                                                                   │
+│ Session 16: Khắc Phục Lỗi WebSocket STOMP - Đồng Bộ Chat Thời Gian Thực│
+│             (Bi-directional Realtime Mission Chat Fix for Citizen)     │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -74,11 +77,15 @@
     - Bản nâng cấp sâu trực tiếp của `ui-redesign`: Sửa lỗi hiển thị bản đồ Leaflet (z-index & resize), sửa triệt để lỗi encoding UTF-8 tiếng Việt trong SQL/Seeder, nâng cấp Cổng Quyên Góp Fullwidth Seamless Dark Theme sang trọng, triển khai Phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống, tách riêng trang Lịch sử điều phối (`coordinator/history.html`).
 11. **[Session 11: Bổ Sung Chức Năng Thống Kê Thu - Chi Dành Cho Quản Trị Viên (Admin Finance)](roadmap/session-11-admin-revenue-expense-statistics.md)** *(✅ Đã hoàn thành)*
     - Phân hệ Thống kê Thu - Chi minh bạch cho Admin: Thống kê nguồn thu từ quyên góp (VNPay, MoMo, VietQR) và ngân sách chi giải ngân cấp phát cho các đội cứu hộ, 4 card KPI tài chính, 2 biểu đồ so sánh Thu - Chi và phân bổ nguồn thu, 2 bảng kê dòng tiền Thu và Chi chi tiết có phân trang.
-12. **[Session 12: Khung Chat Trực Tuyến Thời Gian Thực Khi Đang Tiếp Cận (Live Mission Chat)](roadmap/session-12-mission-live-chat.md)** *(🆕 Mới tạo / Sẵn sàng triển khai)*
+12. **[Session 12: Khung Chat Trực Tuyến Thời Gian Thực Khi Đang Tiếp Cận (Live Mission Chat)](roadmap/session-12-mission-live-chat.md)** *(✅ Đã hoàn thành)*
     - Tích hợp khung chat thời gian thực (WebSocket STOMP & REST fallback) xuất hiện khi đội cứu hộ chuyển sang trạng thái "Đang tiếp cận" (`IN_PROGRESS`). Hiển thị đồng bộ trên màn hình Theo dõi SOS (`sos/track.html`) của người dân và màn hình Bản đồ & Lộ trình di chuyển (`rescuer/routes.html`) của đội cứu hộ được phân công, hỗ trợ nhắn tin 2 chiều và gửi tin nhắn tình huống khẩn cấp 1-chạm (Quick SOS chips).
 13. **[Session 13: Cẩm Nang & Chi Tiết Cẩm Nang Ứng Phó Thiên Tai](roadmap/session-13-disaster-guide-cloudinary.md)** *(✅ Đã hoàn thành)*
     - Xây dựng phân hệ cẩm nang ứng phó thiên tai chuyên sâu (bão lũ, sạt lở, ngập lụt), tích hợp ảnh minh họa AI lưu trữ Cloudinary CDN, giao diện hiện đại đồng bộ tông màu dự án.
-14. **[Session 14: Chuẩn Hóa Unicode SQL Server, Sửa Triệt Để Lỗi Font & Schema Self-Healing](roadmap/session-14-sqlserver-unicode-encoding-fix.md)** *(✅ Đã hoàn thành)*
+14. **[Session 14: Chuẩn Hóa Unicode SQL Server, Sửa Triệt Để Lỗi Font & Schema Self-Healing](sessions/session-14-sqlserver-unicode-encoding-fix.md)** *(✅ Đã hoàn thành)*
     - Thay thế toàn bộ `columnDefinition = "TEXT"` bằng chuẩn JPA `@Lob` (tự động ánh xạ `NVARCHAR(MAX)` trên SQL Server và `LONGTEXT` trên MySQL), cấu hình JDBC driver `sendStringParametersAsUnicode=true`, gỡ bỏ triệt để `@Nationalized` tránh lỗi conversion varchar sang NCHAR. Cơ chế tự động tương thích và phục hồi schema sạch trong `DataInitializer`, làm sạch dữ liệu cũ và nạp lại Seed Data chuẩn tiếng Việt 100%.
-15. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+15. **[Session 15: Sửa Lỗi Đăng Tin Cảnh Báo & Động Hóa Cảnh Báo Thiên Tai](sessions/session-15-community-feed-post-fix-and-dynamic-alerts.md)** *(✅ Đã hoàn thành)*
+    - Khắc phục lỗi thẻ đóng sớm trong Thymeleaf layout của trang Bảng Tin (`feed/index.html`), chuẩn hóa mục cảnh báo khẩn thiên tai lấy trực tiếp từ database `disaster_alerts` theo chuẩn quy trình quản lý thiên tai.
+16. **[Session 16: Khắc Phục Lỗi WebSocket STOMP - Đồng Bộ Chat Thời Gian Thực](sessions/session-16-realtime-chat-websocket-fix.md)** *(✅ Đã hoàn thành)*
+    - Khắc phục triệt để lỗi người dân không nhận được tin nhắn thời gian thực từ đội cứu hộ do SockJS/Stomp tải trễ ở cuối layout. Tối ưu nạp sớm thư viện trong `<head>`, bao bọc `DOMContentLoaded`, bổ sung bộ đếm reconnect timer, cơ chế chống trùng lặp tin nhắn `chat-msg-{id}`, tự động bù đắp tin nhắn và polling dự phòng mỗi 10s.
+17. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

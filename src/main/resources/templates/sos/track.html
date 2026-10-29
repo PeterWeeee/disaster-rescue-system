@@ -283,8 +283,8 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span th:if="${sos.status == 'IN_PROGRESS'}" class="badge bg-success py-2 px-3 shadow-sm" id="chatLiveStatusBadge">
-                            <i class="fa-solid fa-signal fa-beat-fade me-1"></i> Trực Tuyến 24/7
+                        <span th:if="${sos.status == 'IN_PROGRESS'}" class="badge bg-secondary py-2 px-3 shadow-sm" id="chatLiveStatusBadge">
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang kết nối...
                         </span>
                         <span th:if="${sos.status == 'RESOLVED' or sos.status == 'COMPLETED'}" class="badge bg-secondary py-2 px-3">
                             <i class="fa-solid fa-box-archive me-1"></i> Đã Lưu Trữ Hồ Sơ
@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200);
 });
 </script>
-    <!-- Live Mission Chat Script -->
+        <!-- Live Mission Chat Script -->
     <script th:if="${sos != null and (sos.status == 'IN_PROGRESS' or sos.status == 'RESOLVED' or sos.status == 'COMPLETED')}" th:inline="javascript">
     (function() {
         const sosId = /*[[${sos.id}]]*/ 0;
@@ -588,6 +588,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const sendBtn = document.getElementById('chatSendBtn');
 
         let stompClient = null;
+        let chatStompSubscription = null;
+        let reconnectTimer = null;
+        let syncInterval = null;
 
         function formatTime(isoString) {
             if (!isoString) {
@@ -603,12 +606,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         function appendMessage(msg) {
+            if (!msg || !messageList) return;
+            if (msg.id && document.getElementById('chat-msg-' + msg.id)) {
+                return; // Đã hiển thị rồi, tránh trùng lặp tin nhắn
+            }
             if (emptyNotice) emptyNotice.style.display = 'none';
 
             const isMine = (msg.senderType === 'CITIZEN');
 
             const msgRow = document.createElement('div');
-            msgRow.className = 'd-flex mb-2 ' + (isMine ? 'justify-content-end' : 'justify-content-start');
+            if (msg.id) {
+                msgRow.id = 'chat-msg-' + msg.id;
+            }
+            msgRow.className = 'd-flex mb-2 chat-bubble-row ' + (isMine ? 'justify-content-end' : 'justify-content-start');
 
             const bubble = document.createElement('div');
             bubble.style.maxWidth = '78%';
@@ -655,37 +665,55 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch('/api/chat/sos/' + sosId + '/messages?phone=' + encodeURIComponent(contactPhone));
                 if (!res.ok) throw new Error('Không thể tải lịch sử');
                 const data = await res.json();
-                if (emptyNotice) emptyNotice.style.display = 'none';
-                if (Array.isArray(data) && data.length > 0) {
-                    messageList.innerHTML = '';
-                    data.forEach(appendMessage);
-                } else {
-                    if (emptyNotice) {
-                        emptyNotice.innerHTML = '<i class="fa-solid fa-comments text-muted mb-2 fa-2x"></i><div>Chưa có tin nhắn nào. Hãy gửi tin nhắn nếu bạn cần trợ giúp khẩn cấp!</div>';
-                        emptyNotice.style.display = 'block';
+                if (Array.isArray(data)) {
+                    if (data.length > 0) {
+                        if (emptyNotice) emptyNotice.style.display = 'none';
+                        data.forEach(appendMessage);
+                    } else if (messageList.querySelectorAll('.chat-bubble-row').length === 0) {
+                        if (emptyNotice) {
+                            emptyNotice.innerHTML = '<i class="fa-solid fa-comments text-muted mb-2 fa-2x"></i><div>Chưa có tin nhắn nào. Hãy gửi tin nhắn nếu bạn cần trợ giúp khẩn cấp!</div>';
+                            emptyNotice.style.display = 'block';
+                        }
                     }
                 }
             } catch (e) {
                 console.warn('Lỗi tải lịch sử chat:', e);
-                if (emptyNotice) {
+                if (emptyNotice && messageList.querySelectorAll('.chat-bubble-row').length === 0) {
                     emptyNotice.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-warning mb-2"></i><div>Không thể tải lịch sử tin nhắn. Sẽ tự động kết nối lại...</div>';
                 }
             }
         }
 
         function initWebSocket() {
-            if (!window.SockJS || !window.Stomp) return;
+            if (!window.SockJS || !window.Stomp) {
+                console.warn('Đang chờ thư viện SockJS/Stomp tải...');
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(initWebSocket, 600);
+                return;
+            }
+
+            if (chatStompSubscription) {
+                try { chatStompSubscription.unsubscribe(); } catch (_) {}
+                chatStompSubscription = null;
+            }
+            if (stompClient && stompClient.connected) {
+                try { stompClient.disconnect(); } catch (_) {}
+                stompClient = null;
+            }
+
             try {
                 const socket = new SockJS('/ws');
                 stompClient = Stomp.over(socket);
                 stompClient.debug = null;
+
                 stompClient.connect({}, function() {
                     const badge = document.getElementById('chatLiveStatusBadge');
                     if (badge) {
                         badge.className = 'badge bg-success py-2 px-3 shadow-sm';
                         badge.innerHTML = '<i class="fa-solid fa-signal fa-beat-fade me-1"></i> Trực Tuyến 24/7';
                     }
-                    stompClient.subscribe('/topic/chat/' + sosId, function(frame) {
+
+                    chatStompSubscription = stompClient.subscribe('/topic/chat/' + sosId, function(frame) {
                         try {
                             const msg = JSON.parse(frame.body);
                             appendMessage(msg);
@@ -693,17 +721,23 @@ document.addEventListener("DOMContentLoaded", function () {
                             console.error('Lỗi phân tích tin nhắn STOMP:', err);
                         }
                     });
-                }, function() {
+
+                    // Tự động đồng bộ lịch sử tin nhắn khi kết nối thành công
+                    loadHistory();
+                }, function(err) {
+                    console.warn('Mất kết nối WebSocket chat, đang kết nối lại...', err);
                     const badge = document.getElementById('chatLiveStatusBadge');
                     if (badge) {
                         badge.className = 'badge bg-warning text-dark py-2 px-3';
                         badge.innerHTML = '<i class="fa-solid fa-rotate fa-spin me-1"></i> Đang kết nối lại...';
                     }
-                    setTimeout(initWebSocket, 4000);
+                    if (reconnectTimer) clearTimeout(reconnectTimer);
+                    reconnectTimer = setTimeout(initWebSocket, 3500);
                 });
             } catch (err) {
                 console.error('Lỗi khởi tạo STOMP:', err);
-                setTimeout(initWebSocket, 4000);
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(initWebSocket, 3500);
             }
         }
 
@@ -727,6 +761,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     stompClient.send('/app/chat/' + sosId + '/send', {}, JSON.stringify(payload));
                     sent = true;
                 } catch (ex) {
+                    console.warn('Gửi qua STOMP thất bại, chuyển sang REST API:', ex);
                     sent = false;
                 }
             }
@@ -740,9 +775,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                     if (res.ok) {
                         const saved = await res.json();
-                        if (!stompClient || !stompClient.connected) {
-                            appendMessage(saved);
-                        }
+                        appendMessage(saved);
                     }
                 } catch (err) {
                     console.error('Lỗi gửi tin qua REST API:', err);
@@ -775,9 +808,24 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        loadHistory();
-        if (!isCompleted) {
-            initWebSocket();
+        // Dự phòng polling mỗi 10 giây nếu WebSocket bị gián đoạn mạng
+        syncInterval = setInterval(function() {
+            if (!stompClient || !stompClient.connected) {
+                loadHistory();
+            }
+        }, 10000);
+
+        function startChat() {
+            loadHistory();
+            if (!isCompleted) {
+                initWebSocket();
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startChat);
+        } else {
+            startChat();
         }
     })();
     </script>
