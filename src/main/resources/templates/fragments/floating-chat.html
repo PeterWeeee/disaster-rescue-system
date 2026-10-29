@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="floatingChat">
+    <!-- KHUNG CHAT NỔI TOÀN HỆ THỐNG PHONG CÁCH FACEBOOK MESSENGER (CITIZEN & RESCUER) -->
+    <div id="floatingChatDock" class="floating-chat-dock" style="display: none;">
+        
+        <!-- 1. BONG BÓNG TRÒN NỔI (KHI THU NHỎ / LAUNCHER) -->
+        <button id="floatingChatLauncher" type="button" class="floating-chat-bubble border-0"
+                title="Kênh chat trực tiếp ca cứu nạn" aria-label="Mở kênh chat">
+            <div class="bubble-icon-wrap">
+                <i class="fa-solid fa-comments text-white fs-4"></i>
+                <span class="bubble-pulse-dot"></span>
+            </div>
+            <!-- Huy hiệu tin nhắn chưa đọc -->
+            <span id="floatingChatUnreadBadge" class="floating-chat-badge badge bg-danger rounded-pill shadow-sm" style="display: none;">
+                0
+            </span>
+            <!-- Nhãn thu nhỏ xem nhanh -->
+            <div class="bubble-label-pill shadow-sm">
+                <span id="floatingLauncherTitle" class="fw-bold small text-truncate">Kênh Cứu Nạn</span>
+            </div>
+        </button>
+
+        <!-- 2. CỬA SỔ CHAT NỔI (KHI MỞ RỘNG) -->
+        <div id="floatingChatWindow" class="floating-chat-window shadow-2xl rounded-4 overflow-hidden border" style="display: none;">
+            
+            <!-- Header Cửa Sổ -->
+            <div class="floating-chat-header d-flex align-items-center justify-content-between px-3 py-2.5 text-white">
+                <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1 me-2 cursor-pointer" id="floatingHeaderTitleArea">
+                    <div class="position-relative flex-shrink-0">
+                        <div class="avatar-circle rounded-circle bg-white text-primary fw-extrabold d-flex align-items-center justify-content-center shadow-xs"
+                             style="width: 36px; height: 36px; font-size: 0.95rem;">
+                            <span id="floatingPartnerInitial">C</span>
+                        </div>
+                        <span class="online-indicator-dot"></span>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="d-flex align-items-center gap-1.5">
+                            <span id="floatingPartnerName" class="fw-bold small text-truncate text-white d-block" style="max-width: 170px;">
+                                Đội Cứu Hộ
+                            </span>
+                            <span id="floatingSosBadge" class="badge bg-danger-subtle text-white border border-danger-subtle font-monospace py-0 px-1" style="font-size: 0.68rem;">
+                                SOS
+                            </span>
+                        </div>
+                        <small id="floatingPartnerSubtitle" class="text-white-50 text-truncate d-block" style="font-size: 0.72rem;">
+                            Đang trực tuyến 2 chiều
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Các nút hành động trên Header -->
+                <div class="d-flex align-items-center gap-1">
+                    <!-- Nút gọi điện khẩn cấp -->
+                    <a id="floatingCallBtn" href="tel:" class="btn btn-sm btn-icon text-white p-1 rounded-circle hover-bg-dark"
+                       title="Gọi điện trực tiếp" style="display: none;">
+                        <i class="fa-solid fa-phone small"></i>
+                    </a>
+                    <!-- Nút mở trang chi tiết định vị -->
+                    <a id="floatingTrackLink" href="#" class="btn btn-sm btn-icon text-white p-1 rounded-circle hover-bg-dark"
+                       title="Mở trang định vị GPS ca SOS">
+                        <i class="fa-solid fa-location-crosshairs small"></i>
+                    </a>
+                    <!-- Nút thu nhỏ -->
+                    <button type="button" id="floatingMinimizeBtn" class="btn btn-sm btn-icon text-white p-1 rounded-circle hover-bg-dark"
+                            title="Thu nhỏ khung chat">
+                        <i class="fa-solid fa-minus small"></i>
+                    </button>
+                    <!-- Nút đóng về bong bóng tròn -->
+                    <button type="button" id="floatingCloseBtn" class="btn btn-sm btn-icon text-white p-1 rounded-circle hover-bg-dark"
+                            title="Đóng về bong bóng nổi">
+                        <i class="fa-solid fa-xmark small"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thanh thông tin vị trí ca cứu nạn -->
+            <div class="floating-chat-info-strip px-3 py-1.5 d-flex align-items-center justify-content-between text-secondary border-bottom bg-light-subtle" style="font-size: 0.73rem;">
+                <div class="text-truncate me-2">
+                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                    <span id="floatingSosAddress" class="text-truncate text-dark">Đang tải vị trí...</span>
+                </div>
+                <span id="floatingStatusPill" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-0.5 px-2 rounded-pill flex-shrink-0">
+                    Đang tiếp cận
+                </span>
+            </div>
+
+            <!-- Luồng tin nhắn (Message Stream) -->
+            <div id="floatingMessagesBody" class="floating-chat-body p-3 d-flex flex-column gap-2 overflow-y-auto">
+                <div class="text-center py-4 text-muted small" id="floatingChatLoading">
+                    <i class="fa-solid fa-spinner fa-spin text-primary me-1"></i>Đang kết nối kênh chat trực tiếp...
+                </div>
+            </div>
+
+            <!-- Băng chuyền tin nhắn khẩn cấp 1 chạm (Quick chips) -->
+            <div class="floating-quick-chips px-2 py-1.5 bg-light border-top border-bottom d-flex align-items-center gap-1.5 overflow-x-auto" id="floatingQuickChips">
+                <!-- Javascript sẽ tự động thêm các câu mẫu phù hợp cho Dân hoặc Đội cứu hộ -->
+            </div>
+
+            <!-- Form Nhập & Gửi Tin Nhắn -->
+            <form id="floatingChatForm" class="floating-chat-footer p-2 bg-white d-flex align-items-center gap-1.5">
+                <input type="text" id="floatingChatInput" class="form-control form-control-sm rounded-pill px-3 shadow-none border"
+                       placeholder="Nhập tin nhắn..." autocomplete="off" maxlength="1000" required>
+                <button type="submit" id="floatingSendBtn" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                        style="width: 34px; height: 34px;" title="Gửi tin nhắn">
+                    <i class="fa-solid fa-paper-plane small"></i>
+                </button>
+            </form>
+
+        </div>
+
+        <!-- Toast thông báo tin nhắn mới khi đang thu nhỏ -->
+        <div id="floatingChatToast" class="floating-chat-toast shadow-lg rounded-4 p-2.5 bg-white border d-flex align-items-center gap-2 cursor-pointer" style="display: none;">
+            <div class="avatar-circle rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width: 32px; height: 32px; font-size: 0.8rem;">
+                <span id="floatingToastInitial">C</span>
+            </div>
+            <div class="overflow-hidden flex-grow-1" style="max-width: 220px;">
+                <div class="fw-bold small text-dark text-truncate" id="floatingToastSender">Đội Cứu Hộ</div>
+                <div class="text-secondary small text-truncate" id="floatingToastContent" style="font-size: 0.75rem;">Tin nhắn mới...</div>
+            </div>
+            <button type="button" class="btn-close btn-close-sm" id="floatingToastClose" aria-label="Đóng"></button>
+        </div>
+
+    </div>
+
+    <!-- STYLES CHO FLOATING CHAT DOCK (PHONG CÁCH FACEBOOK MESSENGER) -->
+    <style>
+        .floating-chat-dock {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            z-index: 1060;
+            font-family: inherit;
+        }
+
+        /* Bong bóng tròn nổi */
+        .floating-chat-bubble {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.42) !important;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        }
+        .floating-chat-bubble:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 14px 30px rgba(37, 99, 235, 0.55) !important;
+        }
+        .bubble-pulse-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            background-color: #22c55e;
+            border: 2.5px solid #ffffff;
+            border-radius: 50%;
+            animation: pulseGreen 2s infinite;
+        }
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .floating-chat-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.25em 0.55em;
+            border: 2px solid #ffffff;
+            animation: badgeBounce 0.35s ease;
+        }
+        @keyframes badgeBounce {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .bubble-label-pill {
+            position: absolute;
+            right: 66px;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .floating-chat-bubble:hover .bubble-label-pill {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Cửa sổ Chat nổi */
+        .floating-chat-window {
+            width: 370px;
+            max-width: calc(100vw - 32px);
+            height: 520px;
+            max-height: calc(100vh - 100px);
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 16px 45px rgba(15, 23, 42, 0.25) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            animation: chatWindowSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes chatWindowSlideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .floating-chat-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+        .online-indicator-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background-color: #22c55e;
+            border: 2px solid #1e3a8a;
+            border-radius: 50%;
+        }
+        .btn-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .floating-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #f8fafc;
+            scroll-behavior: smooth;
+        }
+
+        /* Message Bubbles - Bố cục Trái (Người nhận) và Phải (Người gửi) */
+        .chat-msg-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            margin-bottom: 3px;
+            width: 100%;
+        }
+        .chat-msg-row.outgoing {
+            justify-content: flex-end !important;
+            padding-left: 18%;
+        }
+        .chat-msg-row.incoming {
+            justify-content: flex-start !important;
+            padding-right: 18%;
+        }
+
+        .chat-bubble-content {
+            max-width: 100%;
+            padding: 8px 13px;
+            border-radius: 18px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            word-break: break-word;
+            position: relative;
+        }
+        .chat-msg-row.incoming .chat-bubble-content {
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .chat-msg-row.outgoing .chat-bubble-content {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22);
+        }
+        .chat-msg-row.incoming.quick-alert .chat-bubble-content {
+            background: #fff1f2 !important;
+            color: #991b1b !important;
+            border: 1.5px solid #fecdd3 !important;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(225, 29, 72, 0.08);
+            font-weight: 600;
+        }
+        .chat-msg-row.outgoing.quick-alert .chat-bubble-content {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+            color: #ffffff !important;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28);
+            font-weight: 600;
+        }
+
+        .chat-msg-time {
+            font-size: 0.68rem;
+            opacity: 0.72;
+            margin-top: 2px;
+            display: block;
+        }
+        .chat-msg-row.outgoing .chat-msg-time {
+            text-align: right;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .chat-msg-row.incoming .chat-msg-time {
+            text-align: left;
+            color: #64748b;
+        }
+
+        /* Quick chips scroll bar */
+        .floating-quick-chips {
+            white-space: nowrap;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .floating-quick-chips::-webkit-scrollbar {
+            display: none;
+        }
+        .quick-chip-item {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .quick-chip-item:hover {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+        }
+
+        /* Floating Toast */
+        .floating-chat-toast {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            z-index: 1065;
+            animation: toastPop 0.25s ease;
+        }
+        @keyframes toastPop {
+            from { opacity: 0; transform: translateY(10px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        @media (max-width: 576px) {
+            .floating-chat-dock {
+                bottom: 12px;
+                right: 12px;
+            }
+            .floating-chat-window {
+                width: calc(100vw - 24px);
+                height: 480px;
+            }
+        }
+    </style>
+</div>
+
+</body>
+</html>

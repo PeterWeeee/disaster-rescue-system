@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.repository.CommunityPostRepository;
+import vn.edu.cuunan.repository.PostCommentRepository;
 import vn.edu.cuunan.repository.RoleRepository;
 import vn.edu.cuunan.repository.UserRepository;
 import vn.edu.cuunan.security.CustomUserDetails;
@@ -32,6 +33,9 @@ class FeedControllerTest {
 
     @Autowired
     private CommunityPostRepository postRepository;
+
+    @Autowired
+    private PostCommentRepository commentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -70,14 +74,17 @@ class FeedControllerTest {
     }
 
     @Test
-    @DisplayName("GET /feed khi đã đăng nhập -> Trả về View feed/index 200 OK")
+    @DisplayName("GET /feed khi đã đăng nhập -> Trả về View feed/index 200 OK với bình luận và cảm xúc")
     void testFeedWithLogin() throws Exception {
         mockMvc.perform(get("/feed").with(user(testUserDetails)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("feed/index"))
                 .andExpect(model().attributeExists("currentUser"))
                 .andExpect(model().attributeExists("posts"))
-                .andExpect(model().attributeExists("shelters"));
+                .andExpect(model().attributeExists("shelters"))
+                .andExpect(model().attributeExists("commentsMap"))
+                .andExpect(model().attributeExists("userReactions"))
+                .andExpect(model().attributeExists("postReactions"));
     }
 
     @Test
@@ -111,7 +118,64 @@ class FeedControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.upvoteCount").value(6))
-                .andExpect(jsonPath("$.isVoted").value(true));
+                .andExpect(jsonPath("$.activeReaction").value("LIKE"));
+    }
+
+    @Test
+    @DisplayName("POST /api/feed/posts/{id}/react?type=CARE -> Thả icon cảm xúc Thương thương")
+    void testReactPostApi() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Cảm Xúc");
+        post.setContent("Đang tập kết nhu yếu phẩm cho bà con");
+        post.setHazardType(HazardType.ISOLATED);
+        post.setUpvoteCount(10);
+        CommunityPost saved = postRepository.save(post);
+
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/react")
+                        .with(user(testUserDetails))
+                        .param("type", "CARE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.upvoteCount").value(11))
+                .andExpect(jsonPath("$.activeReaction").value("CARE"))
+                .andExpect(jsonPath("$.breakdown.CARE").value(1));
+
+        // Nhấn lại lần nữa -> Toggle un-react
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/react")
+                        .with(user(testUserDetails))
+                        .param("type", "CARE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.upvoteCount").value(10))
+                .andExpect(jsonPath("$.isRemoved").value(true));
+    }
+
+    @Test
+    @DisplayName("POST /api/feed/posts/{id}/comments và GET /comments -> Thêm và tải bình luận")
+    void testCommentsApi() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Bình Luận");
+        post.setContent("Cần xuồng hỗ trợ tại xã Hòa Khương");
+        post.setHazardType(HazardType.FLOOD);
+        post.setCommentCount(0);
+        CommunityPost saved = postRepository.save(post);
+
+        // Gửi bình luận mới
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/comments")
+                        .with(user(testUserDetails))
+                        .param("content", "Đội 03 đang di chuyển tới, hãy giữ an toàn!"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.comment.content").value("Đội 03 đang di chuyển tới, hãy giữ an toàn!"))
+                .andExpect(jsonPath("$.comment.authorName").value("Nguyễn Văn Feed"));
+
+        // Lấy danh sách bình luận
+        mockMvc.perform(get("/api/feed/posts/" + saved.getId() + "/comments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].content").value("Đội 03 đang di chuyển tới, hãy giữ an toàn!"));
     }
 
     @Test

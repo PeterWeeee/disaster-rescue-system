@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.cuunan.entity.CommunityPost;
 import vn.edu.cuunan.entity.EvacuationShelter;
+import vn.edu.cuunan.entity.PostComment;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.security.CustomUserDetails;
 import vn.edu.cuunan.service.CommunityFeedService;
@@ -72,12 +73,73 @@ public class FeedApiController {
         if (userDetails == null || userDetails.getUser() == null) {
             Map<String, Object> err = new HashMap<>();
             err.put("success", false);
-            err.put("message", "Vui lòng đăng nhập để xác nhận bài viết!");
+            err.put("message", "Vui lòng đăng nhập để tương tác bài viết!");
             return ResponseEntity.status(401).body(err);
         }
 
         try {
             Map<String, Object> res = feedService.toggleUpvote(id, userDetails.getUser());
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @PostMapping("/posts/{id}/react")
+    public ResponseEntity<?> reactPost(@PathVariable("id") Long id,
+                                       @RequestParam(value = "type", defaultValue = "LIKE") String reactionType,
+                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Vui lòng đăng nhập để thả cảm xúc bài viết!");
+            return ResponseEntity.status(401).body(err);
+        }
+
+        try {
+            Map<String, Object> res = feedService.reactToPost(id, userDetails.getUser(), reactionType);
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @GetMapping("/posts/{id}/comments")
+    public ResponseEntity<?> getComments(@PathVariable("id") Long id) {
+        try {
+            List<PostComment> comments = feedService.getCommentsByPostId(id);
+            return ResponseEntity.ok(comments);
+        } catch (Exception ex) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @PostMapping("/posts/{id}/comments")
+    public ResponseEntity<?> addComment(@PathVariable("id") Long id,
+                                        @RequestParam("content") String content,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Vui lòng đăng nhập để gửi bình luận!");
+            return ResponseEntity.status(401).body(err);
+        }
+
+        try {
+            PostComment comment = feedService.addComment(id, userDetails.getUser(), content);
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("comment", comment);
+            res.put("message", "Đã gửi bình luận thành công!");
             return ResponseEntity.ok(res);
         } catch (Exception ex) {
             Map<String, Object> err = new HashMap<>();

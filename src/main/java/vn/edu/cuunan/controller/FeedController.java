@@ -44,6 +44,11 @@ public class FeedController {
         model.addAttribute("hazardTypes", HazardType.values());
         model.addAttribute("recentAlerts", disasterAlertRepository.findTop5ByOrderByCreatedAtDesc());
 
+        // Dữ liệu bình luận và icon cảm xúc
+        model.addAttribute("commentsMap", feedService.getAllCommentsGroupedByPostId());
+        model.addAttribute("userReactions", feedService.getUserReactionsMap(currentUser.getId()));
+        model.addAttribute("postReactions", feedService.getAllPostsReactionBreakdown());
+
         // Lịch sử các yêu cầu cứu hộ do người dùng tạo.
         List<SosRequest> sosHistory = List.of();
         if (currentUser.getId() != null) {

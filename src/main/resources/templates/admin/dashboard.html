@@ -1,507 +1,507 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#admin-content})}">
-<body>
-
-<div id="admin-content" class="py-4" th:with="adminView=${param.view != null ? param.view[0] : 'overview'}">
-    <div class="container-fluid px-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-            <div>
-                <h2 class="fw-bold text-navy mb-1">
-                    <i class="fa-solid fa-shield-halved text-danger me-2"></i>
-                    <span th:text="${adminView == 'users' ? 'Quản lý tài khoản' : (adminView == 'teams' ? 'Quản lý đội cứu hộ' : (adminView == 'finance' ? 'Báo cáo thống kê thu chi' : 'Trung tâm quản trị'))}">Trung tâm quản trị</span>
-                </h2>
-                <div class="text-muted" th:text="${adminView == 'users' ? 'Cập nhật vai trò và trạng thái tài khoản' : (adminView == 'teams' ? 'Theo dõi và cập nhật thông tin các đội cứu hộ' : (adminView == 'finance' ? 'Minh bạch nguồn thu quyên góp và ngân sách giải ngân cứu trợ' : 'Cảnh báo và số liệu vận hành'))}">Cảnh báo và số liệu vận hành</div>
-            </div>
-            <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#broadcastModal"><i class="fa-solid fa-tower-broadcast me-2"></i>Phát cảnh báo khẩn cấp</button>
-        </div>
-
-        <!-- 1. TAB OVERVIEW (TỔNG QUAN) -->
-        <div class="row g-3 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đã giải quyết</div><div class="fs-3 fw-bold text-success" th:text="${stats.resolvedCases}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
-            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Thời gian xử lý TB</div><div class="fs-3 fw-bold"><span th:text="${stats.averageResponseMinutes}">0</span><small class="fs-6"> phút</small></div></div></div></div>
-        </div>
-        <div class="row g-4 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
-            <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Phân bố mức độ SOS</div><div class="card-body"><canvas id="urgencyChart" height="220"></canvas></div></div></div>
-            <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Ca cứu nạn theo khu vực</div><div class="card-body"><canvas id="regionChart" height="220"></canvas></div></div></div>
-        </div>
-
-        <!-- 2. TAB USERS (QUẢN LÝ TÀI KHOẢN) -->
-        <div class="card border-0 shadow-sm mb-4" id="users-section" th:classappend="${adminView != '' and adminView != 'users' ? 'd-none' : ''}">
-            <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản (<span th:text="${users != null ? users.size() : 0}">0</span>)</span>
-            </div>
-            <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="usersTable"><thead class="table-light"><tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr></thead><tbody>
-                <tr th:each="user : ${users}" th:attr="data-user-id=${user.id}"><td><strong th:text="${user.fullName}">Tên</strong><div class="small text-muted" th:text="${user.username}">username</div></td><td><span th:text="${user.phone}">SĐT</span><div class="small text-muted" th:text="${user.email}">email</div></td>
-                    <td><select class="form-select form-select-sm user-role"><option value="ROLE_CITIZEN" th:selected="${user.role != null and user.role.name == 'ROLE_CITIZEN'}">Người dân</option><option value="ROLE_RESCUER" th:selected="${user.role != null and user.role.name == 'ROLE_RESCUER'}">Cứu hộ</option><option value="ROLE_COORDINATOR" th:selected="${user.role != null and user.role.name == 'ROLE_COORDINATOR'}">Điều phối</option><option value="ROLE_ADMIN" th:selected="${user.role != null and user.role.name == 'ROLE_ADMIN'}">Quản trị</option></select></td>
-                    <td><select class="form-select form-select-sm user-status"><option value="ACTIVE" th:selected="${user.status == 'ACTIVE'}">Hoạt động</option><option value="BLOCKED" th:selected="${user.status == 'BLOCKED'}">Đã khóa</option></select></td><td><button class="btn btn-sm btn-outline-primary btn-save-user">Lưu</button></td></tr>
-            </tbody></table></div>
-            <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="usersPaginationWrap">
-                <div class="small text-muted" id="usersPaginationInfo">Hiển thị...</div>
-                <ul class="pagination pagination-sm mb-0" id="usersPaginationNav"></ul>
-            </div>
-        </div>
-
-        <!-- 3. TAB TEAMS (QUẢN LÝ ĐỘI CỨU HỘ) -->
-        <div class="card border-0 shadow-sm mb-4" id="teams-section" th:classappend="${adminView != '' and adminView != 'teams' ? 'd-none' : ''}">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ (<span th:text="${teams != null ? teams.size() : 0}">0</span>)</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
-            <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="teamsTable"><thead class="table-light"><tr><th>Tên đội</th><th>Đội trưởng</th><th>Liên hệ</th><th>Quân số</th><th>Trạng thái</th><th></th></tr></thead><tbody>
-                <tr th:each="team : ${teams}" th:attr="data-team-id=${team.id}"><td><strong th:text="${team.teamName}">Đội</strong><div class="small text-muted" th:text="${team.equipmentNotes}">Thiết bị</div></td><td th:text="${team.leader != null ? team.leader.fullName : 'Chưa chỉ định'}">—</td><td th:text="${team.contactPhone}">SĐT</td><td th:text="${team.memberCount}">0</td><td><span class="badge" th:classappend="${team.status == 'AVAILABLE' ? 'bg-success' : (team.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}" th:text="${team.status}">AVAILABLE</span></td><td><button class="btn btn-sm btn-outline-secondary" th:attr="data-team-id=${team.id}" onclick="editTeamFromRow(this)">Sửa</button></td></tr>
-            </tbody></table></div>
-            <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="teamsPaginationWrap">
-                <div class="small text-muted" id="teamsPaginationInfo">Hiển thị...</div>
-                <ul class="pagination pagination-sm mb-0" id="teamsPaginationNav"></ul>
-            </div>
-        </div>
-
-        <!-- 4. TAB FINANCE (THỐNG KÊ THU CHI CHO ADMIN) -->
-        <div id="finance-section" th:classappend="${adminView != '' and adminView != 'finance' ? 'd-none' : ''}">
-            <!-- 4 Thẻ KPI Tài Chính -->
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-xl-3">
-                    <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
-                        <div class="card-body">
-                            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng nguồn thu quỹ</div>
-                            <div class="fs-4 fw-bold text-primary" th:text="${fundSummary != null ? fundSummary.formattedTotalGrossFund : '0 ₫'}">0 ₫</div>
-                            <div class="small text-muted mt-1">
-                                Quyên góp: <strong class="text-success" th:text="${fundSummary != null ? fundSummary.formattedTotalDonationsReceived : '0 ₫'}">0 ₫</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card border-0 shadow-sm h-100 border-start border-danger border-4">
-                        <div class="card-body">
-                            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng chi giải ngân</div>
-                            <div class="fs-4 fw-bold text-danger" th:text="${fundSummary != null ? fundSummary.formattedTotalDisbursedFunds : '0 ₫'}">0 ₫</div>
-                            <div class="small text-muted mt-1">Cấp phát vật tư & kinh phí cứu trợ</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
-                        <div class="card-body">
-                            <div class="small text-muted text-uppercase fw-semibold mb-1">Số dư quỹ khả dụng</div>
-                            <div class="fs-4 fw-bold text-success" th:text="${fundSummary != null ? fundSummary.formattedAvailableGeneralFund : '0 ₫'}">0 ₫</div>
-                            <div class="small text-muted mt-1">Sẵn sàng chi viện khẩn cấp</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card border-0 shadow-sm h-100 border-start border-warning border-4">
-                        <div class="card-body">
-                            <div class="small text-muted text-uppercase fw-semibold mb-1">Lượt ủng hộ & Yêu cầu</div>
-                            <div class="fs-4 fw-bold text-dark"><span th:text="${donationStats != null ? donationStats.totalCount : 0}">0</span> <small class="fs-6 text-muted">lượt quyên góp</small></div>
-                            <div class="small text-muted mt-1">
-                                Yêu cầu chờ duyệt: <strong class="text-warning" th:text="${fundSummary != null ? fundSummary.pendingRequestsCount : 0}">0</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2 Biểu đồ Thu - Chi (Chart.js) -->
-            <div class="row g-4 mb-4">
-                <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold py-3 border-bottom d-flex align-items-center justify-content-between">
-                            <span><i class="fa-solid fa-chart-column text-primary me-2"></i>So Sánh Cán Cân Thu - Chi Quỹ Cứu Trợ</span>
-                            <span class="badge bg-light text-muted fw-normal">Đơn vị: VNĐ</span>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="financeComparisonChart" height="230"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold py-3 border-bottom">
-                            <i class="fa-solid fa-chart-pie text-success me-2"></i>Cơ Cấu Thu Theo Cổng Thanh Toán
-                        </div>
-                        <div class="card-body">
-                            <canvas id="paymentMethodChart" height="230"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bảng Dòng Tiền Thu: Danh Sách Quyên Góp -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <span><i class="fa-solid fa-hand-holding-heart text-danger me-2"></i>Dòng tiền thu: Lịch sử tiếp nhận quyên góp (<span th:text="${allDonations != null ? allDonations.size() : 0}">0</span> lượt)</span>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="donationsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Mã giao dịch</th>
-                                <th>Nhà hảo tâm</th>
-                                <th>Số tiền ủng hộ</th>
-                                <th>Phương thức</th>
-                                <th>Khu vực hỗ trợ</th>
-                                <th>Thời gian</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="don : ${allDonations}">
-                                <td><code class="fw-bold text-navy" th:text="${don.transactionCode}">VN0001</code></td>
-                                <td>
-                                    <strong th:text="${don.donorName}">Nhà hảo tâm</strong>
-                                    <div class="small text-muted" th:text="${don.donorPhone}">SĐT</div>
-                                </td>
-                                <td>
-                                    <strong class="text-success" th:text="${don.formattedAmount}">100,000 ₫</strong>
-                                </td>
-                                <td>
-                                    <span class="badge" th:classappend="${don.paymentMethod == 'VNPAY' ? 'bg-primary' : (don.paymentMethod == 'MOMO' ? 'bg-danger' : 'bg-info text-dark')}" th:text="${don.paymentMethod}">VIETQR</span>
-                                </td>
-                                <td>
-                                    <span class="small badge bg-light text-dark border" th:text="${don.targetProvince}">TOÀN MIỀN TRUNG</span>
-                                </td>
-                                <td class="small text-muted" th:text="${#temporals.format(don.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
-                                <td>
-                                    <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>Thành công</span>
-                                </td>
-                            </tr>
-                            <tr th:if="${allDonations == null or allDonations.isEmpty()}">
-                                <td colspan="7" class="text-center text-muted py-3">Chưa có giao dịch quyên góp nào được ghi nhận.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="donationsPaginationWrap">
-                    <div class="small text-muted" id="donationsPaginationInfo">Hiển thị...</div>
-                    <ul class="pagination pagination-sm mb-0" id="donationsPaginationNav"></ul>
-                </div>
-            </div>
-
-            <!-- Bảng Dòng Tiền Chi: Lịch Sử Giải Ngân Cho Đội Cứu Hộ -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <span><i class="fa-solid fa-money-bill-transfer text-primary me-2"></i>Dòng tiền chi: Lịch sử giải ngân & cấp phát ngân sách cứu trợ (<span th:text="${fundRequests != null ? fundRequests.size() : 0}">0</span> phiếu)</span>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="disbursementsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Mã phiếu</th>
-                                <th>Đội tiếp nhận</th>
-                                <th>Danh mục</th>
-                                <th>Số tiền đề xuất</th>
-                                <th>Hạng mục / Mục đích</th>
-                                <th>Thời gian</th>
-                                <th>Trạng thái giải ngân</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="req : ${fundRequests}">
-                                <td><code class="fw-bold" th:text="${'REQ-' + req.id}">REQ-1</code></td>
-                                <td>
-                                    <strong th:text="${req.rescueTeam != null ? req.rescueTeam.teamName : 'Đội cứu hộ'}">Đội Hải Châu</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary" th:text="${req.category != null ? req.category : 'TIẾP TẾ'}">NHU YẾU PHẨM</span>
-                                </td>
-                                <td>
-                                    <strong class="text-danger" th:text="${req.formattedAmount}">10,000,000 ₫</strong>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold text-truncate" style="max-width: 250px;" th:text="${req.purpose}">Tiếp tế xăng xe, ca nô</div>
-                                    <small class="text-muted" th:if="${req.reviewedBy != null}" th:text="${'Duyệt bởi: ' + req.reviewedBy.fullName}">Duyệt bởi</small>
-                                    <small class="text-danger" th:if="${req.rejectReason != null}" th:text="${'Lý do: ' + req.rejectReason}">Lý do</small>
-                                </td>
-                                <td class="small text-muted" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
-                                <td>
-                                    <span class="badge" th:classappend="${req.status == 'APPROVED' ? 'bg-success' : (req.status == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark')}" th:text="${req.status == 'APPROVED' ? 'Đã giải ngân' : (req.status == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt')}">Đã giải ngân</span>
-                                </td>
-                            </tr>
-                            <tr th:if="${fundRequests == null or fundRequests.isEmpty()}">
-                                <td colspan="7" class="text-center text-muted py-3">Chưa có yêu cầu giải ngân nào.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="disbursementsPaginationWrap">
-                    <div class="small text-muted" id="disbursementsPaginationInfo">Hiển thị...</div>
-                    <ul class="pagination pagination-sm mb-0" id="disbursementsPaginationNav"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<div class="modal fade" id="broadcastModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Phát cảnh báo khẩn cấp toàn hệ thống</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
-    <div class="mb-3"><label class="form-label">Tiêu đề</label><input id="alertTitle" class="form-control" maxlength="200"></div><div class="mb-3"><label class="form-label">Nội dung hướng dẫn</label><textarea id="alertContent" class="form-control" rows="4"></textarea></div>
-    <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Mức độ</label><select id="alertSeverity" class="form-select"><option value="DANGER_RED">Nguy hiểm — đỏ</option><option value="WARNING_ORANGE">Cảnh báo — cam</option><option value="NOTICE_YELLOW">Thông báo — vàng</option></select></div><div class="col-md-6 mb-3"><label class="form-label">Khu vực ảnh hưởng</label><input id="alertRegion" class="form-control"></div></div><div class="small text-muted">Cảnh báo được lưu và gửi tức thời đến các trang đang kết nối.</div>
-    </div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button id="sendBroadcast" class="btn btn-danger fw-bold">Phát cảnh báo</button></div></div></div></div>
-
-<div class="modal fade" id="teamModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="teamModalTitle">Thêm đội cứu hộ</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input id="teamId" type="hidden"><div class="row g-3">
-    <div class="col-md-6"><label class="form-label">Tên đội</label><input id="teamName" class="form-control"></div><div class="col-md-6"><label class="form-label">Số điện thoại</label><input id="teamPhone" class="form-control"></div><div class="col-md-6"><label class="form-label">Đội trưởng</label><select id="teamLeader" class="form-select"><option value="">Chưa chỉ định</option><option th:each="rescuer : ${rescuerUsers}" th:value="${rescuer.id}" th:text="${rescuer.fullName + ' (' + rescuer.username + ')'}"></option></select></div>
-    <div class="col-md-3"><label class="form-label">Vĩ độ</label><input id="teamLat" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Kinh độ</label><input id="teamLng" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Quân số</label><input id="teamCount" type="number" min="0" class="form-control" value="0"></div><div class="col-md-4"><label class="form-label">Trạng thái</label><select id="teamStatus" class="form-select"><option>AVAILABLE</option><option>BUSY</option><option>OFFLINE</option></select></div><div class="col-12"><label class="form-label">Trang thiết bị</label><textarea id="teamEquipment" class="form-control" rows="2"></textarea></div>
-    </div></div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" id="saveTeam">Lưu đội</button></div></div></div></div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script th:inline="javascript">
-    const currentView = new URLSearchParams(window.location.search).get('view') || 'overview';
-    const adminStats = /*[[${stats}]]*/ {};
-    const teamsForEditing = /*[[${teams}]]*/ [];
-    const fundSummary = /*[[${fundSummary}]]*/ {};
-    const donationStats = /*[[${donationStats}]]*/ {};
-
-    // 1. Charts cho Tab Overview
-    if (currentView === 'overview') {
-        const urgency = adminStats.byUrgency || {};
-        const urgencyCtx = document.getElementById('urgencyChart');
-        if (urgencyCtx) {
-            new Chart(urgencyCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Nguy cấp', 'Khẩn cấp', 'Trung bình', 'Thấp'],
-                    datasets: [{
-                        data: [urgency.CRITICAL || 0, urgency.HIGH || 0, urgency.MEDIUM || 0, urgency.LOW || 0],
-                        backgroundColor: ['#dc3545', '#fd7e14', '#0dcaf0', '#6c757d']
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-            });
-        }
-        const regions = adminStats.byRegion || {};
-        const regionCtx = document.getElementById('regionChart');
-        if (regionCtx) {
-            new Chart(regionCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(regions),
-                    datasets: [{
-                        label: 'Số ca SOS',
-                        data: Object.values(regions),
-                        backgroundColor: '#0d6efd',
-                        borderRadius: 6
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-            });
-        }
-    }
-
-    // 2. Charts cho Tab Finance (Thống Kê Thu Chi)
-    if (currentView === 'finance') {
-        const grossFund = Number(fundSummary.totalGrossFund || 500000000);
-        const donations = Number(fundSummary.totalDonationsReceived || 0);
-        const disbursed = Number(fundSummary.totalDisbursedFunds || 0);
-
-        const financeCtx = document.getElementById('financeComparisonChart');
-        if (financeCtx) {
-            new Chart(financeCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Tổng Quỹ Tiếp Nhận', 'Tiền Quyên Góp Thực Nhận', 'Chi Giải Ngân Cứu Hộ'],
-                    datasets: [{
-                        label: 'Số tiền (VNĐ)',
-                        data: [grossFund, donations, disbursed],
-                        backgroundColor: ['#0d6efd', '#198754', '#dc3545'],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => (context.parsed.y || 0).toLocaleString('vi-VN') + ' ₫'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: (value) => (value / 1000000).toLocaleString('vi-VN') + ' tr'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        const methodCtx = document.getElementById('paymentMethodChart');
-        if (methodCtx) {
-            const byMethod = (donationStats && donationStats.byMethod) || {};
-            const vnpay = byMethod['VNPAY'] || 0;
-            const momo = byMethod['MOMO'] || 0;
-            const vietqr = byMethod['VIETQR'] || 0;
-            new Chart(methodCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['VNPay Gateway', 'Ví MoMo', 'VietQR Napas 24/7'],
-                    datasets: [{
-                        data: [vnpay, momo, vietqr],
-                        backgroundColor: ['#0d6efd', '#d63384', '#0dcaf0']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-    }
-
-    // Action cập nhật quyền User
-    document.querySelectorAll('.btn-save-user').forEach(button => button.addEventListener('click', async () => {
-        const row = button.closest('tr');
-        try {
-            const response = await fetch(`/api/admin/users/${row.dataset.userId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    role: row.querySelector('.user-role').value,
-                    status: row.querySelector('.user-status').value
-                })
-            });
-            const body = await response.json();
-            if (!response.ok) throw new Error(body.message || 'Không thể cập nhật tài khoản');
-            alert('Đã cập nhật. Thay đổi quyền có hiệu lực từ yêu cầu tiếp theo.');
-        } catch (error) {
-            alert(error.message);
-        }
-    }));
-
-    function openTeamForm(team) {
-        document.getElementById('teamModalTitle').textContent = team ? 'Cập nhật đội cứu hộ' : 'Thêm đội cứu hộ';
-        document.getElementById('teamId').value = team?.id || '';
-        document.getElementById('teamName').value = team?.teamName || '';
-        document.getElementById('teamPhone').value = team?.contactPhone || '';
-        document.getElementById('teamLeader').value = team?.leader?.id || '';
-        document.getElementById('teamLat').value = team?.currentLatitude ?? '';
-        document.getElementById('teamLng').value = team?.currentLongitude ?? '';
-        document.getElementById('teamCount').value = team?.memberCount ?? 0;
-        document.getElementById('teamStatus').value = team?.status || 'AVAILABLE';
-        document.getElementById('teamEquipment').value = team?.equipmentNotes || '';
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('teamModal')).show();
-    }
-
-    function editTeamFromRow(button) {
-        const team = teamsForEditing.find(item => String(item.id) === button.dataset.teamId);
-        if (team) openTeamForm(team);
-    }
-
-    document.getElementById('saveTeam').addEventListener('click', async () => {
-        const id = document.getElementById('teamId').value;
-        const value = id => document.getElementById(id).value;
-        const payload = {
-            teamName: value('teamName'),
-            contactPhone: value('teamPhone'),
-            leaderId: value('teamLeader') || null,
-            currentLatitude: value('teamLat') === '' ? null : Number(value('teamLat')),
-            currentLongitude: value('teamLng') === '' ? null : Number(value('teamLng')),
-            memberCount: Number(value('teamCount')),
-            status: value('teamStatus'),
-            equipmentNotes: value('teamEquipment')
-        };
-        try {
-            const response = await fetch(id ? `/api/admin/teams/${id}` : '/api/admin/teams', {
-                method: id ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const body = await response.json();
-            if (!response.ok) throw new Error(body.message || 'Không thể lưu đội');
-            location.reload();
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-
-    document.getElementById('sendBroadcast').addEventListener('click', async () => {
-        const value = id => document.getElementById(id).value;
-        const payload = {
-            title: value('alertTitle'),
-            content: value('alertContent'),
-            severity: value('alertSeverity'),
-            affectedRegion: value('alertRegion')
-        };
-        if (!payload.title.trim() || !payload.content.trim()) {
-            alert('Vui lòng nhập tiêu đề và nội dung cảnh báo.');
-            return;
-        }
-        const button = document.getElementById('sendBroadcast');
-        button.disabled = true;
-        try {
-            const response = await fetch('/api/admin/broadcast', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const body = await response.json();
-            if (!response.ok) throw new Error(body.message || 'Không thể phát cảnh báo');
-            bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();
-            alert('Đã lưu và gửi cảnh báo đến các trang đang kết nối.');
-            document.getElementById('alertTitle').value = '';
-            document.getElementById('alertContent').value = '';
-        } catch (error) {
-            alert(error.message);
-        } finally {
-            button.disabled = false;
-        }
-    });
-
-    function paginateAdminTable(tableSelector, infoSelector, navSelector, pageSize = 10) {
-        const table = document.querySelector(tableSelector);
-        if (!table) return;
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-        let curPage = 1;
-        function render(p) {
-            curPage = p;
-            const total = rows.length;
-            const totalPages = Math.max(1, Math.ceil(total / pageSize));
-            if (curPage > totalPages) curPage = totalPages;
-            const start = (curPage - 1) * pageSize;
-            const end = Math.min(start + pageSize, total);
-            rows.forEach((r, idx) => {
-                r.style.display = (idx >= start && idx < end) ? '' : 'none';
-            });
-            const info = document.querySelector(infoSelector);
-            if (info) info.innerHTML = total === 0 ? 'Không có bản ghi' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong>`;
-            const nav = document.querySelector(navSelector);
-            if (!nav) return;
-            nav.innerHTML = '';
-            if (totalPages <= 1) return;
-            const prev = document.createElement('li');
-            prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
-            prev.innerHTML = '<a class="page-link" href="javascript:void(0)">Trước</a>';
-            prev.onclick = () => { if (curPage > 1) render(curPage - 1); };
-            nav.appendChild(prev);
-            for (let i = 1; i <= totalPages; i++) {
-                const li = document.createElement('li');
-                li.className = 'page-item ' + (i === curPage ? 'active' : '');
-                li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
-                li.onclick = () => render(i);
-                nav.appendChild(li);
-            }
-            const next = document.createElement('li');
-            next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
-            next.innerHTML = '<a class="page-link" href="javascript:void(0)">Sau</a>';
-            next.onclick = () => { if (curPage < totalPages) render(curPage + 1); };
-            nav.appendChild(next);
-        }
-        render(1);
-    }
-
-    paginateAdminTable('#usersTable', '#usersPaginationInfo', '#usersPaginationNav', 10);
-    paginateAdminTable('#teamsTable', '#teamsPaginationInfo', '#teamsPaginationNav', 10);
-    paginateAdminTable('#donationsTable', '#donationsPaginationInfo', '#donationsPaginationNav', 10);
-    paginateAdminTable('#disbursementsTable', '#disbursementsPaginationInfo', '#disbursementsPaginationNav', 10);
-</script>
-</div>
-
-</body>
-</html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout(${pageTitle}, ~{::#admin-content})}">
+<body>
+
+<div id="admin-content" class="py-4" th:with="adminView=${param.view != null ? param.view[0] : 'overview'}">
+    <div class="container-fluid px-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-navy mb-1">
+                    <i class="fa-solid fa-shield-halved text-danger me-2"></i>
+                    <span th:text="${adminView == 'users' ? 'Quản lý tài khoản' : (adminView == 'teams' ? 'Quản lý đội cứu hộ' : (adminView == 'finance' ? 'Báo cáo thống kê thu chi' : 'Trung tâm quản trị'))}">Trung tâm quản trị</span>
+                </h2>
+                <div class="text-muted" th:text="${adminView == 'users' ? 'Cập nhật vai trò và trạng thái tài khoản' : (adminView == 'teams' ? 'Theo dõi và cập nhật thông tin các đội cứu hộ' : (adminView == 'finance' ? 'Minh bạch nguồn thu quyên góp và ngân sách giải ngân cứu trợ' : 'Cảnh báo và số liệu vận hành'))}">Cảnh báo và số liệu vận hành</div>
+            </div>
+            <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#broadcastModal"><i class="fa-solid fa-tower-broadcast me-2"></i>Phát cảnh báo khẩn cấp</button>
+        </div>
+
+        <!-- 1. TAB OVERVIEW (TỔNG QUAN) -->
+        <div class="row g-3 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tổng ca SOS</div><div class="fs-3 fw-bold" th:text="${stats.totalCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang chờ</div><div class="fs-3 fw-bold text-danger" th:text="${stats.pendingCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang xử lý</div><div class="fs-3 fw-bold text-warning" th:text="${stats.activeCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đã giải quyết</div><div class="fs-3 fw-bold text-success" th:text="${stats.resolvedCases}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Người đã cứu</div><div class="fs-3 fw-bold text-primary" th:text="${stats.rescuedPeople}">0</div></div></div></div>
+            <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Thời gian xử lý TB</div><div class="fs-3 fw-bold"><span th:text="${stats.averageResponseMinutes}">0</span><small class="fs-6"> phút</small></div></div></div></div>
+        </div>
+        <div class="row g-4 mb-4" th:classappend="${adminView != '' and adminView != 'overview' ? 'd-none' : ''}">
+            <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Phân bố mức độ SOS</div><div class="card-body"><canvas id="urgencyChart" height="220"></canvas></div></div></div>
+            <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white fw-bold">Ca cứu nạn theo khu vực</div><div class="card-body"><canvas id="regionChart" height="220"></canvas></div></div></div>
+        </div>
+
+        <!-- 2. TAB USERS (QUẢN LÝ TÀI KHOẢN) -->
+        <div class="card border-0 shadow-sm mb-4" id="users-section" th:classappend="${adminView != '' and adminView != 'users' ? 'd-none' : ''}">
+            <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-users-gear me-2"></i>Quản lý tài khoản (<span th:text="${users != null ? users.size() : 0}">0</span>)</span>
+            </div>
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="usersTable"><thead class="table-light"><tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr th:each="user : ${users}" th:attr="data-user-id=${user.id}"><td><strong th:text="${user.fullName}">Tên</strong><div class="small text-muted" th:text="${user.username}">username</div></td><td><span th:text="${user.phone}">SĐT</span><div class="small text-muted" th:text="${user.email}">email</div></td>
+                    <td><select class="form-select form-select-sm user-role"><option value="ROLE_CITIZEN" th:selected="${user.role != null and user.role.name == 'ROLE_CITIZEN'}">Người dân</option><option value="ROLE_RESCUER" th:selected="${user.role != null and user.role.name == 'ROLE_RESCUER'}">Cứu hộ</option><option value="ROLE_COORDINATOR" th:selected="${user.role != null and user.role.name == 'ROLE_COORDINATOR'}">Điều phối</option><option value="ROLE_ADMIN" th:selected="${user.role != null and user.role.name == 'ROLE_ADMIN'}">Quản trị</option></select></td>
+                    <td><select class="form-select form-select-sm user-status"><option value="ACTIVE" th:selected="${user.status == 'ACTIVE'}">Hoạt động</option><option value="BLOCKED" th:selected="${user.status == 'BLOCKED'}">Đã khóa</option></select></td><td><button class="btn btn-sm btn-outline-primary btn-save-user">Lưu</button></td></tr>
+            </tbody></table></div>
+            <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="usersPaginationWrap">
+                <div class="small text-muted" id="usersPaginationInfo">Hiển thị...</div>
+                <ul class="pagination pagination-sm mb-0" id="usersPaginationNav"></ul>
+            </div>
+        </div>
+
+        <!-- 3. TAB TEAMS (QUẢN LÝ ĐỘI CỨU HỘ) -->
+        <div class="card border-0 shadow-sm mb-4" id="teams-section" th:classappend="${adminView != '' and adminView != 'teams' ? 'd-none' : ''}">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong><i class="fa-solid fa-truck-medical me-2"></i>Quản lý đội cứu hộ (<span th:text="${teams != null ? teams.size() : 0}">0</span>)</strong><button class="btn btn-sm btn-primary" onclick="openTeamForm()"><i class="fa-solid fa-plus me-1"></i>Thêm đội</button></div>
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="teamsTable"><thead class="table-light"><tr><th>Tên đội</th><th>Đội trưởng</th><th>Liên hệ</th><th>Quân số</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr th:each="team : ${teams}" th:attr="data-team-id=${team.id}"><td><strong th:text="${team.teamName}">Đội</strong><div class="small text-muted" th:text="${team.equipmentNotes}">Thiết bị</div></td><td th:text="${team.leader != null ? team.leader.fullName : 'Chưa chỉ định'}">—</td><td th:text="${team.contactPhone}">SĐT</td><td th:text="${team.memberCount}">0</td><td><span class="badge" th:classappend="${team.status == 'AVAILABLE' ? 'bg-success' : (team.status == 'BUSY' ? 'bg-warning text-dark' : 'bg-secondary')}" th:text="${team.status == 'AVAILABLE' ? 'Sẵn sàng' : (team.status == 'BUSY' ? 'Đang bận' : 'Ngoại tuyến')}">Sẵn sàng</span></td><td><button class="btn btn-sm btn-outline-secondary" th:attr="data-team-id=${team.id}" onclick="editTeamFromRow(this)">Sửa</button></td></tr>
+            </tbody></table></div>
+            <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="teamsPaginationWrap">
+                <div class="small text-muted" id="teamsPaginationInfo">Hiển thị...</div>
+                <ul class="pagination pagination-sm mb-0" id="teamsPaginationNav"></ul>
+            </div>
+        </div>
+
+        <!-- 4. TAB FINANCE (THỐNG KÊ THU CHI CHO ADMIN) -->
+        <div id="finance-section" th:classappend="${adminView != '' and adminView != 'finance' ? 'd-none' : ''}">
+            <!-- 4 Thẻ KPI Tài Chính -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
+                        <div class="card-body">
+                            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng nguồn thu quỹ</div>
+                            <div class="fs-4 fw-bold text-primary" th:text="${fundSummary != null ? fundSummary.formattedTotalGrossFund : '0 ₫'}">0 ₫</div>
+                            <div class="small text-muted mt-1">
+                                Quyên góp: <strong class="text-success" th:text="${fundSummary != null ? fundSummary.formattedTotalDonationsReceived : '0 ₫'}">0 ₫</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100 border-start border-danger border-4">
+                        <div class="card-body">
+                            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng chi giải ngân</div>
+                            <div class="fs-4 fw-bold text-danger" th:text="${fundSummary != null ? fundSummary.formattedTotalDisbursedFunds : '0 ₫'}">0 ₫</div>
+                            <div class="small text-muted mt-1">Cấp phát vật tư & kinh phí cứu trợ</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
+                        <div class="card-body">
+                            <div class="small text-muted text-uppercase fw-semibold mb-1">Số dư quỹ khả dụng</div>
+                            <div class="fs-4 fw-bold text-success" th:text="${fundSummary != null ? fundSummary.formattedAvailableGeneralFund : '0 ₫'}">0 ₫</div>
+                            <div class="small text-muted mt-1">Sẵn sàng chi viện khẩn cấp</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100 border-start border-warning border-4">
+                        <div class="card-body">
+                            <div class="small text-muted text-uppercase fw-semibold mb-1">Lượt ủng hộ & Yêu cầu</div>
+                            <div class="fs-4 fw-bold text-dark"><span th:text="${donationStats != null ? donationStats.totalCount : 0}">0</span> <small class="fs-6 text-muted">lượt quyên góp</small></div>
+                            <div class="small text-muted mt-1">
+                                Yêu cầu chờ duyệt: <strong class="text-warning" th:text="${fundSummary != null ? fundSummary.pendingRequestsCount : 0}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 Biểu đồ Thu - Chi (Chart.js) -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold py-3 border-bottom d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-chart-column text-primary me-2"></i>So Sánh Cán Cân Thu - Chi Quỹ Cứu Trợ</span>
+                            <span class="badge bg-light text-muted fw-normal">Đơn vị: VNĐ</span>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="financeComparisonChart" height="230"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold py-3 border-bottom">
+                            <i class="fa-solid fa-chart-pie text-success me-2"></i>Cơ Cấu Thu Theo Cổng Thanh Toán
+                        </div>
+                        <div class="card-body">
+                            <canvas id="paymentMethodChart" height="230"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Dòng Tiền Thu: Danh Sách Quyên Góp -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-hand-holding-heart text-danger me-2"></i>Dòng tiền thu: Lịch sử tiếp nhận quyên góp (<span th:text="${allDonations != null ? allDonations.size() : 0}">0</span> lượt)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="donationsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã giao dịch</th>
+                                <th>Nhà hảo tâm</th>
+                                <th>Số tiền ủng hộ</th>
+                                <th>Phương thức</th>
+                                <th>Khu vực hỗ trợ</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="don : ${allDonations}">
+                                <td><code class="fw-bold text-navy" th:text="${don.transactionCode}">VN0001</code></td>
+                                <td>
+                                    <strong th:text="${don.donorName}">Nhà hảo tâm</strong>
+                                    <div class="small text-muted" th:text="${don.donorPhone}">SĐT</div>
+                                </td>
+                                <td>
+                                    <strong class="text-success" th:text="${don.formattedAmount}">100,000 ₫</strong>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="${don.paymentMethod == 'VNPAY' ? 'bg-primary' : (don.paymentMethod == 'MOMO' ? 'bg-danger' : 'bg-info text-dark')}" th:text="${don.paymentMethod}">VIETQR</span>
+                                </td>
+                                <td>
+                                    <span class="small badge bg-light text-dark border" th:text="${don.targetProvince}">TOÀN MIỀN TRUNG</span>
+                                </td>
+                                <td class="small text-muted" th:text="${#temporals.format(don.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                                <td>
+                                    <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>Thành công</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${allDonations == null or allDonations.isEmpty()}">
+                                <td colspan="7" class="text-center text-muted py-3">Chưa có giao dịch quyên góp nào được ghi nhận.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="donationsPaginationWrap">
+                    <div class="small text-muted" id="donationsPaginationInfo">Hiển thị...</div>
+                    <ul class="pagination pagination-sm mb-0" id="donationsPaginationNav"></ul>
+                </div>
+            </div>
+
+            <!-- Bảng Dòng Tiền Chi: Lịch Sử Giải Ngân Cho Đội Cứu Hộ -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-money-bill-transfer text-primary me-2"></i>Dòng tiền chi: Lịch sử giải ngân & cấp phát ngân sách cứu trợ (<span th:text="${fundRequests != null ? fundRequests.size() : 0}">0</span> phiếu)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="disbursementsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Đội tiếp nhận</th>
+                                <th>Danh mục</th>
+                                <th>Số tiền đề xuất</th>
+                                <th>Hạng mục / Mục đích</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái giải ngân</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="req : ${fundRequests}">
+                                <td><code class="fw-bold" th:text="${'REQ-' + req.id}">REQ-1</code></td>
+                                <td>
+                                    <strong th:text="${req.rescueTeam != null ? req.rescueTeam.teamName : 'Đội cứu hộ'}">Đội Hải Châu</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${req.category != null ? req.category : 'TIẾP TẾ'}">NHU YẾU PHẨM</span>
+                                </td>
+                                <td>
+                                    <strong class="text-danger" th:text="${req.formattedAmount}">10,000,000 ₫</strong>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-truncate" style="max-width: 250px;" th:text="${req.purpose}">Tiếp tế xăng xe, ca nô</div>
+                                    <small class="text-muted" th:if="${req.reviewedBy != null}" th:text="${'Duyệt bởi: ' + req.reviewedBy.fullName}">Duyệt bởi</small>
+                                    <small class="text-danger" th:if="${req.rejectReason != null}" th:text="${'Lý do: ' + req.rejectReason}">Lý do</small>
+                                </td>
+                                <td class="small text-muted" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                                <td>
+                                    <span class="badge" th:classappend="${req.status == 'APPROVED' ? 'bg-success' : (req.status == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark')}" th:text="${req.status == 'APPROVED' ? 'Đã giải ngân' : (req.status == 'REJECTED' ? 'Từ chối' : 'Chờ duyệt')}">Đã giải ngân</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${fundRequests == null or fundRequests.isEmpty()}">
+                                <td colspan="7" class="text-center text-muted py-3">Chưa có yêu cầu giải ngân nào.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center" id="disbursementsPaginationWrap">
+                    <div class="small text-muted" id="disbursementsPaginationInfo">Hiển thị...</div>
+                    <ul class="pagination pagination-sm mb-0" id="disbursementsPaginationNav"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="broadcastModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Phát cảnh báo khẩn cấp toàn hệ thống</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
+    <div class="mb-3"><label class="form-label">Tiêu đề</label><input id="alertTitle" class="form-control" maxlength="200"></div><div class="mb-3"><label class="form-label">Nội dung hướng dẫn</label><textarea id="alertContent" class="form-control" rows="4"></textarea></div>
+    <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Mức độ</label><select id="alertSeverity" class="form-select"><option value="DANGER_RED">Nguy hiểm — đỏ</option><option value="WARNING_ORANGE">Cảnh báo — cam</option><option value="NOTICE_YELLOW">Thông báo — vàng</option></select></div><div class="col-md-6 mb-3"><label class="form-label">Khu vực ảnh hưởng</label><input id="alertRegion" class="form-control"></div></div><div class="small text-muted">Cảnh báo được lưu và gửi tức thời đến các trang đang kết nối.</div>
+    </div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button id="sendBroadcast" class="btn btn-danger fw-bold">Phát cảnh báo</button></div></div></div></div>
+
+<div class="modal fade" id="teamModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="teamModalTitle">Thêm đội cứu hộ</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input id="teamId" type="hidden"><div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Tên đội</label><input id="teamName" class="form-control"></div><div class="col-md-6"><label class="form-label">Số điện thoại</label><input id="teamPhone" class="form-control"></div><div class="col-md-6"><label class="form-label">Đội trưởng</label><select id="teamLeader" class="form-select"><option value="">Chưa chỉ định</option><option th:each="rescuer : ${rescuerUsers}" th:value="${rescuer.id}" th:text="${rescuer.fullName + ' (' + rescuer.username + ')'}"></option></select></div>
+    <div class="col-md-3"><label class="form-label">Vĩ độ</label><input id="teamLat" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Kinh độ</label><input id="teamLng" type="number" step="any" class="form-control"></div><div class="col-md-3"><label class="form-label">Quân số</label><input id="teamCount" type="number" min="0" class="form-control" value="0"></div><div class="col-md-4"><label class="form-label">Trạng thái</label><select id="teamStatus" class="form-select"><option>AVAILABLE</option><option>BUSY</option><option>OFFLINE</option></select></div><div class="col-12"><label class="form-label">Trang thiết bị</label><textarea id="teamEquipment" class="form-control" rows="2"></textarea></div>
+    </div></div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" id="saveTeam">Lưu đội</button></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const currentView = new URLSearchParams(window.location.search).get('view') || 'overview';
+    const adminStats = /*[[${stats}]]*/ {};
+    const teamsForEditing = /*[[${teams}]]*/ [];
+    const fundSummary = /*[[${fundSummary}]]*/ {};
+    const donationStats = /*[[${donationStats}]]*/ {};
+
+    // 1. Charts cho Tab Overview
+    if (currentView === 'overview') {
+        const urgency = adminStats.byUrgency || {};
+        const urgencyCtx = document.getElementById('urgencyChart');
+        if (urgencyCtx) {
+            new Chart(urgencyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Nguy cấp', 'Khẩn cấp', 'Trung bình', 'Thấp'],
+                    datasets: [{
+                        data: [urgency.CRITICAL || 0, urgency.HIGH || 0, urgency.MEDIUM || 0, urgency.LOW || 0],
+                        backgroundColor: ['#dc3545', '#fd7e14', '#0dcaf0', '#6c757d']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        const regions = adminStats.byRegion || {};
+        const regionCtx = document.getElementById('regionChart');
+        if (regionCtx) {
+            new Chart(regionCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(regions),
+                    datasets: [{
+                        label: 'Số ca SOS',
+                        data: Object.values(regions),
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+        }
+    }
+
+    // 2. Charts cho Tab Finance (Thống Kê Thu Chi)
+    if (currentView === 'finance') {
+        const grossFund = Number(fundSummary.totalGrossFund || 500000000);
+        const donations = Number(fundSummary.totalDonationsReceived || 0);
+        const disbursed = Number(fundSummary.totalDisbursedFunds || 0);
+
+        const financeCtx = document.getElementById('financeComparisonChart');
+        if (financeCtx) {
+            new Chart(financeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Tổng Quỹ Tiếp Nhận', 'Tiền Quyên Góp Thực Nhận', 'Chi Giải Ngân Cứu Hộ'],
+                    datasets: [{
+                        label: 'Số tiền (VNĐ)',
+                        data: [grossFund, donations, disbursed],
+                        backgroundColor: ['#0d6efd', '#198754', '#dc3545'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => (context.parsed.y || 0).toLocaleString('vi-VN') + ' ₫'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => (value / 1000000).toLocaleString('vi-VN') + ' tr'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const methodCtx = document.getElementById('paymentMethodChart');
+        if (methodCtx) {
+            const byMethod = (donationStats && donationStats.byMethod) || {};
+            const vnpay = byMethod['VNPAY'] || 0;
+            const momo = byMethod['MOMO'] || 0;
+            const vietqr = byMethod['VIETQR'] || 0;
+            new Chart(methodCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['VNPay Gateway', 'Ví MoMo', 'VietQR Napas 24/7'],
+                    datasets: [{
+                        data: [vnpay, momo, vietqr],
+                        backgroundColor: ['#0d6efd', '#d63384', '#0dcaf0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    }
+
+    // Action cập nhật quyền User
+    document.querySelectorAll('.btn-save-user').forEach(button => button.addEventListener('click', async () => {
+        const row = button.closest('tr');
+        try {
+            const response = await fetch(`/api/admin/users/${row.dataset.userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    role: row.querySelector('.user-role').value,
+                    status: row.querySelector('.user-status').value
+                })
+            });
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.message || 'Không thể cập nhật tài khoản');
+            alert('Đã cập nhật. Thay đổi quyền có hiệu lực từ yêu cầu tiếp theo.');
+        } catch (error) {
+            alert(error.message);
+        }
+    }));
+
+    function openTeamForm(team) {
+        document.getElementById('teamModalTitle').textContent = team ? 'Cập nhật đội cứu hộ' : 'Thêm đội cứu hộ';
+        document.getElementById('teamId').value = team?.id || '';
+        document.getElementById('teamName').value = team?.teamName || '';
+        document.getElementById('teamPhone').value = team?.contactPhone || '';
+        document.getElementById('teamLeader').value = team?.leader?.id || '';
+        document.getElementById('teamLat').value = team?.currentLatitude ?? '';
+        document.getElementById('teamLng').value = team?.currentLongitude ?? '';
+        document.getElementById('teamCount').value = team?.memberCount ?? 0;
+        document.getElementById('teamStatus').value = team?.status || 'AVAILABLE';
+        document.getElementById('teamEquipment').value = team?.equipmentNotes || '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('teamModal')).show();
+    }
+
+    function editTeamFromRow(button) {
+        const team = teamsForEditing.find(item => String(item.id) === button.dataset.teamId);
+        if (team) openTeamForm(team);
+    }
+
+    document.getElementById('saveTeam').addEventListener('click', async () => {
+        const id = document.getElementById('teamId').value;
+        const value = id => document.getElementById(id).value;
+        const payload = {
+            teamName: value('teamName'),
+            contactPhone: value('teamPhone'),
+            leaderId: value('teamLeader') || null,
+            currentLatitude: value('teamLat') === '' ? null : Number(value('teamLat')),
+            currentLongitude: value('teamLng') === '' ? null : Number(value('teamLng')),
+            memberCount: Number(value('teamCount')),
+            status: value('teamStatus'),
+            equipmentNotes: value('teamEquipment')
+        };
+        try {
+            const response = await fetch(id ? `/api/admin/teams/${id}` : '/api/admin/teams', {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.message || 'Không thể lưu đội');
+            location.reload();
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    document.getElementById('sendBroadcast').addEventListener('click', async () => {
+        const value = id => document.getElementById(id).value;
+        const payload = {
+            title: value('alertTitle'),
+            content: value('alertContent'),
+            severity: value('alertSeverity'),
+            affectedRegion: value('alertRegion')
+        };
+        if (!payload.title.trim() || !payload.content.trim()) {
+            alert('Vui lòng nhập tiêu đề và nội dung cảnh báo.');
+            return;
+        }
+        const button = document.getElementById('sendBroadcast');
+        button.disabled = true;
+        try {
+            const response = await fetch('/api/admin/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.message || 'Không thể phát cảnh báo');
+            bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();
+            alert('Đã lưu và gửi cảnh báo đến các trang đang kết nối.');
+            document.getElementById('alertTitle').value = '';
+            document.getElementById('alertContent').value = '';
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    function paginateAdminTable(tableSelector, infoSelector, navSelector, pageSize = 10) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        let curPage = 1;
+        function render(p) {
+            curPage = p;
+            const total = rows.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (curPage > totalPages) curPage = totalPages;
+            const start = (curPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+            rows.forEach((r, idx) => {
+                r.style.display = (idx >= start && idx < end) ? '' : 'none';
+            });
+            const info = document.querySelector(infoSelector);
+            if (info) info.innerHTML = total === 0 ? 'Không có bản ghi' : `Hiển thị <strong>${start + 1} - ${end}</strong> / <strong>${total}</strong>`;
+            const nav = document.querySelector(navSelector);
+            if (!nav) return;
+            nav.innerHTML = '';
+            if (totalPages <= 1) return;
+            const prev = document.createElement('li');
+            prev.className = 'page-item ' + (curPage === 1 ? 'disabled' : '');
+            prev.innerHTML = '<a class="page-link" href="javascript:void(0)">Trước</a>';
+            prev.onclick = () => { if (curPage > 1) render(curPage - 1); };
+            nav.appendChild(prev);
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item ' + (i === curPage ? 'active' : '');
+                li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+                li.onclick = () => render(i);
+                nav.appendChild(li);
+            }
+            const next = document.createElement('li');
+            next.className = 'page-item ' + (curPage === totalPages ? 'disabled' : '');
+            next.innerHTML = '<a class="page-link" href="javascript:void(0)">Sau</a>';
+            next.onclick = () => { if (curPage < totalPages) render(curPage + 1); };
+            nav.appendChild(next);
+        }
+        render(1);
+    }
+
+    paginateAdminTable('#usersTable', '#usersPaginationInfo', '#usersPaginationNav', 10);
+    paginateAdminTable('#teamsTable', '#teamsPaginationInfo', '#teamsPaginationNav', 10);
+    paginateAdminTable('#donationsTable', '#donationsPaginationInfo', '#donationsPaginationNav', 10);
+    paginateAdminTable('#disbursementsTable', '#disbursementsPaginationInfo', '#disbursementsPaginationNav', 10);
+</script>
+</div>
+
+</body>
+</html>

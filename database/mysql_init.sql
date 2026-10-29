@@ -168,8 +168,22 @@ CREATE TABLE IF NOT EXISTS `post_upvotes` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `post_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
+    `reaction_type` VARCHAR(30) DEFAULT 'LIKE',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY `uq_post_user` (`post_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11b. Bàng Bình luận bài đăng (post_comments)
+CREATE TABLE IF NOT EXISTS `post_comments` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` BIGINT NOT NULL,
+    `user_id` BIGINT NULL,
+    `author_name` VARCHAR(150) NOT NULL,
+    `author_avatar` VARCHAR(255) NULL,
+    `content` TEXT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_comments_post` (`post_id`),
+    CONSTRAINT `fk_comments_post` FOREIGN KEY (`post_id`) REFERENCES `community_posts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 12. Bảng Tệp đính kèm (media_files)

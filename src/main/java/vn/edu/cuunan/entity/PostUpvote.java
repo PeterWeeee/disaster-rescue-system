@@ -19,6 +19,9 @@ public class PostUpvote {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "reaction_type", length = 30)
+    private String reactionType = "LIKE";
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -28,6 +31,14 @@ public class PostUpvote {
     public PostUpvote(Long postId, Long userId) {
         this.postId = postId;
         this.userId = userId;
+        this.reactionType = "LIKE";
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public PostUpvote(Long postId, Long userId, String reactionType) {
+        this.postId = postId;
+        this.userId = userId;
+        this.reactionType = (reactionType != null && !reactionType.isBlank()) ? reactionType.trim().toUpperCase() : "LIKE";
         this.createdAt = LocalDateTime.now();
     }
 
@@ -53,6 +64,14 @@ public class PostUpvote {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getReactionType() {
+        return reactionType;
+    }
+
+    public void setReactionType(String reactionType) {
+        this.reactionType = (reactionType != null && !reactionType.isBlank()) ? reactionType.trim().toUpperCase() : "LIKE";
     }
 
     public LocalDateTime getCreatedAt() {

@@ -212,10 +212,28 @@ BEGIN
         [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
         [post_id] BIGINT NOT NULL,
         [user_id] BIGINT NOT NULL,
+        [reaction_type] NVARCHAR(30) DEFAULT N'LIKE',
         [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT [UQ_post_user] UNIQUE ([post_id], [user_id])
     );
     PRINT N'>>> Đã tạo bảng post_upvotes';
+END
+GO
+
+-- 10b. Bảng Bình luận bài đăng cộng đồng (post_comments)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'post_comments')
+BEGIN
+    CREATE TABLE [dbo].[post_comments] (
+        [id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [post_id] BIGINT NOT NULL,
+        [user_id] BIGINT NULL,
+        [author_name] NVARCHAR(150) NOT NULL,
+        [author_avatar] NVARCHAR(255) NULL,
+        [content] NVARCHAR(MAX) NOT NULL,
+        [created_at] DATETIME2 DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT [FK_comments_post] FOREIGN KEY ([post_id]) REFERENCES [dbo].[community_posts] ([id]) ON DELETE CASCADE
+    );
+    PRINT N'>>> Đã tạo bảng post_comments';
 END
 GO
 
