@@ -118,7 +118,9 @@ public class DataInitializer implements CommandLineRunner {
                         "ALTER TABLE team_fund_requests ALTER COLUMN purpose NVARCHAR(500) NOT NULL",
                         "ALTER TABLE team_fund_requests ALTER COLUMN reject_reason NVARCHAR(500) NULL",
                         "ALTER TABLE rescue_chat_messages ALTER COLUMN sender_name NVARCHAR(100) NOT NULL",
-                        "ALTER TABLE rescue_chat_messages ALTER COLUMN content NVARCHAR(MAX) NOT NULL"
+                        "ALTER TABLE rescue_chat_messages ALTER COLUMN content NVARCHAR(MAX) NOT NULL",
+                        "ALTER TABLE post_comments ALTER COLUMN author_name NVARCHAR(150) NOT NULL",
+                        "ALTER TABLE post_comments ALTER COLUMN content NVARCHAR(MAX) NOT NULL"
                     };
                     for (String sql : statements) {
                         try {

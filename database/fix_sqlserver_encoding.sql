@@ -120,6 +120,13 @@ IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'rescue_chat_m
 IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'rescue_chat_messages') AND name = 'content')
     ALTER TABLE [dbo].[rescue_chat_messages] ALTER COLUMN [content] NVARCHAR(MAX) NOT NULL;
 
+-- 15. Bảng post_comments
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'post_comments') AND name = 'author_name')
+    ALTER TABLE [dbo].[post_comments] ALTER COLUMN [author_name] NVARCHAR(150) NOT NULL;
+
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'post_comments') AND name = 'content')
+    ALTER TABLE [dbo].[post_comments] ALTER COLUMN [content] NVARCHAR(MAX) NOT NULL;
+
 PRINT N'>>> Chuyển đổi kiểu dữ liệu cột thành công!';
 GO
 

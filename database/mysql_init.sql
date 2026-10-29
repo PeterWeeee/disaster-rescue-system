@@ -341,4 +341,46 @@ INSERT IGNORE INTO `community_posts` (`id`, `author_name`, `hazard_type`, `conte
 (3, 'Nguyễn Văn Hùng', 'TREE_FALL', 'Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!', 'Đường Hùng Vương, TP Tam Kỳ, Quảng Nam', 15.5684, 108.4795, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg', 'VERIFIED', 35, 12),
 (4, 'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', 'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', 'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg', 'VERIFIED', 52, 14),
 (5, 'Phan Thanh Sơn', 'ISOLATED', 'Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.', 'Xã Quế Long, Huyện Quế Sơn, Quảng Nam', 15.6512, 108.1834, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg', 'VERIFIED', 41, 9),
-(6, 'Ban Chỉ Huy PCTT & TKCN Địa Phương', 'LANDSLIDE', 'Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.', 'Đèo Le, Nông Sơn, Quảng Nam', 15.6320, 108.0670, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg', 'VERIFIED', 29, 5);
+(6, 'Ban Chỉ Huy PCTT & TKCN Địa Phương', 'LANDSLIDE', 'Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.', 'Đèo Le, Nông Sơn, Quảng Nam', 15.6320, 108.0670, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg', 'VERIFIED', 29, 2);
+
+-- 21. Dữ liệu mẫu Bình luận bài đăng cộng đồng (post_comments)
+INSERT IGNORE INTO `post_comments` (`id`, `post_id`, `user_id`, `author_name`, `author_avatar`, `content`, `created_at`) VALUES
+(1, 1, NULL, 'Nguyễn Văn Hùng', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80', 'Bà con xóm 2 chú ý tuyệt đối không đi đường tắt qua khe suối nhé, đất đá trên đồi vẫn đang có dấu hiệu trượt tiếp!', DATE_SUB(NOW(), INTERVAL 120 MINUTE)),
+(2, 1, NULL, 'Trần Đình Điều Phối', 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80', 'Đội dân quân xã và lực lượng công an đã chốt chặn hai đầu ngõ rồi ạ. Đề nghị bà con bình tĩnh chờ lệnh sơ tán.', DATE_SUB(NOW(), INTERVAL 95 MINUTE)),
+(3, 1, NULL, 'Lê Thị Mai', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80', 'Cầu mong không có ai bị thương, nhìn vết nứt mà thót cả tim! Mọi người cố gắng giữ an toàn nhé.', DATE_SUB(NOW(), INTERVAL 70 MINUTE)),
+(4, 2, NULL, 'Võ Thị Mỹ Linh', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80', 'Có gia đình bà Bảy ở số 28 Nguyễn Thị Minh Khai đang bị kẹt trên gác lửng, nước lên sát sàn rồi, đội ca nô ghé đón với ạ!', DATE_SUB(NOW(), INTERVAL 110 MINUTE)),
+(5, 2, NULL, 'Đội Cứu Hộ Đà Nẵng', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', 'Đội 02 đã tiếp nhận thông tin nhà bà Bảy, xuồng máy đang rẽ vào hẻm tiếp cận ngay đây!', DATE_SUB(NOW(), INTERVAL 85 MINUTE)),
+(6, 3, NULL, 'Phạm Văn Bình', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80', 'Điện lực Tam Kỳ đã cắt điện trạm biến áp số 4 từ 15 phút trước rồi, bà con an tâm nhưng vẫn tránh xa dây chùng nhé.', DATE_SUB(NOW(), INTERVAL 100 MINUTE)),
+(7, 3, NULL, 'Nguyễn Thị Đào', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80', 'Cảm ơn các bác thợ điện đã xử lý kịp thời, dông lốc kinh khủng quá!', DATE_SUB(NOW(), INTERVAL 75 MINUTE)),
+(8, 4, NULL, 'Trần Anh Tuấn', 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=120&q=80', 'Tuyệt vời quá các chiến sĩ ơi! Người nhà mình ở An Lạc vừa gọi điện báo đã được lên xuồng an toàn rồi.', DATE_SUB(NOW(), INTERVAL 130 MINUTE)),
+(9, 4, NULL, 'Lê Văn Thành', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80', 'Ấm lòng mùa bão lũ. Chúc toàn đội nhiều sức khỏe và an toàn trên từng chuyến xuồng!', DATE_SUB(NOW(), INTERVAL 105 MINUTE)),
+(10, 4, NULL, 'Bùi Thu Trang', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80', 'Biết ơn các anh cứu hộ vô cùng, bà con nhớ mặc áo phao cẩn thận.', DATE_SUB(NOW(), INTERVAL 80 MINUTE)),
+(11, 5, NULL, 'Đặng Hữu Phúc', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80', 'Bên mình đang tập kết thêm 200 suất bánh chưng và nước suối tại UBND xã Quế Long, ai cần tiếp tế thêm liên hệ nhé.', DATE_SUB(NOW(), INTERVAL 115 MINUTE)),
+(12, 5, NULL, 'Hoàng Thị Tuyết', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80', 'Bà con khu xóm Trong đang rất thiếu nước sạch, may quá có đoàn về hỗ trợ kịp thời!', DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+(13, 6, NULL, 'Hoàng Văn Nam', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80', 'Đoạn Đèo Le đá rơi nhiều, các xe cứu trợ không có dẫn đường thì tạm thời dừng chờ ở chân đèo nhé bà con.', DATE_SUB(NOW(), INTERVAL 125 MINUTE)),
+(14, 6, NULL, 'Nguyễn Quang Huy', 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=120&q=80', 'Lực lượng chức năng đang làm việc rất khẩn trương, hy vọng đầu giờ chiều sẽ thông được một làn đường.', DATE_SUB(NOW(), INTERVAL 100 MINUTE));
+
+-- 22. Dữ liệu mẫu Phản ứng icon cảm xúc bài đăng (post_upvotes)
+INSERT IGNORE INTO `post_upvotes` (`post_id`, `user_id`, `reaction_type`, `created_at`) VALUES
+(1, 101, 'WARNING', NOW()),
+(1, 102, 'PRAY', NOW()),
+(1, 103, 'LIKE', NOW()),
+(1, 104, 'CARE', NOW()),
+(1, 105, 'SAD', NOW()),
+(2, 106, 'PRAY', NOW()),
+(2, 107, 'CARE', NOW()),
+(2, 108, 'LIKE', NOW()),
+(2, 109, 'WARNING', NOW()),
+(3, 110, 'WARNING', NOW()),
+(3, 111, 'LIKE', NOW()),
+(3, 112, 'CARE', NOW()),
+(4, 113, 'LIKE', NOW()),
+(4, 114, 'CARE', NOW()),
+(4, 115, 'PRAY', NOW()),
+(4, 116, 'LIKE', NOW()),
+(5, 117, 'CARE', NOW()),
+(5, 118, 'LIKE', NOW()),
+(5, 119, 'PRAY', NOW()),
+(6, 120, 'LIKE', NOW()),
+(6, 121, 'CARE', NOW()),
+(6, 122, 'WARNING', NOW());

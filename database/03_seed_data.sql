@@ -197,23 +197,23 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE 
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Cẩm Phô%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Lê Minh Hoàng', 'FLOOD', N'Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!', N'Phường Cẩm Phô, TP Hội An, Quảng Nam', 15.8782, 108.3243, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg', 'PENDING', 18, 8);
+    VALUES (N'Lê Minh Hoàng', 'FLOOD', N'Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!', N'Phường Cẩm Phô, TP Hội An, Quảng Nam', 15.8782, 108.3243, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg', 'PENDING', 18, 2);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Tam Kỳ%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Nguyễn Văn Hùng', 'TREE_FALL', N'Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!', N'Đường Hùng Vương, TP Tam Kỳ, Quảng Nam', 15.5684, 108.4795, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg', 'VERIFIED', 35, 12);
+    VALUES (N'Nguyễn Văn Hùng', 'TREE_FALL', N'Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!', N'Đường Hùng Vương, TP Tam Kỳ, Quảng Nam', 15.5684, 108.4795, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg', 'VERIFIED', 35, 2);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', N'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', N'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg', 'VERIFIED', 52, 14);
+    VALUES (N'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', N'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', N'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg', 'VERIFIED', 52, 3);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Quế Long%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Phan Thanh Sơn', 'ISOLATED', N'Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.', N'Xã Quế Long, Huyện Quế Sơn, Quảng Nam', 15.6512, 108.1834, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg', 'VERIFIED', 41, 9);
+    VALUES (N'Phan Thanh Sơn', 'ISOLATED', N'Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.', N'Xã Quế Long, Huyện Quế Sơn, Quảng Nam', 15.6512, 108.1834, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg', 'VERIFIED', 41, 2);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Nông Sơn%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Ban Chỉ Huy PCTT & TKCN Địa Phương', 'LANDSLIDE', N'Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.', N'Đèo Le, Nông Sơn, Quảng Nam', 15.6320, 108.0670, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg', 'VERIFIED', 29, 5);
+    VALUES (N'Ban Chỉ Huy PCTT & TKCN Địa Phương', 'LANDSLIDE', N'Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.', N'Đèo Le, Nông Sơn, Quảng Nam', 15.6320, 108.0670, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg', 'VERIFIED', 29, 2);
 
 -- Cập nhật bổ sung ảnh cho các bài viết hiện hữu nếu đang thiếu
 UPDATE [dbo].[community_posts]
@@ -225,4 +225,118 @@ SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/
 WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'FLOOD';
 
 PRINT N'>>> Đã nạp Bài đăng cảnh báo cộng đồng mẫu với ảnh Cloudinary CDN!';
+GO
+
+-- 7. Nạp Bình luận mẫu cho bài đăng cộng đồng (Post Comments) & Cảm xúc (Reactions)
+DECLARE @p1Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Trà Mai%');
+DECLARE @p2Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Cẩm Phô%');
+DECLARE @p3Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Tam Kỳ%');
+DECLARE @p4Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%');
+DECLARE @p5Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Quế Long%');
+DECLARE @p6Id BIGINT = (SELECT TOP 1 [id] FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Nông Sơn%');
+
+-- 7.1. Bình luận mẫu cho Post 1 (Trà Mai)
+IF @p1Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p1Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p1Id, NULL, N'Nguyễn Văn Hùng', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80', N'Bà con xóm 2 chú ý tuyệt đối không đi đường tắt qua khe suối nhé, đất đá trên đồi vẫn đang có dấu hiệu trượt tiếp!', DATEADD(MINUTE, -120, GETDATE())),
+    (@p1Id, NULL, N'Trần Đình Điều Phối', 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80', N'Đội dân quân xã và lực lượng công an đã chốt chặn hai đầu ngõ rồi ạ. Đề nghị bà con bình tĩnh chờ lệnh sơ tán.', DATEADD(MINUTE, -95, GETDATE())),
+    (@p1Id, NULL, N'Lê Thị Mai', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80', N'Cầu mong không có ai bị thương, nhìn vết nứt mà thót cả tim! Mọi người cố gắng giữ an toàn nhé.', DATEADD(MINUTE, -70, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 3 WHERE [id] = @p1Id;
+END
+
+-- 7.2. Bình luận mẫu cho Post 2 (Cẩm Phô, Hội An)
+IF @p2Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p2Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p2Id, NULL, N'Võ Thị Mỹ Linh', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80', N'Có gia đình bà Bảy ở số 28 Nguyễn Thị Minh Khai đang bị kẹt trên gác lửng, nước lên sát sàn rồi, đội ca nô ghé đón với ạ!', DATEADD(MINUTE, -110, GETDATE())),
+    (@p2Id, NULL, N'Đội Cứu Hộ Đà Nẵng', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', N'Đội 02 đã tiếp nhận thông tin nhà bà Bảy, xuồng máy đang rẽ vào hẻm tiếp cận ngay đây!', DATEADD(MINUTE, -85, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 2 WHERE [id] = @p2Id;
+END
+
+-- 7.3. Bình luận mẫu cho Post 3 (Đường Hùng Vương, Tam Kỳ)
+IF @p3Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p3Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p3Id, NULL, N'Phạm Văn Bình', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80', N'Điện lực Tam Kỳ đã cắt điện trạm biến áp số 4 từ 15 phút trước rồi, bà con an tâm nhưng vẫn tránh xa dây chùng nhé.', DATEADD(MINUTE, -100, GETDATE())),
+    (@p3Id, NULL, N'Nguyễn Thị Đào', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80', N'Cảm ơn các bác thợ điện đã xử lý kịp thời, dông lốc kinh khủng quá!', DATEADD(MINUTE, -75, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 2 WHERE [id] = @p3Id;
+END
+
+-- 7.4. Bình luận mẫu cho Post 4 (Thôn An Lạc, Duy Vinh)
+IF @p4Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p4Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p4Id, NULL, N'Trần Anh Tuấn', 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=120&q=80', N'Tuyệt vời quá các chiến sĩ ơi! Người nhà mình ở An Lạc vừa gọi điện báo đã được lên xuồng an toàn rồi.', DATEADD(MINUTE, -130, GETDATE())),
+    (@p4Id, NULL, N'Lê Văn Thành', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80', N'Ấm lòng mùa bão lũ. Chúc toàn đội nhiều sức khỏe và an toàn trên từng chuyến xuồng!', DATEADD(MINUTE, -105, GETDATE())),
+    (@p4Id, NULL, N'Bùi Thu Trang', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80', N'Biết ơn các anh cứu hộ vô cùng, bà con nhớ mặc áo phao cẩn thận.', DATEADD(MINUTE, -80, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 3 WHERE [id] = @p4Id;
+END
+
+-- 7.5. Bình luận mẫu cho Post 5 (Xã Quế Long, Quế Sơn)
+IF @p5Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p5Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p5Id, NULL, N'Đặng Hữu Phúc', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80', N'Bên mình đang tập kết thêm 200 suất bánh chưng và nước suối tại UBND xã Quế Long, ai cần tiếp tế thêm liên hệ nhé.', DATEADD(MINUTE, -115, GETDATE())),
+    (@p5Id, NULL, N'Hoàng Thị Tuyết', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80', N'Bà con khu xóm Trong đang rất thiếu nước sạch, may quá có đoàn về hỗ trợ kịp thời!', DATEADD(MINUTE, -90, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 2 WHERE [id] = @p5Id;
+END
+
+-- 7.6. Bình luận mẫu cho Post 6 (Đèo Le, Nông Sơn)
+IF @p6Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_comments] WHERE [post_id] = @p6Id)
+BEGIN
+    INSERT INTO [dbo].[post_comments] ([post_id], [user_id], [author_name], [author_avatar], [content], [created_at]) VALUES
+    (@p6Id, NULL, N'Hoàng Văn Nam', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80', N'Đoạn Đèo Le đá rơi nhiều, các xe cứu trợ không có dẫn đường thì tạm thời dừng chờ ở chân đèo nhé bà con.', DATEADD(MINUTE, -125, GETDATE())),
+    (@p6Id, NULL, N'Nguyễn Quang Huy', 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=120&q=80', N'Lực lượng chức năng đang làm việc rất khẩn trương, hy vọng đầu giờ chiều sẽ thông được một làn đường.', DATEADD(MINUTE, -100, GETDATE()));
+
+    UPDATE [dbo].[community_posts] SET [comment_count] = 2 WHERE [id] = @p6Id;
+END
+
+-- 7.7. Nạp Phản ứng cảm xúc mẫu (Reactions / post_upvotes)
+IF @p1Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p1Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p1Id, 101, 'WARNING', GETDATE()),
+    (@p1Id, 102, 'PRAY', GETDATE()),
+    (@p1Id, 103, 'LIKE', GETDATE()),
+    (@p1Id, 104, 'CARE', GETDATE()),
+    (@p1Id, 105, 'SAD', GETDATE());
+
+IF @p2Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p2Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p2Id, 106, 'PRAY', GETDATE()),
+    (@p2Id, 107, 'CARE', GETDATE()),
+    (@p2Id, 108, 'LIKE', GETDATE()),
+    (@p2Id, 109, 'WARNING', GETDATE());
+
+IF @p3Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p3Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p3Id, 110, 'WARNING', GETDATE()),
+    (@p3Id, 111, 'LIKE', GETDATE()),
+    (@p3Id, 112, 'CARE', GETDATE());
+
+IF @p4Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p4Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p4Id, 113, 'LIKE', GETDATE()),
+    (@p4Id, 114, 'CARE', GETDATE()),
+    (@p4Id, 115, 'PRAY', GETDATE()),
+    (@p4Id, 116, 'LIKE', GETDATE());
+
+IF @p5Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p5Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p5Id, 117, 'CARE', GETDATE()),
+    (@p5Id, 118, 'LIKE', GETDATE()),
+    (@p5Id, 119, 'PRAY', GETDATE());
+
+IF @p6Id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[post_upvotes] WHERE [post_id] = @p6Id)
+    INSERT INTO [dbo].[post_upvotes] ([post_id], [user_id], [reaction_type], [created_at]) VALUES
+    (@p6Id, 120, 'LIKE', GETDATE()),
+    (@p6Id, 121, 'CARE', GETDATE()),
+    (@p6Id, 122, 'WARNING', GETDATE());
+
+PRINT N'>>> Đã nạp Bình luận mẫu và Phản ứng icon cảm xúc cho các bài đăng cộng đồng!';
 GO
