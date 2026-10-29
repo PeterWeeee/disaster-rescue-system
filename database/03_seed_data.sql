@@ -218,11 +218,13 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE 
 -- Cập nhật bổ sung ảnh cho các bài viết hiện hữu nếu đang thiếu
 UPDATE [dbo].[community_posts]
 SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg'
-WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'LANDSLIDE';
+WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'LANDSLIDE'
+  AND [location_name] LIKE N'%Trà Mai%';
 
 UPDATE [dbo].[community_posts]
 SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg'
-WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'FLOOD';
+WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'FLOOD'
+  AND [location_name] LIKE N'%Cẩm Phô%';
 
 PRINT N'>>> Đã nạp Bài đăng cảnh báo cộng đồng mẫu với ảnh Cloudinary CDN!';
 GO

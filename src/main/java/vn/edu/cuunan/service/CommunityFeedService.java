@@ -28,6 +28,18 @@ public class CommunityFeedService {
     public static final String CLOUDINARY_FEED_STORM = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg";
     public static final String CLOUDINARY_FEED_RELIEF = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg";
     public static final String CLOUDINARY_FEED_ROAD = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg";
+    public static final String CLOUDINARY_FEED_FLOOD_STREET = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793274112/cuunan247/community_feed/ucs3mtmhihw6k9ozlm43.jpg";
+    public static final String CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211160/cuunan247/guide_images/earthquake-step1.svg";
+    public static final String CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211172/cuunan247/guide_images/earthquake-step2.jpg";
+    public static final String CLOUDINARY_GUIDE_LANDSLIDE_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211182/cuunan247/guide_images/landslide-step2.jpg";
+    public static final String CLOUDINARY_GUIDE_LIGHTNING_STEP_1 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211189/cuunan247/guide_images/lightning-step1.jpg";
+    public static final String CLOUDINARY_GUIDE_LIGHTNING_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211190/cuunan247/guide_images/lightning-step2.svg";
+    private static final List<String> SAMPLE_FEED_IMAGES = List.of(
+            CLOUDINARY_FEED_LANDSLIDE, CLOUDINARY_FEED_FLOOD, CLOUDINARY_FEED_BOAT,
+            CLOUDINARY_FEED_STORM, CLOUDINARY_FEED_RELIEF, CLOUDINARY_FEED_ROAD,
+            CLOUDINARY_FEED_FLOOD_STREET, CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1,
+            CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2, CLOUDINARY_GUIDE_LANDSLIDE_STEP_2,
+            CLOUDINARY_GUIDE_LIGHTNING_STEP_1, CLOUDINARY_GUIDE_LIGHTNING_STEP_2);
 
     private final CommunityPostRepository postRepository;
     private final EvacuationShelterRepository shelterRepository;
@@ -183,23 +195,29 @@ public class CommunityFeedService {
             postRepository.save(post5);
             postRepository.save(post6);
         } else {
-            // Cập nhật bổ sung ảnh Cloudinary cho các bản tin hiện tại nếu chưa có ảnh
+            // Gán ảnh Cloudinary riêng cho từng bài mẫu và sửa các URL mẫu bị trùng từ lần khởi tạo trước.
             List<CommunityPost> existing = postRepository.findAll();
+            Set<String> assignedSampleImages = new HashSet<>();
             for (CommunityPost post : existing) {
-                if (post.getImageUrl() == null || post.getImageUrl().isBlank()) {
-                    if (post.getHazardType() == HazardType.LANDSLIDE) {
-                        post.setImageUrl(CLOUDINARY_FEED_LANDSLIDE);
-                        postRepository.save(post);
-                    } else if (post.getHazardType() == HazardType.FLOOD) {
-                        post.setImageUrl(CLOUDINARY_FEED_FLOOD);
-                        postRepository.save(post);
-                    } else if (post.getHazardType() == HazardType.TREE_FALL || post.getHazardType() == HazardType.STORM) {
-                        post.setImageUrl(CLOUDINARY_FEED_STORM);
-                        postRepository.save(post);
-                    } else if (post.getHazardType() == HazardType.ISOLATED) {
-                        post.setImageUrl(CLOUDINARY_FEED_RELIEF);
+                String preferredImage = sampleImageFor(post);
+                if (preferredImage == null) continue;
+
+                String currentImage = post.getImageUrl();
+                boolean isKnownSampleImage = currentImage != null && SAMPLE_FEED_IMAGES.contains(currentImage);
+                if ((currentImage == null || currentImage.isBlank() || isKnownSampleImage)
+                        && assignedSampleImages.contains(preferredImage)) {
+                    preferredImage = SAMPLE_FEED_IMAGES.stream()
+                            .filter(image -> !assignedSampleImages.contains(image))
+                            .findFirst()
+                            .orElse(preferredImage);
+                }
+
+                if (currentImage == null || currentImage.isBlank() || isKnownSampleImage) {
+                    if (!preferredImage.equals(currentImage)) {
+                        post.setImageUrl(preferredImage);
                         postRepository.save(post);
                     }
+                    assignedSampleImages.add(preferredImage);
                 }
             }
 
@@ -245,6 +263,27 @@ public class CommunityFeedService {
 
         // Khởi tạo phản ứng icon mẫu nếu chưa có
         initSampleReactions();
+    }
+
+    private String sampleImageFor(CommunityPost post) {
+        if (post == null || post.getLocationName() == null) return null;
+        String location = post.getLocationName().toLowerCase(Locale.ROOT);
+
+        if (location.contains("trà mai")) return CLOUDINARY_FEED_LANDSLIDE;
+        if (location.contains("cẩm phô")) return CLOUDINARY_FEED_FLOOD;
+        if (location.contains("tam kỳ")) return CLOUDINARY_FEED_STORM;
+        if (location.contains("duy vinh")) return CLOUDINARY_FEED_BOAT;
+        if (location.contains("quế long")) return CLOUDINARY_FEED_RELIEF;
+        if (location.contains("đèo le")) return CLOUDINARY_FEED_ROAD;
+
+        if (location.contains("mẹ suốt")) return CLOUDINARY_FEED_FLOOD_STREET;
+        if (location.contains("thạch nham")) return CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2;
+        if (location.contains("bạch đằng")) return CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1;
+        if (location.contains("đèo prenn")) return CLOUDINARY_GUIDE_LANDSLIDE_STEP_2;
+        if (location.contains("nguyễn du")) return CLOUDINARY_GUIDE_LIGHTNING_STEP_2;
+        if (location.contains("phạm văn đồng")) return CLOUDINARY_GUIDE_LIGHTNING_STEP_1;
+
+        return null;
     }
 
     public void initSampleComments() {

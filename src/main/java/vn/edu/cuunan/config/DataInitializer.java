@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.entity.*;
 import vn.edu.cuunan.repository.*;
+import vn.edu.cuunan.service.CommunityFeedService;
 import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
@@ -874,6 +875,14 @@ public class DataInitializer implements CommandLineRunner {
                 "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
                 VerificationStatus.REJECTED, 3, 8, null);
 
+        // Mỗi bài mẫu dùng một ảnh Cloudinary khác nhau; cập nhật cả dữ liệu đã tạo từ lần chạy trước.
+        ensureSamplePostImage(post1, CommunityFeedService.CLOUDINARY_FEED_FLOOD_STREET);
+        ensureSamplePostImage(post2, CommunityFeedService.CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2);
+        ensureSamplePostImage(post3, CommunityFeedService.CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1);
+        ensureSamplePostImage(post4, CommunityFeedService.CLOUDINARY_GUIDE_LANDSLIDE_STEP_2);
+        ensureSamplePostImage(post5, CommunityFeedService.CLOUDINARY_GUIDE_LIGHTNING_STEP_2);
+        ensureSamplePostImage(post6, CommunityFeedService.CLOUDINARY_GUIDE_LIGHTNING_STEP_1);
+
         // 10. Khởi tạo Lượt bình chọn bài đăng (PostUpvotes)
         if (post1 != null) {
             initUpvote(post1.getId(), citizen01.getId());
@@ -1412,6 +1421,12 @@ public class DataInitializer implements CommandLineRunner {
         CommunityPost post = new CommunityPost(null, author, authorName, hazardType, content, locationName, lat, lng,
                 null, status, upvotes, comments, sosRequest);
         return communityPostRepository.save(post);
+    }
+
+    private void ensureSamplePostImage(CommunityPost post, String imageUrl) {
+        if (post == null || imageUrl == null || imageUrl.equals(post.getImageUrl())) return;
+        post.setImageUrl(imageUrl);
+        communityPostRepository.save(post);
     }
 
     private void initUpvote(Long postId, Long userId) {
