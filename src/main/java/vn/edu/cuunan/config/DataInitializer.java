@@ -216,10 +216,19 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 3. Phục hồi Bài đăng cộng đồng (CommunityPosts)
+        // 3. Phục hồi Bài đăng cộng đồng (CommunityPosts) & dọn dẹp các bài đăng cũ thừa
         for (CommunityPost post : communityPostRepository.findAll()) {
             boolean changed = false;
             String loc = (post.getLocationName() != null) ? post.getLocationName() : "";
+
+            // Xóa triệt để các bài đăng cũ không còn trong bộ dữ liệu chuẩn (như Đèo Le, Quế Long)
+            if (loc.contains("Đèo Le") || loc.contains("Nông Sơn") || loc.contains("Quế Long")) {
+                try {
+                    communityPostRepository.delete(post);
+                    continue;
+                } catch (Exception ignored) {}
+            }
+
             if ((post.getContent() != null && post.getContent().contains("?")) ||
                 (post.getAuthorName() != null && post.getAuthorName().contains("?")) ||
                 loc.contains("?")) {
@@ -231,8 +240,8 @@ public class DataInitializer implements CommandLineRunner {
                     changed = true;
                 } else if (loc.contains("Trà Mai") || loc.contains("Nam Trà My")) {
                     post.setAuthorName("Trần Thị Thu");
-                    post.setContent("Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.");
-                    post.setLocationName("Xã Trà Mai, Nam Trà My, Quảng Nam");
+                    post.setContent("Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Mọi người tránh khu vực này.");
+                    post.setLocationName("Xã Trà Mai, Quảng Nam");
                     changed = true;
                 } else if (loc.contains("Mẹ Suốt") || loc.contains("Liên Chiểu")) {
                     post.setAuthorName("Nguyễn Văn Dân");
@@ -246,18 +255,13 @@ public class DataInitializer implements CommandLineRunner {
                     changed = true;
                 } else if (loc.contains("Cẩm Phô") || loc.contains("Hội An")) {
                     post.setAuthorName("Lê Minh Hoàng");
-                    post.setContent("Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!");
-                    post.setLocationName("Phường Cẩm Phô, TP Hội An, Quảng Nam");
+                    post.setContent("Nước sông dâng nhanh, đã ngập tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng gấp.");
+                    post.setLocationName("Phường Cẩm Phô, Hội An");
                     changed = true;
                 } else if (loc.contains("Bạch Đằng") || loc.contains("Huế")) {
                     post.setAuthorName("Trần Thị Huế");
                     post.setContent("Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.");
                     post.setLocationName("Đường Bạch Đằng, Phường Phú Cát, TP. Huế");
-                    changed = true;
-                } else if (loc.contains("Hùng Vương") || loc.contains("Tam Kỳ")) {
-                    post.setAuthorName("Nguyễn Văn Hùng");
-                    post.setContent("Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!");
-                    post.setLocationName("Đường Hùng Vương, TP Tam Kỳ, Quảng Nam");
                     changed = true;
                 } else if (loc.contains("Nguyễn Du") || loc.contains("Vinh")) {
                     post.setAuthorName("Lê Văn Nghệ An");
@@ -268,16 +272,6 @@ public class DataInitializer implements CommandLineRunner {
                     post.setAuthorName("Đội Cứu Hộ Tình Nguyện Miền Trung");
                     post.setContent("Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.");
                     post.setLocationName("Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam");
-                    changed = true;
-                } else if (loc.contains("Quế Long") || loc.contains("Quế Sơn")) {
-                    post.setAuthorName("Phan Thanh Sơn");
-                    post.setContent("Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.");
-                    post.setLocationName("Xã Quế Long, Huyện Quế Sơn, Quảng Nam");
-                    changed = true;
-                } else if (loc.contains("Đèo Le") || loc.contains("Nông Sơn")) {
-                    post.setAuthorName("Ban Chỉ Huy PCTT & TKCN Địa Phương");
-                    post.setContent("Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.");
-                    post.setLocationName("Đèo Le, Nông Sơn, Quảng Nam");
                     changed = true;
                 } else if (loc.contains("Nha Trang") || loc.contains("Vĩnh Hải")) {
                     post.setAuthorName("Hoàng Thị Khánh Hòa");
@@ -861,7 +855,17 @@ public class DataInitializer implements CommandLineRunner {
         initShelter("Sân Vận Động 19/8 Nha Trang", "Đường Yersin, TP. Nha Trang, Tỉnh Khánh Hòa", 12.2450, 109.1900, 1200, 310, "0258.3827112", "OPEN");
         initShelter("Trung Tâm Văn Hóa Nghệ Thuật Lâm Đồng", "Số 01 Trần Hưng Đạo, TP. Đà Lạt, Tỉnh Lâm Đồng", 11.9420, 108.4450, 450, 0, "0263.3828112", "OPEN");
 
-        // 9. Khởi tạo Bài đăng cộng đồng (CommunityPosts)
+        // 9. Khởi tạo & Đồng bộ 10 Bài đăng cộng đồng chuẩn miền Trung (10 bài ảnh thực tế)
+        CommunityPost postTraMai = initPost(null, "Trần Thị Thu", HazardType.LANDSLIDE,
+                "Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Mọi người tránh khu vực này.",
+                "Xã Trà Mai, Quảng Nam", 15.2841, 108.0821,
+                VerificationStatus.VERIFIED, 7, 3, null);
+
+        CommunityPost postCamPho = initPost(null, "Lê Minh Hoàng", HazardType.FLOOD,
+                "Nước sông dâng nhanh, đã ngập tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng gấp.",
+                "Phường Cẩm Phô, Hội An", 15.8782, 108.3243,
+                VerificationStatus.PENDING, 8, 2, null);
+
         CommunityPost post1 = initPost(citizen01, "Nguyễn Văn Dân", HazardType.FLOOD,
                 "Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!",
                 "Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng", 16.0590, 108.1580,
@@ -897,13 +901,21 @@ public class DataInitializer implements CommandLineRunner {
                 "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
                 VerificationStatus.REJECTED, 3, 8, null);
 
+        CommunityPost postDuyVinh = initPost(null, "Đội Cứu Hộ Tình Nguyện Miền Trung", HazardType.FLOOD,
+                "Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.",
+                "Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam", 15.8450, 108.3050,
+                VerificationStatus.VERIFIED, 52, 3, null);
+
         // Mỗi bài mẫu dùng một ảnh Cloudinary thực tế khớp nội dung bài đăng; cập nhật cả dữ liệu đã tạo từ lần chạy trước.
+        ensureSamplePostImage(postTraMai, CommunityFeedService.CLOUDINARY_FEED_LANDSLIDE);
+        ensureSamplePostImage(postCamPho, CommunityFeedService.CLOUDINARY_FEED_FLOOD);
         ensureSamplePostImage(post1, CommunityFeedService.CLOUDINARY_FEED_FLOOD_STREET);
         ensureSamplePostImage(post2, CommunityFeedService.CLOUDINARY_FEED_THACH_NHAM_TAY);
         ensureSamplePostImage(post3, CommunityFeedService.CLOUDINARY_FEED_BACH_DANG);
         ensureSamplePostImage(post4, CommunityFeedService.CLOUDINARY_FEED_PRENN);
         ensureSamplePostImage(post5, CommunityFeedService.CLOUDINARY_FEED_NGUYEN_DU);
         ensureSamplePostImage(post6, CommunityFeedService.CLOUDINARY_FEED_VINH_HAI);
+        ensureSamplePostImage(postDuyVinh, CommunityFeedService.CLOUDINARY_FEED_BOAT);
 
         // 10. Khởi tạo Lượt bình chọn bài đăng (PostUpvotes)
         if (post1 != null) {
@@ -1418,7 +1430,16 @@ public class DataInitializer implements CommandLineRunner {
     private CommunityPost initPost(User author, String authorName, HazardType hazardType, String content,
                                   String locationName, Double lat, Double lng, VerificationStatus status,
                                   int upvotes, int comments, SosRequest sosRequest) {
-        Optional<CommunityPost> postOpt = (locationName != null) ? communityPostRepository.findFirstByLocationName(locationName) : Optional.empty();
+        Optional<CommunityPost> postOpt = Optional.empty();
+        if (locationName != null) {
+            postOpt = communityPostRepository.findFirstByLocationName(locationName);
+            if (postOpt.isEmpty()) {
+                String firstPart = locationName.split(",")[0].trim();
+                postOpt = communityPostRepository.findAll().stream()
+                        .filter(p -> p.getLocationName() != null && p.getLocationName().contains(firstPart))
+                        .findFirst();
+            }
+        }
         if (postOpt.isPresent()) {
             CommunityPost post = postOpt.get();
             boolean changed = false;
