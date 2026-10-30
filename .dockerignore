@@ -1,0 +1,10 @@
+target/
+.git/
+.settings/
+.classpath
+.project
+.factorypath
+ui-preview/
+uploads/
+*.docx
+*.ps1
