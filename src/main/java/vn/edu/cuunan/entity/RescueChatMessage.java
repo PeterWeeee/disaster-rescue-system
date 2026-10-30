@@ -34,7 +34,7 @@ public class RescueChatMessage {
     private String senderPhone;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "message_type", length = 30)

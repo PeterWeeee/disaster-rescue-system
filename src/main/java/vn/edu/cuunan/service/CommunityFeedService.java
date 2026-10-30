@@ -1,6 +1,8 @@
 package vn.edu.cuunan.service;
 
 import jakarta.annotation.PostConstruct;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,9 @@ public class CommunityFeedService {
     private final CloudinaryService cloudinaryService;
     private final SosService sosService;
 
+    @Autowired(required = false)
+    private DataSource dataSource;
+
     public CommunityFeedService(CommunityPostRepository postRepository,
                                 EvacuationShelterRepository shelterRepository,
                                 PostUpvoteRepository upvoteRepository,
@@ -76,6 +81,22 @@ public class CommunityFeedService {
 
     @PostConstruct
     public void initSampleData() {
+        if (dataSource != null) {
+            try (java.sql.Connection conn = dataSource.getConnection();
+                 java.sql.Statement stmt = conn.createStatement()) {
+                stmt.execute("ALTER TABLE community_posts MODIFY COLUMN content TEXT");
+                stmt.execute("ALTER TABLE post_comments MODIFY COLUMN content TEXT");
+            } catch (Exception ignored) {
+            }
+        }
+        try {
+            initSampleDataInternal();
+        } catch (Exception ex) {
+            log.warn("Lỗi khi nạp dữ liệu bảng tin cộng đồng mẫu: {}", ex.getMessage());
+        }
+    }
+
+    private void initSampleDataInternal() {
         if (shelterRepository.count() == 0) {
             log.info("Khởi tạo danh sách điểm sơ tán mẫu...");
             shelterRepository.save(new EvacuationShelter(

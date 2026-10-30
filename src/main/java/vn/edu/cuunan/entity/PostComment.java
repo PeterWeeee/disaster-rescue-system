@@ -24,7 +24,7 @@ public class PostComment {
     private String authorAvatar;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "created_at", nullable = false)

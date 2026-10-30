@@ -22,7 +22,7 @@ public class CommunityPost extends BaseEntity {
     private HazardType hazardType = HazardType.OTHER;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "location_name", length = 255)

@@ -90,6 +90,31 @@ public class DataInitializer implements CommandLineRunner {
         if (dataSource == null) return;
         try (java.sql.Connection conn = dataSource.getConnection()) {
             String dbProduct = conn.getMetaData().getDatabaseProductName();
+            if (dbProduct != null && (dbProduct.toLowerCase().contains("mysql") || dbProduct.toLowerCase().contains("tidb") || dbProduct.toLowerCase().contains("mariadb"))) {
+                log.info(">>> [MySQL/TiDB] Đang kiểm tra và chuẩn hóa kiểu dữ liệu cột sang TEXT...");
+                try (java.sql.Statement stmt = conn.createStatement()) {
+                    String[] mysqlStatements = {
+                        "ALTER TABLE community_posts MODIFY COLUMN content TEXT",
+                        "ALTER TABLE post_comments MODIFY COLUMN content TEXT",
+                        "ALTER TABLE disaster_alerts MODIFY COLUMN content TEXT",
+                        "ALTER TABLE rescue_chat_messages MODIFY COLUMN content TEXT",
+                        "ALTER TABLE notifications MODIFY COLUMN message TEXT",
+                        "ALTER TABLE sos_requests MODIFY COLUMN description TEXT",
+                        "ALTER TABLE rescue_assignments MODIFY COLUMN report_notes TEXT",
+                        "ALTER TABLE rescue_assignments MODIFY COLUMN selected_equipment TEXT",
+                        "ALTER TABLE rescue_teams MODIFY COLUMN equipment_notes TEXT",
+                        "ALTER TABLE rescue_equipment MODIFY COLUMN notes TEXT",
+                        "ALTER TABLE activity_logs MODIFY COLUMN details TEXT"
+                    };
+                    for (String sql : mysqlStatements) {
+                        try {
+                            stmt.execute(sql);
+                        } catch (Exception ignored) {}
+                    }
+                }
+                log.info(">>> [MySQL/TiDB] Đã đảm bảo toàn bộ cột văn bản tương thích TEXT!");
+            }
+
             if (dbProduct != null && dbProduct.toLowerCase().contains("microsoft")) {
                 log.info(">>> [SQL Server] Đang kiểm tra và chuẩn hóa kiểu dữ liệu cột sang NVARCHAR/NVARCHAR(MAX)...");
                 try (java.sql.Statement stmt = conn.createStatement()) {
