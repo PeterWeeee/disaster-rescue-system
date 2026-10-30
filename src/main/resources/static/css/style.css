@@ -1715,13 +1715,53 @@ body.donation-page-body .app-footer a:hover {
     padding: 5px 12px;
     border-radius: 999px;
 }
+.guide-img-frame {
+    background-color: #0b0f19;
+    background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+.guide-img-frame:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
+}
 .guide-ai-illustration {
-    transition: transform .35s ease;
-    aspect-ratio: 16 / 9;
-    max-height: 380px;
+    max-width: 100%;
+    max-height: 480px;
+    width: auto;
+    height: auto;
+    object-fit: contain !important;
+    object-position: center;
+    display: block;
+    margin: 0 auto;
+    border-radius: 6px;
+    transition: transform .25s ease;
 }
 .guide-img-frame:hover .guide-ai-illustration {
-    transform: scale(1.025);
+    transform: scale(1.015);
+}
+.guide-img-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.guide-img-zoom-btn {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
 }
 .guide-action-card {
     box-shadow: 0 2px 8px rgba(29, 78, 216, .04);

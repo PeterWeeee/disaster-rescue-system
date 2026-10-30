@@ -111,26 +111,44 @@
 
                         <div class="guide-step-card-body p-3 p-md-4">
                             <div class="row g-4 align-items-stretch">
-                                <!-- Left Column: Visual AI Illustration -->
+                                <!-- Left Column: Visual AI Illustration (Hiển thị 100% toàn bộ thông tin và viền ảnh) -->
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="guide-img-container h-100 d-flex flex-column">
-                                        <div class="guide-img-frame flex-grow-1 position-relative overflow-hidden rounded-3 shadow-sm">
+                                        <!-- Thanh công cụ thông tin ảnh và nút xem phóng to riêng biệt, không đè lên hình ảnh -->
+                                        <div class="guide-img-toolbar d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                                <span class="badge bg-dark bg-opacity-75 text-white px-2.5 py-1.5 rounded-pill border border-secondary border-opacity-25 small fw-semibold">
+                                                    <i class="fa-solid fa-robot me-1 text-info"></i>Ảnh do AI tạo
+                                                </span>
+                                                <span th:if="${step.imageUrl != null and step.imageUrl.contains('cloudinary')}"
+                                                      class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2.5 py-1.5 rounded-pill small fw-semibold">
+                                                    <i class="fa-solid fa-cloud me-1"></i>Cloudinary CDN
+                                                </span>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm guide-img-zoom-btn fw-semibold"
+                                                    th:data-src="${step.imageUrl}"
+                                                    th:data-caption="${step.stepTitle + ' - ' + step.imageCaption}"
+                                                    onclick="previewGuideImage(this.dataset.src, this.dataset.caption)"
+                                                    title="Bấm để xem ảnh kích thước đầy đủ không bị cắt viền">
+                                                <i class="fa-solid fa-expand me-1"></i>Xem ảnh đầy đủ
+                                            </button>
+                                        </div>
+
+                                        <!-- Khung ảnh: dùng object-fit contain và căn giữa để hiển thị trọn vẹn toàn bộ 4 cạnh và chữ bên trong -->
+                                        <div class="guide-img-frame flex-grow-1 position-relative rounded-3 shadow-sm"
+                                             th:data-src="${step.imageUrl}"
+                                             th:data-caption="${step.stepTitle + ' - ' + step.imageCaption}"
+                                             onclick="previewGuideImage(this.dataset.src, this.dataset.caption)"
+                                             title="Bấm để xem ảnh kích thước đầy đủ">
                                             <img th:src="${step.imageUrl}"
                                                  th:data-fallback="@{${step.fallbackUrl}}"
                                                  onerror="if (this.dataset.fallback && this.src !== this.dataset.fallback) { this.src = this.dataset.fallback; }"
                                                  th:alt="${step.stepTitle}"
-                                                 class="guide-ai-illustration w-100 h-100 object-fit-cover"
+                                                 class="guide-ai-illustration"
                                                  loading="lazy" />
-                                            <div class="guide-img-badge-overlay position-absolute top-0 start-0 m-3 d-flex flex-wrap gap-2">
-                                                <span class="px-3 py-1 rounded-pill bg-dark bg-opacity-75 text-white small fw-bold">
-                                                    <i class="fa-solid fa-robot me-1 text-info"></i>Ảnh do AI tạo
-                                                </span>
-                                                <span th:if="${step.imageUrl != null and step.imageUrl.contains('cloudinary')}"
-                                                      class="px-3 py-1 rounded-pill bg-primary bg-opacity-90 text-white small fw-bold shadow-sm">
-                                                    <i class="fa-solid fa-cloud me-1"></i>Cloudinary CDN
-                                                </span>
-                                            </div>
                                         </div>
+
+                                        <!-- Hộp chú thích dưới ảnh -->
                                         <div class="guide-img-caption-box mt-2 p-2 px-3 rounded-2 bg-light border text-secondary small">
                                             <i class="fa-solid fa-camera-retro me-1 text-primary"></i>
                                             <span class="fw-semibold text-dark">Mô tả trực quan:</span>
@@ -271,6 +289,52 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal phóng to xem trọn vẹn ảnh cẩm nang AI không bị cắt viền -->
+    <div class="modal fade" id="guideImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark border-0 shadow-lg text-white">
+                <div class="modal-header border-bottom border-secondary py-2 px-3">
+                    <h6 class="modal-title fw-bold text-white fs-6" id="guideModalCaption">
+                        <i class="fa-solid fa-image me-2 text-info"></i>Xem ảnh cẩm nang chi tiết
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body p-2 p-md-3 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style="min-height: 480px;">
+                    <img id="guideModalImg" src="" alt="Infographic cẩm nang" class="img-fluid rounded shadow" style="max-height: 82vh; max-width: 100%; object-fit: contain;" />
+                </div>
+                <div class="modal-footer border-top border-secondary py-2 px-3 d-flex justify-content-between flex-wrap gap-2">
+                    <span class="text-white-50 small">
+                        <i class="fa-solid fa-circle-info me-1 text-primary"></i>Toàn bộ thông tin, sơ đồ và viền ảnh được hiển thị 100% nguyên bản
+                    </span>
+                    <div class="d-flex gap-2">
+                        <a id="guideModalOpenTab" href="" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Mở ảnh tab mới
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewGuideImage(src, caption) {
+            if (!src) return;
+            const modalElement = document.getElementById('guideImageModal');
+            if (modalElement && window.bootstrap) {
+                document.getElementById('guideModalImg').src = src;
+                if (caption) {
+                    document.getElementById('guideModalCaption').innerHTML = '<i class="fa-solid fa-image me-2 text-info"></i>' + caption;
+                }
+                document.getElementById('guideModalOpenTab').href = src;
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            } else {
+                window.open(src, '_blank');
+            }
+        }
+    </script>
 </div>
 </body>
 </html>

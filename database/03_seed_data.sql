@@ -193,11 +193,11 @@ GO
 -- 6. Nạp Bài đăng cảnh báo cộng đồng mẫu (Community Posts) kèm ảnh Cloudinary CDN
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Trà Mai%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Trần Thị Thu', 'LANDSLIDE', N'Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.', N'Xã Trà Mai, Nam Trà My, Quảng Nam', 15.2841, 108.0821, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg', 'VERIFIED', 24, 3);
+    VALUES (N'Trần Thị Thu', 'LANDSLIDE', N'Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.', N'Xã Trà Mai, Nam Trà My, Quảng Nam', 15.2841, 108.0821, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328584/cuunan247/community_feed/V%E1%BA%BFt_n%E1%BB%A9t_l%E1%BB%9Bn_xu%E1%BA%A5t_hi%E1%BB%87n_tr%C3%AAn_s%C6%B0%E1%BB%9Dn_%C4%91%E1%BB%93i_ph%C3%ADa_sau_tr%C6%B0%E1%BB%9Dng_ti%E1%BB%83u_h%E1%BB%8Dc_%C4%91%E1%BA%A5t_b%C3%B9n_%C4%91%C3%A3_tr%C3%A0n_ra_%C4%91%C6%B0%E1%BB%9Dng_%C4%91%C3%A8o.webp', 'VERIFIED', 24, 3);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Cẩm Phô%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Lê Minh Hoàng', 'FLOOD', N'Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!', N'Phường Cẩm Phô, TP Hội An, Quảng Nam', 15.8782, 108.3243, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg', 'PENDING', 18, 2);
+    VALUES (N'Lê Minh Hoàng', 'FLOOD', N'Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!', N'Phường Cẩm Phô, TP Hội An, Quảng Nam', 15.8782, 108.3243, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328592/cuunan247/community_feed/N%C6%B0%E1%BB%9Bc_s%C3%B4ng_d%C3%A2ng_nhanh_%C4%91%C3%A3_ng%E1%BA%ADp_t%E1%BA%A7ng_1_d%C3%A3y_nh%C3%A0_ven_s%C3%B4ng.jpg', 'PENDING', 18, 2);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Tam Kỳ%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
@@ -205,7 +205,7 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE 
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', N'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', N'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg', 'VERIFIED', 52, 3);
+    VALUES (N'Đội Cứu Hộ Tình Nguyện Miền Trung', 'FLOOD', N'Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.', N'Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam', 15.8450, 108.3050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328594/cuunan247/community_feed/Xu%E1%BB%93ng_cao_su_c%E1%BB%A9u_h%E1%BB%99_ti%E1%BA%BFp_c%E1%BA%ADn_v%C3%B9ng_ng%E1%BA%ADp_s%C3%A2u.jpg', 'VERIFIED', 52, 3);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Quế Long%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
@@ -217,12 +217,12 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE 
 
 -- Cập nhật bổ sung ảnh cho các bài viết hiện hữu nếu đang thiếu
 UPDATE [dbo].[community_posts]
-SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg'
+SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328584/cuunan247/community_feed/V%E1%BA%BFt_n%E1%BB%A9t_l%E1%BB%9Bn_xu%E1%BA%A5t_hi%E1%BB%87n_tr%C3%AAn_s%C6%B0%E1%BB%9Dn_%C4%91%E1%BB%93i_ph%C3%ADa_sau_tr%C6%B0%E1%BB%9Dng_ti%E1%BB%83u_h%E1%BB%8Dc_%C4%91%E1%BA%A5t_b%C3%B9n_%C4%91%C3%A3_tr%C3%A0n_ra_%C4%91%C6%B0%E1%BB%9Dng_%C4%91%C3%A8o.webp'
 WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'LANDSLIDE'
   AND [location_name] LIKE N'%Trà Mai%';
 
 UPDATE [dbo].[community_posts]
-SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg'
+SET [image_url] = 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328592/cuunan247/community_feed/N%C6%B0%E1%BB%9Bc_s%C3%B4ng_d%C3%A2ng_nhanh_%C4%91%C3%A3_ng%E1%BA%ADp_t%E1%BA%A7ng_1_d%C3%A3y_nh%C3%A0_ven_s%C3%B4ng.jpg'
 WHERE ([image_url] IS NULL OR [image_url] = '') AND [hazard_type] = 'FLOOD'
   AND [location_name] LIKE N'%Cẩm Phô%';
 

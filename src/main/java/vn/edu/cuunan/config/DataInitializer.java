@@ -264,7 +264,7 @@ public class DataInitializer implements CommandLineRunner {
                     post.setContent("Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.");
                     post.setLocationName("Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An");
                     changed = true;
-                } else if (loc.contains("An Lạc") || loc.contains("Duy Vinh")) {
+                } else if (loc.contains("An L") || loc.contains("Duy") || (post.getContent() != null && post.getContent().contains("cao su"))) {
                     post.setAuthorName("Đội Cứu Hộ Tình Nguyện Miền Trung");
                     post.setContent("Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.");
                     post.setLocationName("Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam");
@@ -875,13 +875,13 @@ public class DataInitializer implements CommandLineRunner {
                 "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
                 VerificationStatus.REJECTED, 3, 8, null);
 
-        // Mỗi bài mẫu dùng một ảnh Cloudinary khác nhau; cập nhật cả dữ liệu đã tạo từ lần chạy trước.
+        // Mỗi bài mẫu dùng một ảnh Cloudinary thực tế khớp nội dung bài đăng; cập nhật cả dữ liệu đã tạo từ lần chạy trước.
         ensureSamplePostImage(post1, CommunityFeedService.CLOUDINARY_FEED_FLOOD_STREET);
-        ensureSamplePostImage(post2, CommunityFeedService.CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2);
-        ensureSamplePostImage(post3, CommunityFeedService.CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1);
-        ensureSamplePostImage(post4, CommunityFeedService.CLOUDINARY_GUIDE_LANDSLIDE_STEP_2);
-        ensureSamplePostImage(post5, CommunityFeedService.CLOUDINARY_GUIDE_LIGHTNING_STEP_2);
-        ensureSamplePostImage(post6, CommunityFeedService.CLOUDINARY_GUIDE_LIGHTNING_STEP_1);
+        ensureSamplePostImage(post2, CommunityFeedService.CLOUDINARY_FEED_THACH_NHAM_TAY);
+        ensureSamplePostImage(post3, CommunityFeedService.CLOUDINARY_FEED_BACH_DANG);
+        ensureSamplePostImage(post4, CommunityFeedService.CLOUDINARY_FEED_PRENN);
+        ensureSamplePostImage(post5, CommunityFeedService.CLOUDINARY_FEED_NGUYEN_DU);
+        ensureSamplePostImage(post6, CommunityFeedService.CLOUDINARY_FEED_VINH_HAI);
 
         // 10. Khởi tạo Lượt bình chọn bài đăng (PostUpvotes)
         if (post1 != null) {
