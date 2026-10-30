@@ -27,33 +27,18 @@ public class CommunityFeedService {
     public static final String CLOUDINARY_FEED_LANDSLIDE = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328584/cuunan247/community_feed/V%E1%BA%BFt_n%E1%BB%A9t_l%E1%BB%9Bn_xu%E1%BA%A5t_hi%E1%BB%87n_tr%C3%AAn_s%C6%B0%E1%BB%9Dn_%C4%91%E1%BB%93i_ph%C3%ADa_sau_tr%C6%B0%E1%BB%9Dng_ti%E1%BB%83u_h%E1%BB%8Dc_%C4%91%E1%BA%A5t_b%C3%B9n_%C4%91%C3%A3_tr%C3%A0n_ra_%C4%91%C6%B0%E1%BB%9Dng_%C4%91%C3%A8o.webp";
     public static final String CLOUDINARY_FEED_FLOOD = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328592/cuunan247/community_feed/N%C6%B0%E1%BB%9Bc_s%C3%B4ng_d%C3%A2ng_nhanh_%C4%91%C3%A3_ng%E1%BA%ADp_t%E1%BA%A7ng_1_d%C3%A3y_nh%C3%A0_ven_s%C3%B4ng.jpg";
     public static final String CLOUDINARY_FEED_BOAT = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328594/cuunan247/community_feed/Xu%E1%BB%93ng_cao_su_c%E1%BB%A9u_h%E1%BB%99_ti%E1%BA%BFp_c%E1%BA%ADn_v%C3%B9ng_ng%E1%BA%ADp_s%C3%A2u.jpg";
-    public static final String CLOUDINARY_FEED_STORM = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269099/cuunan247/community_feed/feed_storm_cay_do.jpg";
-    public static final String CLOUDINARY_FEED_RELIEF = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269102/cuunan247/community_feed/feed_relief_supplies.jpg";
-    public static final String CLOUDINARY_FEED_ROAD = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269104/cuunan247/community_feed/feed_clearing_road.jpg";
     public static final String CLOUDINARY_FEED_FLOOD_STREET = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328442/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_M%E1%BA%B9_Su%E1%BB%91t_%C4%91o%E1%BA%A1n_g%E1%BA%A7n_c%E1%BA%A7u_m%C6%B0%C6%A1ng_ng%E1%BA%ADp_s%C3%A2u_h%C6%A1n_1m_n%C6%B0%E1%BB%9Bc_ch%E1%BA%A3y_r%E1%BA%A5t_xi%E1%BA%BFt.jpg";
     public static final String CLOUDINARY_FEED_THACH_NHAM_TAY = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328564/cuunan247/community_feed/C%E1%BA%A7u_tr%C3%A0n_th%C3%B4n_Th%E1%BA%A1ch_Nham_T%C3%A2y_x%C3%A3_H%C3%B2a_Nh%C6%A1n_%C4%91ang_b%E1%BB%8B_ng%E1%BA%ADp_0.8m.jpg";
     public static final String CLOUDINARY_FEED_BACH_DANG = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328566/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_B%E1%BA%A1ch_%C4%90%E1%BA%B1ng_ven_s%C3%B4ng_H%C6%B0%C6%A1ng_n%C6%B0%E1%BB%9Bc_tr%C3%A0n_l%C3%AAn_b%E1%BB%9D_%C4%91i_v%C3%A0o_nh%C3%A0_d%C3%A2n_s%C3%A2u_0.5m.jpg";
     public static final String CLOUDINARY_FEED_PRENN = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328569/cuunan247/community_feed/%C4%90%C3%A8o_Prenn_%C4%91o%E1%BA%A1n_Km225_xu%E1%BA%A5t_hi%E1%BB%87n_v%E1%BA%BFt_n%E1%BB%A9t_s%C6%B0%E1%BB%9Dn_taluy_d%C6%B0%C6%A1ng_c%C3%B3_%C4%91%E1%BA%A5t_%C4%91%C3%A1_nh%E1%BB%8F_r%C6%A1i_xu%E1%BB%91ng_m%E1%BA%B7t_%C4%91%C6%B0%E1%BB%9Dng.jpg";
     public static final String CLOUDINARY_FEED_NGUYEN_DU = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328571/cuunan247/community_feed/C%C3%A2y_ph%C6%B0%E1%BB%A3ng_c%E1%BB%95_th%E1%BB%A5_b%E1%BB%8B_l%E1%BB%91c_xo%C3%A1y_qu%E1%BA%ADt_%C4%91%E1%BB%95_%C4%91%C3%A8_tr%C3%BAng_c%E1%BB%99t_%C4%91i%E1%BB%87n_h%E1%BA%A1_th%E1%BA%BF_t%E1%BA%A1i_%C4%91%C6%B0%E1%BB%9Dng_Nguy%E1%BB%85n_Du.jpg";
     public static final String CLOUDINARY_FEED_VINH_HAI = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793328573/cuunan247/community_feed/Gi%C3%B3_r%C3%ADt_m%E1%BA%A1nh_t%E1%BB%ABng_c%C6%A1n_gi%E1%BA%ADt_c%E1%BA%A5p_9_t%E1%BA%A1i_ven_bi%E1%BB%83n_V%C4%A9nh_H%E1%BA%A3i.jpg";
-    public static final String CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211160/cuunan247/guide_images/earthquake-step1.svg";
-    public static final String CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211172/cuunan247/guide_images/earthquake-step2.jpg";
-    public static final String CLOUDINARY_GUIDE_LANDSLIDE_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211182/cuunan247/guide_images/landslide-step2.jpg";
-    public static final String CLOUDINARY_GUIDE_LIGHTNING_STEP_1 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211189/cuunan247/guide_images/lightning-step1.jpg";
-    public static final String CLOUDINARY_GUIDE_LIGHTNING_STEP_2 = "https://res.cloudinary.com/odwf5uoi/image/upload/v1793211190/cuunan247/guide_images/lightning-step2.svg";
-    private static final List<String> SAMPLE_FEED_IMAGES = List.of(
+
+    public static final List<String> SAMPLE_FEED_IMAGES = List.of(
             CLOUDINARY_FEED_LANDSLIDE, CLOUDINARY_FEED_FLOOD, CLOUDINARY_FEED_BOAT,
-            CLOUDINARY_FEED_STORM, CLOUDINARY_FEED_RELIEF, CLOUDINARY_FEED_ROAD,
             CLOUDINARY_FEED_FLOOD_STREET, CLOUDINARY_FEED_THACH_NHAM_TAY,
             CLOUDINARY_FEED_BACH_DANG, CLOUDINARY_FEED_PRENN,
-            CLOUDINARY_FEED_NGUYEN_DU, CLOUDINARY_FEED_VINH_HAI,
-            CLOUDINARY_GUIDE_EARTHQUAKE_STEP_1, CLOUDINARY_GUIDE_EARTHQUAKE_STEP_2,
-            CLOUDINARY_GUIDE_LANDSLIDE_STEP_2, CLOUDINARY_GUIDE_LIGHTNING_STEP_1,
-            CLOUDINARY_GUIDE_LIGHTNING_STEP_2,
-            "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269064/cuunan247/community_feed/feed_landslide_tra_mai.jpg",
-            "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269093/cuunan247/community_feed/feed_flood_hoi_an.jpg",
-            "https://res.cloudinary.com/odwf5uoi/image/upload/v1793269096/cuunan247/community_feed/feed_flood_rescue_boat.jpg",
-            "https://res.cloudinary.com/odwf5uoi/image/upload/v1793274112/cuunan247/community_feed/ucs3mtmhihw6k9ozlm43.jpg");
+            CLOUDINARY_FEED_NGUYEN_DU, CLOUDINARY_FEED_VINH_HAI);
 
     private final CommunityPostRepository postRepository;
     private final EvacuationShelterRepository shelterRepository;
@@ -124,101 +109,75 @@ public class CommunityFeedService {
         }
 
         if (postRepository.count() == 0) {
-            log.info("Khởi tạo bài đăng cảnh báo cộng đồng mẫu với ảnh hiện trường từ Cloudinary CDN...");
+            log.info("Khởi tạo 10 bài đăng cảnh báo cộng đồng chuẩn miền Trung với ảnh thực tế Cloudinary CDN...");
             CommunityPost post1 = new CommunityPost(
-                    null,
-                    null,
-                    "Trần Thị Thu",
-                    HazardType.LANDSLIDE,
-                    "Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.",
-                    "Xã Trà Mai, Nam Trà My, Quảng Nam",
-                    15.2841,
-                    108.0821,
-                    CLOUDINARY_FEED_LANDSLIDE,
-                    VerificationStatus.VERIFIED,
-                    24,
-                    3,
-                    null
+                    null, null, "Trần Thị Thu", HazardType.LANDSLIDE,
+                    "Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Mọi người tránh khu vực này.",
+                    "Xã Trà Mai, Quảng Nam", 15.2841, 108.0821,
+                    CLOUDINARY_FEED_LANDSLIDE, VerificationStatus.VERIFIED, 7, 3, null
             );
 
             CommunityPost post2 = new CommunityPost(
-                    null,
-                    null,
-                    "Lê Minh Hoàng",
-                    HazardType.FLOOD,
-                    "Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!",
-                    "Phường Cẩm Phô, TP Hội An, Quảng Nam",
-                    15.8782,
-                    108.3243,
-                    CLOUDINARY_FEED_FLOOD,
-                    VerificationStatus.PENDING,
-                    18,
-                    2,
-                    null
+                    null, null, "Lê Minh Hoàng", HazardType.FLOOD,
+                    "Nước sông dâng nhanh, đã ngập tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng gấp.",
+                    "Phường Cẩm Phô, Hội An", 15.8782, 108.3243,
+                    CLOUDINARY_FEED_FLOOD, VerificationStatus.PENDING, 8, 2, null
             );
 
             CommunityPost post3 = new CommunityPost(
-                    null,
-                    null,
-                    "Nguyễn Văn Hùng",
-                    HazardType.TREE_FALL,
-                    "Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!",
-                    "Đường Hùng Vương, TP Tam Kỳ, Quảng Nam",
-                    15.5684,
-                    108.4795,
-                    CLOUDINARY_FEED_STORM,
-                    VerificationStatus.VERIFIED,
-                    35,
-                    2,
-                    null
+                    null, null, "Nguyễn Văn An", HazardType.FLOOD,
+                    "Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!",
+                    "Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng", 16.0590, 108.1580,
+                    CLOUDINARY_FEED_FLOOD_STREET, VerificationStatus.VERIFIED, 28, 6, null
             );
 
             CommunityPost post4 = new CommunityPost(
-                    null,
-                    null,
-                    "Đội Cứu Hộ Tình Nguyện Miền Trung",
-                    HazardType.FLOOD,
-                    "Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.",
-                    "Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam",
-                    15.8450,
-                    108.3050,
-                    CLOUDINARY_FEED_BOAT,
-                    VerificationStatus.VERIFIED,
-                    52,
-                    3,
-                    null
+                    null, null, "Trần Thị Mai", HazardType.ISOLATED,
+                    "Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.",
+                    "Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng", 16.0120, 108.1350,
+                    CLOUDINARY_FEED_THACH_NHAM_TAY, VerificationStatus.VERIFIED, 19, 4, null
             );
 
             CommunityPost post5 = new CommunityPost(
-                    null,
-                    null,
-                    "Phan Thanh Sơn",
-                    HazardType.ISOLATED,
-                    "Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.",
-                    "Xã Quế Long, Huyện Quế Sơn, Quảng Nam",
-                    15.6512,
-                    108.1834,
-                    CLOUDINARY_FEED_RELIEF,
-                    VerificationStatus.VERIFIED,
-                    41,
-                    2,
-                    null
+                    null, null, "Trần Văn Minh", HazardType.FLOOD,
+                    "Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.",
+                    "Đường Bạch Đằng, Phường Phú Cát, TP. Huế", 16.4720, 107.5920,
+                    CLOUDINARY_FEED_BACH_DANG, VerificationStatus.VERIFIED, 35, 12, null
             );
 
             CommunityPost post6 = new CommunityPost(
-                    null,
-                    null,
-                    "Ban Chỉ Huy PCTT & TKCN Địa Phương",
-                    HazardType.LANDSLIDE,
-                    "Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở Đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.",
-                    "Đèo Le, Nông Sơn, Quảng Nam",
-                    15.6320,
-                    108.0670,
-                    CLOUDINARY_FEED_ROAD,
-                    VerificationStatus.VERIFIED,
-                    29,
-                    2,
-                    null
+                    null, null, "Phạm Văn Long", HazardType.LANDSLIDE,
+                    "Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.",
+                    "Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng", 11.9150, 108.4450,
+                    CLOUDINARY_FEED_PRENN, VerificationStatus.PENDING, 14, 2, null
+            );
+
+            CommunityPost post7 = new CommunityPost(
+                    null, null, "Lê Văn Hùng", HazardType.TREE_FALL,
+                    "Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.",
+                    "Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An", 18.6650, 105.6950,
+                    CLOUDINARY_FEED_NGUYEN_DU, VerificationStatus.VERIFIED, 22, 5, null
+            );
+
+            CommunityPost post8 = new CommunityPost(
+                    null, null, "Lê Thị Thảo", HazardType.STORM,
+                    "Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.",
+                    "Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa", 12.2850, 109.2050,
+                    CLOUDINARY_FEED_VINH_HAI, VerificationStatus.PENDING, 11, 1, null
+            );
+
+            CommunityPost post9 = new CommunityPost(
+                    null, null, "Võ Văn Bình", HazardType.OTHER,
+                    "Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.",
+                    "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
+                    null, VerificationStatus.REJECTED, 3, 8, null
+            );
+
+            CommunityPost post10 = new CommunityPost(
+                    null, null, "Đội Cứu Hộ Tình Nguyện Miền Trung", HazardType.FLOOD,
+                    "Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.",
+                    "Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam", 15.8450, 108.3050,
+                    CLOUDINARY_FEED_BOAT, VerificationStatus.VERIFIED, 52, 3, null
             );
 
             postRepository.save(post1);
@@ -227,46 +186,33 @@ public class CommunityFeedService {
             postRepository.save(post4);
             postRepository.save(post5);
             postRepository.save(post6);
+            postRepository.save(post7);
+            postRepository.save(post8);
+            postRepository.save(post9);
+            postRepository.save(post10);
         } else {
-            // Gán ảnh Cloudinary riêng cho từng bài mẫu và sửa các URL mẫu bị trùng từ lần khởi tạo trước.
+            // Xóa các bài đăng cũ thừa từ các bản seed trước (Đèo Le, Quế Long) nếu còn tồn tại
             List<CommunityPost> existing = postRepository.findAll();
-            Set<String> assignedSampleImages = new HashSet<>();
+            for (CommunityPost post : existing) {
+                String loc = post.getLocationName() != null ? post.getLocationName() : "";
+                if (loc.contains("Đèo Le") || loc.contains("Nông Sơn") || loc.contains("Quế Long")) {
+                    try {
+                        postRepository.delete(post);
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            // Gán đúng ảnh Cloudinary thực tế khớp nội dung bài đăng
+            existing = postRepository.findAll();
             for (CommunityPost post : existing) {
                 String preferredImage = sampleImageFor(post);
-                if (preferredImage == null) continue;
-
-                String currentImage = post.getImageUrl();
-                boolean isKnownSampleImage = currentImage != null && SAMPLE_FEED_IMAGES.contains(currentImage);
-                if ((currentImage == null || currentImage.isBlank() || isKnownSampleImage)
-                        && assignedSampleImages.contains(preferredImage)) {
-                    preferredImage = SAMPLE_FEED_IMAGES.stream()
-                            .filter(image -> !assignedSampleImages.contains(image))
-                            .findFirst()
-                            .orElse(preferredImage);
-                }
-
-                if (currentImage == null || currentImage.isBlank() || isKnownSampleImage) {
-                    if (!preferredImage.equals(currentImage)) {
-                        post.setImageUrl(preferredImage);
-                        postRepository.save(post);
-                    }
-                    assignedSampleImages.add(preferredImage);
+                if (preferredImage != null && !preferredImage.equals(post.getImageUrl())) {
+                    post.setImageUrl(preferredImage);
+                    postRepository.save(post);
                 }
             }
 
-            boolean hasTreeFall = existing.stream().anyMatch(p -> p.getHazardType() == HazardType.TREE_FALL);
-            if (!hasTreeFall) {
-                postRepository.save(new CommunityPost(
-                        null, null, "Nguyễn Văn Hùng", HazardType.TREE_FALL,
-                        "Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!",
-                        "Đường Hùng Vương, TP Tam Kỳ, Quảng Nam",
-                        15.5684, 108.4795,
-                        CLOUDINARY_FEED_STORM,
-                        VerificationStatus.VERIFIED, 35, 2, null
-                ));
-            }
-
-            boolean hasBoatRescue = existing.stream().anyMatch(p -> p.getContent() != null && p.getContent().contains("xuồng máy cao su"));
+            boolean hasBoatRescue = existing.stream().anyMatch(p -> p.getLocationName() != null && p.getLocationName().contains("An Lạc"));
             if (!hasBoatRescue) {
                 postRepository.save(new CommunityPost(
                         null, null, "Đội Cứu Hộ Tình Nguyện Miền Trung", HazardType.FLOOD,
@@ -275,18 +221,6 @@ public class CommunityFeedService {
                         15.8450, 108.3050,
                         CLOUDINARY_FEED_BOAT,
                         VerificationStatus.VERIFIED, 52, 3, null
-                ));
-            }
-
-            boolean hasRelief = existing.stream().anyMatch(p -> p.getHazardType() == HazardType.ISOLATED);
-            if (!hasRelief) {
-                postRepository.save(new CommunityPost(
-                        null, null, "Phan Thanh Sơn", HazardType.ISOLATED,
-                        "Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.",
-                        "Xã Quế Long, Huyện Quế Sơn, Quảng Nam",
-                        15.6512, 108.1834,
-                        CLOUDINARY_FEED_RELIEF,
-                        VerificationStatus.VERIFIED, 41, 2, null
                 ));
             }
         }
@@ -305,17 +239,13 @@ public class CommunityFeedService {
 
         if (location.contains("trà mai") || content.contains("trà mai") || content.contains("phía sau trường tiểu học")) return CLOUDINARY_FEED_LANDSLIDE;
         if (location.contains("cẩm phô") || content.contains("sông hoài") || content.contains("ngập sâu tầng 1")) return CLOUDINARY_FEED_FLOOD;
-        if (location.contains("tam kỳ") || content.contains("hùng vương")) return CLOUDINARY_FEED_STORM;
-        if (location.contains("duy") || location.contains("an l") || content.contains("xuồng") || content.contains("cao su")) return CLOUDINARY_FEED_BOAT;
-        if (location.contains("quế long") || content.contains("cầu tràn bị ngập 1.5m")) return CLOUDINARY_FEED_RELIEF;
-        if (location.contains("đèo le") || content.contains("đèo le")) return CLOUDINARY_FEED_ROAD;
-
         if (location.contains("mẹ suốt") || content.contains("mẹ suốt")) return CLOUDINARY_FEED_FLOOD_STREET;
         if (location.contains("thạch nham") || content.contains("thạch nham")) return CLOUDINARY_FEED_THACH_NHAM_TAY;
         if (location.contains("bạch đằng") || content.contains("bạch đằng")) return CLOUDINARY_FEED_BACH_DANG;
         if (location.contains("đèo prenn") || content.contains("prenn")) return CLOUDINARY_FEED_PRENN;
         if (location.contains("nguyễn du") || content.contains("nguyễn du") || content.contains("cây phượng")) return CLOUDINARY_FEED_NGUYEN_DU;
         if (location.contains("phạm văn đồng") || location.contains("vĩnh hải") || content.contains("vĩnh hải")) return CLOUDINARY_FEED_VINH_HAI;
+        if (location.contains("an lạc") || location.contains("duy vinh") || location.contains("duy xuyên") || content.contains("xuồng máy cao su") || content.contains("xuồng cao su")) return CLOUDINARY_FEED_BOAT;
 
         return null;
     }

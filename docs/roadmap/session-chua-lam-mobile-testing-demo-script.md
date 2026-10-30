@@ -26,7 +26,7 @@
     - Admin: `admin` / `123456`
     - Coordinator: `dieupoi1` / `123456`
     - Rescuer Leader: `cuuho1` / `123456`
-    - Citizen: `nguoidan1` / `123456`
+    - Citizen: `citizen_dn02` / `123456`
   - Sinh sẵn 4 đội cứu hộ với tọa độ thực tế.
   - Sinh sẵn 5 ca cứu hộ đang ở các trạng thái khác nhau.
 

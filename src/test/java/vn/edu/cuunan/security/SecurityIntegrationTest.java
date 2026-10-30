@@ -57,7 +57,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("Cẩm nang chỉ cho người dân đã đăng nhập và xuất hiện trong thanh điều hướng của họ")
     void testDisasterGuideRestrictedToAuthenticatedCitizens() throws Exception {
-        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+        String citizenToken = tokenProvider.generateToken("citizen_dn01", "ROLE_CITIZEN", "Nguyễn Văn An");
         mockMvc.perform(get("/guide/disaster").cookie(new Cookie("jwt_token", citizenToken)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Cẩm nang ứng phó thiên tai")))
@@ -119,7 +119,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 5: Tài khoản CITIZEN truy cập trang COORDINATOR -> Bị chặn 403 Forbidden")
     void testCitizenForbiddenOnCoordinatorDashboard() throws Exception {
-        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+        String citizenToken = tokenProvider.generateToken("citizen_dn01", "ROLE_CITIZEN", "Nguyễn Văn An");
 
         mockMvc.perform(get("/coordinator/dashboard")
                         .cookie(new Cookie("jwt_token", citizenToken)))
@@ -148,7 +148,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 8: Tài khoản RESCUER gửi yêu cầu tiếp tế ngân sách không bị lỗi 403")
     void testRescuerSubmitBudgetRequestSuccess() throws Exception {
-        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Nguyễn Văn Hùng");
 
         mockMvc.perform(post("/rescuer/resources/request-budget")
                         .cookie(new Cookie("jwt_token", rescuerToken))
@@ -163,7 +163,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 9: Tài khoản RESCUER truy vấn API lộ trình OSRM /api/rescuer/assignments/{id}/route thành công")
     void testRescuerGetAssignmentRouteSuccess() throws Exception {
-        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Nguyễn Văn Hùng");
 
         mockMvc.perform(get("/api/rescuer/assignments/1/route")
                         .cookie(new Cookie("jwt_token", rescuerToken)))

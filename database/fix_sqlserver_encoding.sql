@@ -177,7 +177,7 @@ WHERE [action] = 'APPROVE_BUDGET_REQUEST';
 
 -- 2.3. Phục hồi bài viết cảnh báo cộng đồng (CommunityPosts)
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Cil Ha Kôi',
+SET [author_name] = N'Phạm Văn Long',
     [content] = N'Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.',
     [location_name] = N'Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng'
 WHERE [location_name] LIKE N'%Prenn%' OR [location_name] LIKE N'%Lâm Đồng%' OR ([hazard_type] = 'LANDSLIDE' AND [location_name] LIKE N'%Đà Lạt%');
@@ -219,37 +219,37 @@ SET [author_name] = N'Ban Chỉ Huy PCTT & TKCN Địa Phương',
 WHERE [location_name] LIKE N'%Đèo Le%' OR [location_name] LIKE N'%Nông Sơn%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Nguyễn Văn Dân',
+SET [author_name] = N'Nguyễn Văn An',
     [content] = N'Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!',
     [location_name] = N'Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng'
 WHERE [location_name] LIKE N'%Mẹ Suốt%' OR [location_name] LIKE N'%M% Su%t%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Lê Thị Cứu Trợ',
+SET [author_name] = N'Trần Thị Mai',
     [content] = N'Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.',
     [location_name] = N'Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng'
 WHERE [location_name] LIKE N'%Thạch Nham%' OR [location_name] LIKE N'%Hòa Nhơn%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Trần Thị Huế',
+SET [author_name] = N'Trần Văn Minh',
     [content] = N'Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.',
     [location_name] = N'Đường Bạch Đằng, Phường Phú Cát, TP. Huế'
 WHERE [location_name] LIKE N'%Bạch Đằng%' OR [location_name] LIKE N'%B%ch %ng%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Lê Văn Nghệ An',
+SET [author_name] = N'Lê Văn Hùng',
     [content] = N'Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.',
     [location_name] = N'Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An'
 WHERE [location_name] LIKE N'%Nguyễn Du%' OR [location_name] LIKE N'%Bến Thủy%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Hoàng Thị Khánh Hòa',
+SET [author_name] = N'Lê Thị Thảo',
     [content] = N'Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.',
     [location_name] = N'Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa'
 WHERE [location_name] LIKE N'%Phạm Văn Đồng%' OR [location_name] LIKE N'%Nha Trang%';
 
 UPDATE [dbo].[community_posts]
-SET [author_name] = N'Ksor H''Lâm',
+SET [author_name] = N'Võ Văn Bình',
     [content] = N'Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.',
     [location_name] = N'Huyện Krông Pa, Tỉnh Gia Lai'
 WHERE [location_name] LIKE N'%Krông Pa%' OR [location_name] LIKE N'%Gia Lai%';

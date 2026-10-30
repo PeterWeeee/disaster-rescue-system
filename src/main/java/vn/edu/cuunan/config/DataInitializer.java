@@ -241,51 +241,55 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 3. Phục hồi Bài đăng cộng đồng (CommunityPosts)
+        // 3. Phục hồi Bài đăng cộng đồng (CommunityPosts) & dọn dẹp các bài đăng cũ thừa
         for (CommunityPost post : communityPostRepository.findAll()) {
             boolean changed = false;
             String loc = (post.getLocationName() != null) ? post.getLocationName() : "";
+
+            // Xóa triệt để các bài đăng cũ không còn trong bộ dữ liệu chuẩn (như Đèo Le, Quế Long)
+            if (loc.contains("Đèo Le") || loc.contains("Nông Sơn") || loc.contains("Quế Long")) {
+                try {
+                    communityPostRepository.delete(post);
+                    continue;
+                } catch (Exception ignored) {}
+            }
+
             if ((post.getContent() != null && post.getContent().contains("?")) ||
                 (post.getAuthorName() != null && post.getAuthorName().contains("?")) ||
                 loc.contains("?")) {
 
                 if (loc.contains("Prenn") || loc.contains("Lâm Đồng") || post.getHazardType() == HazardType.LANDSLIDE && (loc.contains("Đà Lạt") || post.getId() == 4L)) {
-                    post.setAuthorName("Cil Ha Kôi");
+                    post.setAuthorName("Phạm Văn Long");
                     post.setContent("Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.");
                     post.setLocationName("Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng");
                     changed = true;
                 } else if (loc.contains("Trà Mai") || loc.contains("Nam Trà My")) {
                     post.setAuthorName("Trần Thị Thu");
-                    post.setContent("Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Lực lượng cứu nạn đang phong tỏa khu vực nguy hiểm, người dân tuyệt đối không di chuyển qua cung đèo này.");
-                    post.setLocationName("Xã Trà Mai, Nam Trà My, Quảng Nam");
+                    post.setContent("Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Mọi người tránh khu vực này.");
+                    post.setLocationName("Xã Trà Mai, Quảng Nam");
                     changed = true;
                 } else if (loc.contains("Mẹ Suốt") || loc.contains("Liên Chiểu")) {
-                    post.setAuthorName("Nguyễn Văn Dân");
+                    post.setAuthorName("Nguyễn Văn An");
                     post.setContent("Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!");
                     post.setLocationName("Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng");
                     changed = true;
                 } else if (loc.contains("Thạch Nham Tây") || loc.contains("Hòa Nhơn")) {
-                    post.setAuthorName("Lê Thị Cứu Trợ");
+                    post.setAuthorName("Trần Thị Mai");
                     post.setContent("Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.");
                     post.setLocationName("Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng");
                     changed = true;
                 } else if (loc.contains("Cẩm Phô") || loc.contains("Hội An")) {
                     post.setAuthorName("Lê Minh Hoàng");
-                    post.setContent("Nước sông Hoài dâng nhanh vượt mức báo động 3, đã ngập sâu tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng hỗ trợ gấp!");
-                    post.setLocationName("Phường Cẩm Phô, TP Hội An, Quảng Nam");
+                    post.setContent("Nước sông dâng nhanh, đã ngập tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng gấp.");
+                    post.setLocationName("Phường Cẩm Phô, Hội An");
                     changed = true;
                 } else if (loc.contains("Bạch Đằng") || loc.contains("Huế")) {
-                    post.setAuthorName("Trần Thị Huế");
+                    post.setAuthorName("Trần Văn Minh");
                     post.setContent("Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.");
                     post.setLocationName("Đường Bạch Đằng, Phường Phú Cát, TP. Huế");
                     changed = true;
-                } else if (loc.contains("Hùng Vương") || loc.contains("Tam Kỳ")) {
-                    post.setAuthorName("Nguyễn Văn Hùng");
-                    post.setContent("Gió giật mạnh làm đổ cây xà cừ cổ thụ chắn ngang đường Hùng Vương, đè đứt đường dây điện hạ thế. Đã có tia lửa điện lóe lên, người dân chú ý không đi qua!");
-                    post.setLocationName("Đường Hùng Vương, TP Tam Kỳ, Quảng Nam");
-                    changed = true;
                 } else if (loc.contains("Nguyễn Du") || loc.contains("Vinh")) {
-                    post.setAuthorName("Lê Văn Nghệ An");
+                    post.setAuthorName("Lê Văn Hùng");
                     post.setContent("Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.");
                     post.setLocationName("Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An");
                     changed = true;
@@ -294,23 +298,13 @@ public class DataInitializer implements CommandLineRunner {
                     post.setContent("Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.");
                     post.setLocationName("Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam");
                     changed = true;
-                } else if (loc.contains("Quế Long") || loc.contains("Quế Sơn")) {
-                    post.setAuthorName("Phan Thanh Sơn");
-                    post.setContent("Cầu tràn bị ngập 1.5m chia cắt hoàn toàn 60 hộ dân xóm Trong. Đội cứu trợ đã chuyển xong đợt 1 gồm 100 thùng mì tôm, 50 bình nước sạch và thuốc men thiết yếu.");
-                    post.setLocationName("Xã Quế Long, Huyện Quế Sơn, Quảng Nam");
-                    changed = true;
-                } else if (loc.contains("Đèo Le") || loc.contains("Nông Sơn")) {
-                    post.setAuthorName("Ban Chỉ Huy PCTT & TKCN Địa Phương");
-                    post.setContent("Máy xúc và đội cơ giới đang khẩn trương san ủi khối đất đá sạt lở đèo Le, dự kiến thông tuyến tạm thời trong chiều nay cho xe cứu hộ qua lại.");
-                    post.setLocationName("Đèo Le, Nông Sơn, Quảng Nam");
-                    changed = true;
                 } else if (loc.contains("Nha Trang") || loc.contains("Vĩnh Hải")) {
-                    post.setAuthorName("Hoàng Thị Khánh Hòa");
+                    post.setAuthorName("Lê Thị Thảo");
                     post.setContent("Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.");
                     post.setLocationName("Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa");
                     changed = true;
                 } else if (loc.contains("Krông Pa") || loc.contains("Gia Lai")) {
-                    post.setAuthorName("Ksor H'Lâm");
+                    post.setAuthorName("Võ Văn Bình");
                     post.setContent("Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.");
                     post.setLocationName("Huyện Krông Pa, Tỉnh Gia Lai");
                     changed = true;
@@ -389,6 +383,49 @@ public class DataInitializer implements CommandLineRunner {
         log.info(">>> Đã hoàn tất tự động kiểm tra và phục hồi dữ liệu Unicode tiếng Việt sạch 100%!");
     }
 
+    /** Migrate demo citizen usernames to a province abbreviation convention. */
+    private void migrateLegacyCitizenUsernames() {
+        if (!userRepository.existsByUsername("citizen_dn01")) {
+            userRepository.findByUsername("citizen")
+                    .filter(user -> "0900000004".equals(user.getPhone()))
+                    .ifPresent(user -> {
+                        user.setUsername("citizen_dn01");
+                        userRepository.save(user);
+                    });
+        }
+        List<String> oldNames = List.of("nguoidan01", "nguoidan1", "nguoidan02",
+                "nguoidan03", "citizen_th", "nguoidan04", "citizen_na", "nguoidan05", "citizen_ht",
+                "nguoidan06", "citizen_qt", "nguoidan07", "citizen_hue", "nguoidan08", "citizen_qn",
+                "nguoidan09", "citizen_gl", "nguoidan10", "citizen_dl", "nguoidan11", "citizen_kh",
+                "nguoidan12", "citizen_ld");
+        List<String> newNames = List.of("citizen_dn01", "citizen_dn02", "citizen_dn02",
+                "citizen_th", "citizen_th", "citizen_na", "citizen_na", "citizen_ht", "citizen_ht",
+                "citizen_qt", "citizen_qt", "citizen_hue", "citizen_hue", "citizen_qn", "citizen_qn",
+                "citizen_gl", "citizen_gl", "citizen_dl", "citizen_dl", "citizen_kh", "citizen_kh",
+                "citizen_ld", "citizen_ld");
+        for (int i = 0; i < oldNames.size(); i++) {
+            String oldName = oldNames.get(i);
+            String newName = newNames.get(i);
+            if (!oldName.equals(newName) && !userRepository.existsByUsername(newName)) {
+                userRepository.findByUsername(oldName).ifPresent(user -> {
+                    user.setUsername(newName);
+                    userRepository.save(user);
+                });
+            }
+        }
+    }    /** Retire extra coordinators while preserving user rows referenced by history. */
+    private void retireLegacyCoordinatorAccounts(Role coordinatorRole, Role citizenRole) {
+        for (User user : userRepository.findAll()) {
+            if (!"coordinator".equalsIgnoreCase(user.getUsername())
+                    && user.getRole() != null
+                    && coordinatorRole.getId().equals(user.getRole().getId())) {
+                user.setRole(citizenRole);
+                user.setStatus("BLOCKED");
+                userRepository.save(user);
+            }
+        }
+    }
+
     @Override
     public void run(String... args) {
         ensureSqlServerUnicodeCompatibility();
@@ -402,25 +439,18 @@ public class DataInitializer implements CommandLineRunner {
         Role coordRole = getOrCreateRole("ROLE_COORDINATOR");
         Role rescuerRole = getOrCreateRole("ROLE_RESCUER");
         Role citizenRole = getOrCreateRole("ROLE_CITIZEN");
+        migrateLegacyCitizenUsernames();
 
         // 2. Khởi tạo Người dùng (Users): Mật khẩu thống nhất kiểm thử là 123456
         // 2.1. Quản trị viên (Admin)
         User adminUser = getOrCreateUser("admin", "123456", "Quản Trị Viên Hệ Thống", "0901112233", "admin@cuunan247.vn", "Hà Nội / Đà Nẵng", adminRole);
 
-        // 2.2. Điều phối viên trung tâm & 11 tỉnh/thành Miền Trung
+        // 2.2. Một tài khoản điều phối viên duy nhất cho toàn hệ thống
         User coordCentral = getOrCreateUser("coordinator", "123456", "Điều Phối Viên TT Chỉ Huy", "0902223344", "coord@cuunan247.vn", "Trung Tâm Chỉ Huy Đà Nẵng", coordRole);
-        User coordCentral2 = getOrCreateUser("dieupoi1", "123456", "Điều Phối Viên Khu Vực 2", "0902223355", "dieupoi1@cuunan247.vn", "Khu Vực Duyên Hải Miền Trung", coordRole);
-        User coordTH = getOrCreateUser("coord_thanhhoa", "123456", "Nguyễn Văn Điều Phối Thanh Hóa", "0902010001", "coord.thanhhoa@cuunan247.vn", "Thành phố Thanh Hóa", coordRole);
-        User coordNA = getOrCreateUser("coord_nghean", "123456", "Trần Đình Điều Phối Nghệ An", "0902020002", "coord.nghean@cuunan247.vn", "Thành phố Vinh, Nghệ An", coordRole);
-        User coordHT = getOrCreateUser("coord_hatinh", "123456", "Lê Văn Điều Phối Hà Tĩnh", "0902030003", "coord.hatinh@cuunan247.vn", "Thành phố Hà Tĩnh", coordRole);
-        User coordQT = getOrCreateUser("coord_quangtri", "123456", "Phạm Văn Điều Phối Quảng Trị", "0902040004", "coord.quangtri@cuunan247.vn", "Thành phố Đông Hà, Quảng Trị", coordRole);
-        User coordHue = getOrCreateUser("coord_hue", "123456", "Hoàng Văn Điều Phối Huế", "0902050005", "coord.hue@cuunan247.vn", "Thành phố Huế", coordRole);
-        User coordDN = getOrCreateUser("coord_danang", "123456", "Ngô Quốc Điều Phối Đà Nẵng", "0902060006", "coord.danang@cuunan247.vn", "Thành phố Đà Nẵng", coordRole);
-        User coordQN = getOrCreateUser("coord_quangngai", "123456", "Võ Văn Điều Phối Quảng Ngãi", "0902070007", "coord.quangngai@cuunan247.vn", "Thành phố Quảng Ngãi", coordRole);
-        User coordGL = getOrCreateUser("coord_gialai", "123456", "Đỗ Văn Điều Phối Gia Lai", "0902080008", "coord.gialai@cuunan247.vn", "Thành phố Pleiku, Gia Lai", coordRole);
-        User coordDL = getOrCreateUser("coord_daklak", "123456", "Bùi Văn Điều Phối Đắk Lắk", "0902090009", "coord.daklak@cuunan247.vn", "Thành phố Buôn Ma Thuột, Đắk Lắk", coordRole);
-        User coordKH = getOrCreateUser("coord_khanhhoa", "123456", "Đinh Văn Điều Phối Khánh Hòa", "0902100010", "coord.khanhhoa@cuunan247.vn", "Thành phố Nha Trang, Khánh Hòa", coordRole);
-        User coordLD = getOrCreateUser("coord_lamdong", "123456", "Chu Văn Điều Phối Lâm Đồng", "0902110011", "coord.lamdong@cuunan247.vn", "Thành phố Đà Lạt, Lâm Đồng", coordRole);
+        coordCentral.setRole(coordRole);
+        coordCentral.setStatus("ACTIVE");
+        coordCentral = userRepository.save(coordCentral);
+        retireLegacyCoordinatorAccounts(coordRole, citizenRole);
 
         // 2.3. Đội trưởng cứu hộ (ROLE_RESCUER) cho từng đội thuộc 11 tỉnh/thành
         // Thanh Hóa
@@ -434,16 +464,16 @@ public class DataInitializer implements CommandLineRunner {
         User rescuerHT02 = getOrCreateUser("rescuer_ht02", "123456", "Lê Hồng Sơn (Đội Trưởng HT 02)", "0913003002", "rescuer.ht02@cuunan247.vn", "Huyện Hương Khê, Hà Tĩnh", rescuerRole);
         // Quảng Trị
         User rescuerQT01 = getOrCreateUser("rescuer_qt01", "123456", "Hoàng Văn Trị (Đội Trưởng QT 01)", "0914004001", "rescuer.qt01@cuunan247.vn", "TP Đông Hà, Quảng Trị", rescuerRole);
-        User rescuerQT02 = getOrCreateUser("rescuer_qt02", "123456", "Đặng Thị Quảng (Đội Trưởng QT 02)", "0914004002", "rescuer.qt02@cuunan247.vn", "Huyện Hướng Hóa, Quảng Trị", rescuerRole);
+        User rescuerQT02 = getOrCreateUser("rescuer_qt02", "123456", "Trần Thị Hương (Đội Trưởng QT 02)", "0914004002", "rescuer.qt02@cuunan247.vn", "Huyện Hướng Hóa, Quảng Trị", rescuerRole);
         // Thành phố Huế
         User rescuerHue01 = getOrCreateUser("rescuer_hue01", "123456", "Ngô Văn Huệ (Đội Trưởng Huế 01)", "0915005001", "rescuer.hue01@cuunan247.vn", "TP Huế, Thừa Thiên Huế", rescuerRole);
         User rescuerHue02 = getOrCreateUser("rescuer_hue02", "123456", "Lý Thị Hương (Đội Trưởng Huế 02)", "0915005002", "rescuer.hue02@cuunan247.vn", "TX Hương Trà, Thừa Thiên Huế", rescuerRole);
         // Thành phố Đà Nẵng (giữ rescuer & cuuho1 để tương thích tài liệu cũ, thêm dn03)
-        User rescuerDN01 = getOrCreateUser("rescuer", "123456", "Đặng Văn Cứu Hộ (Đội Trưởng Hải Châu)", "0900000003", "rescuer@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", rescuerRole);
-        User rescuerDN02 = getOrCreateUser("cuuho1", "123456", "Nguyễn Văn Sơn Trà (Đội Trưởng Sơn Trà)", "0905556677", "cuuho1@cuunan247.vn", "Quận Sơn Trà, Đà Nẵng", rescuerRole);
+        User rescuerDN01 = getOrCreateUser("rescuer", "123456", "Nguyễn Văn Hùng (Đội Trưởng Hải Châu)", "0900000003", "rescuer@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", rescuerRole);
+        User rescuerDN02 = getOrCreateUser("cuuho1", "123456", "Nguyễn Văn Sơn (Đội Trưởng Sơn Trà)", "0905556677", "cuuho1@cuunan247.vn", "Quận Sơn Trà, Đà Nẵng", rescuerRole);
         User rescuerDN03 = getOrCreateUser("rescuer_dn03", "123456", "Dương Văn Nẵng (Đội Trưởng Hòa Vang)", "0916006003", "rescuer.dn03@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", rescuerRole);
         // Quảng Ngãi
-        User rescuerQN01 = getOrCreateUser("rescuer_qn01", "123456", "Đinh Công Ngãi (Đội Trưởng QN 01)", "0917007001", "rescuer.qn01@cuunan247.vn", "TP Quảng Ngãi, Quảng Ngãi", rescuerRole);
+        User rescuerQN01 = getOrCreateUser("rescuer_qn01", "123456", "Lê Văn Minh (Đội Trưởng QN 01)", "0917007001", "rescuer.qn01@cuunan247.vn", "TP Quảng Ngãi, Quảng Ngãi", rescuerRole);
         User rescuerQN02 = getOrCreateUser("rescuer_qn02", "123456", "Bùi Văn Trà (Đội Trưởng QN 02)", "0917007002", "rescuer.qn02@cuunan247.vn", "Huyện Ba Tơ, Quảng Ngãi", rescuerRole);
         // Gia Lai
         User rescuerGL01 = getOrCreateUser("rescuer_gl01", "123456", "Ksor Y Lai (Đội Trưởng Gia Lai 01)", "0918008001", "rescuer.gl01@cuunan247.vn", "TP Pleiku, Gia Lai", rescuerRole);
@@ -455,22 +485,30 @@ public class DataInitializer implements CommandLineRunner {
         User rescuerKH01 = getOrCreateUser("rescuer_kh01", "123456", "Trần Văn Hòa (Đội Trưởng Khánh Hòa 01)", "0920010001", "rescuer.kh01@cuunan247.vn", "TP Nha Trang, Khánh Hòa", rescuerRole);
         User rescuerKH02 = getOrCreateUser("rescuer_kh02", "123456", "Nguyễn Thị Khánh (Đội Trưởng Khánh Hòa 02)", "0920010002", "rescuer.kh02@cuunan247.vn", "TP Cam Ranh, Khánh Hòa", rescuerRole);
         // Lâm Đồng
-        User rescuerLD01 = getOrCreateUser("rescuer_ld01", "123456", "Cil Ha Đồng (Đội Trưởng Lâm Đồng 01)", "0921011001", "rescuer.ld01@cuunan247.vn", "TP Đà Lạt, Lâm Đồng", rescuerRole);
+        User rescuerLD01 = getOrCreateUser("rescuer_ld01", "123456", "Trần Văn Dũng (Đội Trưởng Lâm Đồng 01)", "0921011001", "rescuer.ld01@cuunan247.vn", "TP Đà Lạt, Lâm Đồng", rescuerRole);
         User rescuerLD02 = getOrCreateUser("rescuer_ld02", "123456", "K'Brooke (Đội Trưởng Lâm Đồng 02)", "0921011002", "rescuer.ld02@cuunan247.vn", "TP Bảo Lộc, Lâm Đồng", rescuerRole);
 
         // 2.4. Người dân (ROLE_CITIZEN)
-        User citizen01 = getOrCreateUser("citizen", "123456", "Nguyễn Văn Dân", "0900000004", "dan@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", citizenRole);
-        User citizen02 = getOrCreateUser("nguoidan1", "123456", "Lê Thị Cứu Trợ", "0900000014", "nguoidan1@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", citizenRole);
-        User citizenTH = getOrCreateUser("citizen_th", "123456", "Nguyễn Thị Thanh Hóa", "0901000101", "citizen.th@cuunan247.vn", "Thành phố Thanh Hóa", citizenRole);
-        User citizenNA = getOrCreateUser("citizen_na", "123456", "Lê Văn Nghệ An", "0901000102", "citizen.na@cuunan247.vn", "Huyện Hưng Nguyên, Nghệ An", citizenRole);
-        User citizenHT = getOrCreateUser("citizen_ht", "123456", "Phạm Văn Hà Tĩnh", "0901000103", "citizen.ht@cuunan247.vn", "Huyện Cẩm Xuyên, Hà Tĩnh", citizenRole);
-        User citizenQT = getOrCreateUser("citizen_qt", "123456", "Hoàng Văn Quảng Trị", "0901000104", "citizen.qt@cuunan247.vn", "Thị xã Quảng Trị", citizenRole);
-        User citizenHue = getOrCreateUser("citizen_hue", "123456", "Trần Thị Huế", "0901000105", "citizen.hue@cuunan247.vn", "Thành phố Huế", citizenRole);
-        User citizenQN = getOrCreateUser("citizen_qn", "123456", "Đinh Văn Quảng Ngãi", "0901000106", "citizen.qn@cuunan247.vn", "Huyện Bình Sơn, Quảng Ngãi", citizenRole);
-        User citizenGL = getOrCreateUser("citizen_gl", "123456", "Ksor H'Lâm", "0901000107", "citizen.gl@cuunan247.vn", "TP Pleiku, Gia Lai", citizenRole);
-        User citizenDL = getOrCreateUser("citizen_dl", "123456", "Y Krin Dân", "0901000108", "citizen.dl@cuunan247.vn", "Huyện Krông Ana, Đắk Lắk", citizenRole);
-        User citizenKH = getOrCreateUser("citizen_kh", "123456", "Hoàng Thị Khánh Hòa", "0901000109", "citizen.kh@cuunan247.vn", "TP Nha Trang, Khánh Hòa", citizenRole);
-        User citizenLD = getOrCreateUser("citizen_ld", "123456", "Cil Ha Kôi", "0901000110", "citizen.ld@cuunan247.vn", "Huyện Lạc Dương, Lâm Đồng", citizenRole);
+        User citizen01 = getOrCreateUser("citizen_dn01", "123456", "Nguyễn Văn An", "0900000004", "dan@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", citizenRole);
+        User citizenGeneral = getOrCreateUser("citizen", "123456", "Nguyễn Hoàng Nam", "0900000015", "citizen@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", citizenRole);
+        citizenGeneral.setFullName("Nguyễn Hoàng Nam");
+        citizenGeneral.setPhone("0900000015");
+        citizenGeneral.setEmail("citizen@cuunan247.vn");
+        citizenGeneral.setAddress("Quận Hải Châu, Đà Nẵng");
+        citizenGeneral.setRole(citizenRole);
+        citizenGeneral.setStatus("ACTIVE");
+        citizenGeneral = userRepository.save(citizenGeneral);
+        User citizen02 = getOrCreateUser("citizen_dn02", "123456", "Trần Thị Mai", "0900000014", "nguoidan1@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", citizenRole);
+        User citizenTH = getOrCreateUser("citizen_th", "123456", "Nguyễn Thị Lan", "0901000101", "citizen.th@cuunan247.vn", "Thành phố Thanh Hóa", citizenRole);
+        User citizenNA = getOrCreateUser("citizen_na", "123456", "Lê Văn Hùng", "0901000102", "citizen.na@cuunan247.vn", "Huyện Hưng Nguyên, Nghệ An", citizenRole);
+        User citizenHT = getOrCreateUser("citizen_ht", "123456", "Phạm Văn Nam", "0901000103", "citizen.ht@cuunan247.vn", "Huyện Cẩm Xuyên, Hà Tĩnh", citizenRole);
+        User citizenQT = getOrCreateUser("citizen_qt", "123456", "Hoàng Thị Hương", "0901000104", "citizen.qt@cuunan247.vn", "Thị xã Quảng Trị", citizenRole);
+        User citizenHue = getOrCreateUser("citizen_hue", "123456", "Trần Văn Minh", "0901000105", "citizen.hue@cuunan247.vn", "Thành phố Huế", citizenRole);
+        User citizenQN = getOrCreateUser("citizen_qn", "123456", "Nguyễn Thị Hoa", "0901000106", "citizen.qn@cuunan247.vn", "Huyện Bình Sơn, Quảng Ngãi", citizenRole);
+        User citizenGL = getOrCreateUser("citizen_gl", "123456", "Võ Văn Bình", "0901000107", "citizen.gl@cuunan247.vn", "TP Pleiku, Gia Lai", citizenRole);
+        User citizenDL = getOrCreateUser("citizen_dl", "123456", "Nguyễn Thị Hạnh", "0901000108", "citizen.dl@cuunan247.vn", "Huyện Krông Ana, Đắk Lắk", citizenRole);
+        User citizenKH = getOrCreateUser("citizen_kh", "123456", "Lê Thị Thảo", "0901000109", "citizen.kh@cuunan247.vn", "TP Nha Trang, Khánh Hòa", citizenRole);
+        User citizenLD = getOrCreateUser("citizen_ld", "123456", "Phạm Văn Long", "0901000110", "citizen.ld@cuunan247.vn", "Huyện Lạc Dương, Lâm Đồng", citizenRole);
 
         // 3. Khởi tạo Đội cứu hộ (RescueTeams) - 1 đến 2 đội cho từng tỉnh/thành miền Trung
         // 3.1. Thanh Hóa
@@ -798,27 +836,27 @@ public class DataInitializer implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80");
 
         // Nhiệm vụ 4: Thanh Hóa (Đội Nghi Sơn) - PENDING
-        initAssignment(sosTH2, teamTH02, coordTH, "PENDING",
+        initAssignment(sosTH2, teamTH02, coordCentral, "PENDING",
                 "Điều phối Thanh Hóa: Tiếp cận phường Hải Hòa, mang theo cáng cứu thương và túi y tế.",
                 LocalDateTime.now().minusMinutes(25), null, null, null, null);
 
         // Nhiệm vụ 5: Hà Tĩnh (Đội Cẩm Xuyên) - IN_PROGRESS
-        initAssignment(sosHT1, teamHT01, coordHT, "IN_PROGRESS",
+        initAssignment(sosHT1, teamHT01, coordCentral, "IN_PROGRESS",
                 "Đội Cẩm Xuyên đang dùng xuồng máy vượt dòng xả lũ hồ Kẻ Gỗ để tiếp cận cụ già và bé nhỏ.",
                 LocalDateTime.now().minusMinutes(50), LocalDateTime.now().minusMinutes(42), null, null, null);
 
         // Nhiệm vụ 6: Thừa Thiên Huế (Đội Huế 01) - IN_PROGRESS
-        initAssignment(sosHue1, teamHue01, coordHue, "IN_PROGRESS",
+        initAssignment(sosHue1, teamHue01, coordCentral, "IN_PROGRESS",
                 "Đội canô số 1 đang tiếp cận phường Hương Vinh, mang theo áo phao và nhân viên y tế hỗ trợ sản phụ.",
                 LocalDateTime.now().minusMinutes(60), LocalDateTime.now().minusMinutes(52), null, null, null);
 
         // Nhiệm vụ 7: Nghệ An (Đội NA 01) - PENDING
-        initAssignment(sosNA1, teamNA01, coordNA, "PENDING",
+        initAssignment(sosNA1, teamNA01, coordCentral, "PENDING",
                 "Điều phối Nghệ An: Điều 1 xuồng chở mì tôm, nước ngọt và đèn pin cứu hộ vào xóm bị cô lập.",
                 LocalDateTime.now().minusMinutes(20), null, null, null, null);
 
         // Nhiệm vụ 8: Đắk Lắk (Đội DL 01) - COMPLETED
-        initAssignment(sosDL1, teamDL01, coordDL, "COMPLETED",
+        initAssignment(sosDL1, teamDL01, coordCentral, "COMPLETED",
                 "Đã đưa 5 người dân vượt qua đoạn ngập sâu an toàn về trụ sở UBND xã Hòa Đông.",
                 LocalDateTime.now().minusHours(7), LocalDateTime.now().minusHours(6).minusMinutes(50),
                 LocalDateTime.now().minusHours(6),
@@ -864,49 +902,67 @@ public class DataInitializer implements CommandLineRunner {
         initShelter("Sân Vận Động 19/8 Nha Trang", "Đường Yersin, TP. Nha Trang, Tỉnh Khánh Hòa", 12.2450, 109.1900, 1200, 310, "0258.3827112", "OPEN");
         initShelter("Trung Tâm Văn Hóa Nghệ Thuật Lâm Đồng", "Số 01 Trần Hưng Đạo, TP. Đà Lạt, Tỉnh Lâm Đồng", 11.9420, 108.4450, 450, 0, "0263.3828112", "OPEN");
 
-        // 9. Khởi tạo Bài đăng cộng đồng (CommunityPosts)
-        CommunityPost post1 = initPost(citizen01, "Nguyễn Văn Dân", HazardType.FLOOD,
+        // 9. Khởi tạo & Đồng bộ 10 Bài đăng cộng đồng chuẩn miền Trung (10 bài ảnh thực tế)
+        CommunityPost postTraMai = initPost(null, "Trần Thị Thu", HazardType.LANDSLIDE,
+                "Vết nứt lớn xuất hiện trên sườn đồi phía sau trường tiểu học, đất bùn đã tràn ra đường đèo. Mọi người tránh khu vực này.",
+                "Xã Trà Mai, Quảng Nam", 15.2841, 108.0821,
+                VerificationStatus.VERIFIED, 7, 3, null);
+
+        CommunityPost postCamPho = initPost(null, "Lê Minh Hoàng", HazardType.FLOOD,
+                "Nước sông dâng nhanh, đã ngập tầng 1 dãy nhà ven sông. Có 3 người già chưa di chuyển được, cần xuồng gấp.",
+                "Phường Cẩm Phô, Hội An", 15.8782, 108.3243,
+                VerificationStatus.PENDING, 8, 2, null);
+
+        CommunityPost post1 = initPost(citizen01, "Nguyễn Văn An", HazardType.FLOOD,
                 "Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!",
                 "Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng", 16.0590, 108.1580,
                 VerificationStatus.VERIFIED, 28, 6, null);
 
-        CommunityPost post2 = initPost(citizen02, "Lê Thị Cứu Trợ", HazardType.ISOLATED,
+        CommunityPost post2 = initPost(citizen02, "Trần Thị Mai", HazardType.ISOLATED,
                 "Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.",
                 "Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng", 16.0120, 108.1350,
                 VerificationStatus.VERIFIED, 19, 4, null);
 
-        CommunityPost post3 = initPost(citizenHue, "Trần Thị Huế", HazardType.FLOOD,
+        CommunityPost post3 = initPost(citizenHue, "Trần Văn Minh", HazardType.FLOOD,
                 "Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.",
                 "Đường Bạch Đằng, Phường Phú Cát, TP. Huế", 16.4720, 107.5920,
                 VerificationStatus.VERIFIED, 35, 12, null);
 
-        CommunityPost post4 = initPost(citizenLD, "Cil Ha Kôi", HazardType.LANDSLIDE,
+        CommunityPost post4 = initPost(citizenLD, "Phạm Văn Long", HazardType.LANDSLIDE,
                 "Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.",
                 "Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng", 11.9150, 108.4450,
                 VerificationStatus.PENDING, 14, 2, null);
 
-        CommunityPost post5 = initPost(citizenNA, "Lê Văn Nghệ An", HazardType.TREE_FALL,
+        CommunityPost post5 = initPost(citizenNA, "Lê Văn Hùng", HazardType.TREE_FALL,
                 "Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.",
                 "Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An", 18.6650, 105.6950,
                 VerificationStatus.VERIFIED, 22, 5, null);
 
-        CommunityPost post6 = initPost(citizenKH, "Hoàng Thị Khánh Hòa", HazardType.STORM,
+        CommunityPost post6 = initPost(citizenKH, "Lê Thị Thảo", HazardType.STORM,
                 "Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.",
                 "Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa", 12.2850, 109.2050,
                 VerificationStatus.PENDING, 11, 1, null);
 
-        CommunityPost post7 = initPost(citizenGL, "Ksor H'Lâm", HazardType.OTHER,
+        CommunityPost post7 = initPost(citizenGL, "Võ Văn Bình", HazardType.OTHER,
                 "Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.",
                 "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
                 VerificationStatus.REJECTED, 3, 8, null);
 
+        CommunityPost postDuyVinh = initPost(null, "Đội Cứu Hộ Tình Nguyện Miền Trung", HazardType.FLOOD,
+                "Đội đã điều động 2 xuồng máy cao su tiếp cận khu vực ngập sâu tại thôn An Lạc, đã đưa được 5 hộ dân và người già đến nhà văn hóa an toàn.",
+                "Thôn An Lạc, Xã Duy Vinh, Duy Xuyên, Quảng Nam", 15.8450, 108.3050,
+                VerificationStatus.VERIFIED, 52, 3, null);
+
         // Mỗi bài mẫu dùng một ảnh Cloudinary thực tế khớp nội dung bài đăng; cập nhật cả dữ liệu đã tạo từ lần chạy trước.
+        ensureSamplePostImage(postTraMai, CommunityFeedService.CLOUDINARY_FEED_LANDSLIDE);
+        ensureSamplePostImage(postCamPho, CommunityFeedService.CLOUDINARY_FEED_FLOOD);
         ensureSamplePostImage(post1, CommunityFeedService.CLOUDINARY_FEED_FLOOD_STREET);
         ensureSamplePostImage(post2, CommunityFeedService.CLOUDINARY_FEED_THACH_NHAM_TAY);
         ensureSamplePostImage(post3, CommunityFeedService.CLOUDINARY_FEED_BACH_DANG);
         ensureSamplePostImage(post4, CommunityFeedService.CLOUDINARY_FEED_PRENN);
         ensureSamplePostImage(post5, CommunityFeedService.CLOUDINARY_FEED_NGUYEN_DU);
         ensureSamplePostImage(post6, CommunityFeedService.CLOUDINARY_FEED_VINH_HAI);
+        ensureSamplePostImage(postDuyVinh, CommunityFeedService.CLOUDINARY_FEED_BOAT);
 
         // 10. Khởi tạo Lượt bình chọn bài đăng (PostUpvotes)
         if (post1 != null) {
@@ -937,13 +993,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 13. Khởi tạo & Tự động phục hồi Thông báo mẫu (Notifications)
-        User coordDn = userRepository.findByUsername("coord_danang").orElse(null);
-        if (coordDn != null) {
-            List<Notification> coordNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(coordDn);
+        if (coordCentral != null) {
+            List<Notification> coordNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(coordCentral);
             boolean exists = coordNotifs.stream().anyMatch(n -> "SOS_NEW".equals(n.getType()));
             if (!exists) {
                 notificationRepository.save(new vn.edu.cuunan.entity.Notification(
-                        coordDn, "Tiếp nhận ca SOS #1 mới",
+                        coordCentral, "Tiếp nhận ca SOS #1 mới",
                         "Có yêu cầu cứu nạn khẩn cấp tại Mẹ Suốt, Liên Chiểu, Đà Nẵng cần điều phối.",
                         "SOS_NEW", "/coordinator/dashboard"));
             } else {
@@ -1422,7 +1477,16 @@ public class DataInitializer implements CommandLineRunner {
     private CommunityPost initPost(User author, String authorName, HazardType hazardType, String content,
                                   String locationName, Double lat, Double lng, VerificationStatus status,
                                   int upvotes, int comments, SosRequest sosRequest) {
-        Optional<CommunityPost> postOpt = (locationName != null) ? communityPostRepository.findFirstByLocationName(locationName) : Optional.empty();
+        Optional<CommunityPost> postOpt = Optional.empty();
+        if (locationName != null) {
+            postOpt = communityPostRepository.findFirstByLocationName(locationName);
+            if (postOpt.isEmpty()) {
+                String firstPart = locationName.split(",")[0].trim();
+                postOpt = communityPostRepository.findAll().stream()
+                        .filter(p -> p.getLocationName() != null && p.getLocationName().contains(firstPart))
+                        .findFirst();
+            }
+        }
         if (postOpt.isPresent()) {
             CommunityPost post = postOpt.get();
             boolean changed = false;
