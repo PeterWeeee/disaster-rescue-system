@@ -14,7 +14,7 @@
 | STOMP Destination | Người Nhận (Subscribers) | Sự Kiện (Event) & Dữ Liệu Gửi Đi |
 | :--- | :--- | :--- |
 | `/topic/sos-alerts` | Coordinator, Rescuer, Admin | **Có SOS mới:** Gửi `SosAlertMessage` (id, contactName, phone, lat, lng, urgency, peopleCount, address). Client phát chuông & vẽ marker đỏ nhấp nháy. |
-| `/topic/map-updates` | Mọi client đang xem bản đồ | **Cập nhật Marker:** Trạng thái ca SOS thay đổi (Đỏ -> Vàng khi có đội nhận, Vàng -> Xanh khi cứu xong). |
+| `/topic/map-updates` | Mọi client đang xem bản đồ (Citizen, Rescuer, Coordinator) | **Cập nhật Live GPS & Tuyến đường:**<br>- `STATUS_CHANGE`: Thay đổi trạng thái ca SOS (Đỏ -> Vàng khi có đội nhận, Vàng -> Xanh khi cứu xong).<br>- `LOCATION_UPDATE`: Vị trí GPS của Đội cứu hộ (`teamId`, `latitude`, `longitude`, `distanceKm`, `durationMinutes`, `routeGeometryGeoJson`).<br>- `VICTIM_LOCATION_UPDATE`: Vị trí GPS thời gian thực của Nạn nhân (`sosId`, `latitude`, `longitude`). |
 | `/topic/broadcast-alerts` | Tất cả user đang truy cập | **Cảnh báo khẩn cấp:** Admin gửi thông báo thiên tai, xả lũ, di dời đè lên toàn màn hình client. |
 | `/user/queue/assignments` | Rescuer (Đội trưởng cụ thể) | **Nhiệm vụ mới được giao:** Gửi chi tiết ca cứu hộ vừa được Coordinator phân công cho đội này. |
 | `/user/queue/sos-status` | Citizen (Nạn nhân gửi SOS) | **Cập nhật trạng thái phiếu cứu hộ:** Báo cho người dân biết đội nào đã nhận, đang di chuyển đến. |
@@ -36,10 +36,13 @@
 - `POST /api/auth/logout` - Đăng xuất, xóa Cookie.
 - `GET /api/auth/me` - Lấy thông tin tài khoản đang đăng nhập.
 
-### 2.2. Quản Lý Yêu Cầu Cứu Nạn (`/api/sos`)
+### 2.2. Quản Lý Yêu Cầu Cứu Nạn & Định Vị Live (`/api/sos`)
 - `POST /api/sos` - Gửi yêu cầu cứu nạn khẩn cấp (kèm tọa độ GPS, số người, mô tả, ảnh). Bắn WebSocket `/topic/sos-alerts`.
 - `GET /api/sos` - Lấy danh sách SOS (hỗ trợ phân trang, lọc theo trạng thái, mức độ khẩn cấp).
 - `GET /api/sos/{id}` - Chi tiết 1 yêu cầu cứu nạn.
+- `PATCH /api/sos/{id}/status` - Cập nhật trạng thái ca SOS.
+- `GET /api/sos/{id}/route` - Lấy lộ trình OSRM, khoảng cách đường bộ và thời gian dự kiến (đồng bộ giữa nạn nhân và đội cứu hộ).
+- `POST /api/sos/{id}/location` - Nạn nhân chia sẻ vị trí trực tiếp (Live Location Tracking). Bắn WebSocket `/topic/map-updates` với type `VICTIM_LOCATION_UPDATE`.
 - `PUT /api/sos/{id}/cancel` - Người dân tự hủy yêu cầu khi chưa có đội nhận.
 
 ### 2.3. Điều Phối Cứu Hộ (`/api/coordinator`)
@@ -47,11 +50,14 @@
 - `GET /api/coordinator/nearest-teams?sosId={id}` - Lấy danh sách các đội cứu hộ gần nhất tính theo công thức khoảng cách Haversine.
 - `POST /api/coordinator/assign` - Phân công nhiệm vụ cho đội cứu hộ (Body: `sosId`, `teamId`). Bắn WebSocket `/user/queue/assignments`.
 
-### 2.4. Đội Cứu Hộ (`/api/rescuer`)
+### 2.4. Đội Cứu Hộ & Lộ Trình Tác Chiến (`/api/rescuer`)
 - `GET /api/rescuer/my-tasks` - Danh sách nhiệm vụ của đội mình.
-- `PUT /api/rescuer/tasks/{assignmentId}/accept` - Nhận nhiệm vụ.
-- `PUT /api/rescuer/tasks/{assignmentId}/reject` - Từ chối nhiệm vụ (kèm lý do).
-- `PUT /api/rescuer/tasks/{assignmentId}/update-status` - Cập nhật trạng thái (`IN_PROGRESS`, `COMPLETED`, kèm ảnh báo cáo).
+- `POST /api/rescuer/assignments/{id}/accept` - Nhận nhiệm vụ.
+- `POST /api/rescuer/assignments/{id}/reject` - Từ chối nhiệm vụ (kèm lý do).
+- `GET /api/rescuer/assignments/{id}/route` - Phân tích địa hình và định tuyến OSRM kèm danh mục phương tiện, trang bị đề xuất.
+- `POST /api/rescuer/assignments/{id}/start-moving` - Bắt đầu xuất kích tiếp cận hiện trường.
+- `POST /api/rescuer/assignments/{id}/location` - Đội cứu hộ cập nhật vị trí GPS thời gian thực (watchPosition). Bắn WebSocket `/topic/map-updates` với type `LOCATION_UPDATE` và tính lại cự ly OSRM.
+- `POST /api/rescuer/assignments/{id}/complete` - Hoàn thành nhiệm vụ (kèm ảnh hiện trường báo cáo).
 
 ### 2.5. Upload Tệp Lên Cloudinary (`/api/media` & `/api/upload`)
 - `POST /api/media/upload` - Multipart form upload ảnh hiện trường, trả về link ảnh an toàn HTTPS của Cloudinary.

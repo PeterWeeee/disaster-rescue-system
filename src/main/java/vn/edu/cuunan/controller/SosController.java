@@ -11,11 +11,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.edu.cuunan.dto.RouteTerrainAnalysisDto;
 import vn.edu.cuunan.dto.SosRequestDto;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.security.CustomUserDetails;
 import vn.edu.cuunan.service.CloudinaryService;
 import vn.edu.cuunan.service.SosService;
+import vn.edu.cuunan.service.TerrainAnalysisService;
 import vn.edu.cuunan.entity.RescueTeam;
 import vn.edu.cuunan.repository.RescueAssignmentRepository;
 import vn.edu.cuunan.util.GeoUtils;
@@ -33,6 +35,7 @@ public class SosController {
     private final SosService sosService;
     private final CloudinaryService cloudinaryService;
     private final RescueAssignmentRepository rescueAssignmentRepository;
+    private final TerrainAnalysisService terrainAnalysisService;
 
     @Value("${app.hotlines.rescue:112}")
     private String rescueHotline;
@@ -45,10 +48,18 @@ public class SosController {
 
     public SosController(SosService sosService,
                          CloudinaryService cloudinaryService,
-                         RescueAssignmentRepository rescueAssignmentRepository) {
+                         RescueAssignmentRepository rescueAssignmentRepository,
+                         TerrainAnalysisService terrainAnalysisService) {
         this.sosService = sosService;
         this.cloudinaryService = cloudinaryService;
         this.rescueAssignmentRepository = rescueAssignmentRepository;
+        this.terrainAnalysisService = terrainAnalysisService;
+    }
+
+    public SosController(SosService sosService,
+                         CloudinaryService cloudinaryService,
+                         RescueAssignmentRepository rescueAssignmentRepository) {
+        this(sosService, cloudinaryService, rescueAssignmentRepository, new TerrainAnalysisService());
     }
 
     /**
@@ -163,8 +174,38 @@ public class SosController {
                 model.addAttribute("teamLng", team.getCurrentLongitude());
                 if (sos.getLatitude() != null && sos.getLongitude() != null
                         && team.getCurrentLatitude() != null && team.getCurrentLongitude() != null) {
-                    double dist = GeoUtils.calculateDistance(sos.getLatitude(), sos.getLongitude(), team.getCurrentLatitude(), team.getCurrentLongitude());
-                    model.addAttribute("distanceKm", Math.round(dist * 100.0) / 100.0);
+                    Double routeDistance = assignment.getRouteDistanceKm();
+                    Integer routeDuration = assignment.getRouteDurationMinutes();
+                    try {
+                        RouteTerrainAnalysisDto analysis = terrainAnalysisService.analyzeRouteAndTerrain(team, sos, assignment.getId());
+                        if (analysis != null) {
+                            if (analysis.getRouteDistanceKm() != null) {
+                                routeDistance = analysis.getRouteDistanceKm();
+                                assignment.setRouteDistanceKm(routeDistance);
+                            }
+                            if (analysis.getRouteDurationMinutes() != null) {
+                                routeDuration = analysis.getRouteDurationMinutes();
+                                assignment.setRouteDurationMinutes(routeDuration);
+                            }
+                            if (analysis.getRouteGeometryGeoJson() != null) {
+                                model.addAttribute("routeGeometryGeoJson", analysis.getRouteGeometryGeoJson());
+                            }
+                            rescueAssignmentRepository.save(assignment);
+                        }
+                    } catch (Exception ex) {
+                        log.warn("Không thể tính lộ trình OSRM cho ca SOS #{}: {}", sos.getId(), ex.getMessage());
+                    }
+
+                    if (routeDistance == null) {
+                        double dist = GeoUtils.calculateDistance(sos.getLatitude(), sos.getLongitude(), team.getCurrentLatitude(), team.getCurrentLongitude());
+                        routeDistance = Math.round(dist * 100.0) / 100.0;
+                    }
+                    model.addAttribute("distanceKm", routeDistance);
+                    if (routeDuration != null) {
+                        model.addAttribute("durationMinutes", routeDuration);
+                    }
+
+
                 }
             }
         });

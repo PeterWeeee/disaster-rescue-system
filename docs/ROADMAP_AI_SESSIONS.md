@@ -55,6 +55,9 @@
 │ Session 19: Popover Cảm Xúc Hover, Đồng Bộ Bình Luận & Tự Phục Hồi Font│
 │             (Reaction Hover, Comment Sync & Unicode Self-Healing)      │
 │    ↓                                                                   │
+│ Session 20: Đồng Bộ Cự Ly OSRM & Tự Động Cập Nhật Vị Trí Live GPS      │
+│             (Distance Synchronization & Live GPS Tracking 3 Roles)     │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -106,5 +109,9 @@ eaction-popover bị lơ lửng đè lên thanh tóm tắt phản ứng: Gỡ b�
     - Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map lookup ${commentsMap.get(post.id)}, bổ sung API fetch động loadCommentsForPost(postId) tự động đồng bộ số lượng khi mở hộp bình luận.
     - Cơ chế tự phục hồi lỗi font tiếng Việt (dấu hỏi ?) do seed data: Bổ sung phương thức đa tầng 
 epairCorruptedUnicodeData() trong DataInitializer.java và ensureCleanSampleComments() trong CommunityFeedService.java tự động làm sạch và nạp lại dữ liệu tiếng Việt chuẩn cho thông báo, bài viết, nhật ký hệ thống, cảnh báo và bình luận; lưu file database/fix_sqlserver_encoding.sql chuẩn UTF-8 with BOM.
-20. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+20. **[Session 20: Đồng Bộ Cự Ly Tuyến Đường OSRM & Định Vị Live GPS Thời Gian Thực (Distance Synchronization & Live GPS Tracking)](roadmap/session-20-distance-synchronization-and-live-gps-tracking.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Đồng bộ triệt để cự ly lộ trình di chuyển thực tế qua OSRM Routing API (4.14 km, ~7 phút) giữa Bản đồ lộ trình của đội cứu hộ (`rescuer/routes.html`) và Màn hình theo dõi của người bị nạn (`sos/track.html`), khắc phục lỗi một bên hiển thị OSRM một bên hiển thị Haversine (3.6 km).
+    - Tích hợp vẽ tuyến đường OSRM GeoJSON trực quan trên bản đồ người bị nạn.
+    - Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 bên: Đội cứu hộ dùng `watchPosition` gửi tọa độ thực khi di chuyển, người bị nạn có công tắc "Chia sẻ vị trí trực tiếp" gửi qua `POST /api/sos/{id}/location`, cả 2 bản đồ Điều phối viên (`dashboard.html` và `missions.html`) tự động trượt marker và co ngắn dây nối theo WebSocket `LOCATION_UPDATE` và `VICTIM_LOCATION_UPDATE`.
+21. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

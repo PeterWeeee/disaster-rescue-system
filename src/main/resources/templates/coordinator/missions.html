@@ -204,6 +204,8 @@
                         </tr>
                         <tr th:each="asg : ${assignments}" class="mission-row"
                             th:attr="data-id=${asg.id},
+                                     data-sos-id=${asg.sosRequest != null ? asg.sosRequest.id : ''},
+                                     data-team-id=${asg.team != null ? asg.team.id : ''},
                                      data-sos-name=${asg.sosRequest != null ? asg.sosRequest.contactName : ''},
                                      data-sos-phone=${asg.sosRequest != null ? asg.sosRequest.contactPhone : ''},
                                      data-sos-addr=${asg.sosRequest != null ? asg.sosRequest.addressDetail : ''},
@@ -566,6 +568,55 @@
             missionsMap.setView(bounds[0], 12);
         }
     }
+
+    // Lắng nghe cập nhật GPS thời gian thực trên bản đồ điều phối viên
+    document.addEventListener('rescue:map-update', function(e) {
+        const update = e.detail || {};
+        if (update.type === 'LOCATION_UPDATE') {
+            const teamId = update.teamId;
+            const sosId = update.sosId;
+            const newLat = Number(update.latitude);
+            const newLng = Number(update.longitude);
+            const dist = update.distanceKm;
+
+            const rows = document.querySelectorAll('.mission-row');
+            rows.forEach(row => {
+                const rSosId = row.getAttribute('data-sos-id');
+                const rTeamId = row.getAttribute('data-team-id');
+                const aId = row.getAttribute('data-id');
+                if ((sosId && String(rSosId) === String(sosId)) || (teamId && String(rTeamId) === String(teamId))) {
+                    const layer = missionLayers[aId];
+                    if (layer && layer.teamMarker && !isNaN(newLat) && !isNaN(newLng)) {
+                        layer.teamMarker.setLatLng([newLat, newLng]);
+                        layer.teamPos = [newLat, newLng];
+                        if (layer.polyline && layer.sosPos) {
+                            layer.polyline.setLatLngs([[newLat, newLng], layer.sosPos]);
+                        }
+                    }
+                }
+            });
+        } else if (update.type === 'VICTIM_LOCATION_UPDATE') {
+            const sosId = update.sosId;
+            const newLat = Number(update.latitude);
+            const newLng = Number(update.longitude);
+
+            const rows = document.querySelectorAll('.mission-row');
+            rows.forEach(row => {
+                const rSosId = row.getAttribute('data-sos-id');
+                const aId = row.getAttribute('data-id');
+                if (String(rSosId) === String(sosId)) {
+                    const layer = missionLayers[aId];
+                    if (layer && layer.sosMarker && !isNaN(newLat) && !isNaN(newLng)) {
+                        layer.sosMarker.setLatLng([newLat, newLng]);
+                        layer.sosPos = [newLat, newLng];
+                        if (layer.polyline && layer.teamPos) {
+                            layer.polyline.setLatLngs([layer.teamPos, [newLat, newLng]]);
+                        }
+                    }
+                }
+            });
+        }
+    });
 
     function focusMissionFromButton(btn) {
         const row = btn.closest(".mission-row");

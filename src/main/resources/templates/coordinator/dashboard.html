@@ -432,6 +432,17 @@
                 return;
             }
 
+            // 1.1 Cập nhật vị trí GPS của Người bị nạn (VICTIM_LOCATION_UPDATE)
+            if (update.type === 'VICTIM_LOCATION_UPDATE') {
+                const sosId = update.sosId;
+                const newLat = Number(update.latitude);
+                const newLng = Number(update.longitude);
+                if (sosMarkers[sosId] && !isNaN(newLat) && !isNaN(newLng)) {
+                    sosMarkers[sosId].setLatLng([newLat, newLng]);
+                }
+                return;
+            }
+
             // 2. Cập nhật khi đổi trạng thái (STATUS_CHANGE hoặc ASSIGNED)
             if (update.sosId) {
                 const marker = sosMarkers[update.sosId];

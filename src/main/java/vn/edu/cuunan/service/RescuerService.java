@@ -86,7 +86,7 @@ public class RescuerService {
     /**
      * Xác định đội cứu hộ mà tài khoản người dùng đang tham gia (là Đội trưởng hoặc Thành viên).
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<RescueTeam> getMyTeam(User user) {
         if (user == null || user.getId() == null) {
             return Optional.empty();
@@ -119,7 +119,7 @@ public class RescuerService {
     /**
      * Lấy toàn bộ danh sách nhiệm vụ được phân công cho đội của người dùng.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RescueAssignment> getMyAssignments(User user) {
         Optional<RescueTeam> teamOpt = getMyTeam(user);
         if (teamOpt.isEmpty()) {
@@ -269,18 +269,26 @@ public class RescuerService {
     /**
      * Bắt đầu di chuyển / tiếp cận hiện trường.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public RouteTerrainAnalysisDto getRouteAndTerrainAnalysis(Long assignmentId, User user) {
         RescueAssignment assignment = findAndValidateAssignmentAccess(assignmentId, user);
-        return terrainAnalysisService.analyzeRouteAndTerrain(assignment.getTeam(), assignment.getSosRequest(), assignmentId);
+        RouteTerrainAnalysisDto result = terrainAnalysisService.analyzeRouteAndTerrain(assignment.getTeam(), assignment.getSosRequest(), assignmentId);
+        if (result != null && result.getRouteDistanceKm() != null) {
+            assignment.setRouteDistanceKm(result.getRouteDistanceKm());
+            if (result.getRouteDurationMinutes() != null) {
+                assignment.setRouteDurationMinutes(result.getRouteDurationMinutes());
+            }
+            rescueAssignmentRepository.save(assignment);
+        }
+        return result;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public RescueTeam getAssignmentTeam(Long assignmentId, User user) {
         return findAndValidateAssignmentAccess(assignmentId, user).getTeam();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<vn.edu.cuunan.entity.EquipmentAssignment> getMissionEquipment(Long assignmentId, User user) {
         findAndValidateAssignmentAccess(assignmentId, user);
         return equipmentService == null ? Collections.emptyList() : equipmentService.getDispatchedEquipmentForMission(assignmentId).stream()
@@ -534,7 +542,28 @@ public class RescuerService {
         team.setCurrentLongitude(lng);
         rescueTeamRepository.save(team);
 
-        double distanceKm = GeoUtils.calculateDistance(lat, lng, sos.getLatitude(), sos.getLongitude());
+        double distanceKm;
+        Integer durationMinutes = null;
+        String routeGeometry = null;
+
+        try {
+            RouteTerrainAnalysisDto analysis = terrainAnalysisService.analyzeRouteAndTerrain(team, sos, assignmentId);
+            if (analysis != null && analysis.getRouteDistanceKm() != null) {
+                distanceKm = analysis.getRouteDistanceKm();
+                durationMinutes = analysis.getRouteDurationMinutes();
+                routeGeometry = analysis.getRouteGeometryGeoJson();
+                assignment.setRouteDistanceKm(distanceKm);
+                if (durationMinutes != null) {
+                    assignment.setRouteDurationMinutes(durationMinutes);
+                }
+                rescueAssignmentRepository.save(assignment);
+            } else {
+                distanceKm = Math.round(GeoUtils.calculateDistance(lat, lng, sos.getLatitude(), sos.getLongitude()) * 100.0) / 100.0;
+            }
+        } catch (Exception ex) {
+            log.warn("Lỗi tính lộ trình OSRM khi cập nhật vị trí: {}", ex.getMessage());
+            distanceKm = Math.round(GeoUtils.calculateDistance(lat, lng, sos.getLatitude(), sos.getLongitude()) * 100.0) / 100.0;
+        }
         distanceKm = Math.round(distanceKm * 100.0) / 100.0;
 
         Map<String, Object> locationUpdate = new HashMap<>();
@@ -544,7 +573,13 @@ public class RescuerService {
         locationUpdate.put("teamName", team.getTeamName());
         locationUpdate.put("latitude", lat);
         locationUpdate.put("longitude", lng);
-        locationUpdate.put("distanceKm", distanceKm);
+        locationUpdate.put("distanceKm", distanceKm);
+        if (durationMinutes != null) {
+            locationUpdate.put("durationMinutes", durationMinutes);
+        }
+        if (routeGeometry != null) {
+            locationUpdate.put("routeGeometryGeoJson", routeGeometry);
+        }
 
         if (messagingTemplate != null) {
             messagingTemplate.convertAndSend("/topic/map-updates", locationUpdate);

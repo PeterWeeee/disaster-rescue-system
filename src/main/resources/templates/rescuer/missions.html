@@ -206,7 +206,7 @@
                                             Tọa độ đội hiện tại: <strong id="rescuerCoordText">[<span th:text="${myTeam != null ? myTeam.currentLatitude : '--'}"></span>, <span th:text="${myTeam != null ? myTeam.currentLongitude : '--'}"></span>]</strong>
                                         </div>
                                         <div class="small text-dark">
-                                            Khoảng cách đến nạn nhân: <strong class="text-danger fs-6" id="rescuerDistText">Đang theo dõi...</strong>
+                                            Khoảng cách đến nạn nhân: <strong class="text-danger fs-6" id="rescuerDistText" th:text="${a.routeDistanceKm != null ? a.routeDistanceKm + ' km' : 'Đang theo dõi...'}">Đang theo dõi...</strong>
                                         </div>
                                     </div>
 

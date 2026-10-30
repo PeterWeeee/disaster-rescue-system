@@ -221,6 +221,14 @@
                     const noticeEl = document.getElementById('pendingMissionNotice');
                     if (noticeEl) noticeEl.style.display = isPending ? 'block' : 'none';
 
+                    // Kích hoạt theo dõi vị trí live của đội cứu hộ nếu nhiệm vụ đang tiến hành (IN_PROGRESS)
+                    if (activeBtn && activeBtn.getAttribute('data-status') === 'IN_PROGRESS') {
+                        startRescuerLocationWatch(assignmentId);
+                    } else if (rescuerWatchId !== null) {
+                        navigator.geolocation.clearWatch(rescuerWatchId);
+                        rescuerWatchId = null;
+                    }
+
                     // Cập nhật thông tin chi tiết
                     document.getElementById('panelDistance').textContent = (data.routeDistanceKm || '--') + ' km';
                     document.getElementById('panelDuration').textContent = '~' + (data.routeDurationMinutes || '--') + ' phút';
@@ -305,6 +313,91 @@
                     console.error('Lỗi tải lộ trình:', e);
                 }
             }
+
+            let rescuerWatchId = null;
+
+            function startRescuerLocationWatch(assignmentId) {
+                if (!navigator.geolocation) return;
+                if (rescuerWatchId !== null) {
+                    navigator.geolocation.clearWatch(rescuerWatchId);
+                    rescuerWatchId = null;
+                }
+                rescuerWatchId = navigator.geolocation.watchPosition(function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    fetch(`/api/rescuer/assignments/${assignmentId}/location`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ latitude: lat, longitude: lng })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (startMarker) {
+                                startMarker.setLatLng([lat, lng]);
+                            }
+                            const startCoordEl = document.getElementById('panelStartCoord');
+                            if (startCoordEl) startCoordEl.textContent = `[${lat.toFixed(4)}, ${lng.toFixed(4)}]`;
+                            if (data.distanceKm !== undefined) {
+                                const distEl = document.getElementById('panelDistance');
+                                if (distEl) distEl.textContent = data.distanceKm + ' km';
+                            }
+                            if (data.durationMinutes !== undefined) {
+                                const durEl = document.getElementById('panelDuration');
+                                if (durEl) durEl.textContent = '~' + data.durationMinutes + ' phút';
+                            }
+                            if (data.routeGeometryGeoJson && map) {
+                                try {
+                                    if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+                                    currentRouteLayer = L.geoJSON(JSON.parse(data.routeGeometryGeoJson), {
+                                        style: { color: '#0d6efd', weight: 5, opacity: 0.85, dashArray: '2, 6', lineJoin: 'round' }
+                                    }).addTo(map);
+                                } catch(e) {}
+                            }
+                        }
+                    })
+                    .catch(err => console.warn('Lỗi gửi GPS đội cứu hộ:', err));
+                }, function(err) {
+                    console.warn('GPS Watch error:', err);
+                }, {
+                    enableHighAccuracy: false,
+                    maximumAge: 1500,
+                    timeout: 10000
+                });
+            }
+
+            // Lắng nghe cập nhật WebSocket thời gian thực cho Đội Cứu Hộ
+            document.addEventListener('rescue:map-update', function (e) {
+                const data = e.detail || {};
+                const activeBtn = document.querySelector('.mission-item-btn.active');
+                if (!activeBtn) return;
+                const activeSosId = activeBtn.getAttribute('data-sos-id');
+                const activeAssignmentId = activeBtn.getAttribute('data-id');
+
+                if (data.type === 'LOCATION_UPDATE' && String(data.sosId) === String(activeSosId)) {
+                    if (startMarker && data.latitude && data.longitude) {
+                        startMarker.setLatLng([Number(data.latitude), Number(data.longitude)]);
+                    }
+                    if (data.distanceKm !== undefined) {
+                        const distEl = document.getElementById('panelDistance');
+                        if (distEl) distEl.textContent = data.distanceKm + ' km';
+                    }
+                    if (data.durationMinutes !== undefined) {
+                        const durEl = document.getElementById('panelDuration');
+                        if (durEl) durEl.textContent = '~' + data.durationMinutes + ' phút';
+                    }
+                } else if (data.type === 'VICTIM_LOCATION_UPDATE' && String(data.sosId) === String(activeSosId)) {
+                    // Người bị nạn di chuyển -> Cập nhật vị trí điểm đỏ và vẽ lại tuyến đường
+                    if (endMarker && data.latitude && data.longitude) {
+                        endMarker.setLatLng([Number(data.latitude), Number(data.longitude)]);
+                        const sosCoordEl = document.getElementById('panelSosCoord');
+                        if (sosCoordEl) sosCoordEl.textContent = `[${Number(data.latitude).toFixed(4)}, ${Number(data.longitude).toFixed(4)}]`;
+                        if (activeAssignmentId) {
+                            loadMissionRoute(activeAssignmentId);
+                        }
+                    }
+                }
+            });
 
             // Gắn sự kiện chọn nhiệm vụ
             document.querySelectorAll('.mission-item-btn').forEach(btn => {
