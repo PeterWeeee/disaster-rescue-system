@@ -20,6 +20,8 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
 
     long countByStatus(String status);
 
+    List<Donation> findByDonorPhoneOrderByCreatedAtDesc(String donorPhone);
+
     @Query("SELECT COALESCE(SUM(d.amount), 0) FROM Donation d WHERE d.status = :status")
     BigDecimal sumAmountByStatus(String status);
 }
