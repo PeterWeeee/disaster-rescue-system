@@ -15,9 +15,9 @@ Mở **SQL Server Management Studio (SSMS)** và chạy lần lượt:
    *(Lưu ý: Nếu bạn chạy Spring Boot với `spring.jpa.hibernate.ddl-auto=update`, Hibernate cũng có thể tự sinh các bảng này. Tuy nhiên việc chạy file SQL này giúp đảm bảo đúng 100% kiểu dữ liệu, index và collation).*
 3. **`03_seed_data.sql`:**
    * Nạp sẵn 4 vai trò chuẩn (`ROLE_ADMIN`, `ROLE_COORDINATOR`, `ROLE_RESCUER`, `ROLE_CITIZEN`).
-   * Nạp 4 tài khoản mẫu (Mật khẩu mặc định đều là `123456`):
+   * Nạp tài khoản mẫu (Mật khẩu mặc định đều là `123456`):
      * `admin` / `123456` (Quản trị viên)
-     * `dieuphoi01` / `123456` (Điều phối viên)
+     * `coordinator` / `123456` (Điều phối viên duy nhất)
      * `doitruong01` / `123456` (Đội trưởng cứu hộ)
      * `nguoidan01` / `123456` (Người dân)
    * Nạp Đội cứu hộ mẫu, 2 ca cứu nạn SOS khẩn cấp mẫu và 1 cảnh báo bão lũ diện rộng.

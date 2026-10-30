@@ -148,7 +148,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 8: Tài khoản RESCUER gửi yêu cầu tiếp tế ngân sách không bị lỗi 403")
     void testRescuerSubmitBudgetRequestSuccess() throws Exception {
-        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Nguyễn Văn Hùng");
 
         mockMvc.perform(post("/rescuer/resources/request-budget")
                         .cookie(new Cookie("jwt_token", rescuerToken))
@@ -163,7 +163,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 9: Tài khoản RESCUER truy vấn API lộ trình OSRM /api/rescuer/assignments/{id}/route thành công")
     void testRescuerGetAssignmentRouteSuccess() throws Exception {
-        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Đặng Văn Cứu Hộ");
+        String rescuerToken = tokenProvider.generateToken("rescuer", "ROLE_RESCUER", "Nguyễn Văn Hùng");
 
         mockMvc.perform(get("/api/rescuer/assignments/1/route")
                         .cookie(new Cookie("jwt_token", rescuerToken)))

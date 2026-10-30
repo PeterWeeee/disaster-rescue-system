@@ -39,64 +39,21 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'admin')
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coordinator')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
     VALUES ('coordinator', @hash, N'Điều Phối Viên TT Chỉ Huy', '0902223344', 'coord@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'dieupoi1')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('dieupoi1', @hash, N'Điều Phối Viên Khu Vực 2', '0902223355', 'dieupoi1@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
--- Điều phối viên 11 tỉnh/thành
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_thanhhoa')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_thanhhoa', @hash, N'Nguyễn Văn Điều Phối Thanh Hóa', '0902010001', 'coord.th@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_nghean')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_nghean', @hash, N'Trần Đình Điều Phối Nghệ An', '0902020002', 'coord.na@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_hatinh')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_hatinh', @hash, N'Lê Văn Điều Phối Hà Tĩnh', '0902030003', 'coord.ht@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_quangtri')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_quangtri', @hash, N'Phạm Văn Điều Phối Quảng Trị', '0902040004', 'coord.qt@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_hue')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_hue', @hash, N'Hoàng Văn Điều Phối Huế', '0902050005', 'coord.hue@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_danang')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_danang', @hash, N'Ngô Quốc Điều Phối Đà Nẵng', '0902060006', 'coord.dn@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_quangngai')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_quangngai', @hash, N'Võ Văn Điều Phối Quảng Ngãi', '0902070007', 'coord.qn@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_gialai')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_gialai', @hash, N'Đỗ Văn Điều Phối Gia Lai', '0902080008', 'coord.gl@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_daklak')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_daklak', @hash, N'Bùi Văn Điều Phối Đắk Lắk', '0902090009', 'coord.dl@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_khanhhoa')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_khanhhoa', @hash, N'Đinh Văn Điều Phối Khánh Hòa', '0902100010', 'coord.kh@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'coord_lamdong')
-    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('coord_lamdong', @hash, N'Chu Văn Điều Phối Lâm Đồng', '0902110011', 'coord.ld@cuunan247.vn', @coordRoleId, 'ACTIVE');
-
+UPDATE [dbo].[users]
+SET [role_id] = @coordRoleId, [status] = 'ACTIVE'
+WHERE [username] = 'coordinator';
+-- Chỉ giữ một tài khoản điều phối viên; khóa tài khoản mẫu cũ nhưng bảo toàn dữ liệu lịch sử.
+UPDATE [dbo].[users]
+SET [role_id] = @citizenRoleId, [status] = 'BLOCKED'
+WHERE [username] <> 'coordinator' AND [role_id] = @coordRoleId;
 -- 2.2. Đội trưởng cứu hộ (ROLE_RESCUER)
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('rescuer', @hash, N'Đặng Văn Cứu Hộ (Hải Châu)', '0900000003', 'rescuer@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
+    VALUES ('rescuer', @hash, N'Nguyễn Văn Hùng (Hải Châu)', '0900000003', 'rescuer@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'cuuho1')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('cuuho1', @hash, N'Nguyễn Văn Sơn Trà (Sơn Trà)', '0905556677', 'cuuho1@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
+    VALUES ('cuuho1', @hash, N'Nguyễn Văn Sơn (Sơn Trà)', '0905556677', 'cuuho1@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_th01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
@@ -120,7 +77,7 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_hue01')
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_qn01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('rescuer_qn01', @hash, N'Đinh Công Ngãi (Quảng Ngãi 01)', '0917007001', 'rescuer.qn01@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
+    VALUES ('rescuer_qn01', @hash, N'Lê Văn Minh (Quảng Ngãi 01)', '0917007001', 'rescuer.qn01@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_gl01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
@@ -136,13 +93,31 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_kh01')
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_ld01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('rescuer_ld01', @hash, N'Cil Ha Đồng (Lâm Đồng 01)', '0921011001', 'rescuer.ld01@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
+    VALUES ('rescuer_ld01', @hash, N'Trần Văn Dũng (Lâm Đồng 01)', '0921011001', 'rescuer.ld01@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
 
+-- Chuẩn hóa username người dân cũ, giữ nguyên ID và các dữ liệu liên quan.
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan01') UPDATE [dbo].[users] SET [username] = 'nguoidan01' WHERE [username] = 'citizen';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan1') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan02') UPDATE [dbo].[users] SET [username] = 'nguoidan02' WHERE [username] = 'nguoidan1';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_th') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan03') UPDATE [dbo].[users] SET [username] = 'nguoidan03' WHERE [username] = 'citizen_th';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_na') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan04') UPDATE [dbo].[users] SET [username] = 'nguoidan04' WHERE [username] = 'citizen_na';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ht') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan05') UPDATE [dbo].[users] SET [username] = 'nguoidan05' WHERE [username] = 'citizen_ht';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qt') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan06') UPDATE [dbo].[users] SET [username] = 'nguoidan06' WHERE [username] = 'citizen_qt';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_hue') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan07') UPDATE [dbo].[users] SET [username] = 'nguoidan07' WHERE [username] = 'citizen_hue';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qn') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan08') UPDATE [dbo].[users] SET [username] = 'nguoidan08' WHERE [username] = 'citizen_qn';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_gl') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan09') UPDATE [dbo].[users] SET [username] = 'nguoidan09' WHERE [username] = 'citizen_gl';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dl') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan10') UPDATE [dbo].[users] SET [username] = 'nguoidan10' WHERE [username] = 'citizen_dl';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_kh') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan11') UPDATE [dbo].[users] SET [username] = 'nguoidan11' WHERE [username] = 'citizen_kh';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ld') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan12') UPDATE [dbo].[users] SET [username] = 'nguoidan12' WHERE [username] = 'citizen_ld';
 -- 2.3. Người dân (ROLE_CITIZEN)
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen')
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('citizen', @hash, N'Nguyễn Văn Dân', '0900000004', 'dan@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+    VALUES ('nguoidan01', @hash, N'Nguyễn Văn Dân', '0900000004', 'dan@cuunan247.vn', @citizenRoleId, 'ACTIVE');
 
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Văn Hùng (Hải Châu)' WHERE [username] = 'rescuer';
+UPDATE [dbo].[users] SET [full_name] = N'Trần Thị Hương (Quảng Trị 02)' WHERE [username] = 'rescuer_qt02';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Văn Sơn (Sơn Trà)' WHERE [username] = 'cuuho1';
+UPDATE [dbo].[users] SET [full_name] = N'Lê Văn Minh (Quảng Ngãi 01)' WHERE [username] = 'rescuer_qn01';
+UPDATE [dbo].[users] SET [full_name] = N'Trần Văn Dũng (Lâm Đồng 01)' WHERE [username] = 'rescuer_ld01';
 PRINT N'>>> Đã nạp tài khoản mẫu cho các vai trò!';
 GO
 

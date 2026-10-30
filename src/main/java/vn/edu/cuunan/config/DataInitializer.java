@@ -364,6 +364,35 @@ public class DataInitializer implements CommandLineRunner {
         log.info(">>> Đã hoàn tất tự động kiểm tra và phục hồi dữ liệu Unicode tiếng Việt sạch 100%!");
     }
 
+    /** Rename demo citizen accounts to simple, consistent Vietnamese usernames. */
+    private void migrateLegacyCitizenUsernames() {
+        List<String> oldNames = List.of("citizen", "nguoidan1", "citizen_th", "citizen_na", "citizen_ht",
+                "citizen_qt", "citizen_hue", "citizen_qn", "citizen_gl", "citizen_dl", "citizen_kh", "citizen_ld");
+        List<String> newNames = List.of("nguoidan01", "nguoidan02", "nguoidan03", "nguoidan04", "nguoidan05",
+                "nguoidan06", "nguoidan07", "nguoidan08", "nguoidan09", "nguoidan10", "nguoidan11", "nguoidan12");
+        for (int i = 0; i < oldNames.size(); i++) {
+            String oldName = oldNames.get(i);
+            String newName = newNames.get(i);
+            if (!userRepository.existsByUsername(newName)) {
+                userRepository.findByUsername(oldName).ifPresent(user -> {
+                    user.setUsername(newName);
+                    userRepository.save(user);
+                });
+            }
+        }
+    }
+    /** Retire extra coordinators while preserving user rows referenced by history. */
+    private void retireLegacyCoordinatorAccounts(Role coordinatorRole, Role citizenRole) {
+        for (User user : userRepository.findAll()) {
+            if (!"coordinator".equalsIgnoreCase(user.getUsername())
+                    && user.getRole() != null
+                    && coordinatorRole.getId().equals(user.getRole().getId())) {
+                user.setRole(citizenRole);
+                user.setStatus("BLOCKED");
+                userRepository.save(user);
+            }
+        }
+    }
     @Override
     public void run(String... args) {
         ensureSqlServerUnicodeCompatibility();
@@ -377,25 +406,18 @@ public class DataInitializer implements CommandLineRunner {
         Role coordRole = getOrCreateRole("ROLE_COORDINATOR");
         Role rescuerRole = getOrCreateRole("ROLE_RESCUER");
         Role citizenRole = getOrCreateRole("ROLE_CITIZEN");
+        migrateLegacyCitizenUsernames();
 
         // 2. Khởi tạo Người dùng (Users): Mật khẩu thống nhất kiểm thử là 123456
         // 2.1. Quản trị viên (Admin)
         User adminUser = getOrCreateUser("admin", "123456", "Quản Trị Viên Hệ Thống", "0901112233", "admin@cuunan247.vn", "Hà Nội / Đà Nẵng", adminRole);
 
-        // 2.2. Điều phối viên trung tâm & 11 tỉnh/thành Miền Trung
+        // 2.2. Một tài khoản điều phối viên duy nhất cho toàn hệ thống
         User coordCentral = getOrCreateUser("coordinator", "123456", "Điều Phối Viên TT Chỉ Huy", "0902223344", "coord@cuunan247.vn", "Trung Tâm Chỉ Huy Đà Nẵng", coordRole);
-        User coordCentral2 = getOrCreateUser("dieupoi1", "123456", "Điều Phối Viên Khu Vực 2", "0902223355", "dieupoi1@cuunan247.vn", "Khu Vực Duyên Hải Miền Trung", coordRole);
-        User coordTH = getOrCreateUser("coord_thanhhoa", "123456", "Nguyễn Văn Điều Phối Thanh Hóa", "0902010001", "coord.thanhhoa@cuunan247.vn", "Thành phố Thanh Hóa", coordRole);
-        User coordNA = getOrCreateUser("coord_nghean", "123456", "Trần Đình Điều Phối Nghệ An", "0902020002", "coord.nghean@cuunan247.vn", "Thành phố Vinh, Nghệ An", coordRole);
-        User coordHT = getOrCreateUser("coord_hatinh", "123456", "Lê Văn Điều Phối Hà Tĩnh", "0902030003", "coord.hatinh@cuunan247.vn", "Thành phố Hà Tĩnh", coordRole);
-        User coordQT = getOrCreateUser("coord_quangtri", "123456", "Phạm Văn Điều Phối Quảng Trị", "0902040004", "coord.quangtri@cuunan247.vn", "Thành phố Đông Hà, Quảng Trị", coordRole);
-        User coordHue = getOrCreateUser("coord_hue", "123456", "Hoàng Văn Điều Phối Huế", "0902050005", "coord.hue@cuunan247.vn", "Thành phố Huế", coordRole);
-        User coordDN = getOrCreateUser("coord_danang", "123456", "Ngô Quốc Điều Phối Đà Nẵng", "0902060006", "coord.danang@cuunan247.vn", "Thành phố Đà Nẵng", coordRole);
-        User coordQN = getOrCreateUser("coord_quangngai", "123456", "Võ Văn Điều Phối Quảng Ngãi", "0902070007", "coord.quangngai@cuunan247.vn", "Thành phố Quảng Ngãi", coordRole);
-        User coordGL = getOrCreateUser("coord_gialai", "123456", "Đỗ Văn Điều Phối Gia Lai", "0902080008", "coord.gialai@cuunan247.vn", "Thành phố Pleiku, Gia Lai", coordRole);
-        User coordDL = getOrCreateUser("coord_daklak", "123456", "Bùi Văn Điều Phối Đắk Lắk", "0902090009", "coord.daklak@cuunan247.vn", "Thành phố Buôn Ma Thuột, Đắk Lắk", coordRole);
-        User coordKH = getOrCreateUser("coord_khanhhoa", "123456", "Đinh Văn Điều Phối Khánh Hòa", "0902100010", "coord.khanhhoa@cuunan247.vn", "Thành phố Nha Trang, Khánh Hòa", coordRole);
-        User coordLD = getOrCreateUser("coord_lamdong", "123456", "Chu Văn Điều Phối Lâm Đồng", "0902110011", "coord.lamdong@cuunan247.vn", "Thành phố Đà Lạt, Lâm Đồng", coordRole);
+        coordCentral.setRole(coordRole);
+        coordCentral.setStatus("ACTIVE");
+        coordCentral = userRepository.save(coordCentral);
+        retireLegacyCoordinatorAccounts(coordRole, citizenRole);
 
         // 2.3. Đội trưởng cứu hộ (ROLE_RESCUER) cho từng đội thuộc 11 tỉnh/thành
         // Thanh Hóa
@@ -409,16 +431,16 @@ public class DataInitializer implements CommandLineRunner {
         User rescuerHT02 = getOrCreateUser("rescuer_ht02", "123456", "Lê Hồng Sơn (Đội Trưởng HT 02)", "0913003002", "rescuer.ht02@cuunan247.vn", "Huyện Hương Khê, Hà Tĩnh", rescuerRole);
         // Quảng Trị
         User rescuerQT01 = getOrCreateUser("rescuer_qt01", "123456", "Hoàng Văn Trị (Đội Trưởng QT 01)", "0914004001", "rescuer.qt01@cuunan247.vn", "TP Đông Hà, Quảng Trị", rescuerRole);
-        User rescuerQT02 = getOrCreateUser("rescuer_qt02", "123456", "Đặng Thị Quảng (Đội Trưởng QT 02)", "0914004002", "rescuer.qt02@cuunan247.vn", "Huyện Hướng Hóa, Quảng Trị", rescuerRole);
+        User rescuerQT02 = getOrCreateUser("rescuer_qt02", "123456", "Trần Thị Hương (Đội Trưởng QT 02)", "0914004002", "rescuer.qt02@cuunan247.vn", "Huyện Hướng Hóa, Quảng Trị", rescuerRole);
         // Thành phố Huế
         User rescuerHue01 = getOrCreateUser("rescuer_hue01", "123456", "Ngô Văn Huệ (Đội Trưởng Huế 01)", "0915005001", "rescuer.hue01@cuunan247.vn", "TP Huế, Thừa Thiên Huế", rescuerRole);
         User rescuerHue02 = getOrCreateUser("rescuer_hue02", "123456", "Lý Thị Hương (Đội Trưởng Huế 02)", "0915005002", "rescuer.hue02@cuunan247.vn", "TX Hương Trà, Thừa Thiên Huế", rescuerRole);
         // Thành phố Đà Nẵng (giữ rescuer & cuuho1 để tương thích tài liệu cũ, thêm dn03)
-        User rescuerDN01 = getOrCreateUser("rescuer", "123456", "Đặng Văn Cứu Hộ (Đội Trưởng Hải Châu)", "0900000003", "rescuer@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", rescuerRole);
-        User rescuerDN02 = getOrCreateUser("cuuho1", "123456", "Nguyễn Văn Sơn Trà (Đội Trưởng Sơn Trà)", "0905556677", "cuuho1@cuunan247.vn", "Quận Sơn Trà, Đà Nẵng", rescuerRole);
+        User rescuerDN01 = getOrCreateUser("rescuer", "123456", "Nguyễn Văn Hùng (Đội Trưởng Hải Châu)", "0900000003", "rescuer@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", rescuerRole);
+        User rescuerDN02 = getOrCreateUser("cuuho1", "123456", "Nguyễn Văn Sơn (Đội Trưởng Sơn Trà)", "0905556677", "cuuho1@cuunan247.vn", "Quận Sơn Trà, Đà Nẵng", rescuerRole);
         User rescuerDN03 = getOrCreateUser("rescuer_dn03", "123456", "Dương Văn Nẵng (Đội Trưởng Hòa Vang)", "0916006003", "rescuer.dn03@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", rescuerRole);
         // Quảng Ngãi
-        User rescuerQN01 = getOrCreateUser("rescuer_qn01", "123456", "Đinh Công Ngãi (Đội Trưởng QN 01)", "0917007001", "rescuer.qn01@cuunan247.vn", "TP Quảng Ngãi, Quảng Ngãi", rescuerRole);
+        User rescuerQN01 = getOrCreateUser("rescuer_qn01", "123456", "Lê Văn Minh (Đội Trưởng QN 01)", "0917007001", "rescuer.qn01@cuunan247.vn", "TP Quảng Ngãi, Quảng Ngãi", rescuerRole);
         User rescuerQN02 = getOrCreateUser("rescuer_qn02", "123456", "Bùi Văn Trà (Đội Trưởng QN 02)", "0917007002", "rescuer.qn02@cuunan247.vn", "Huyện Ba Tơ, Quảng Ngãi", rescuerRole);
         // Gia Lai
         User rescuerGL01 = getOrCreateUser("rescuer_gl01", "123456", "Ksor Y Lai (Đội Trưởng Gia Lai 01)", "0918008001", "rescuer.gl01@cuunan247.vn", "TP Pleiku, Gia Lai", rescuerRole);
@@ -430,22 +452,22 @@ public class DataInitializer implements CommandLineRunner {
         User rescuerKH01 = getOrCreateUser("rescuer_kh01", "123456", "Trần Văn Hòa (Đội Trưởng Khánh Hòa 01)", "0920010001", "rescuer.kh01@cuunan247.vn", "TP Nha Trang, Khánh Hòa", rescuerRole);
         User rescuerKH02 = getOrCreateUser("rescuer_kh02", "123456", "Nguyễn Thị Khánh (Đội Trưởng Khánh Hòa 02)", "0920010002", "rescuer.kh02@cuunan247.vn", "TP Cam Ranh, Khánh Hòa", rescuerRole);
         // Lâm Đồng
-        User rescuerLD01 = getOrCreateUser("rescuer_ld01", "123456", "Cil Ha Đồng (Đội Trưởng Lâm Đồng 01)", "0921011001", "rescuer.ld01@cuunan247.vn", "TP Đà Lạt, Lâm Đồng", rescuerRole);
+        User rescuerLD01 = getOrCreateUser("rescuer_ld01", "123456", "Trần Văn Dũng (Đội Trưởng Lâm Đồng 01)", "0921011001", "rescuer.ld01@cuunan247.vn", "TP Đà Lạt, Lâm Đồng", rescuerRole);
         User rescuerLD02 = getOrCreateUser("rescuer_ld02", "123456", "K'Brooke (Đội Trưởng Lâm Đồng 02)", "0921011002", "rescuer.ld02@cuunan247.vn", "TP Bảo Lộc, Lâm Đồng", rescuerRole);
 
         // 2.4. Người dân (ROLE_CITIZEN)
-        User citizen01 = getOrCreateUser("citizen", "123456", "Nguyễn Văn Dân", "0900000004", "dan@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", citizenRole);
-        User citizen02 = getOrCreateUser("nguoidan1", "123456", "Lê Thị Cứu Trợ", "0900000014", "nguoidan1@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", citizenRole);
-        User citizenTH = getOrCreateUser("citizen_th", "123456", "Nguyễn Thị Thanh Hóa", "0901000101", "citizen.th@cuunan247.vn", "Thành phố Thanh Hóa", citizenRole);
-        User citizenNA = getOrCreateUser("citizen_na", "123456", "Lê Văn Nghệ An", "0901000102", "citizen.na@cuunan247.vn", "Huyện Hưng Nguyên, Nghệ An", citizenRole);
-        User citizenHT = getOrCreateUser("citizen_ht", "123456", "Phạm Văn Hà Tĩnh", "0901000103", "citizen.ht@cuunan247.vn", "Huyện Cẩm Xuyên, Hà Tĩnh", citizenRole);
-        User citizenQT = getOrCreateUser("citizen_qt", "123456", "Hoàng Văn Quảng Trị", "0901000104", "citizen.qt@cuunan247.vn", "Thị xã Quảng Trị", citizenRole);
-        User citizenHue = getOrCreateUser("citizen_hue", "123456", "Trần Thị Huế", "0901000105", "citizen.hue@cuunan247.vn", "Thành phố Huế", citizenRole);
-        User citizenQN = getOrCreateUser("citizen_qn", "123456", "Đinh Văn Quảng Ngãi", "0901000106", "citizen.qn@cuunan247.vn", "Huyện Bình Sơn, Quảng Ngãi", citizenRole);
-        User citizenGL = getOrCreateUser("citizen_gl", "123456", "Ksor H'Lâm", "0901000107", "citizen.gl@cuunan247.vn", "TP Pleiku, Gia Lai", citizenRole);
-        User citizenDL = getOrCreateUser("citizen_dl", "123456", "Y Krin Dân", "0901000108", "citizen.dl@cuunan247.vn", "Huyện Krông Ana, Đắk Lắk", citizenRole);
-        User citizenKH = getOrCreateUser("citizen_kh", "123456", "Hoàng Thị Khánh Hòa", "0901000109", "citizen.kh@cuunan247.vn", "TP Nha Trang, Khánh Hòa", citizenRole);
-        User citizenLD = getOrCreateUser("citizen_ld", "123456", "Cil Ha Kôi", "0901000110", "citizen.ld@cuunan247.vn", "Huyện Lạc Dương, Lâm Đồng", citizenRole);
+        User citizen01 = getOrCreateUser("nguoidan01", "123456", "Nguyễn Văn Dân", "0900000004", "dan@cuunan247.vn", "Quận Hải Châu, Đà Nẵng", citizenRole);
+        User citizen02 = getOrCreateUser("nguoidan02", "123456", "Lê Thị Cứu Trợ", "0900000014", "nguoidan1@cuunan247.vn", "Huyện Hòa Vang, Đà Nẵng", citizenRole);
+        User citizenTH = getOrCreateUser("nguoidan03", "123456", "Nguyễn Thị Thanh Hóa", "0901000101", "citizen.th@cuunan247.vn", "Thành phố Thanh Hóa", citizenRole);
+        User citizenNA = getOrCreateUser("nguoidan04", "123456", "Lê Văn Nghệ An", "0901000102", "citizen.na@cuunan247.vn", "Huyện Hưng Nguyên, Nghệ An", citizenRole);
+        User citizenHT = getOrCreateUser("nguoidan05", "123456", "Phạm Văn Hà Tĩnh", "0901000103", "citizen.ht@cuunan247.vn", "Huyện Cẩm Xuyên, Hà Tĩnh", citizenRole);
+        User citizenQT = getOrCreateUser("nguoidan06", "123456", "Hoàng Văn Quảng Trị", "0901000104", "citizen.qt@cuunan247.vn", "Thị xã Quảng Trị", citizenRole);
+        User citizenHue = getOrCreateUser("nguoidan07", "123456", "Trần Thị Huế", "0901000105", "citizen.hue@cuunan247.vn", "Thành phố Huế", citizenRole);
+        User citizenQN = getOrCreateUser("nguoidan08", "123456", "Đinh Văn Quảng Ngãi", "0901000106", "citizen.qn@cuunan247.vn", "Huyện Bình Sơn, Quảng Ngãi", citizenRole);
+        User citizenGL = getOrCreateUser("nguoidan09", "123456", "Ksor H'Lâm", "0901000107", "citizen.gl@cuunan247.vn", "TP Pleiku, Gia Lai", citizenRole);
+        User citizenDL = getOrCreateUser("nguoidan10", "123456", "Y Krin Dân", "0901000108", "citizen.dl@cuunan247.vn", "Huyện Krông Ana, Đắk Lắk", citizenRole);
+        User citizenKH = getOrCreateUser("nguoidan11", "123456", "Hoàng Thị Khánh Hòa", "0901000109", "citizen.kh@cuunan247.vn", "TP Nha Trang, Khánh Hòa", citizenRole);
+        User citizenLD = getOrCreateUser("nguoidan12", "123456", "Cil Ha Kôi", "0901000110", "citizen.ld@cuunan247.vn", "Huyện Lạc Dương, Lâm Đồng", citizenRole);
 
         // 3. Khởi tạo Đội cứu hộ (RescueTeams) - 1 đến 2 đội cho từng tỉnh/thành miền Trung
         // 3.1. Thanh Hóa
@@ -773,27 +795,27 @@ public class DataInitializer implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80");
 
         // Nhiệm vụ 4: Thanh Hóa (Đội Nghi Sơn) - PENDING
-        initAssignment(sosTH2, teamTH02, coordTH, "PENDING",
+        initAssignment(sosTH2, teamTH02, coordCentral, "PENDING",
                 "Điều phối Thanh Hóa: Tiếp cận phường Hải Hòa, mang theo cáng cứu thương và túi y tế.",
                 LocalDateTime.now().minusMinutes(25), null, null, null, null);
 
         // Nhiệm vụ 5: Hà Tĩnh (Đội Cẩm Xuyên) - IN_PROGRESS
-        initAssignment(sosHT1, teamHT01, coordHT, "IN_PROGRESS",
+        initAssignment(sosHT1, teamHT01, coordCentral, "IN_PROGRESS",
                 "Đội Cẩm Xuyên đang dùng xuồng máy vượt dòng xả lũ hồ Kẻ Gỗ để tiếp cận cụ già và bé nhỏ.",
                 LocalDateTime.now().minusMinutes(50), LocalDateTime.now().minusMinutes(42), null, null, null);
 
         // Nhiệm vụ 6: Thừa Thiên Huế (Đội Huế 01) - IN_PROGRESS
-        initAssignment(sosHue1, teamHue01, coordHue, "IN_PROGRESS",
+        initAssignment(sosHue1, teamHue01, coordCentral, "IN_PROGRESS",
                 "Đội canô số 1 đang tiếp cận phường Hương Vinh, mang theo áo phao và nhân viên y tế hỗ trợ sản phụ.",
                 LocalDateTime.now().minusMinutes(60), LocalDateTime.now().minusMinutes(52), null, null, null);
 
         // Nhiệm vụ 7: Nghệ An (Đội NA 01) - PENDING
-        initAssignment(sosNA1, teamNA01, coordNA, "PENDING",
+        initAssignment(sosNA1, teamNA01, coordCentral, "PENDING",
                 "Điều phối Nghệ An: Điều 1 xuồng chở mì tôm, nước ngọt và đèn pin cứu hộ vào xóm bị cô lập.",
                 LocalDateTime.now().minusMinutes(20), null, null, null, null);
 
         // Nhiệm vụ 8: Đắk Lắk (Đội DL 01) - COMPLETED
-        initAssignment(sosDL1, teamDL01, coordDL, "COMPLETED",
+        initAssignment(sosDL1, teamDL01, coordCentral, "COMPLETED",
                 "Đã đưa 5 người dân vượt qua đoạn ngập sâu an toàn về trụ sở UBND xã Hòa Đông.",
                 LocalDateTime.now().minusHours(7), LocalDateTime.now().minusHours(6).minusMinutes(50),
                 LocalDateTime.now().minusHours(6),
@@ -912,13 +934,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 13. Khởi tạo & Tự động phục hồi Thông báo mẫu (Notifications)
-        User coordDn = userRepository.findByUsername("coord_danang").orElse(null);
-        if (coordDn != null) {
-            List<Notification> coordNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(coordDn);
+        if (coordCentral != null) {
+            List<Notification> coordNotifs = notificationRepository.findByRecipientOrderByCreatedAtDesc(coordCentral);
             boolean exists = coordNotifs.stream().anyMatch(n -> "SOS_NEW".equals(n.getType()));
             if (!exists) {
                 notificationRepository.save(new vn.edu.cuunan.entity.Notification(
-                        coordDn, "Tiếp nhận ca SOS #1 mới",
+                        coordCentral, "Tiếp nhận ca SOS #1 mới",
                         "Có yêu cầu cứu nạn khẩn cấp tại Mẹ Suốt, Liên Chiểu, Đà Nẵng cần điều phối.",
                         "SOS_NEW", "/coordinator/dashboard"));
             } else {
