@@ -28,7 +28,7 @@ Trước phiên làm việc này:
 - **Tài khoản thụ hưởng thực tế:**
   - Ngân hàng: **BIDV** (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)
   - Mã định danh Napas BIN: `970418`
-  - Số tài khoản: `6351078034`
+  - Số tài khoản: `962471ABQD`
   - Chủ tài khoản: `NGUYEN TRI THAI`
 - **Động hóa cấu hình trong `application.yml`:**
   - Hỗ trợ ghi đè cấu hình linh hoạt qua biến môi trường (`DONATION_BANK_BIN`, `DONATION_BANK_ACCOUNT_NO`, `DONATION_BANK_ACCOUNT_NAME`, `SEPAY_API_KEY`).
@@ -41,7 +41,7 @@ Trước phiên làm việc này:
   - Tạo `SepayWebhookDto.java` hứng đầy đủ các trường từ webhook của SePay: `gateway`, `transactionDate`, `accountNumber`, `content`, `transferType`, `transferAmount`, `accumulated`, `referenceCode`, `description`.
 - **API Endpoint Webhook Bảo Mật (`DonationApiController.java`):**
   - Khai báo endpoint công khai: `POST /api/donations/sepay-webhook`.
-  - **Bảo mật:** Kiểm tra tiêu đề `Authorization: Apikey <TOKEN>` hoặc `Bearer <TOKEN>` khớp với API Key được cấp trên SePay (`BBE3HIZC...`).
+  - **Bảo mật:** Kiểm tra tiêu đề `Authorization: Apikey <TOKEN>` hoặc `Bearer <TOKEN>` khớp với API Key được cấp trên SePay (`YOUR_SEPAY_API_KEY`).
   - **Lọc giao dịch:** Chỉ xử lý khi `transferType == "in"` (tiền vào tài khoản).
   - **Trích xuất mã giao dịch thông minh:** Dùng biểu thức chính quy Regex `Pattern.compile("CN\\d+", Pattern.CASE_INSENSITIVE)` để bắt chính xác mã ủng hộ dạng `CN123456...` nằm trong chuỗi nội dung chuyển khoản (bất chấp ngân hàng có thêm tiền tố/hậu tố SMS).
 - **Tự động đối soát và cập nhật số tiền thực tế (`DonationService.java`):**
@@ -59,7 +59,7 @@ Trước phiên làm việc này:
 
 | Tệp | Trạng Thái | Mô Tả Thay Đổi |
 | :--- | :--- | :--- |
-| `src/main/resources/application.yml` | Chỉnh sửa | Bổ sung cấu hình `sepay.api-key` và `donation.bank` (BIN 970418, STK 6351078034, NGUYEN TRI THAI). |
+| `src/main/resources/application.yml` | Chỉnh sửa | Bổ sung cấu hình `sepay.api-key` và `donation.bank` (BIN 970418, STK 962471ABQD, NGUYEN TRI THAI). |
 | `src/main/java/vn/edu/cuunan/dto/SepayWebhookDto.java` | Tạo mới | DTO ánh xạ gói tin JSON Webhook từ SePay khi có biến động số dư ngân hàng. |
 | `src/main/java/vn/edu/cuunan/service/DonationService.java` | Chỉnh sửa | Bổ sung phương thức `confirmSepayPayment` tự động cập nhật số tiền thực tế và trạng thái SUCCESS. |
 | `src/main/java/vn/edu/cuunan/controller/DonationApiController.java` | Chỉnh sửa | Thêm endpoint `POST /api/donations/sepay-webhook` với cơ chế xác thực API Key và regex trích xuất mã `CNxxxx`. |
@@ -79,8 +79,8 @@ Trước phiên làm việc này:
    ```
 3. **Cấu hình Webhook trên SePay Dashboard (my.sepay.vn):**
    - URL Webhook: `https://<ngrok-domain>/api/donations/sepay-webhook`
-   - Tài khoản nhận: BIDV `6351078034`
-   - Kiểu xác thực: `API Key` (`BBE3HIZC69VHCFUVNWDZC0K8ISMAGPXMJXJIFOAQ3BP0JRCUEGW8TSRZOYGLEYF2`)
+   - Tài khoản nhận: BIDV `962471ABQD`
+   - Kiểu xác thực: `API Key` (`YOUR_SEPAY_API_KEY`)
 4. **Quy trình kiểm thử chuyển khoản thật:**
    - Vào `http://localhost:8080/donations`, chọn ủng hộ `2,000 đ` hoặc `5,000 đ`.
    - Mở App ngân hàng quét mã QR hiển thị.

@@ -22,7 +22,7 @@ public class DonationApiController {
 
     private final DonationService donationService;
 
-    @Value("${sepay.api-key:BBE3HIZC69VHCFUVNWDZC0K8ISMAGPXMJXJIFOAQ3BP0JRCUEGW8TSRZOYGLEYF2}")
+    @Value("${sepay.api-key:}")
     private String sepayApiKey;
 
     @Autowired

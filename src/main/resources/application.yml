@@ -74,11 +74,11 @@ vnpay:
 
 # SePay Webhook & Bank Account Configuration for Donations
 sepay:
-  api-key: ${SEPAY_API_KEY:BBE3HIZC69VHCFUVNWDZC0K8ISMAGPXMJXJIFOAQ3BP0JRCUEGW8TSRZOYGLEYF2}
+  api-key: ${SEPAY_API_KEY:}
 
 donation:
   bank:
     bin: ${DONATION_BANK_BIN:970418}
     name: ${DONATION_BANK_NAME:BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)}
-    account-no: ${DONATION_ACCOUNT_NO:6351078034}
+    account-no: ${DONATION_ACCOUNT_NO:962471ABQD}
     account-name: ${DONATION_ACCOUNT_NAME:NGUYEN TRI THAI}

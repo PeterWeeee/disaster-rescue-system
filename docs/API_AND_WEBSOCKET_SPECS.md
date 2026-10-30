@@ -82,7 +82,7 @@
 - `GET /api/donations/stats` - Lấy thống kê tổng số tiền quyên góp, tổng lượt đóng góp và tiến độ quỹ cứu trợ.
 - `GET /api/donations/recent` - Lấy danh sách 15 nhà hảo tâm ủng hộ mới nhất để vinh danh trên Bảng Vàng.
 - `GET /api/donations/status/{code}` - Tra cứu trạng thái giao dịch ủng hộ theo mã `CNxxxx` (hỗ trợ JavaScript Polling định kỳ 3 giây tại `pay.html`).
-- `POST /api/donations/sepay-webhook` - Tiếp nhận thông báo biến động số dư ngân hàng thời gian thực từ SePay (Tài khoản BIDV `6351078034`).
+- `POST /api/donations/sepay-webhook` - Tiếp nhận thông báo biến động số dư ngân hàng thời gian thực từ SePay (Tài khoản BIDV `962471ABQD`).
   - **Header xác thực:** `Authorization: Apikey <SEPAY_API_KEY>` hoặc `Bearer <SEPAY_API_KEY>`.
   - **Payload Body:** `SepayWebhookDto` (`gateway`, `transactionDate`, `accountNumber`, `content`, `transferType`, `transferAmount`, `accumulated`, `referenceCode`, `description`).
   - **Quy trình xử lý:** Kiểm tra `transferType == "in"`, trích xuất mã giao dịch dạng `CN\d+` từ `content`/`description`, cập nhật số tiền thực nhận `transferAmount` và đổi trạng thái giao dịch sang `SUCCESS`.

@@ -115,7 +115,7 @@
     - Tích hợp vẽ tuyến đường OSRM GeoJSON trực quan trên bản đồ người bị nạn.
     - Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 bên: Đội cứu hộ dùng `watchPosition`, người bị nạn có công tắc "Chia sẻ vị trí trực tiếp", bản đồ Điều phối viên tự trượt marker.
 21. **[Session 21: Tích Hợp Chuyển Khoản Ngân Hàng Thật Qua VietQR & SePay Webhook (Real-time Donation Auto-Confirmation)](roadmap/session-21-vietqr-sepay-webhook-realtime-donation.md)** *(✅ Đã hoàn thành - PeterWeeee)*
-    - Cấu hình tài khoản ngân hàng thật BIDV (`970418` - `6351078034` - `NGUYEN TRI THAI`) và tạo mã Dynamic VietQR Napas 24/7 tự động điền sẵn STK, số tiền và mã giao dịch `CNxxxx`.
+    - Cấu hình tài khoản ngân hàng thật BIDV (`970418` - `962471ABQD` - `NGUYEN TRI THAI`) và tạo mã Dynamic VietQR Napas 24/7 tự động điền sẵn STK, số tiền và mã giao dịch `CNxxxx`.
     - Xây dựng API Webhook `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư thời gian thực từ SePay, bảo mật bằng API Key.
     - Tự động trích xuất mã giao dịch bằng Regex, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn quỹ cứu trợ tức thì.
     - Giao diện `pay.html` tự động nhận diện giao dịch thành công và chuyển hướng sang trang cảm ơn/biên nhận điện tử.

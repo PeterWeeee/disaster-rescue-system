@@ -30,7 +30,7 @@ class DonationApiControllerTest {
     @InjectMocks
     private DonationApiController donationApiController;
 
-    private final String API_KEY = "BBE3HIZC69VHCFUVNWDZC0K8ISMAGPXMJXJIFOAQ3BP0JRCUEGW8TSRZOYGLEYF2";
+    private final String API_KEY = "TEST_SEPAY_API_KEY_ABCXYZ123456";
 
     @BeforeEach
     void setUp() {

@@ -30,7 +30,7 @@ public class DonationController {
     @Value("${donation.bank.name:BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)}")
     private String bankName;
 
-    @Value("${donation.bank.account-no:6351078034}")
+    @Value("${donation.bank.account-no:962471ABQD}")
     private String accountNo;
 
     @Value("${donation.bank.account-name:NGUYEN TRI THAI}")
@@ -38,7 +38,7 @@ public class DonationController {
 
     public static final String BANK_BIN = "970418";
     public static final String BANK_NAME = "BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)";
-    public static final String ACCOUNT_NO = "6351078034";
+    public static final String ACCOUNT_NO = "962471ABQD";
     public static final String ACCOUNT_NAME = "NGUYEN TRI THAI";
 
     @Autowired

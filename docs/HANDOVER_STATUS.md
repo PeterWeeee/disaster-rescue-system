@@ -66,7 +66,7 @@
   - [x] Vẽ tuyến đường OSRM GeoJSON trực quan trên bản đồ người bị nạn.
   - [x] Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 vai trò (Đội cứu hộ, Nạn nhân và Điều phối viên).
 - [x] **SESSION 21 (PeterWeeee - Nhánh `main`):**
-  - [x] Cấu hình thông tin tài khoản ngân hàng thụ hưởng thật: **BIDV** (BIN: `970418`, STK: `6351078034`, Chủ TK: `NGUYEN TRI THAI`).
+  - [x] Cấu hình thông tin tài khoản ngân hàng thụ hưởng thật: **BIDV** (BIN: `970418`, STK: `962471ABQD`, Chủ TK: `NGUYEN TRI THAI`).
   - [x] Tạo mã Dynamic VietQR Napas 24/7 tự động điền sẵn STK, tên chủ tài khoản, số tiền đã chọn và mã giao dịch duy nhất dạng `CNxxxx`.
   - [x] Xây dựng DTO `SepayWebhookDto` và REST endpoint `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư ngân hàng thời gian thực từ SePay, bảo mật bằng API Key.
   - [x] Tự động trích xuất mã giao dịch bằng Regex `CN\d+`, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn trực tiếp vào Quỹ Cứu Trợ.

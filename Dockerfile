@@ -16,7 +16,8 @@ WORKDIR /app
 COPY --from=builder /workspace/app/target/*.jar app.jar
 
 ENV PORT=8080
+ENV TZ=Asia/Ho_Chi_Minh
 EXPOSE 8080
 
-# Use SerialGC and limit heap to 350MB to fit within 512MB container
-ENTRYPOINT ["java", "-Xmx350m", "-Xss512k", "-XX:+UseSerialGC", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+# Use SerialGC, limit heap to 350MB, and enforce Vietnam Timezone (GMT+7)
+ENTRYPOINT ["java", "-Xmx350m", "-Xss512k", "-XX:+UseSerialGC", "-Duser.timezone=Asia/Ho_Chi_Minh", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
