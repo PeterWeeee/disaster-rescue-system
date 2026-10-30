@@ -181,7 +181,7 @@
 | **Quản trị viên (Admin)** | `admin` | `123456` | `/admin/dashboard` | Thống kê Chart.js, Quản lý tài khoản & Đội, Phát cảnh báo WebSocket kèm còi hú |
 | **Điều phối viên (Coordinator)** | `coordinator` | `123456` | `/coordinator/dashboard` | Live GIS Map, Điều động Haversine, Quản lý đội `/teams`, Lộ trình `/missions`, Duyệt quỹ `/budget` |
 | **Đội trưởng cứu hộ (Rescuer)** | `rescuer` | `123456` | `/rescuer/missions` | Nhận/từ chối nhiệm vụ, Lộ trình OSRM `/routes`, Quản lý trang bị & Xin cấp ngân sách `/resources` |
-| **Người dân (Citizen)** | `nguoidan01` | `123456` | `/sos/request` | Gửi SOS, Theo dõi ca cứu hộ `/sos/track`, Quyên góp cứu trợ `/donations`, Bảng tin `/feed` |
+| **Người dân (Citizen)** | `citizen_dn01` | `123456` | `/sos/request` | Gửi SOS, Theo dõi ca cứu hộ `/sos/track`, Quyên góp cứu trợ `/donations`, Bảng tin `/feed` |
 
 ---
 *Báo cáo được biên soạn và cập nhật tự động cho Nhóm 04 - Đồ án Lập trình Web - HCMUTE.*

@@ -1,4 +1,4 @@
--- =========================================================================
+﻿-- =========================================================================
 -- ĐỒ ÁN LẬP TRÌNH WEB - NHÓM 04
 -- DỰ ÁN: HỆ THỐNG CỨU NẠN THIÊN TAI (CỨUNẠN 24/7)
 -- FILE: 03_seed_data.sql
@@ -95,29 +95,80 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'rescuer_ld01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
     VALUES ('rescuer_ld01', @hash, N'Trần Văn Dũng (Lâm Đồng 01)', '0921011001', 'rescuer.ld01@cuunan247.vn', @rescuerRoleId, 'ACTIVE');
 
--- Chuẩn hóa username người dân cũ, giữ nguyên ID và các dữ liệu liên quan.
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan01') UPDATE [dbo].[users] SET [username] = 'nguoidan01' WHERE [username] = 'citizen';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan1') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan02') UPDATE [dbo].[users] SET [username] = 'nguoidan02' WHERE [username] = 'nguoidan1';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_th') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan03') UPDATE [dbo].[users] SET [username] = 'nguoidan03' WHERE [username] = 'citizen_th';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_na') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan04') UPDATE [dbo].[users] SET [username] = 'nguoidan04' WHERE [username] = 'citizen_na';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ht') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan05') UPDATE [dbo].[users] SET [username] = 'nguoidan05' WHERE [username] = 'citizen_ht';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qt') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan06') UPDATE [dbo].[users] SET [username] = 'nguoidan06' WHERE [username] = 'citizen_qt';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_hue') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan07') UPDATE [dbo].[users] SET [username] = 'nguoidan07' WHERE [username] = 'citizen_hue';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qn') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan08') UPDATE [dbo].[users] SET [username] = 'nguoidan08' WHERE [username] = 'citizen_qn';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_gl') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan09') UPDATE [dbo].[users] SET [username] = 'nguoidan09' WHERE [username] = 'citizen_gl';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dl') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan10') UPDATE [dbo].[users] SET [username] = 'nguoidan10' WHERE [username] = 'citizen_dl';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_kh') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan11') UPDATE [dbo].[users] SET [username] = 'nguoidan11' WHERE [username] = 'citizen_kh';
-IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ld') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan12') UPDATE [dbo].[users] SET [username] = 'nguoidan12' WHERE [username] = 'citizen_ld';
+-- Chuẩn hóa username người dân theo dạng citizen_<mã tỉnh>, giữ nguyên ID và dữ liệu liên quan.
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen' AND [phone] = '0900000004') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn01') UPDATE [dbo].[users] SET [username] = 'citizen_dn01' WHERE [username] = 'citizen';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan01') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn01') UPDATE [dbo].[users] SET [username] = 'citizen_dn01' WHERE [username] = 'nguoidan01';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan1') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn02') UPDATE [dbo].[users] SET [username] = 'citizen_dn02' WHERE [username] = 'nguoidan1';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan02') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn02') UPDATE [dbo].[users] SET [username] = 'citizen_dn02' WHERE [username] = 'nguoidan02';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan03') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_th') UPDATE [dbo].[users] SET [username] = 'citizen_th' WHERE [username] = 'nguoidan03';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan04') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_na') UPDATE [dbo].[users] SET [username] = 'citizen_na' WHERE [username] = 'nguoidan04';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan05') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ht') UPDATE [dbo].[users] SET [username] = 'citizen_ht' WHERE [username] = 'nguoidan05';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan06') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qt') UPDATE [dbo].[users] SET [username] = 'citizen_qt' WHERE [username] = 'nguoidan06';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan07') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_hue') UPDATE [dbo].[users] SET [username] = 'citizen_hue' WHERE [username] = 'nguoidan07';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan08') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qn') UPDATE [dbo].[users] SET [username] = 'citizen_qn' WHERE [username] = 'nguoidan08';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan09') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_gl') UPDATE [dbo].[users] SET [username] = 'citizen_gl' WHERE [username] = 'nguoidan09';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan10') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dl') UPDATE [dbo].[users] SET [username] = 'citizen_dl' WHERE [username] = 'nguoidan10';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan11') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_kh') UPDATE [dbo].[users] SET [username] = 'citizen_kh' WHERE [username] = 'nguoidan11';
+IF EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan12') AND NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ld') UPDATE [dbo].[users] SET [username] = 'citizen_ld' WHERE [username] = 'nguoidan12';
 -- 2.3. Người dân (ROLE_CITIZEN)
-IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'nguoidan01')
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn01')
     INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
-    VALUES ('nguoidan01', @hash, N'Nguyễn Văn Dân', '0900000004', 'dan@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+    VALUES ('citizen_dn01', @hash, N'Nguyễn Văn An', '0900000004', 'dan@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen', @hash, N'Nguyễn Hoàng Nam', '0900000015', 'citizen@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dn02')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_dn02', @hash, N'Trần Thị Mai', '0900000014', 'nguoidan1@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_th')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_th', @hash, N'Nguyễn Thị Lan', '0901000101', 'citizen.th@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_na')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_na', @hash, N'Lê Văn Hùng', '0901000102', 'citizen.na@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ht')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_ht', @hash, N'Phạm Văn Nam', '0901000103', 'citizen.ht@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qt')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_qt', @hash, N'Hoàng Thị Hương', '0901000104', 'citizen.qt@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_hue')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_hue', @hash, N'Trần Văn Minh', '0901000105', 'citizen.hue@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_qn')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_qn', @hash, N'Nguyễn Thị Hoa', '0901000106', 'citizen.qn@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_gl')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_gl', @hash, N'Võ Văn Bình', '0901000107', 'citizen.gl@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_dl')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_dl', @hash, N'Nguyễn Thị Hạnh', '0901000108', 'citizen.dl@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_kh')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_kh', @hash, N'Lê Thị Thảo', '0901000109', 'citizen.kh@cuunan247.vn', @citizenRoleId, 'ACTIVE');
+IF NOT EXISTS (SELECT 1 FROM [dbo].[users] WHERE [username] = 'citizen_ld')
+    INSERT INTO [dbo].[users] ([username], [password], [full_name], [phone], [email], [role_id], [status])
+    VALUES ('citizen_ld', @hash, N'Phạm Văn Long', '0901000110', 'citizen.ld@cuunan247.vn', @citizenRoleId, 'ACTIVE');
 
 UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Văn Hùng (Hải Châu)' WHERE [username] = 'rescuer';
 UPDATE [dbo].[users] SET [full_name] = N'Trần Thị Hương (Quảng Trị 02)' WHERE [username] = 'rescuer_qt02';
 UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Văn Sơn (Sơn Trà)' WHERE [username] = 'cuuho1';
 UPDATE [dbo].[users] SET [full_name] = N'Lê Văn Minh (Quảng Ngãi 01)' WHERE [username] = 'rescuer_qn01';
 UPDATE [dbo].[users] SET [full_name] = N'Trần Văn Dũng (Lâm Đồng 01)' WHERE [username] = 'rescuer_ld01';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Văn An' WHERE [username] = 'citizen_dn01';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Hoàng Nam', [phone] = '0900000015', [email] = 'citizen@cuunan247.vn', [role_id] = @citizenRoleId, [status] = 'ACTIVE' WHERE [username] = 'citizen';
+UPDATE [dbo].[users] SET [full_name] = N'Trần Thị Mai' WHERE [username] = 'citizen_dn02';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Thị Lan' WHERE [username] = 'citizen_th';
+UPDATE [dbo].[users] SET [full_name] = N'Lê Văn Hùng' WHERE [username] = 'citizen_na';
+UPDATE [dbo].[users] SET [full_name] = N'Phạm Văn Nam' WHERE [username] = 'citizen_ht';
+UPDATE [dbo].[users] SET [full_name] = N'Hoàng Thị Hương' WHERE [username] = 'citizen_qt';
+UPDATE [dbo].[users] SET [full_name] = N'Trần Văn Minh' WHERE [username] = 'citizen_hue';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Thị Hoa' WHERE [username] = 'citizen_qn';
+UPDATE [dbo].[users] SET [full_name] = N'Võ Văn Bình' WHERE [username] = 'citizen_gl';
+UPDATE [dbo].[users] SET [full_name] = N'Nguyễn Thị Hạnh' WHERE [username] = 'citizen_dl';
+UPDATE [dbo].[users] SET [full_name] = N'Lê Thị Thảo' WHERE [username] = 'citizen_kh';
+UPDATE [dbo].[users] SET [full_name] = N'Phạm Văn Long' WHERE [username] = 'citizen_ld';
 PRINT N'>>> Đã nạp tài khoản mẫu cho các vai trò!';
 GO
 
@@ -176,31 +227,31 @@ IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE 
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Mẹ Suốt%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Nguyễn Văn Dân', 'FLOOD', N'Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!', N'Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng', 16.0590, 108.1580, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328442/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_M%E1%BA%B9_Su%E1%BB%91t_%C4%91o%E1%BA%A1n_g%E1%BA%A7n_c%E1%BA%A7u_m%C6%B0%C6%A1ng_ng%E1%BA%ADp_s%C3%A2u_h%C6%A1n_1m_n%C6%B0%E1%BB%9Bc_ch%E1%BA%A3y_r%E1%BA%A5t_xi%E1%BA%BFt.jpg', 'VERIFIED', 28, 6);
+    VALUES (N'Nguyễn Văn An', 'FLOOD', N'Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!', N'Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng', 16.0590, 108.1580, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328442/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_M%E1%BA%B9_Su%E1%BB%91t_%C4%91o%E1%BA%A1n_g%E1%BA%A7n_c%E1%BA%A7u_m%C6%B0%C6%A1ng_ng%E1%BA%ADp_s%C3%A2u_h%C6%A1n_1m_n%C6%B0%E1%BB%9Bc_ch%E1%BA%A3y_r%E1%BA%A5t_xi%E1%BA%BFt.jpg', 'VERIFIED', 28, 6);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Thạch Nham%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Lê Thị Cứu Trợ', 'ISOLATED', N'Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.', N'Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng', 16.0120, 108.1350, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328564/cuunan247/community_feed/C%E1%BA%A7u_tr%C3%A0n_th%C3%B4n_Th%E1%BA%A1ch_Nham_T%C3%A2y_x%C3%A3_H%C3%B2a_Nh%C6%A1n_%C4%91ang_b%E1%BB%8B_ng%E1%BA%ADp_0.8m.jpg', 'VERIFIED', 19, 4);
+    VALUES (N'Trần Thị Mai', 'ISOLATED', N'Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.', N'Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng', 16.0120, 108.1350, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328564/cuunan247/community_feed/C%E1%BA%A7u_tr%C3%A0n_th%C3%B4n_Th%E1%BA%A1ch_Nham_T%C3%A2y_x%C3%A3_H%C3%B2a_Nh%C6%A1n_%C4%91ang_b%E1%BB%8B_ng%E1%BA%ADp_0.8m.jpg', 'VERIFIED', 19, 4);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Bạch Đằng%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Trần Thị Huế', 'FLOOD', N'Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.', N'Đường Bạch Đằng, Phường Phú Cát, TP. Huế', 16.4720, 107.5920, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328566/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_B%E1%BA%A1ch_%C4%90%E1%BA%B1ng_ven_s%C3%B4ng_H%C6%B0%C6%A1ng_n%C6%B0%E1%BB%9Bc_tr%C3%A0n_l%C3%AAn_b%E1%BB%9D_%C4%91i_v%C3%A0o_nh%C3%A0_d%C3%A2n_s%C3%A2u_0.5m.jpg', 'VERIFIED', 35, 12);
+    VALUES (N'Trần Văn Minh', 'FLOOD', N'Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.', N'Đường Bạch Đằng, Phường Phú Cát, TP. Huế', 16.4720, 107.5920, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328566/cuunan247/community_feed/%C4%90%C6%B0%E1%BB%9Dng_B%E1%BA%A1ch_%C4%90%E1%BA%B1ng_ven_s%C3%B4ng_H%C6%B0%C6%A1ng_n%C6%B0%E1%BB%9Bc_tr%C3%A0n_l%C3%AAn_b%E1%BB%9D_%C4%91i_v%C3%A0o_nh%C3%A0_d%C3%A2n_s%C3%A2u_0.5m.jpg', 'VERIFIED', 35, 12);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Prenn%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Cil Ha Kôi', 'LANDSLIDE', N'Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.', N'Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng', 11.9150, 108.4450, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328569/cuunan247/community_feed/%C4%90%C3%A8o_Prenn_%C4%91o%E1%BA%A1n_Km225_xu%E1%BA%A5t_hi%E1%BB%87n_v%E1%BA%BFt_n%E1%BB%A9t_s%C6%B0%E1%BB%9Dn_taluy_d%C6%B0%C6%A1ng_c%C3%B3_%C4%91%E1%BA%A5t_%C4%91%C3%A1_nh%E1%BB%8F_r%C6%A1i_xu%E1%BB%91ng_m%E1%BA%B7t_%C4%91%C6%B0%E1%BB%9Dng.jpg', 'PENDING', 14, 2);
+    VALUES (N'Phạm Văn Long', 'LANDSLIDE', N'Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.', N'Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng', 11.9150, 108.4450, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328569/cuunan247/community_feed/%C4%90%C3%A8o_Prenn_%C4%91o%E1%BA%A1n_Km225_xu%E1%BA%A5t_hi%E1%BB%87n_v%E1%BA%BFt_n%E1%BB%A9t_s%C6%B0%E1%BB%9Dn_taluy_d%C6%B0%C6%A1ng_c%C3%B3_%C4%91%E1%BA%A5t_%C4%91%C3%A1_nh%E1%BB%8F_r%C6%A1i_xu%E1%BB%91ng_m%E1%BA%B7t_%C4%91%C6%B0%E1%BB%9Dng.jpg', 'PENDING', 14, 2);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Nguyễn Du%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Lê Văn Nghệ An', 'TREE_FALL', N'Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.', N'Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An', 18.6650, 105.6950, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328571/cuunan247/community_feed/C%C3%A2y_ph%C6%B0%E1%BB%A3ng_c%E1%BB%95_th%E1%BB%A5_b%E1%BB%8B_l%E1%BB%91c_xo%C3%A1y_qu%E1%BA%ADt_%C4%91%E1%BB%95_%C4%91%C3%A8_tr%C3%BAng_c%E1%BB%99t_%C4%91i%E1%BB%87n_h%E1%BA%A1_th%E1%BA%BF_t%E1%BA%A1i_%C4%91%C6%B0%E1%BB%9Dng_Nguy%E1%BB%85n_Du.jpg', 'VERIFIED', 22, 5);
+    VALUES (N'Lê Văn Hùng', 'TREE_FALL', N'Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.', N'Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An', 18.6650, 105.6950, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328571/cuunan247/community_feed/C%C3%A2y_ph%C6%B0%E1%BB%A3ng_c%E1%BB%95_th%E1%BB%A5_b%E1%BB%8B_l%E1%BB%91c_xo%C3%A1y_qu%E1%BA%ADt_%C4%91%E1%BB%95_%C4%91%C3%A8_tr%C3%BAng_c%E1%BB%99t_%C4%91i%E1%BB%87n_h%E1%BA%A1_th%E1%BA%BF_t%E1%BA%A1i_%C4%91%C6%B0%E1%BB%9Dng_Nguy%E1%BB%85n_Du.jpg', 'VERIFIED', 22, 5);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Vĩnh Hải%' OR [location_name] LIKE N'%Nha Trang%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Hoàng Thị Khánh Hòa', 'STORM', N'Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.', N'Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa', 12.2850, 109.2050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328573/cuunan247/community_feed/Gi%C3%B3_r%C3%ADt_m%E1%BA%A1nh_t%E1%BB%ABng_c%C6%A1n_gi%E1%BA%ADt_c%E1%BA%A5p_9_t%E1%BA%A1i_ven_bi%E1%BB%83n_V%C4%A9nh_H%E1%BA%A3i.jpg', 'PENDING', 11, 1);
+    VALUES (N'Lê Thị Thảo', 'STORM', N'Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.', N'Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa', 12.2850, 109.2050, 'https://res.cloudinary.com/odwf5uoi/image/upload/v1793328573/cuunan247/community_feed/Gi%C3%B3_r%C3%ADt_m%E1%BA%A1nh_t%E1%BB%ABng_c%C6%A1n_gi%E1%BA%ADt_c%E1%BA%A5p_9_t%E1%BA%A1i_ven_bi%E1%BB%83n_V%C4%A9nh_H%E1%BA%A3i.jpg', 'PENDING', 11, 1);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Krông Pa%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])
-    VALUES (N'Ksor H''Lâm', 'OTHER', N'Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.', N'Huyện Krông Pa, Tỉnh Gia Lai', 13.2100, 108.6800, NULL, 'REJECTED', 3, 8);
+    VALUES (N'Võ Văn Bình', 'OTHER', N'Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.', N'Huyện Krông Pa, Tỉnh Gia Lai', 13.2100, 108.6800, NULL, 'REJECTED', 3, 8);
 
 IF NOT EXISTS (SELECT 1 FROM [dbo].[community_posts] WHERE [location_name] LIKE N'%Duy Vinh%' OR [location_name] LIKE N'%An Lạc%')
     INSERT INTO [dbo].[community_posts] ([author_name], [hazard_type], [content], [location_name], [latitude], [longitude], [image_url], [verification_status], [upvote_count], [comment_count])

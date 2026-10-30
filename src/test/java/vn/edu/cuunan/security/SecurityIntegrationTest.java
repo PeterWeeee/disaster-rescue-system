@@ -57,7 +57,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("Cẩm nang chỉ cho người dân đã đăng nhập và xuất hiện trong thanh điều hướng của họ")
     void testDisasterGuideRestrictedToAuthenticatedCitizens() throws Exception {
-        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+        String citizenToken = tokenProvider.generateToken("citizen_dn01", "ROLE_CITIZEN", "Nguyễn Văn An");
         mockMvc.perform(get("/guide/disaster").cookie(new Cookie("jwt_token", citizenToken)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Cẩm nang ứng phó thiên tai")))
@@ -119,7 +119,7 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("DoD 5: Tài khoản CITIZEN truy cập trang COORDINATOR -> Bị chặn 403 Forbidden")
     void testCitizenForbiddenOnCoordinatorDashboard() throws Exception {
-        String citizenToken = tokenProvider.generateToken("citizen", "ROLE_CITIZEN", "Nguyễn Văn Dân");
+        String citizenToken = tokenProvider.generateToken("citizen_dn01", "ROLE_CITIZEN", "Nguyễn Văn An");
 
         mockMvc.perform(get("/coordinator/dashboard")
                         .cookie(new Cookie("jwt_token", citizenToken)))

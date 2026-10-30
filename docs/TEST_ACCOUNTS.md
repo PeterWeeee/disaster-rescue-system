@@ -36,7 +36,7 @@
 | **Quảng Trị** | `rescuer_qt02` | Trần Thị Hương | Đội Cứu Hộ Quảng Trị 02 (Hướng Hóa) | 16.6800, 106.6600 | AVAILABLE |
 | **Thành phố Huế**| `rescuer_hue01`| Ngô Văn Huệ | Đội Cứu Hộ Huế 01 (Sông Hương & Tam Giang) | 16.4637, 107.5909 | BUSY |
 | **Thành phố Huế**| `rescuer_hue02`| Lý Thị Hương | Đội Cứu Hộ Huế 02 (Hương Trà) | 16.4300, 107.5000 | AVAILABLE |
-| **Đà Nẵng** | `rescuer` | Nguyễn Văn Hùng | Đội Cứu Hộ Hải Châu (Xuồng máy) | 16.0678, 108.2208 | BUSY |
+| **Đà Nẵng** | `rescuer` | Nguyễn Văn Hùng | Đội Cứu Hộ Hải Châu (Xuồng máy) | 16.0678, 108.2208 | BUSY |Đặng Văn Cứu Hộ
 | **Đà Nẵng** | `cuuho1` | Nguyễn Văn Sơn | Đội Tình Nguyện Cứu Trợ Sơn Trà | 16.1022, 108.2450 | AVAILABLE |
 | **Đà Nẵng** | `rescuer_dn03` | Dương Văn Nẵng | Đội Cứu Hộ Hòa Vang (Cơ động) | 15.9800, 108.1800 | AVAILABLE |
 | **Quảng Ngãi** | `rescuer_qn01` | Lê Văn Minh | Đội Cứu Hộ Quảng Ngãi 01 (Sông Trà Khúc) | 15.1200, 108.7922 | AVAILABLE |
@@ -55,18 +55,19 @@
 ### 1.4. Người Dân (ROLE_CITIZEN)
 | Username | Mật khẩu | Họ và Tên | Điện thoại | Địa phương |
 | :--- | :---: | :--- | :--- | :--- |
-| `nguoidan01` | `123456` | Nguyễn Văn Dân | 0900000004 | Đà Nẵng |
-| `nguoidan02` | `123456` | Lê Thị Cứu Trợ | 0900000014 | Đà Nẵng |
-| `nguoidan03` | `123456` | Nguyễn Thị Thanh Hóa | 0901000101 | Thanh Hóa |
-| `nguoidan04` | `123456` | Lê Văn Nghệ An | 0901000102 | Nghệ An |
-| `nguoidan05` | `123456` | Phạm Văn Hà Tĩnh | 0901000103 | Hà Tĩnh |
-| `nguoidan06` | `123456` | Hoàng Văn Quảng Trị | 0901000104 | Quảng Trị |
-| `nguoidan07` | `123456` | Trần Thị Huế | 0901000105 | Thừa Thiên Huế |
-| `nguoidan08` | `123456` | Đinh Văn Quảng Ngãi | 0901000106 | Quảng Ngãi |
-| `nguoidan09` | `123456` | Ksor H'Lâm | 0901000107 | Gia Lai |
-| `nguoidan10` | `123456` | Y Krin Dân | 0901000108 | Đắk Lắk |
-| `nguoidan11` | `123456` | Hoàng Thị Khánh Hòa | 0901000109 | Khánh Hòa |
-| `nguoidan12` | `123456` | Cil Ha Kôi | 0901000110 | Lâm Đồng |
+| `citizen_dn01` | `123456` | Nguyễn Văn An | 0900000004 | Đà Nẵng |
+| `citizen` | `123456` | Nguyễn Hoàng Nam | 0900000015 | Đà Nẵng |
+| `citizen_dn02` | `123456` | Trần Thị Mai | 0900000014 | Đà Nẵng |
+| `citizen_th` | `123456` | Nguyễn Thị Lan | 0901000101 | Thanh Hóa |
+| `citizen_na` | `123456` | Lê Văn Hùng | 0901000102 | Nghệ An |
+| `citizen_ht` | `123456` | Phạm Văn Nam | 0901000103 | Hà Tĩnh |
+| `citizen_qt` | `123456` | Hoàng Thị Hương | 0901000104 | Quảng Trị |
+| `citizen_hue` | `123456` | Trần Văn Minh | 0901000105 | Thừa Thiên Huế |
+| `citizen_qn` | `123456` | Nguyễn Thị Hoa | 0901000106 | Quảng Ngãi |
+| `citizen_gl` | `123456` | Võ Văn Bình | 0901000107 | Gia Lai |
+| `citizen_dl` | `123456` | Nguyễn Thị Hạnh | 0901000108 | Đắk Lắk |
+| `citizen_kh` | `123456` | Lê Thị Thảo | 0901000109 | Khánh Hòa |
+| `citizen_ld` | `123456` | Phạm Văn Long | 0901000110 | Lâm Đồng |
 ---
 
 ## 2. Kịch Bản Kiểm Thử Các Chức Năng Chính
@@ -90,7 +91,7 @@
 6. Bấm **"Phân công đội"** -> Nhiệm vụ được giao lập tức qua WebSocket đến đội trưởng.
 
 ### Kịch bản 3: Người dân phát tín hiệu SOS
-1. Đăng nhập tài khoản `nguoidan01` (hoặc gửi ẩn danh tại trang chủ `/sos`)
+1. Đăng nhập tài khoản `citizen` (hoặc gửi ẩn danh tại trang chủ `/sos`)
 2. Điền thông tin: Họ tên, SĐT, định vị GPS, tình trạng ngập nước, người già/trẻ em
 3. Bấm **"GỬI YÊU CẦU CỨU NẠN KHẨN CẤP"**
 4. Màn hình tự động chuyển sang trang theo dõi trực tiếp: `/sos/track/{id}`

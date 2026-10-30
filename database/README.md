@@ -19,7 +19,8 @@ Mở **SQL Server Management Studio (SSMS)** và chạy lần lượt:
      * `admin` / `123456` (Quản trị viên)
      * `coordinator` / `123456` (Điều phối viên duy nhất)
      * `doitruong01` / `123456` (Đội trưởng cứu hộ)
-     * `nguoidan01` / `123456` (Người dân)
+     * `citizen` / `123456` (Người dân)
+     * `citizen_dn01` / `123456` (Người dân Đà Nẵng)
    * Nạp Đội cứu hộ mẫu, 2 ca cứu nạn SOS khẩn cấp mẫu và 1 cảnh báo bão lũ diện rộng.
 
 ---

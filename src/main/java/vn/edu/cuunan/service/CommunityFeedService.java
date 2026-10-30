@@ -104,49 +104,49 @@ public class CommunityFeedService {
             );
 
             CommunityPost post3 = new CommunityPost(
-                    null, null, "Nguyễn Văn Dân", HazardType.FLOOD,
+                    null, null, "Nguyễn Văn An", HazardType.FLOOD,
                     "Đường Mẹ Suốt đoạn gần cầu mương ngập sâu hơn 1m, nước chảy rất xiết, bà con tuyệt đối không nên di chuyển bằng xe máy!",
                     "Đường Mẹ Suốt, P. Hòa Khánh Nam, Liên Chiểu, Đà Nẵng", 16.0590, 108.1580,
                     CLOUDINARY_FEED_FLOOD_STREET, VerificationStatus.VERIFIED, 28, 6, null
             );
 
             CommunityPost post4 = new CommunityPost(
-                    null, null, "Lê Thị Cứu Trợ", HazardType.ISOLATED,
+                    null, null, "Trần Thị Mai", HazardType.ISOLATED,
                     "Cầu tràn thôn Thạch Nham Tây xã Hòa Nhơn đang bị ngập 0.8m, cô lập 120 hộ dân, cần xuồng tiếp tế mì và nước uống.",
                     "Thôn Thạch Nham Tây, Xã Hòa Nhơn, Hòa Vang, Đà Nẵng", 16.0120, 108.1350,
                     CLOUDINARY_FEED_THACH_NHAM_TAY, VerificationStatus.VERIFIED, 19, 4, null
             );
 
             CommunityPost post5 = new CommunityPost(
-                    null, null, "Trần Thị Huế", HazardType.FLOOD,
+                    null, null, "Trần Văn Minh", HazardType.FLOOD,
                     "Đường Bạch Đằng ven sông Hương nước tràn lên bờ đi vào nhà dân sâu 0.5m, đề nghị bà con dọn đồ lên gác lửng.",
                     "Đường Bạch Đằng, Phường Phú Cát, TP. Huế", 16.4720, 107.5920,
                     CLOUDINARY_FEED_BACH_DANG, VerificationStatus.VERIFIED, 35, 12, null
             );
 
             CommunityPost post6 = new CommunityPost(
-                    null, null, "Cil Ha Kôi", HazardType.LANDSLIDE,
+                    null, null, "Phạm Văn Long", HazardType.LANDSLIDE,
                     "Đèo Prenn đoạn Km225 xuất hiện vết nứt sườn taluy dương, có đất đá nhỏ rơi xuống mặt đường, các bác tài chú ý giảm tốc độ.",
                     "Đèo Prenn, Phường 3, TP. Đà Lạt, Lâm Đồng", 11.9150, 108.4450,
                     CLOUDINARY_FEED_PRENN, VerificationStatus.PENDING, 14, 2, null
             );
 
             CommunityPost post7 = new CommunityPost(
-                    null, null, "Lê Văn Nghệ An", HazardType.TREE_FALL,
+                    null, null, "Lê Văn Hùng", HazardType.TREE_FALL,
                     "Cây phượng cổ thụ bị lốc xoáy quật đổ đè trúng cột điện hạ thế tại đường Nguyễn Du, gây mất điện toàn khu phố.",
                     "Đường Nguyễn Du, Phường Bến Thủy, TP. Vinh, Nghệ An", 18.6650, 105.6950,
                     CLOUDINARY_FEED_NGUYEN_DU, VerificationStatus.VERIFIED, 22, 5, null
             );
 
             CommunityPost post8 = new CommunityPost(
-                    null, null, "Hoàng Thị Khánh Hòa", HazardType.STORM,
+                    null, null, "Lê Thị Thảo", HazardType.STORM,
                     "Gió rít mạnh từng cơn giật cấp 9 tại ven biển Vĩnh Hải, sóng cao đánh tràn qua kè công viên, người dân không nên ra bờ biển.",
                     "Bờ kè Phạm Văn Đồng, Phường Vĩnh Hải, TP. Nha Trang, Khánh Hòa", 12.2850, 109.2050,
                     CLOUDINARY_FEED_VINH_HAI, VerificationStatus.PENDING, 11, 1, null
             );
 
             CommunityPost post9 = new CommunityPost(
-                    null, null, "Ksor H'Lâm", HazardType.OTHER,
+                    null, null, "Võ Văn Bình", HazardType.OTHER,
                     "Tin đồn vỡ đập thủy điện trên sông Ba là tin giả mạo, chính quyền địa phương thông báo đập vẫn vận hành xả lũ an toàn.",
                     "Huyện Krông Pa, Tỉnh Gia Lai", 13.2100, 108.6800,
                     null, VerificationStatus.REJECTED, 3, 8, null
