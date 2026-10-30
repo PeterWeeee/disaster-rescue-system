@@ -70,3 +70,15 @@ vnpay:
   tmn-code: ${VNPAY_TMN_CODE:DEMOVNP1}
   hash-secret: ${VNPAY_HASH_SECRET:RAOCTPBMD0TUARFNSOENSTOBKIRUAG2H}
   return-url: ${VNPAY_RETURN_URL:http://localhost:8080/donations/vnpay-return}
+
+
+# SePay Webhook & Bank Account Configuration for Donations
+sepay:
+  api-key: ${SEPAY_API_KEY:BBE3HIZC69VHCFUVNWDZC0K8ISMAGPXMJXJIFOAQ3BP0JRCUEGW8TSRZOYGLEYF2}
+
+donation:
+  bank:
+    bin: ${DONATION_BANK_BIN:970418}
+    name: ${DONATION_BANK_NAME:BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)}
+    account-no: ${DONATION_ACCOUNT_NO:6351078034}
+    account-name: ${DONATION_ACCOUNT_NAME:NGUYEN TRI THAI}

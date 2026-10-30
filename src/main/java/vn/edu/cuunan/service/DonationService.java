@@ -160,6 +160,36 @@ public class DonationService {
         return Optional.of(donation);
     }
 
+    /**
+     * Xác nhận thanh toán tự động từ SePay Webhook.
+     * Cập nhật số tiền thực tế nhận được từ biến động số dư ngân hàng (nếu có thay đổi).
+     */
+    @Transactional
+    public Optional<Donation> confirmSepayPayment(String transactionCode, BigDecimal actualAmount) {
+        Optional<Donation> optionalDonation = donationRepository.findByTransactionCode(transactionCode);
+        if (optionalDonation.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Donation donation = optionalDonation.get();
+        if (actualAmount != null && actualAmount.compareTo(BigDecimal.ZERO) > 0) {
+            donation.setAmount(actualAmount);
+        }
+        donation.setStatus("SUCCESS");
+        donation.setPaidAt(LocalDateTime.now());
+        donation = donationRepository.save(donation);
+        log.info(">>> SePay Webhook: Xác nhận quyên góp THÀNH CÔNG cho mã: [{}], số tiền thực tế: [{}]",
+                transactionCode, donation.getAmount());
+
+        try {
+            emailService.sendDonationThankYouEmail(donation);
+        } catch (Exception ex) {
+            log.warn(">>> Lỗi gửi email cảm ơn sau xác nhận SePay: {}", ex.getMessage());
+        }
+
+        return Optional.of(donation);
+    }
+
     public Optional<Donation> getDonationByCode(String transactionCode) {
         return donationRepository.findByTransactionCode(transactionCode);
     }

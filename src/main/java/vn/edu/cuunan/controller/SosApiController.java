@@ -33,6 +33,7 @@ public class SosApiController {
     private final SosRequestRepository sosRequestRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
     public SosApiController(SosService sosService,
                             RescueAssignmentRepository rescueAssignmentRepository,
                             TerrainAnalysisService terrainAnalysisService,
@@ -43,10 +44,6 @@ public class SosApiController {
         this.terrainAnalysisService = terrainAnalysisService;
         this.sosRequestRepository = sosRequestRepository;
         this.messagingTemplate = messagingTemplate;
-    }
-
-    public SosApiController(SosService sosService) {
-        this(sosService, null, new TerrainAnalysisService(), null, null);
     }
 
     /**

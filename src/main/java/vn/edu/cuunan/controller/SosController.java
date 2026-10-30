@@ -3,6 +3,7 @@ package vn.edu.cuunan.controller;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -46,6 +47,7 @@ public class SosController {
     @Value("${app.hotlines.medical:115}")
     private String medicalHotline;
 
+    @Autowired
     public SosController(SosService sosService,
                          CloudinaryService cloudinaryService,
                          RescueAssignmentRepository rescueAssignmentRepository,
@@ -54,12 +56,6 @@ public class SosController {
         this.cloudinaryService = cloudinaryService;
         this.rescueAssignmentRepository = rescueAssignmentRepository;
         this.terrainAnalysisService = terrainAnalysisService;
-    }
-
-    public SosController(SosService sosService,
-                         CloudinaryService cloudinaryService,
-                         RescueAssignmentRepository rescueAssignmentRepository) {
-        this(sosService, cloudinaryService, rescueAssignmentRepository, new TerrainAnalysisService());
     }
 
     /**

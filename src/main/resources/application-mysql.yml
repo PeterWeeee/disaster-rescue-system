@@ -1,10 +1,18 @@
 # Profile: mysql (Dành cho thành viên nhóm sử dụng MySQL hoặc deploy Cloud)
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:cuunan_db}?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&characterEncoding=UTF-8}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:cuunan_db}?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&characterEncoding=UTF-8&autoReconnect=true}
     username: ${SPRING_DATASOURCE_USERNAME:${MYSQL_USER:root}}
     password: ${SPRING_DATASOURCE_PASSWORD:${MYSQL_PASSWORD:}}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 600000
+      idle-timeout: 180000
+      connection-timeout: 30000
+      minimum-idle: 2
+      maximum-pool-size: 10
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: update

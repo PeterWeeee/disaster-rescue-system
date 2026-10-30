@@ -139,6 +139,28 @@ class DonationServiceTest {
 
     @Test
     @DisplayName("Lấy thống kê tổng số tiền và lượt ủng hộ chính xác")
+    void testConfirmSepayPayment() {
+        String txCode = "CN88888888";
+        Donation donation = Donation.builder()
+                .id(3L)
+                .transactionCode(txCode)
+                .amount(new BigDecimal("50000"))
+                .status("PENDING")
+                .build();
+
+        when(donationRepository.findByTransactionCode(txCode)).thenReturn(Optional.of(donation));
+        when(donationRepository.save(any(Donation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Người dùng đổi số tiền thành 100,000 đ trên điện thoại khi chuyển
+        Optional<Donation> result = donationService.confirmSepayPayment(txCode, new BigDecimal("100000"));
+
+        assertTrue(result.isPresent());
+        assertEquals("SUCCESS", result.get().getStatus());
+        assertEquals(new BigDecimal("100000"), result.get().getAmount());
+        assertNotNull(result.get().getPaidAt());
+    }
+
+    @Test
     void testGetDonationStats() {
         when(donationRepository.sumAmountByStatus("SUCCESS")).thenReturn(new BigDecimal("15000000"));
         when(donationRepository.countByStatus("SUCCESS")).thenReturn(45L);

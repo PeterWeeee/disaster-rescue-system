@@ -3,6 +3,7 @@ package vn.edu.cuunan.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,11 +23,23 @@ public class DonationController {
 
     private final DonationService donationService;
 
-    // Thông tin tài khoản tiếp nhận quyên góp của hệ thống CứuNạn 24/7 (MB Bank)
-    public static final String BANK_BIN = "970422"; // MB Bank (Ngân hàng Quân Đội)
-    public static final String BANK_NAME = "MB Bank (Ngân hàng Quân Đội)";
-    public static final String ACCOUNT_NO = "0909123456";
-    public static final String ACCOUNT_NAME = "QUY CUU TRO KHAN CAP CUUNAN 247";
+    // Cấu hình thông tin tài khoản BIDV tiếp nhận quyên góp của hệ thống CứuNạn 24/7
+    @Value("${donation.bank.bin:970418}")
+    private String bankBin;
+
+    @Value("${donation.bank.name:BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)}")
+    private String bankName;
+
+    @Value("${donation.bank.account-no:6351078034}")
+    private String accountNo;
+
+    @Value("${donation.bank.account-name:NGUYEN TRI THAI}")
+    private String accountName;
+
+    public static final String BANK_BIN = "970418";
+    public static final String BANK_NAME = "BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)";
+    public static final String ACCOUNT_NO = "6351078034";
+    public static final String ACCOUNT_NAME = "NGUYEN TRI THAI";
 
     @Autowired
     public DonationController(DonationService donationService) {
@@ -85,19 +98,24 @@ public class DonationController {
             return "redirect:/donations/success?code=" + code;
         }
 
-        // Tạo dynamic VietQR URL theo chuẩn Napas 24/7
-        String encodedAccountName = URLEncoder.encode(ACCOUNT_NAME, StandardCharsets.UTF_8);
+        // Tạo dynamic VietQR URL theo chuẩn Napas 24/7 với tài khoản BIDV thật
+        String curBin = (bankBin != null && !bankBin.isBlank()) ? bankBin : BANK_BIN;
+        String curAccNo = (accountNo != null && !accountNo.isBlank()) ? accountNo : ACCOUNT_NO;
+        String curAccName = (accountName != null && !accountName.isBlank()) ? accountName : ACCOUNT_NAME;
+        String curBankName = (bankName != null && !bankName.isBlank()) ? bankName : BANK_NAME;
+
+        String encodedAccountName = URLEncoder.encode(curAccName, StandardCharsets.UTF_8);
         String encodedAddInfo = URLEncoder.encode(donation.getTransactionCode(), StandardCharsets.UTF_8);
         String vietqrUrl = String.format(
                 "https://img.vietqr.io/image/%s-%s-compact2.png?amount=%s&addInfo=%s&accountName=%s",
-                BANK_BIN, ACCOUNT_NO, donation.getAmount().longValue(), encodedAddInfo, encodedAccountName
+                curBin, curAccNo, donation.getAmount().longValue(), encodedAddInfo, encodedAccountName
         );
 
         model.addAttribute("donation", donation);
         model.addAttribute("vietqrUrl", vietqrUrl);
-        model.addAttribute("bankName", BANK_NAME);
-        model.addAttribute("accountNo", ACCOUNT_NO);
-        model.addAttribute("accountName", ACCOUNT_NAME);
+        model.addAttribute("bankName", curBankName);
+        model.addAttribute("accountNo", curAccNo);
+        model.addAttribute("accountName", curAccName);
 
         return "donation/pay";
     }
