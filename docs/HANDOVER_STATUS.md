@@ -4,20 +4,13 @@
 ---
 
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
-- **Thời điểm cập nhật:** 29/10/2026
-- **Nhánh Git hiện tại:** `develop` (Đã tích hợp toàn bộ nâng cấp giao diện, cẩm nang thiên tai, live chat thời gian thực 2 chiều, bảng tin cộng đồng và chuẩn hóa Unicode SQL Server)
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 18):
-  - **SESSION 09 (Tân trang giao diện & Tinh gọn nội dung thừa - Nhánh `ui-redesign`)**
-  - **SESSION 10 (Nâng cấp giao diện, sửa lỗi bản đồ, quyên góp dark theme & phân trang toàn diện - Nhánh `ui-fixes`)**
-  - **SESSION 11 (Bổ sung chức năng Thống kê Thu - Chi & Quản trị tài chính Quỹ cứu trợ cho Admin)**
-  - **SESSION 12 (Khung Chat Trực Tuyến Thời Gian Thực Giữa Nạn Nhân SOS và Đội Cứu Hộ Khi Đang Tiếp Cận - Nhánh `ui-fixes`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 13 (Cẩm nang ứng phó thiên tai chuyên sâu & Cloudinary CDN - Nhánh `ui-fixes`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 14 (Chuẩn hóa Unicode SQL Server & Sửa triệt để lỗi font tiếng Việt - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 15 (Sửa lỗi đăng tin cảnh báo & Động hóa cảnh báo thiên tai - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 16 (Khắc phục lỗi WebSocket STOMP - Đồng bộ Chat trực tuyến 2 chiều thời gian thực cho người dân và đội cứu hộ - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 17 (Tích hợp ảnh hiện trường thiên tai từ Cloudinary CDN cho Bảng Tin Cộng Đồng - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
-  - **SESSION 18 (Khung Chat Nổi Toàn Hệ Thống Phong Cách Facebook Messenger & Đa Cảm Xúc / Bình Luận Bảng Tin - Nhánh `develop`)** ✅ ĐÃ HOÀN THÀNH 100%
-- **Trạng thái tổng quan:** Toàn bộ **131/131 unit & integration tests đạt BUILD SUCCESS 100%**.
+- **Thời điểm cập nhật:** 31/10/2026
+- **Nhánh Git hiện tại:** `main`
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 21):
+  - **SESSION 19 (Khắc phục Popover cảm xúc hover, đồng bộ bình luận & Tự phục hồi Unicode Database)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 20 (Đồng bộ cự ly tuyến đường OSRM & Định vị Live GPS thời gian thực cho 3 vai trò)** ✅ ĐÃ HOÀN THÀNH 100%
+  - **SESSION 21 (Tích hợp chuyển khoản ngân hàng thật qua VietQR Napas 24/7 & SePay Webhook Auto-Confirmation)** ✅ ĐÃ HOÀN THÀNH 100%
+- **Trạng thái tổng quan:** Toàn bộ **133/133 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 
@@ -34,74 +27,51 @@
   - [x] Tân trang lại toàn bộ giao diện website theo phong cách chỉ huy cứu hộ hiện đại.
   - [x] Xóa sạch các nội dung thừa thãi, rườm rà (bloatware) trên trang chủ, tập trung vào 3 hành động khẩn cấp: Gửi SOS, Bản đồ cứu nạn và Quyên góp.
   - [x] Tái cấu trúc thanh điều hướng: Navbar tinh gọn + Sidebar chuyên dụng theo từng vai trò (`fragments/sidebar.html`).
-  - [x] Tối ưu hóa trang đăng nhập, chân trang và xây dựng bộ UI Preview độc lập (`ui-preview/`).
 - [x] **SESSION 10 (PeterWeeee - Nhánh `ui-fixes`):**
   - [x] Bản nâng cấp sâu và sửa lỗi toàn diện của `ui-redesign`.
   - [x] Sửa triệt để lỗi hiển thị Bản đồ số GIS Leaflet (xung đột z-index điều khiển và lỗi tự co giãn `invalidateSize`).
   - [x] Khắc phục toàn bộ lỗi mã hóa UTF-8 tiếng Việt trong CSDL và `DataInitializer.java`.
-  - [x] Tân trang Cổng Quyên Góp cứu trợ: Bố cục Fullwidth Seamless Dark Theme, khắc phục độ tương phản chữ trắng trên nền trắng.
-  - [x] Triển khai phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống (Coordinator, Rescuer, Admin, Feed).
+  - [x] Tân trang Cổng Quyên Góp cứu trợ: Bố cục Fullwidth Seamless Dark Theme.
+  - [x] Triển khai phân trang (Pagination) trên toàn bộ bảng dữ liệu hệ thống.
   - [x] Tách riêng trang Lịch sử điều phối chuyên biệt (`coordinator/history.html`).
 - [x] **SESSION 11 (PeterWeeee):**
   - [x] Bổ sung phân hệ Thống kê Thu - Chi minh bạch dành cho Quản trị viên (`ROLE_ADMIN`) tại `/admin/dashboard?view=finance` và `/admin/finance`.
   - [x] Thống kê tổng nguồn thu (Quỹ cơ sở 500tr + Quyên góp từ cộng đồng qua VNPay, MoMo, VietQR) và tổng chi giải ngân cho các đội cứu hộ.
-  - [x] Thẻ KPI tài chính, 2 biểu đồ Chart.js (So sánh Thu - Chi và Phân bổ cổng thanh toán), bảng kê dòng tiền Thu và dòng tiền Chi kèm phân trang.
 - [x] **SESSION 12 (PeterWeeee - Nhánh `ui-fixes`):**
-  - [x] Tạo bảng CSDL `rescue_chat_messages` (trong cả SQL Server và MySQL scripts) và JPA Entity `RescueChatMessage.java`.
+  - [x] Tạo bảng CSDL `rescue_chat_messages` và JPA Entity `RescueChatMessage.java`.
   - [x] Xây dựng `ChatService.java` và `ChatApiController.java` tiếp nhận REST API + WebSocket STOMP messaging kênh `/topic/chat/{sosId}` và `@MessageMapping("/chat/{sosId}/send")`.
   - [x] Tự động kích hoạt Khung Chat trực tuyến tại màn hình Theo dõi SOS (`templates/sos/track.html`) khi ca cứu nạn chuyển sang trạng thái `IN_PROGRESS`.
-  - [x] Tự động kích hoạt Khung Chat tại màn hình Bản đồ & Lộ trình cứu hộ (`templates/rescuer/routes.html`) của Đội cứu hộ với tính năng tự động chuyển đổi phòng chat khi chọn ca khác nhau.
-  - [x] Bộ nút gửi tin nhắn nhanh tình huống khẩn cấp 1-chạm (Quick SOS chips cho người dân và hướng dẫn khẩn cấp cho đội cứu hộ).
-  - [x] Chế độ lưu trữ hồ sơ chỉ đọc (Read-only Archive) khi ca hoàn tất (`RESOLVED` / `COMPLETED`) để phục vụ nghiệm thu cứu trợ.
-  - [x] Thêm 11 unit & integration tests (`ChatServiceTest.java`, `ChatApiControllerTest.java`), nâng tổng test suite lên **128/128 tests đạt BUILD SUCCESS 100%**.
 - [x] **SESSION 13 (PeterWeeee - Nhánh `ui-fixes`):**
-  - [x] Xây dựng phân hệ Cẩm nang ứng phó thiên tai chuyên sâu và trang Chi tiết từng bước (`/guide/disaster/{slug}`).
-  - [x] Tích hợp 18 ảnh minh họa sinh tồn trực quan do AI tạo và biểu đồ đồ họa cứu nạn SVG cho 7 loại thiên tai phổ biến.
-  - [x] Tích hợp dịch vụ lưu trữ đám mây Cloudinary: Upload và phục vụ ảnh trực tiếp từ Cloudinary CDN (`CLOUDINARY_GUIDE_BASE_URL`) qua API `/api/upload/guide-image`, kèm fallback an toàn về Local Storage.
-  - [x] Thiết kế thanh chọn các tình huống thiên tai ở cột bên trái màn hình (`col-lg-3`), vị trí tĩnh chuẩn (non-floating), không trôi đè lên ảnh và nội dung bài viết khi lướt cuộn trang.
-  - [x] Loại bỏ hoàn toàn nút "Phát tín hiệu SOS" trên tất cả các trang cẩm nang (`/guide/disaster` và `/guide/disaster/{slug}`).
+  - [x] Cẩm nang ứng phó thiên tai chuyên sâu và trang Chi tiết từng bước (`/guide/disaster/{slug}`).
+  - [x] Tích hợp 18 ảnh minh họa sinh tồn trực quan do AI tạo và biểu đồ đồ họa cứu nạn SVG cho 7 loại thiên tai phổ biến lưu trữ Cloudinary CDN.
 - [x] **SESSION 14 (PeterWeeee - Nhánh `develop`):**
-  - [x] Khắc phục triệt để lỗi mất dấu font tiếng Việt (biến thành `?`) trong các bảng Thông báo (`notifications`), Lịch sử hoạt động (`activity_logs`), và bảng dữ liệu tác nghiệp trên SQL Server.
-  - [x] Chuẩn hóa toàn bộ trường văn bản dài từ `@Column(columnDefinition = "TEXT")` sang JPA tiêu chuẩn `@Lob` trên 10 Entities. Hibernate 6 tự động ánh xạ thông minh thành `NVARCHAR(MAX)` trên SQL Server và `LONGTEXT` trên MySQL.
-  - [x] Bổ sung cấu hình `sendStringParametersAsUnicode=true` vào connection string trong `application-sqlserver.yml`.
-  - [x] Gỡ bỏ cấu hình `use_nationalized_character_data: true` và `@Nationalized` gây crash khi truy vấn `VARCHAR(50)`.
-  - [x] Bổ sung phương thức tự động tương thích `ensureSqlServerUnicodeCompatibility()` trong `DataInitializer.java`.
-  - [x] Làm sạch và nạp lại Seed Data chuẩn tiếng Việt 100%.
+  - [x] Chuẩn hóa Unicode SQL Server: Thay thế toàn bộ trường text dài sang JPA `@Lob` (`NVARCHAR(MAX)` trên SQL Server và `LONGTEXT` trên MySQL).
+  - [x] Bổ sung cấu hình `sendStringParametersAsUnicode=true`, gỡ bỏ `@Nationalized`, cơ chế tự phục hồi schema trong `DataInitializer.java`.
 - [x] **SESSION 15 (PeterWeeee - Nhánh `develop`):**
-  - [x] Khắc phục triệt để lỗi nút "Đăng tin cảnh báo" không hoạt động trên Bảng Tin Cộng Đồng (`feed/index.html`) do thẻ đóng sớm trong Thymeleaf fragment layout.
-  - [x] Bổ sung cơ chế tự động dọn dẹp các trường rỗng `latitude`, `longitude`, `imageFile` trước khi gửi AJAX lên `/api/feed/posts`.
-  - [x] Chuẩn hóa nghiệp vụ cứu trợ mục "Cảnh báo khẩn mới": Thay thế dữ liệu tĩnh mẫu bằng dữ liệu động kết nối trực tiếp với bảng `disaster_alerts` qua `DisasterAlertRepository.findTop5ByOrderByCreatedAtDesc()`.
-  - [x] Phân loại màu sắc và huy hiệu theo mức độ nghiêm trọng (`DANGER_RED`, `WARNING_ORANGE`, `NOTICE_YELLOW`) kèm địa phương ảnh hưởng và mốc thời gian.
-  - [x] Tích hợp tương tác click mở modal chi tiết cảnh báo khẩn cấp `emergencyBroadcastModal` để người dân nắm rõ hướng dẫn an toàn.
-  - [x] Làm rõ cơ chế kiến trúc Avatar/Logo của hệ thống: Tối ưu tải nhẹ qua FontAwesome và Letter Avatar trích xuất ký tự đầu từ họ tên người dùng.
+  - [x] Sửa lỗi thẻ đóng sớm trên Bảng Tin (`feed/index.html`).
+  - [x] Động hóa mục "Cảnh báo khẩn mới" kết nối trực tiếp với bảng `disaster_alerts`.
 - [x] **SESSION 16 (PeterWeeee - Nhánh `develop`):**
-  - [x] Khắc phục triệt để lỗi kết nối WebSocket STOMP phía người dân: Nạp sớm `sockjs.min.js` và `stomp.min.js` trong `<head>` (`fragments/head.html`), khắc phục lỗi script inline trong `sos/track.html` chạy trước khi thư viện được tải.
-  - [x] Nâng cấp client chat `sos/track.html`: Bọc `DOMContentLoaded`, bổ sung timer tự động kết nối lại (`reconnectTimer`), quản lý hủy kết nối cũ an toàn.
-  - [x] Bổ sung cơ chế chống trùng lặp tin nhắn `chat-msg-{id}` cho cả người dân và đội cứu hộ (`rescuer-chat-msg-{id}`).
-  - [x] Tự động tải lại lịch sử tin nhắn khi kết nối thành công để bù đắp tin nhắn bị nhỡ; bổ sung smart polling định kỳ mỗi 10 giây dự phòng nếu mất kết nối WebSocket.
-  - [x] Đạt chuẩn nhắn tin 2 chiều thời gian thực (Bi-directional Real-time Mission Chat): Người dân và đội cứu hộ trao đổi tức thời (< 500ms) không cần tải lại trang.
+  - [x] Nạp sớm thư viện STOMP trong `<head>`, chống trùng lặp tin nhắn `chat-msg-{id}`, timer tự kết nối lại, smart polling dự phòng mỗi 10 giây.
 - [x] **SESSION 17 (PeterWeeee - Nhánh `develop`):**
-  - [x] Tải lên bộ ảnh thực địa thiên tai đa dạng theo từng loại hiểm họa (`LANDSLIDE`, `FLOOD`, `TREE_FALL`, `ISOLATED`, v.v.) vào Cloudinary CDN folder `cuunan247/community_feed`.
-  - [x] Khai báo hằng số URL CDN và nạp tự động 6 bài đăng mẫu kèm ảnh Cloudinary trong `CommunityFeedService.java`.
-  - [x] Tích hợp cơ chế tự phục hồi (Self-healing backfill): Tự động quét và bổ sung URL ảnh Cloudinary cho các bài đăng hiện hữu trong CSDL nếu chưa có ảnh.
-  - [x] Bổ sung Seed Data mẫu bài đăng kèm ảnh Cloudinary trong cả `03_seed_data.sql` (SQL Server) và `mysql_init.sql` (MySQL).
-  - [x] Nâng cấp giao diện Bảng Tin (`feed/index.html`): Hiển thị huy hiệu `Cloudinary CDN`, modal xem ảnh phóng to `#imagePreviewModal`, nút "Mở ảnh gốc Cloudinary", chuẩn hóa `data-*` an toàn theo Thymeleaf 3.1+.
+  - [x] Tích hợp bộ ảnh thực địa thiên tai Cloudinary CDN folder `cuunan247/community_feed` cho Bảng Tin Cộng Đồng.
 - [x] **SESSION 18 (Võ Văn Thịnh - Nhánh `develop`):**
-  - [x] Tích hợp Khung Chat Nổi Toàn Hệ Thống (Persistent Floating Chat Dock) phong cách Facebook Messenger: Tự động phát hiện phiên hoạt động qua API `GET /api/chat/active-session`, launcher bubble có badge chưa đọc và pulse dot, cửa sổ chat $380 \times 540\text{ px}$ kèm nút gọi `tel:` và định vị GPS.
-  - [x] Tinh gọn giao diện: Loại bỏ hoàn toàn 2 khung chat inline cục bộ tại `sos/track.html` và `rescuer/routes.html`, hợp nhất trải nghiệm trò chuyện toàn diện về Floating Chat Dock.
-  - [x] Sửa triệt để nút đóng (`X`) trên Toast tin nhắn mới (`dismissToast(event)`), bổ sung cờ `isInitial = true` ngăn chặn Toast thông báo và chuông báo ảo cho tin nhắn cũ khi vừa tải trang.
-  - [x] Nâng cấp Bảng Tin Cộng Đồng (`/feed`): Hệ thống đa cảm xúc 5 trạng thái (`LIKE`, `CARE`, `PRAY`, `WARNING`, `SAD`) với popover animated mượt mà.
-  - [x] Xây dựng phân hệ bình luận thời gian thực cho bài đăng cộng đồng (`PostComment.java`, `PostCommentRepository`, `/api/feed/posts/{id}/comments`), hiển thị và nạp bình luận bằng AJAX.
-  - [x] Đồng bộ DDL CSDL và Seed Data mẫu bình luận/cảm xúc trên cả SQL Server (`02_create_tables.sql`, `03_seed_data.sql`, `fix_sqlserver_encoding.sql`), MySQL (`mysql_init.sql`) và `DataInitializer.java`.
-  - [x] Tinh gọn giao diện Bảng Tin: Xóa card "Khẩn Cấp 24/7", sửa lỗi co ép méo avatar người dùng (`flex-shrink-0`, `min-width: 44px`, `text-truncate` cho địa chỉ), xóa nút "Chuyển thành đơn SOS".
-  - [x] Toàn bộ **131/131 tests đạt BUILD SUCCESS 100%**.
+  - [x] Tích hợp Khung Chat Nổi Toàn Hệ Thống (Persistent Floating Chat Dock) phong cách Facebook Messenger.
+  - [x] Bảng Tin Cộng Đồng: Hệ thống đa cảm xúc 5 trạng thái (`LIKE`, `CARE`, `PRAY`, `WARNING`, `SAD`) và bình luận bài viết (`post_comments`).
 - [x] **SESSION 19 (PeterWeeee - Nhánh `develop`):**
-  - [x] Khắc phục triệt để lỗi thanh chọn cảm xúc `reaction-popover` bị lơ lửng đè lên số lượt tương tác bài viết: Gỡ bỏ Bootstrap `d-flex` có `!important`, thiết lập CSS `display: none !important;` mặc định và chỉ hiển thị `display: flex !important;` khi hover/focus vào container, bổ sung cầu nối chuột `::after` chống rung giật.
-  - [x] Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map key lookup từ `${commentsMap[post.id]}` sang `${commentsMap.get(post.id)}`, bổ sung API fetch động `loadCommentsForPost(postId)` tự động đồng bộ số lượng khi mở hộp bình luận.
-  - [x] Khắc phục triệt để lỗi font tiếng Việt (dấu hỏi `?`) do nạp seed data trên SQL Server: Bổ sung phương thức tự phục hồi Unicode tiếng Việt đa tầng `repairCorruptedUnicodeData()` trong `DataInitializer.java` (quét và sửa thông báo, nhật ký kiểm toán hệ thống, bài đăng cộng đồng 13 vùng miền, cảnh báo thiên tai và bình luận).
-  - [x] Thêm cơ chế tự động làm sạch bình luận `ensureCleanSampleComments()` trong `CommunityFeedService.java`: Phát hiện bản ghi chứa dấu hỏi `?`, tự động xóa và tái tạo bình luận cứu nạn tiếng Việt chuẩn UTF-8.
-  - [x] Chuẩn hóa `database/fix_sqlserver_encoding.sql` lưu dưới định dạng **UTF-8 with BOM** (`0xEF 0xBB 0xBF`), bổ sung lệnh ALTER TABLE cho 15 bảng và UPDATE/DELETE bản ghi lỗi font.
-  - [x] Toàn bộ **131/131 tests đạt BUILD SUCCESS 100%**.
+  - [x] Khắc phục triệt để lỗi thanh chọn cảm xúc `reaction-popover` bị lơ lửng đè lên số lượt tương tác bài viết.
+  - [x] Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận qua API fetch động `loadCommentsForPost(postId)`.
+  - [x] Phương thức tự phục hồi Unicode tiếng Việt đa tầng `repairCorruptedUnicodeData()` trong `DataInitializer.java` và `ensureCleanSampleComments()`.
+- [x] **SESSION 20 (PeterWeeee - Nhánh `main`):**
+  - [x] Đồng bộ cự ly lộ trình OSRM (4.14 km, ~7 phút) giữa Bản đồ lộ trình đội cứu hộ (`rescuer/routes.html`) và màn hình theo dõi nạn nhân (`sos/track.html`).
+  - [x] Vẽ tuyến đường OSRM GeoJSON trực quan trên bản đồ người bị nạn.
+  - [x] Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 vai trò (Đội cứu hộ, Nạn nhân và Điều phối viên).
+- [x] **SESSION 21 (PeterWeeee - Nhánh `main`):**
+  - [x] Cấu hình thông tin tài khoản ngân hàng thụ hưởng thật: **BIDV** (BIN: `970418`, STK: `6351078034`, Chủ TK: `NGUYEN TRI THAI`).
+  - [x] Tạo mã Dynamic VietQR Napas 24/7 tự động điền sẵn STK, tên chủ tài khoản, số tiền đã chọn và mã giao dịch duy nhất dạng `CNxxxx`.
+  - [x] Xây dựng DTO `SepayWebhookDto` và REST endpoint `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư ngân hàng thời gian thực từ SePay, bảo mật bằng API Key.
+  - [x] Tự động trích xuất mã giao dịch bằng Regex `CN\d+`, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn trực tiếp vào Quỹ Cứu Trợ.
+  - [x] Giao diện `pay.html` tự động nhận diện giao dịch thành công (Polling 3s) và tự động chuyển hướng sang trang Cảm ơn / Biên nhận điện tử.
+  - [x] Toàn bộ **133/133 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 

@@ -58,6 +58,9 @@
 │ Session 20: Đồng Bộ Cự Ly OSRM & Tự Động Cập Nhật Vị Trí Live GPS      │
 │             (Distance Synchronization & Live GPS Tracking 3 Roles)     │
 │    ↓                                                                   │
+│ Session 21: Tích Hợp Chuyển Khoản Ngân Hàng Thật (Dynamic VietQR)      │
+│             (SePay Webhook Auto-Confirmation & Real-time Fund Update)  │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -104,14 +107,17 @@
 18. **[Session 18: Khung Chat Nổi Toàn Hệ Thống & Đa Cảm Xúc / Bình Luận Bảng Tin](roadmap/session-18-floating-chat-dock-feed-reactions-cleanup.md)** *(✅ Đã hoàn thành - PeterWeeee)*
     - Tích hợp Khung Chat Nổi toàn hệ thống (Persistent Floating Chat Dock) phong cách Facebook Messenger, tự động phát hiện ca cứu hộ qua `/api/chat/active-session`. Loại bỏ 2 khung chat inline dư thừa trên `sos/track.html` và `rescuer/routes.html`. Gỡ bỏ triệt để Toast popup đè màn hình. Nâng cấp Bảng Tin: 5 trạng thái cảm xúc (Multi-Reactions), bình luận bài viết (`post_comments`), sửa lỗi UTF-8 BOM SQL Server và cơ chế tự phục hồi bình luận mẫu (Self-Healing Comments), sửa lỗi lệch avatar người dùng và xóa thẻ khẩn cấp 24/7.
 19. **[Session 19: Khắc Phục Popover Cảm Xúc Hover, Đồng Bộ Bình Luận & Tự Phục Hồi Unicode Database (Feed Reaction Popover & Unicode Healing)](roadmap/session-19-feed-reaction-popover-comment-sync-unicode-healing.md)** *(✅ Đã hoàn thành - PeterWeeee)*
-    - Khắc phục lỗi thanh chọn cảm xúc 
-eaction-popover bị lơ lửng đè lên thanh tóm tắt phản ứng: Gỡ bỏ Bootstrap d-flex ghi đè !important, định nghĩa CSS display: none !important; mặc định và kích hoạt display: flex !important; khi hover/focus, bổ sung pseudo-element ::after làm cầu nối rê chuột chống rung giật.
-    - Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận: Sửa lỗi Thymeleaf map lookup ${commentsMap.get(post.id)}, bổ sung API fetch động loadCommentsForPost(postId) tự động đồng bộ số lượng khi mở hộp bình luận.
-    - Cơ chế tự phục hồi lỗi font tiếng Việt (dấu hỏi ?) do seed data: Bổ sung phương thức đa tầng 
-epairCorruptedUnicodeData() trong DataInitializer.java và ensureCleanSampleComments() trong CommunityFeedService.java tự động làm sạch và nạp lại dữ liệu tiếng Việt chuẩn cho thông báo, bài viết, nhật ký hệ thống, cảnh báo và bình luận; lưu file database/fix_sqlserver_encoding.sql chuẩn UTF-8 with BOM.
+    - Khắc phục lỗi thanh chọn cảm xúc reaction-popover bị lơ lửng đè lên thanh tóm tắt phản ứng.
+    - Khắc phục lỗi số lượng bình luận hiển thị nhưng ấn vào không thấy bình luận qua API fetch động `loadCommentsForPost(postId)`.
+    - Cơ chế tự phục hồi lỗi font tiếng Việt (dấu hỏi ?) do seed data qua phương thức đa tầng `repairCorruptedUnicodeData()` và `ensureCleanSampleComments()`.
 20. **[Session 20: Đồng Bộ Cự Ly Tuyến Đường OSRM & Định Vị Live GPS Thời Gian Thực (Distance Synchronization & Live GPS Tracking)](roadmap/session-20-distance-synchronization-and-live-gps-tracking.md)** *(✅ Đã hoàn thành - PeterWeeee)*
-    - Đồng bộ triệt để cự ly lộ trình di chuyển thực tế qua OSRM Routing API (4.14 km, ~7 phút) giữa Bản đồ lộ trình của đội cứu hộ (`rescuer/routes.html`) và Màn hình theo dõi của người bị nạn (`sos/track.html`), khắc phục lỗi một bên hiển thị OSRM một bên hiển thị Haversine (3.6 km).
+    - Đồng bộ triệt để cự ly lộ trình di chuyển thực tế qua OSRM Routing API (4.14 km, ~7 phút) giữa Bản đồ lộ trình của đội cứu hộ (`rescuer/routes.html`) và Màn hình theo dõi của người bị nạn (`sos/track.html`).
     - Tích hợp vẽ tuyến đường OSRM GeoJSON trực quan trên bản đồ người bị nạn.
-    - Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 bên: Đội cứu hộ dùng `watchPosition` gửi tọa độ thực khi di chuyển, người bị nạn có công tắc "Chia sẻ vị trí trực tiếp" gửi qua `POST /api/sos/{id}/location`, cả 2 bản đồ Điều phối viên (`dashboard.html` và `missions.html`) tự động trượt marker và co ngắn dây nối theo WebSocket `LOCATION_UPDATE` và `VICTIM_LOCATION_UPDATE`.
-21. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+    - Cơ chế Live GPS Tracking tự động cập nhật vị trí cho cả 3 bên: Đội cứu hộ dùng `watchPosition`, người bị nạn có công tắc "Chia sẻ vị trí trực tiếp", bản đồ Điều phối viên tự trượt marker.
+21. **[Session 21: Tích Hợp Chuyển Khoản Ngân Hàng Thật Qua VietQR & SePay Webhook (Real-time Donation Auto-Confirmation)](roadmap/session-21-vietqr-sepay-webhook-realtime-donation.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Cấu hình tài khoản ngân hàng thật BIDV (`970418` - `6351078034` - `NGUYEN TRI THAI`) và tạo mã Dynamic VietQR Napas 24/7 tự động điền sẵn STK, số tiền và mã giao dịch `CNxxxx`.
+    - Xây dựng API Webhook `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư thời gian thực từ SePay, bảo mật bằng API Key.
+    - Tự động trích xuất mã giao dịch bằng Regex, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn quỹ cứu trợ tức thì.
+    - Giao diện `pay.html` tự động nhận diện giao dịch thành công và chuyển hướng sang trang cảm ơn/biên nhận điện tử.
+22. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

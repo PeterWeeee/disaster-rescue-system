@@ -8,7 +8,7 @@
 - **Môn học:** Lập trình Web (Đồ án Nhóm 04).
 - **Mục tiêu:** Xây dựng nền tảng web kết nối người dân vùng thiên tai (bão lũ, sạt lở) với đội cứu hộ và điều phối viên theo thời gian thực (Real-time).
 - **Repository GitHub:** `https://github.com/PeterWeeee/disaster-rescue-system.git`
-- **Nhánh phát triển chính:** `develop` (Không push trực tiếp lên `main`).
+- **Nhánh phát triển chính:** `main` (hoặc `develop`).
 
 ---
 
@@ -22,13 +22,14 @@
 | **Real-time** | WebSocket (STOMP + SockJS) | Bắn tín hiệu SOS, live dispatching, cập nhật bản đồ |
 | **Bảo mật** | Spring Security + JWT | Xác thực Stateless, lưu JWT trong Cookie/Header |
 | **Lưu trữ ảnh** | Cloudinary | Upload ảnh hiện trường cứu hộ, avatar người dùng |
+| **Cổng Quyên Góp** | VietQR Napas 24/7 + SePay Webhook + VNPay | Tiếp nhận ủng hộ thật (BIDV), tự động cập nhật ngân sách cứu trợ qua Webhook |
 | **Cơ sở dữ liệu** | MySQL & SQL Server (Đa CSDL) | Hỗ trợ song song cả 2 hệ quản trị trong nhóm |
 
 ---
 
 ## 3. Chiến Lược Hỗ Trợ Đa CSDL (MySQL & SQL Server)
 Nhóm có thành viên dùng MySQL, có thành viên dùng SQL Server. Hệ thống được cấu hình đa profile:
-- `application.yml`: Cấu hình chung (JPA, WebSocket, Cloudinary, JWT).
+- `application.yml`: Cấu hình chung (JPA, WebSocket, Cloudinary, JWT, SePay & BIDV Bank info).
 - `application-mysql.yml`: `spring.datasource.url=jdbc:mysql://localhost:3306/cuunan_db`
 - `application-sqlserver.yml`: `spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=cuunan_db`
 - Khi chạy: chỉ cần đổi tham số `spring.profiles.active=mysql` hoặc `sqlserver`.
@@ -41,12 +42,12 @@ Nhóm có thành viên dùng MySQL, có thành viên dùng SQL Server. Hệ th�
 1. **`ROLE_CITIZEN` (Người dân):**
    - Đăng ký, đăng nhập, quản lý thông tin cá nhân.
    - Gửi yêu cầu cứu nạn khẩn cấp (GPS 1 chạm + số người + mức độ + ảnh).
-   - Theo dõi tiến độ cứu nạn của bản thân theo thời gian thực.
-   - Xem bản đồ các vùng nguy hiểm và điểm sơ tán an toàn.
+   - Theo dõi tiến độ cứu nạn của bản thân theo thời gian thực (Live GPS & tuyến OSRM).
+   - Quyên góp ủng hộ cứu trợ bão lũ bằng quét mã VietQR Napas 24/7 ngân hàng thật.
 
 2. **`ROLE_RESCUER` (Đội cứu hộ / Tình nguyện viên):**
    - Đội trưởng: Xem nhiệm vụ được điều phối, nhận/từ chối, phân công cho đội viên, quản lý thành viên đội.
-   - Đội viên: Nhận việc, cập nhật tiến độ, chia sẻ vị trí GPS thực tế, tải ảnh nghiệm thu.
+   - Đội viên: Nhận việc, cập nhật tiến độ, chia sẻ vị trí GPS thực tế (`watchPosition`), tải ảnh nghiệm thu.
 
 3. **`ROLE_COORDINATOR` (Điều phối viên):**
    - Xem Dashboard toàn cảnh các ca SOS trên bản đồ thời gian thực.
@@ -58,7 +59,7 @@ Nhóm có thành viên dùng MySQL, có thành viên dùng SQL Server. Hệ th�
    - Toàn quyền của Coordinator.
    - Quản lý tài khoản, phân quyền, quản lý các đội cứu hộ.
    - Quản lý các đợt thiên tai, phát sóng cảnh báo khẩn cấp diện rộng (Broadcast).
-   - Xem báo cáo thống kê tổng hợp.
+   - Xem báo cáo thống kê tổng hợp và quản lý tài chính thu - chi Quỹ cứu trợ.
 
 ---
 

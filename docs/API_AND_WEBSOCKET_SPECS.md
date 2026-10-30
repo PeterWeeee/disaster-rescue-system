@@ -76,3 +76,13 @@
 - `GET /api/feed/posts/{id}/comments` - Lấy danh sách các bình luận của bài viết theo thứ tự thời gian.
 - `POST /api/feed/posts/{id}/comments` - Gửi bình luận mới cho bài viết (tham số: `content`).
 - `GET /api/feed/shelters` - Lấy danh sách các điểm sơ tán tránh trú bão lũ an toàn.
+
+
+### 2.8. Cổng Quyên Góp & Webhook Ngân Hàng (`/api/donations`)
+- `GET /api/donations/stats` - Lấy thống kê tổng số tiền quyên góp, tổng lượt đóng góp và tiến độ quỹ cứu trợ.
+- `GET /api/donations/recent` - Lấy danh sách 15 nhà hảo tâm ủng hộ mới nhất để vinh danh trên Bảng Vàng.
+- `GET /api/donations/status/{code}` - Tra cứu trạng thái giao dịch ủng hộ theo mã `CNxxxx` (hỗ trợ JavaScript Polling định kỳ 3 giây tại `pay.html`).
+- `POST /api/donations/sepay-webhook` - Tiếp nhận thông báo biến động số dư ngân hàng thời gian thực từ SePay (Tài khoản BIDV `6351078034`).
+  - **Header xác thực:** `Authorization: Apikey <SEPAY_API_KEY>` hoặc `Bearer <SEPAY_API_KEY>`.
+  - **Payload Body:** `SepayWebhookDto` (`gateway`, `transactionDate`, `accountNumber`, `content`, `transferType`, `transferAmount`, `accumulated`, `referenceCode`, `description`).
+  - **Quy trình xử lý:** Kiểm tra `transferType == "in"`, trích xuất mã giao dịch dạng `CN\d+` từ `content`/`description`, cập nhật số tiền thực nhận `transferAmount` và đổi trạng thái giao dịch sang `SUCCESS`.
