@@ -688,11 +688,10 @@ public class CommunityFeedService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
 
         boolean canModerate = reviewer != null && reviewer.getRole() != null
-                && ("ROLE_COORDINATOR".equalsIgnoreCase(reviewer.getRole().getName())
-                || "ROLE_ADMIN".equalsIgnoreCase(reviewer.getRole().getName()));
+                && "ROLE_ADMIN".equalsIgnoreCase(reviewer.getRole().getName());
 
         if (!canModerate) {
-            throw new AccessDeniedException("Chỉ Điều Phối Viên hoặc Quản Trị Viên mới có quyền phê duyệt bài đăng!");
+            throw new AccessDeniedException("Chỉ Quản Trị Viên (Admin) mới có quyền phê duyệt bài đăng!");
         }
 
         if (newStatus == null) {

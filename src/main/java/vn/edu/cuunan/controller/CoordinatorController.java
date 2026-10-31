@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.cuunan.service.BudgetService;
-import vn.edu.cuunan.entity.CommunityPost;
-import vn.edu.cuunan.entity.VerificationStatus;
-import vn.edu.cuunan.service.CommunityFeedService;
 import vn.edu.cuunan.service.CoordinatorService;
 import java.util.List;
 import vn.edu.cuunan.util.ProvinceRegion;
@@ -21,14 +18,10 @@ public class CoordinatorController {
 
     private final CoordinatorService coordinatorService;
     private final BudgetService budgetService;
-    private final CommunityFeedService feedService;
 
-    public CoordinatorController(CoordinatorService coordinatorService,
-                                 BudgetService budgetService,
-                                 CommunityFeedService feedService) {
+    public CoordinatorController(CoordinatorService coordinatorService, BudgetService budgetService) {
         this.coordinatorService = coordinatorService;
         this.budgetService = budgetService;
-        this.feedService = feedService;
     }
 
     @GetMapping
@@ -149,30 +142,5 @@ public class CoordinatorController {
         return "coordinator/history";
     }
 
-    /**
-     * 6. Trang Kiểm Duyệt & Phê Duyệt Bài Đăng Thiên Tai Từ Cộng Đồng
-     */
-    @GetMapping("/moderation")
-    public String moderation(@RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
-                             Model model) {
-        String cleanStatus = (status == null || status.isBlank()) ? "ALL" : status.trim().toUpperCase();
-        model.addAttribute("pageTitle", "Kiểm Duyệt Bài Đăng Cộng Đồng - Điều Phối Viên");
-        model.addAttribute("currentFilter", cleanStatus);
 
-        List<CommunityPost> allPosts = feedService.getRecentPosts();
-        List<CommunityPost> filteredPosts = allPosts;
-        if (!"ALL".equals(cleanStatus)) {
-            filteredPosts = allPosts.stream()
-                    .filter(p -> p.getVerificationStatus().name().equalsIgnoreCase(cleanStatus))
-                    .toList();
-        }
-
-        model.addAttribute("posts", filteredPosts);
-        model.addAttribute("totalCount", allPosts.size());
-        model.addAttribute("pendingCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING).count());
-        model.addAttribute("verifiedCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.VERIFIED).count());
-        model.addAttribute("rejectedCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.REJECTED).count());
-
-        return "coordinator/moderation";
-    }
 }

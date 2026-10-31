@@ -158,6 +158,12 @@ public class VnpayConfig {
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
         }
-        return ipAddress != null ? ipAddress : "127.0.0.1";
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        if ("0:0:0:0:0:0:0:1".equals(ipAddress) || "::1".equals(ipAddress)) {
+            ipAddress = "127.0.0.1";
+        }
+        return (ipAddress != null && !ipAddress.isBlank()) ? ipAddress : "127.0.0.1";
     }
 }

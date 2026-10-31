@@ -1150,6 +1150,70 @@
     paginateAdminTable('#donationsTable', '#donationsPaginationInfo', '#donationsPaginationNav', 10);
 
     paginateAdminTable('#disbursementsTable', '#disbursementsPaginationInfo', '#disbursementsPaginationNav', 10);
+    paginateAdminTable('#postsTable', '#postsPaginationInfo', '#postsPaginationNav', 10);
+
+    function getAdminCsrfToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+    }
+
+    function verifyPostAdmin(postId, newStatus) {
+        const labels = {
+            'VERIFIED': 'PHÊ DUYỆT (Đã xác minh)',
+            'REJECTED': 'BÁC BỎ (Sai tin)',
+            'PENDING': 'CHỜ DUYỆT (Xét lại)'
+        };
+        const label = labels[newStatus] || newStatus;
+        if (!confirm(`Xác nhận chuyển trạng thái bài đăng #${postId} thành "${label}"?`)) {
+            return;
+        }
+
+        const token = getAdminCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
+        fetch(`/api/feed/posts/${postId}/verify?status=${newStatus}`, {
+            method: 'POST',
+            headers: headers
+        })
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                alert(data.message || 'Cập nhật trạng thái thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể thực hiện phê duyệt'));
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
+    function deletePostAdmin(postId) {
+        if (!confirm(`BẠN CÓ CHẮC CHẮN MUỐN XÓA BÀI VIẾT #${postId}?
+
+Hành động này sẽ xóa hoàn toàn bài đăng khỏi hệ thống và không thể hoàn tác.`)) {
+            return;
+        }
+
+        const token = getAdminCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
+        fetch(`/api/feed/posts/${postId}`, {
+            method: 'DELETE',
+            headers: headers
+        })
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                alert(data.message || 'Đã xóa bài viết thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể xóa bài viết'));
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
 
 </script>
 

@@ -1,6 +1,7 @@
 package vn.edu.cuunan.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -183,6 +184,7 @@ public class FeedApiController {
     }
 
     @PostMapping("/posts/{id}/verify")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> verifyPost(@PathVariable("id") Long id,
                                         @RequestParam("status") String statusStr,
                                         @AuthenticationPrincipal CustomUserDetails userDetails) {

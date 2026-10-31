@@ -14,30 +14,26 @@
         <a th:href="@{/rescuer/routes}" class="sidebar-link"><i class="fa-solid fa-route"></i><span>Lộ trình di chuyển</span></a>
         <a th:href="@{/rescuer/resources}" class="sidebar-link"><i class="fa-solid fa-boxes-stacked"></i><span>Quân số và trang bị</span></a>
         <a th:href="@{/rescuer/missions#completed-missions}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử nhiệm vụ</span></a>
-        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn text-info"></i><span>Bảng tin cộng đồng</span></a>
-        <a th:href="@{/feed/my-posts}" class="sidebar-link"><i class="fa-solid fa-user-pen text-primary"></i><span>Bài đăng của bạn</span></a>
+        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn"></i><span>Bảng tin cộng đồng</span></a>
     </div>
 
     <div sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')" class="sidebar-links">
         <a th:href="@{/coordinator/dashboard}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan điều phối</span></a>
         <a th:href="@{/coordinator/missions}" class="sidebar-link"><i class="fa-solid fa-route"></i><span>Phân công & Lộ trình</span></a>
         <a th:href="@{/coordinator/teams}" class="sidebar-link"><i class="fa-solid fa-people-group"></i><span>Quản lý đội cứu hộ</span></a>
-        <a th:href="@{/coordinator/moderation}" class="sidebar-link"><i class="fa-solid fa-clipboard-check text-warning"></i><span>Kiểm duyệt bài đăng</span></a>
         <a th:href="@{/coordinator/history}" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử điều phối</span></a>
         <a th:href="@{/coordinator/budget}" class="sidebar-link"><i class="fa-solid fa-wallet"></i><span>Quỹ và ngân sách</span></a>
-        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn text-info"></i><span>Bảng tin cộng đồng</span></a>
-        <a th:href="@{/feed/my-posts}" class="sidebar-link"><i class="fa-solid fa-user-pen text-primary"></i><span>Bài đăng của bạn</span></a>
+        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn"></i><span>Bảng tin cộng đồng</span></a>
     </div>
 
     <div sec:authorize="hasRole('ADMIN')" class="sidebar-links">
         <a th:href="@{/admin/dashboard}" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i><span>Tổng quan quản trị</span></a>
-        <a th:href="@{/admin/dashboard(view='posts')}" class="sidebar-link"><i class="fa-solid fa-clipboard-check text-warning"></i><span>Kiểm duyệt bài đăng</span></a>
         <a th:href="@{/admin/dashboard(view='users')}" class="sidebar-link"><i class="fa-solid fa-users-gear"></i><span>Quản lý tài khoản</span></a>
         <a th:href="@{/admin/dashboard(view='teams')}" class="sidebar-link"><i class="fa-solid fa-people-group"></i><span>Quản lý đội cứu hộ</span></a>
         <a th:href="@{/admin/dashboard(view='finance')}" class="sidebar-link"><i class="fa-solid fa-chart-pie"></i><span>Thống kê thu chi</span></a>
         <a th:href="@{/admin/audit-logs}" class="sidebar-link"><i class="fa-solid fa-clipboard-list"></i><span>Nhật ký hoạt động</span></a>
-        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn text-info"></i><span>Bảng tin cộng đồng</span></a>
-        <a th:href="@{/feed/my-posts}" class="sidebar-link"><i class="fa-solid fa-user-pen text-primary"></i><span>Bài đăng của bạn</span></a>
+        <a th:href="@{/feed}" class="sidebar-link"><i class="fa-solid fa-bullhorn"></i><span>Bảng tin cộng đồng</span></a>
+        <a th:href="@{/admin/dashboard(view='posts')}" class="sidebar-link"><i class="fa-solid fa-clipboard-check"></i><span>Kiểm duyệt bài đăng</span></a>
     </div>
 
     <div class="sidebar-bottom">

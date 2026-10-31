@@ -219,23 +219,23 @@ class FeedControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/feed/posts/{id}/verify -> Điều phối viên hoặc Admin duyệt bài")
+    @DisplayName("POST /api/feed/posts/{id}/verify -> Chỉ Admin có quyền duyệt bài")
     void testVerifyPostApi() throws Exception {
-        Role roleCoord = roleRepository.findByName("ROLE_COORDINATOR")
-                .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_COORDINATOR")));
+        Role roleAdmin = roleRepository.findByName("ROLE_ADMIN")
+                .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_ADMIN")));
 
-        User coordUser = userRepository.findByUsername("coord_tester").orElseGet(() -> {
+        User adminUser = userRepository.findByUsername("admin_tester").orElseGet(() -> {
             User u = new User();
-            u.setUsername("coord_tester");
+            u.setUsername("admin_tester");
             u.setPassword("encodedPassword123");
-            u.setFullName("Điều Phối Viên Test");
+            u.setFullName("Quản Trị Viên Test");
             u.setPhone("0911223344");
-            u.setEmail("coord_tester@test.com");
-            u.setRole(roleCoord);
+            u.setEmail("admin_tester@test.com");
+            u.setRole(roleAdmin);
             u.setStatus("ACTIVE");
             return userRepository.save(u);
         });
-        CustomUserDetails coordDetails = new CustomUserDetails(coordUser);
+        CustomUserDetails adminDetails = new CustomUserDetails(adminUser);
 
         CommunityPost post = new CommunityPost();
         post.setAuthor(testUser);
@@ -245,17 +245,17 @@ class FeedControllerTest {
         post.setVerificationStatus(VerificationStatus.PENDING);
         CommunityPost saved = postRepository.save(post);
 
-        // Điều phối viên duyệt bài thành VERIFIED
+        // Admin duyệt bài thành VERIFIED
         mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/verify")
-                        .with(user(coordDetails))
+                        .with(user(adminDetails))
                         .param("status", "VERIFIED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.status").value("VERIFIED"));
 
-        // Điều phối viên bác bỏ bài thành REJECTED
+        // Admin bác bỏ bài thành REJECTED
         mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/verify")
-                        .with(user(coordDetails))
+                        .with(user(adminDetails))
                         .param("status", "REJECTED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
