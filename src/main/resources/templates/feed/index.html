@@ -2198,6 +2198,147 @@
         .catch(err => alert('Lỗi kết nối: ' + err.message));
     }
 
+    function openEditPostModal(postId) {
+        fetch(`/api/feed/posts/${postId}`)
+        .then(async res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(post => {
+            if (!post || !post.id) {
+                alert('Không thể tải dữ liệu bài viết!');
+                return;
+            }
+            const idEl = document.getElementById('editPostId');
+            if (idEl) idEl.value = post.id;
+            const contentEl = document.getElementById('editPostContent');
+            if (contentEl) contentEl.value = post.content || '';
+            const locEl = document.getElementById('editLocationName');
+            if (locEl) locEl.value = post.locationName || '';
+            const latEl = document.getElementById('editLatitude');
+            if (latEl) latEl.value = post.latitude || '';
+            const lngEl = document.getElementById('editLongitude');
+            if (lngEl) lngEl.value = post.longitude || '';
+
+            const hazardRadio = document.getElementById('edit_hazard_' + post.hazardType);
+            if (hazardRadio) hazardRadio.checked = true;
+
+            const imgWrap = document.getElementById('editCurrentImageWrap');
+            const imgEl = document.getElementById('editCurrentImage');
+            const removeCheck = document.getElementById('editRemoveImage');
+            if (removeCheck) removeCheck.checked = false;
+
+            if (imgWrap && imgEl) {
+                if (post.imageUrl) {
+                    imgEl.src = post.imageUrl;
+                    imgWrap.classList.remove('d-none');
+                } else {
+                    imgWrap.classList.add('d-none');
+                }
+            }
+
+            const modalEl = document.getElementById('editPostModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        })
+        .catch(err => alert('Lỗi tải bài viết: ' + err.message));
+    }
+
+    function scanEditGps() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const latEl = document.getElementById('editLatitude');
+                const lngEl = document.getElementById('editLongitude');
+                const locEl = document.getElementById('editLocationName');
+                if (latEl) latEl.value = pos.coords.latitude;
+                if (lngEl) lngEl.value = pos.coords.longitude;
+                if (locEl && !locEl.value) {
+                    locEl.value = 'Tọa độ GPS: ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+                }
+                alert('Đã cập nhật tọa độ GPS thành công!');
+            }, err => {
+                alert('Không thể lấy tọa độ GPS: ' + err.message);
+            });
+        } else {
+            alert('Trình duyệt của bạn không hỗ trợ Geolocation.');
+        }
+    }
+
+    function submitEditPost(e) {
+        e.preventDefault();
+        const postId = document.getElementById('editPostId').value;
+        const form = document.getElementById('editPostForm');
+        const formData = new FormData(form);
+
+        const btn = document.getElementById('btnSubmitEditPost');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+        }
+
+        const token = getFeedCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
+        fetch(`/api/feed/posts/${postId}/edit`, {
+            method: 'POST',
+            headers: headers,
+            body: formData
+        })
+        .then(async res => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi';
+            }
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                alert(data.message || 'Cập nhật thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể cập nhật bài viết'));
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi';
+            }
+            alert('Lỗi kết nối: ' + err.message);
+        });
+    }
+
+    function deletePost(postId) {
+        if (!confirm(`BẠN CÓ CHẮC CHẮN MUỐN XÓA BÀI VIẾT #${postId}?\n\nHành động này sẽ xóa vĩnh viễn bài đăng của bạn khỏi hệ thống. Thao tác không thể hoàn tác.`)) {
+            return;
+        }
+
+        const token = getFeedCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
+        fetch(`/api/feed/posts/${postId}`, {
+            method: 'DELETE',
+            headers: headers
+        })
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                alert(data.message || 'Đã xóa bài viết thành công!');
+                const card = document.getElementById('post-card-' + postId);
+                if (card) {
+                    card.remove();
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể xóa bài viết'));
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
 </script>
 
 

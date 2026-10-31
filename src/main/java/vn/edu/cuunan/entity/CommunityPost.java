@@ -10,6 +10,7 @@ public class CommunityPost extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User author;
@@ -44,6 +45,7 @@ public class CommunityPost extends BaseEntity {
     @Column(name = "comment_count")
     private int commentCount = 0;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sos_request_id")
     private SosRequest convertedSosRequest;

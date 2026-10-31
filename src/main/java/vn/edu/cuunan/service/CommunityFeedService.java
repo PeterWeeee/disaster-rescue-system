@@ -612,8 +612,11 @@ public class CommunityFeedService {
         CommunityPost post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
 
-        boolean isAuthor = post.getAuthor() != null && currentUser != null
-                && post.getAuthor().getId().equals(currentUser.getId());
+        boolean isAuthor = (post.getAuthor() != null && currentUser != null
+                && post.getAuthor().getId().equals(currentUser.getId()))
+                || (currentUser != null && post.getAuthorName() != null
+                && (post.getAuthorName().equalsIgnoreCase(currentUser.getFullName())
+                    || post.getAuthorName().equalsIgnoreCase(currentUser.getUsername())));
         boolean isAdmin = currentUser != null && currentUser.getRole() != null
                 && "ROLE_ADMIN".equalsIgnoreCase(currentUser.getRole().getName());
 
@@ -663,8 +666,11 @@ public class CommunityFeedService {
         CommunityPost post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
 
-        boolean isAuthor = post.getAuthor() != null && currentUser != null
-                && post.getAuthor().getId().equals(currentUser.getId());
+        boolean isAuthor = (post.getAuthor() != null && currentUser != null
+                && post.getAuthor().getId().equals(currentUser.getId()))
+                || (currentUser != null && post.getAuthorName() != null
+                && (post.getAuthorName().equalsIgnoreCase(currentUser.getFullName())
+                    || post.getAuthorName().equalsIgnoreCase(currentUser.getUsername())));
         boolean isAdmin = currentUser != null && currentUser.getRole() != null
                 && "ROLE_ADMIN".equalsIgnoreCase(currentUser.getRole().getName());
 

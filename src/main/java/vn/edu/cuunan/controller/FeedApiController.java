@@ -177,7 +177,20 @@ public class FeedApiController {
     public ResponseEntity<?> getPostById(@PathVariable("id") Long id) {
         try {
             CommunityPost post = feedService.getPostById(id);
-            return ResponseEntity.ok(post);
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", post.getId());
+            data.put("authorName", post.getAuthorName());
+            data.put("authorId", post.getAuthor() != null ? post.getAuthor().getId() : null);
+            data.put("hazardType", post.getHazardType() != null ? post.getHazardType().name() : "OTHER");
+            data.put("content", post.getContent());
+            data.put("locationName", post.getLocationName());
+            data.put("latitude", post.getLatitude());
+            data.put("longitude", post.getLongitude());
+            data.put("imageUrl", post.getImageUrl());
+            data.put("verificationStatus", post.getVerificationStatus() != null ? post.getVerificationStatus().name() : "PENDING");
+            data.put("upvoteCount", post.getUpvoteCount());
+            data.put("commentCount", post.getCommentCount());
+            return ResponseEntity.ok(data);
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
         }
@@ -229,9 +242,15 @@ public class FeedApiController {
         try {
             CommunityPost updated = feedService.updatePost(id, userDetails.getUser(), hazardType, content,
                     locationName, latitude, longitude, imageFile, removeImage);
+            Map<String, Object> postMap = new HashMap<>();
+            postMap.put("id", updated.getId());
+            postMap.put("content", updated.getContent());
+            postMap.put("hazardType", updated.getHazardType() != null ? updated.getHazardType().name() : "OTHER");
+            postMap.put("locationName", updated.getLocationName());
+            postMap.put("imageUrl", updated.getImageUrl());
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "post", updated,
+                    "post", postMap,
                     "message", "Cập nhật bài viết thành công!"
             ));
         } catch (AccessDeniedException ex) {

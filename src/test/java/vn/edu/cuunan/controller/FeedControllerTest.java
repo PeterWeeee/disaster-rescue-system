@@ -299,4 +299,21 @@ class FeedControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
+
+    @Test
+    @DisplayName("GET /api/feed/posts/{id} -> Lấy chi tiết bài viết")
+    void testGetPostById() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Test");
+        post.setContent("Nội dung test lấy chi tiết");
+        post.setHazardType(HazardType.FLOOD);
+        CommunityPost saved = postRepository.save(post);
+
+        mockMvc.perform(get("/api/feed/posts/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(saved.getId()))
+                .andExpect(jsonPath("$.content").value("Nội dung test lấy chi tiết"));
+    }
+
 }

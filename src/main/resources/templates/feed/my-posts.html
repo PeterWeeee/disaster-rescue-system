@@ -440,6 +440,11 @@
         }
     }
 
+    function getMyPostsCsrfToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+    }
+
     function submitEditPost(e) {
         e.preventDefault();
         const postId = document.getElementById('editPostId').value;
@@ -450,19 +455,24 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
 
+        const token = getMyPostsCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
         fetch(`/api/feed/posts/${postId}/edit`, {
             method: 'POST',
+            headers: headers,
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(async res => {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi';
-            if (data.success) {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
                 alert(data.message || 'Cập nhật thành công!');
                 window.location.reload();
             } else {
-                alert('Lỗi: ' + (data.message || 'Không thể cập nhật bài viết'));
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể cập nhật bài viết'));
             }
         })
         .catch(err => {
@@ -477,12 +487,17 @@
             return;
         }
 
+        const token = getMyPostsCsrfToken();
+        const headers = {};
+        if (token) headers['X-XSRF-TOKEN'] = token;
+
         fetch(`/api/feed/posts/${postId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: headers
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
                 alert(data.message || 'Đã xóa bài viết thành công!');
                 const card = document.getElementById('my-post-' + postId);
                 if (card) {
@@ -491,7 +506,7 @@
                     window.location.reload();
                 }
             } else {
-                alert('Lỗi: ' + (data.message || 'Không thể xóa bài viết'));
+                alert('Lỗi (' + res.status + '): ' + (data.message || 'Không thể xóa bài viết'));
             }
         })
         .catch(err => alert('Lỗi kết nối: ' + err.message));
