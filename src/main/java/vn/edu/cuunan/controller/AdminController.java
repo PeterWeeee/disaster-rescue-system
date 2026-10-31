@@ -13,6 +13,8 @@ import vn.edu.cuunan.entity.ActivityLog;
 import vn.edu.cuunan.service.ActivityLogService;
 import vn.edu.cuunan.service.AdminService;
 import vn.edu.cuunan.service.BudgetService;
+import vn.edu.cuunan.entity.VerificationStatus;
+import vn.edu.cuunan.service.CommunityFeedService;
 import vn.edu.cuunan.service.DonationService;
 
 @Controller
@@ -24,15 +26,18 @@ public class AdminController {
     private final ActivityLogService activityLogService;
     private final BudgetService budgetService;
     private final DonationService donationService;
+    private final CommunityFeedService feedService;
 
     public AdminController(AdminService adminService,
                            ActivityLogService activityLogService,
                            BudgetService budgetService,
-                           DonationService donationService) {
+                           DonationService donationService,
+                           CommunityFeedService feedService) {
         this.adminService = adminService;
         this.activityLogService = activityLogService;
         this.budgetService = budgetService;
         this.donationService = donationService;
+        this.feedService = feedService;
     }
 
     @GetMapping("/dashboard")
@@ -51,12 +56,24 @@ public class AdminController {
         model.addAttribute("recentDonations", donationService.getRecentDonations());
         model.addAttribute("fundRequests", budgetService.getAllRequests());
         model.addAttribute("donationStats", donationService.getDonationStats());
+
+        // Dữ liệu Kiểm duyệt bài đăng cộng đồng
+        var allPosts = feedService.getRecentPosts();
+        model.addAttribute("allPosts", allPosts);
+        model.addAttribute("pendingPostsCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING).count());
+        model.addAttribute("verifiedPostsCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.VERIFIED).count());
+        model.addAttribute("rejectedPostsCount", allPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.REJECTED).count());
         return "admin/dashboard";
     }
 
     @GetMapping("/finance")
     public String finance() {
         return "redirect:/admin/dashboard?view=finance";
+    }
+
+    @GetMapping("/moderation")
+    public String moderation() {
+        return "redirect:/admin/dashboard?view=posts";
     }
 
     @GetMapping("/audit-logs")

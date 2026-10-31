@@ -30,13 +30,17 @@
                 </div>
                 <div sec:authorize="isAuthenticated()" class="dropdown">
                     <button class="btn btn-light border dropdown-toggle account-button" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-regular fa-circle-user text-primary me-sm-1"></i><span sec:authentication="name" class="d-none d-sm-inline">Người dùng</span></button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm"><li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-regular fa-id-card me-2"></i>Hồ sơ cá nhân</a></li><li><hr class="dropdown-divider"></li><li><form th:action="@{/auth/logout}" method="post" class="m-0"><button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất</button></form></li></ul>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm"><li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-regular fa-id-card me-2"></i>Hồ sơ cá nhân</a></li>
+<li><a class="dropdown-item" th:href="@{/feed/my-posts}"><i class="fa-solid fa-user-pen text-primary me-2"></i>Quản lý bài đăng của bạn</a></li>
+<li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin/dashboard(view='posts')}"><i class="fa-solid fa-clipboard-check text-warning me-2"></i>Kiểm duyệt bài đăng</a></li>
+<li sec:authorize="hasRole('COORDINATOR') and !hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/coordinator/moderation}"><i class="fa-solid fa-clipboard-check text-warning me-2"></i>Kiểm duyệt bài đăng</a></li>
+<li><hr class="dropdown-divider"></li><li><form th:action="@{/auth/logout}" method="post" class="m-0"><button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất</button></form></li></ul>
                 </div>
             </div>
         </div>
     </div>
     <div class="public-nav" sec:authorize="!hasAnyRole('RESCUER','COORDINATOR','ADMIN')">
-        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a sec:authorize="hasRole('CITIZEN')" th:href="@{/guide/disaster}">Cẩm nang</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
+        <div class="public-nav-inner"><a th:href="@{/}">Trang chủ</a><a th:href="@{/#home-features}">Tính năng</a><a th:href="@{/feed}">Bảng tin</a><a sec:authorize="isAuthenticated()" th:href="@{/feed/my-posts}"><i class="fa-solid fa-user-pen text-primary me-1"></i>Bài đăng của bạn</a><a th:href="@{/map}">Bản đồ cứu hộ</a><a sec:authorize="hasRole('CITIZEN')" th:href="@{/guide/disaster}">Cẩm nang</a><a th:href="@{/#home-process}">Quy trình</a><a th:href="@{/donations}">Ủng hộ cứu trợ</a></div>
     </div>
     <div class="offcanvas offcanvas-start app-mobile-sidebar" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
         <div class="offcanvas-header"><h5 class="offcanvas-title" id="mobileSidebarLabel">Điều hướng</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button></div>

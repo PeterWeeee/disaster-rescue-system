@@ -8,30 +8,31 @@
     <div class="container-xl">
 
         <!-- HEADER BANNER -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-gradient position-relative text-white"
-             style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
-            <div class="p-4 p-md-5 position-relative" style="z-index: 2;">
+        <div class="rounded-4 shadow-sm mb-4 position-relative overflow-hidden p-4 p-md-5"
+             style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0369a1 100%) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.12) !important;">
+            <div class="position-relative" style="z-index: 2;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-2 small">
-                                <li class="breadcrumb-item"><a th:href="@{/feed}" class="text-white-50 text-decoration-none"><i class="fa-solid fa-house me-1"></i>Bảng Tin</a></li>
-                                <li class="breadcrumb-item active text-white" aria-current="page">Bài đăng của bạn</li>
+                                <li class="breadcrumb-item"><a th:href="@{/feed}" style="color: rgba(255,255,255,0.75) !important; text-decoration: none;"><i class="fa-solid fa-house me-1"></i>Bảng Tin</a></li>
+                                <li class="breadcrumb-item active fw-semibold" style="color: #ffffff !important;" aria-current="page">Bài đăng của bạn</li>
                             </ol>
                         </nav>
-                        <h2 class="fw-black mb-2 tracking-tight d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-user-pen text-info"></i> Quản Lý Bài Đăng Của Bạn
+                        <h2 class="fw-bold mb-2 tracking-tight d-flex align-items-center gap-2" style="color: #ffffff !important;">
+                            <i class="fa-solid fa-user-pen" style="color: #38bdf8 !important;"></i> Quản Lý Bài Đăng Của Bạn
                         </h2>
-                        <p class="text-white-50 mb-0 small max-w-2xl">
+                        <p class="mb-0 small" style="color: rgba(255,255,255,0.85) !important; max-width: 720px; line-height: 1.6;">
                             Theo dõi tiến độ kiểm duyệt từ Ban Điều Phối, cập nhật tình hình thực địa hoặc quản lý chỉnh sửa, xóa các bài viết cảnh báo của bạn.
                         </p>
                     </div>
 
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <a th:href="@{/feed}" class="btn btn-outline-light fw-bold shadow-sm rounded-pill px-3">
+                        <a th:href="@{/feed}" class="btn fw-semibold shadow-sm rounded-pill px-3 py-2"
+                           style="background: rgba(255,255,255,0.15) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3) !important;">
                             <i class="fa-solid fa-arrow-left me-1"></i> Quay lại Bảng Tin
                         </a>
-                        <button type="button" class="btn btn-danger fw-bold shadow-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                        <button type="button" class="btn btn-danger fw-bold shadow-sm rounded-pill px-3 py-2 d-flex align-items-center gap-2"
                                 data-bs-toggle="modal" data-bs-target="#createPostModal">
                             <i class="fa-solid fa-pen-to-square"></i> Đăng Tin Mới
                         </button>
