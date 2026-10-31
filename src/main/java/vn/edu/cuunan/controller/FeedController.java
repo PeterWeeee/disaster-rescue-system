@@ -81,7 +81,7 @@ public class FeedController {
         model.addAttribute("myPostsCount", myPosts.size());
 
         long verifiedCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.VERIFIED).count();
-        long pendingCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING).count();
+        long pendingCount = myPosts.stream().filter(p -> p.getVerificationStatus() == null || p.getVerificationStatus() == VerificationStatus.PENDING).count();
         long rejectedCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.REJECTED).count();
 
         model.addAttribute("verifiedCount", verifiedCount);

@@ -42,6 +42,8 @@ class FeedControllerTest {
 
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private org.springframework.web.servlet.ViewResolver viewResolver;
 
     private User testUser;
     private CustomUserDetails testUserDetails;
@@ -206,16 +208,22 @@ class FeedControllerTest {
         post.setAuthorName("Tác giả Của Tôi");
         post.setContent("Bài đăng mẫu của chính tài khoản này");
         post.setHazardType(HazardType.STORM);
-        post.setVerificationStatus(VerificationStatus.PENDING);
+        post.setVerificationStatus(null);
         postRepository.save(post);
 
-        mockMvc.perform(get("/feed/my-posts").with(user(testUserDetails)))
+
+        org.springframework.test.web.servlet.MvcResult mvcResult = mockMvc.perform(get("/feed/my-posts").with(user(testUserDetails)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("feed/my-posts"))
                 .andExpect(model().attributeExists("currentUser"))
                 .andExpect(model().attributeExists("myPosts"))
                 .andExpect(model().attributeExists("myPostsCount"))
-                .andExpect(model().attributeExists("pendingCount"));
+                .andExpect(model().attributeExists("pendingCount"))
+                .andReturn();
+        org.springframework.web.servlet.View view = viewResolver.resolveViewName(
+                mvcResult.getModelAndView().getViewName(), java.util.Locale.getDefault());
+        view.render(mvcResult.getModelAndView().getModel(),
+                mvcResult.getRequest(), mvcResult.getResponse());
     }
 
     @Test
@@ -242,7 +250,7 @@ class FeedControllerTest {
         post.setAuthorName("Người Dân Báo Tin");
         post.setContent("Đang có hiện tượng lũ quét cục bộ");
         post.setHazardType(HazardType.FLOOD);
-        post.setVerificationStatus(VerificationStatus.PENDING);
+        post.setVerificationStatus(null);
         CommunityPost saved = postRepository.save(post);
 
         // Admin duyệt bài thành VERIFIED

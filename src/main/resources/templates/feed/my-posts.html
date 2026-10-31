@@ -136,7 +136,7 @@
                                     <div th:unless="${post.author != null && post.author.avatarUrl != null && !#strings.isEmpty(post.author.avatarUrl)}"
                                          class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
                                          style="width: 44px; height: 44px; min-width: 44px; font-size: 1.15rem;">
-                                        <span th:text="${post.authorName != null ? #strings.substring(post.authorName, 0, 1) : 'U'}">U</span>
+                                        <span th:text="${post.authorName != null && !#strings.isEmpty(post.authorName) ? #strings.substring(post.authorName, 0, 1) : 'U'}">U</span>
                                     </div>
 
                                     <div>
@@ -144,8 +144,8 @@
                                             <span class="fw-bold text-dark fs-6" th:text="${post.authorName}">Tên Bạn</span>
                                             <span class="badge bg-light text-secondary border small">Tác giả bài viết</span>
                                             <span class="badge fw-bold"
-                                                  th:style="'background-color: ' + ${post.hazardType.badgeColor} + '; color: #fff;'"
-                                                  th:text="${post.hazardType.shortName}">SẠT LỞ</span>
+                                                  th:style="'background-color: ' + ${post.hazardType != null ? post.hazardType.badgeColor : '#64748b'} + '; color: #fff;'"
+                                                  th:text="${post.hazardType != null ? post.hazardType.shortName : 'KHÁC'}">SẠT LỞ</span>
                                         </div>
                                         <div class="text-muted small mt-0.5">
                                             <i class="fa-regular fa-clock me-1"></i>
@@ -161,39 +161,39 @@
                                 <!-- Verification Status Badge & Action Buttons -->
                                 <div class="d-flex align-items-center gap-2">
                                     <div th:id="'status-wrap-' + ${post.id}">
-                                        <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-3 py-2 rounded-pill shadow-xs">
+                                        <span th:if="${post.verificationStatus != null && post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-3 py-2 rounded-pill shadow-xs">
                                             <i class="fa-solid fa-check me-1"></i> Đã xác minh
                                         </span>
-                                        <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-3 py-2 rounded-pill">
+                                        <span th:if="${post.verificationStatus == null || post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-3 py-2 rounded-pill">
                                             <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
                                         </span>
-                                        <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-3 py-2 rounded-pill">
+                                        <span th:if="${post.verificationStatus != null && post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-3 py-2 rounded-pill">
                                             <i class="fa-solid fa-xmark me-1"></i> Đã bác bỏ
                                         </span>
                                     </div>
 
                                     <!-- Quick Action Buttons -->
                                     <button type="button" class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-2.5 py-1"
-                                            th:onclick="'openEditPostModal(' + ${post.id} + ')'" title="Chỉnh sửa bài viết">
+                                            th:data-id="${post.id}" onclick="openEditPostModal(this.dataset.id)" title="Chỉnh sửa bài viết">
                                         <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-2.5 py-1"
-                                            th:onclick="'deletePost(' + ${post.id} + ')'" title="Xóa bài viết">
+                                            th:data-id="${post.id}" onclick="deletePost(this.dataset.id)" title="Xóa bài viết">
                                         <i class="fa-solid fa-trash-can me-1"></i> Xóa
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Verification Explanatory Box -->
-                            <div th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                            <div th:if="${post.verificationStatus != null && post.verificationStatus.name() == 'VERIFIED'}" class="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-shield-check fs-6 text-success"></i>
                                 <span><strong>Thông tin đã thẩm định:</strong> Ban Điều Phối đã kiểm tra thực tế và xác thực đây là cảnh báo chính xác.</span>
                             </div>
-                            <div th:if="${post.verificationStatus.name() == 'PENDING'}" class="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                            <div th:if="${post.verificationStatus == null || post.verificationStatus.name() == 'PENDING'}" class="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-circle-info fs-6 text-warning"></i>
                                 <span><strong>Đang chờ phê duyệt:</strong> Ban Điều Phối hoặc Quản Trị Viên đang đối chiếu thông tin cứu nạn từ hiện trường. Bạn có thể cập nhật thông tin nếu có diễn biến mới.</span>
                             </div>
-                            <div th:if="${post.verificationStatus.name() == 'REJECTED'}" class="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                            <div th:if="${post.verificationStatus != null && post.verificationStatus.name() == 'REJECTED'}" class="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-triangle-exclamation fs-6 text-danger"></i>
                                 <span><strong>Bác bỏ:</strong> Tin báo này bị cơ quan chức năng từ chối do không đúng hiện trường hoặc đã qua thời điểm nguy hiểm.</span>
                             </div>
@@ -208,7 +208,9 @@
                                 <img th:src="${post.imageUrl}"
                                      class="w-100 object-fit-cover"
                                      style="max-height: 460px; cursor: pointer;"
-                                     th:onclick="'previewImage(\'' + ${post.imageUrl} + '\', \'' + ${post.locationName} + '\')'"
+                                     th:data-src="${post.imageUrl}"
+                                     th:data-caption="${post.locationName != null ? post.locationName : 'Ảnh hiện trường'}"
+                                     onclick="previewImage(this.dataset.src, this.dataset.caption)"
                                      alt="Ảnh hiện trường">
                             </div>
 
@@ -376,8 +378,6 @@
             </div>
         </div>
     </div>
-
-</div>
 
 <!-- INLINE JAVASCRIPT LOGIC -->
 <script>
@@ -566,5 +566,6 @@
     });
 </script>
 
+</div>
 </body>
 </html>
