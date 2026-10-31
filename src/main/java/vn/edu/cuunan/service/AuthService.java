@@ -230,4 +230,8 @@ public class AuthService {
     public Optional<String> getLatestOtp(String email, String type) {
         return otpService != null ? otpService.getLatestOtp(email, type) : Optional.empty();
     }
+
+    public String getLastError() {
+        return otpService != null ? otpService.getLastError() : null;
+    }
 }

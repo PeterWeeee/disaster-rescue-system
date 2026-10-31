@@ -5,7 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import vn.edu.cuunan.entity.CommunityPost;
 import vn.edu.cuunan.entity.HazardType;
+import vn.edu.cuunan.entity.VerificationStatus;
 import vn.edu.cuunan.entity.SosRequest;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.security.CustomUserDetails;
@@ -43,6 +45,7 @@ public class FeedController {
         model.addAttribute("shelters", feedService.getAllShelters());
         model.addAttribute("hazardTypes", HazardType.values());
         model.addAttribute("recentAlerts", disasterAlertRepository.findTop5ByOrderByCreatedAtDesc());
+        model.addAttribute("myPostsCount", feedService.countMyPosts(currentUser.getId()));
 
         // Dữ liệu bình luận và icon cảm xúc
         model.addAttribute("commentsMap", feedService.getAllCommentsGroupedByPostId());
@@ -62,5 +65,34 @@ public class FeedController {
         model.addAttribute("sosHistory", sosHistory);
 
         return "feed/index";
+    }
+
+    @GetMapping("/my-posts")
+    public String showMyPosts(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return "redirect:/auth/login?redirect=/feed/my-posts";
+        }
+
+        User currentUser = userDetails.getUser();
+        List<CommunityPost> myPosts = feedService.getMyPosts(currentUser.getId());
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("myPosts", myPosts);
+        model.addAttribute("hazardTypes", HazardType.values());
+        model.addAttribute("myPostsCount", myPosts.size());
+
+        long verifiedCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.VERIFIED).count();
+        long pendingCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING).count();
+        long rejectedCount = myPosts.stream().filter(p -> p.getVerificationStatus() == VerificationStatus.REJECTED).count();
+
+        model.addAttribute("verifiedCount", verifiedCount);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("rejectedCount", rejectedCount);
+
+        // Bình luận & cảm xúc cho các bài đăng của tôi
+        model.addAttribute("commentsMap", feedService.getAllCommentsGroupedByPostId());
+        model.addAttribute("userReactions", feedService.getUserReactionsMap(currentUser.getId()));
+        model.addAttribute("postReactions", feedService.getAllPostsReactionBreakdown());
+
+        return "feed/my-posts";
     }
 }

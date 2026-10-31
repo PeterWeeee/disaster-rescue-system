@@ -20,20 +20,32 @@
                             <span th:text="${successMessage}"></span>
                         </div>
 
+                        <!-- Cảnh báo nếu có -->
+                        <div th:if="${warningMessage}" class="alert alert-warning small py-2 d-flex align-items-center">
+                            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                            <span th:text="${warningMessage}"></span>
+                        </div>
+
                         <!-- Thông báo lỗi -->
                         <div th:if="${errorMessage}" class="alert alert-danger small py-2 d-flex align-items-center">
                             <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
                             <span th:text="${errorMessage}"></span>
                         </div>
 
-                        <!-- Chế độ Dev Simulator khi chưa cấu hình mật khẩu Gmail SMTP -->
+                        <!-- Mã OTP Dự Phòng khi SMTP gặp lỗi hoặc bị Cloud chặn cổng -->
                         <div th:if="${devOtpCode}" class="alert alert-warning border border-warning shadow-sm small py-3 mb-3 rounded-3">
                             <div class="fw-bold text-dark d-flex align-items-center mb-1">
-                                <i class="fa-solid fa-flask-vial me-2 text-warning fs-5"></i>
-                                <span>Chế Độ Thử Nghiệm (Dev Simulator)</span>
+                                <i class="fa-solid fa-shield-halved me-2 text-warning fs-5"></i>
+                                <span>Mã OTP Kích Hoạt Dự Phòng (Fallback)</span>
                             </div>
-                            <p class="text-muted mb-2 small">
-                                Chưa cấu hình Mật khẩu ứng dụng Gmail SMTP (<code>spring.mail.password</code>). Để thuận tiện thử nghiệm, mã OTP kích hoạt của bạn là:
+                            <div th:if="${smtpError}" class="p-2 bg-light rounded border border-warning-subtle text-danger small my-2">
+                                <i class="fa-solid fa-circle-exclamation me-1"></i> <strong>Lý do Gmail SMTP chưa gửi được:</strong> <span th:text="${smtpError}">Lỗi kết nối</span>
+                                <div class="text-muted mt-1 small" style="font-size: 11px;">
+                                    * Lưu ý: Nền tảng Render Free Tier chặn các cổng gửi mail 25, 465, 587 theo chính sách chống spam của cloud.
+                                </div>
+                            </div>
+                            <p class="text-muted mb-2 small" th:unless="${smtpError}">
+                                Để thuận tiện thử nghiệm nhanh, hệ thống đã sinh sẵn mã OTP kích hoạt cho bạn:
                             </p>
                             <div class="p-2 bg-white rounded border border-warning text-center">
                                 <span class="fs-4 fw-bold text-danger font-monospace tracking-wide" th:text="${devOtpCode}">123456</span>

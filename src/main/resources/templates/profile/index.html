@@ -719,7 +719,8 @@
                     .then(data => {
                         if (data.success) {
                             if (data.devOtp) {
-                                showEmailOtpFeedback('warning', `<div class="p-2 bg-light rounded border border-warning mt-1"><i class="fa-solid fa-flask-vial text-warning me-1"></i> <strong>Chế độ Thử Nghiệm:</strong> ${data.message}<div class="mt-1">Mã OTP của bạn là: <strong class="fs-6 text-danger font-monospace">${data.devOtp}</strong> (Đã tự động điền)</div></div>`);
+                                const errNotice = data.smtpError ? `<div class="text-danger small mt-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Lý do SMTP: ${data.smtpError}</div>` : '';
+                                showEmailOtpFeedback('warning', `<div class="p-2 bg-light rounded border border-warning mt-1"><i class="fa-solid fa-shield-halved text-warning me-1"></i> <strong>Mã OTP Dự Phòng:</strong> ${data.message}${errNotice}<div class="mt-2 text-center p-1 bg-white rounded border border-warning"><strong class="fs-5 text-danger font-monospace">${data.devOtp}</strong></div><small class="text-muted d-block mt-1">(Đã tự động điền vào ô bên dưới)</small></div>`);
                                 if (emailOtpInput) {
                                     emailOtpInput.value = data.devOtp;
                                 }

@@ -97,4 +97,8 @@ public class OtpService {
         return otpRepository.findTopByEmailAndTypeAndIsUsedFalseOrderByCreatedAtDesc(email.trim().toLowerCase(), type)
                 .map(OtpVerification::getOtpCode);
     }
+
+    public String getLastError() {
+        return emailService != null ? emailService.getLastError() : null;
+    }
 }

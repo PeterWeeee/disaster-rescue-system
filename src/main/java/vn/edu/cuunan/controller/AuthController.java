@@ -116,9 +116,16 @@ public class AuthController {
                         "Mã OTP xác thực 6 chữ số đã được gửi đến hộp thư Gmail " + registerDto.getEmail() + ". Vui lòng kiểm tra hộp thư đến (và thư rác/spam) để kích hoạt tài khoản!");
             } else {
                 String devOtp = authService.getLatestOtp(registerDto.getEmail(), "REGISTRATION").orElse("");
+                String smtpError = authService.getLastError();
                 redirectAttributes.addFlashAttribute("devOtpCode", devOtp);
-                redirectAttributes.addFlashAttribute("successMessage",
-                        "Chế độ Thử Nghiệm (Dev): Chưa cấu hình Gmail App Password trong application-secret.yml. Mã OTP kích hoạt của bạn là: " + devOtp);
+                redirectAttributes.addFlashAttribute("smtpError", smtpError);
+                if (smtpError != null && !smtpError.isBlank()) {
+                    redirectAttributes.addFlashAttribute("warningMessage",
+                            "Không thể gửi qua Gmail SMTP (" + smtpError + "). Đã cấp mã OTP kích hoạt dự phòng bên dưới.");
+                } else {
+                    redirectAttributes.addFlashAttribute("successMessage",
+                            "Mã OTP kích hoạt tài khoản của bạn là: " + devOtp);
+                }
             }
             return "redirect:/auth/verify-otp?email=" + registerDto.getEmail();
         } catch (Exception ex) {
@@ -140,6 +147,10 @@ public class AuthController {
         }
         if (!model.containsAttribute("devOtpCode") && email != null && !authService.isLastEmailSentReal()) {
             authService.getLatestOtp(email, "REGISTRATION").ifPresent(otp -> model.addAttribute("devOtpCode", otp));
+            String smtpErr = authService.getLastError();
+            if (smtpErr != null && !smtpErr.isBlank()) {
+                model.addAttribute("smtpError", smtpErr);
+            }
         }
         return "auth/verify-otp";
     }
@@ -168,8 +179,14 @@ public class AuthController {
                 redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP mới đến hộp thư Gmail " + email + ". Vui lòng kiểm tra hộp thư!");
             } else {
                 String devOtp = authService.getLatestOtp(email, "REGISTRATION").orElse("");
+                String smtpError = authService.getLastError();
                 redirectAttributes.addFlashAttribute("devOtpCode", devOtp);
-                redirectAttributes.addFlashAttribute("successMessage", "Chế độ Thử Nghiệm (Dev): Mã OTP mới của bạn là: " + devOtp);
+                redirectAttributes.addFlashAttribute("smtpError", smtpError);
+                if (smtpError != null && !smtpError.isBlank()) {
+                    redirectAttributes.addFlashAttribute("warningMessage", "Chưa thể gửi qua Gmail SMTP (" + smtpError + "). Đã cấp mã OTP mới bên dưới.");
+                } else {
+                    redirectAttributes.addFlashAttribute("successMessage", "Mã OTP mới của bạn là: " + devOtp);
+                }
             }
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

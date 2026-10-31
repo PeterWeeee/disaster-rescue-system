@@ -7,7 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.edu.cuunan.entity.CommunityPost;
 import vn.edu.cuunan.entity.EvacuationShelter;
 import vn.edu.cuunan.entity.PostComment;
+import org.springframework.security.access.AccessDeniedException;
 import vn.edu.cuunan.entity.User;
+import vn.edu.cuunan.entity.VerificationStatus;
 import vn.edu.cuunan.security.CustomUserDetails;
 import vn.edu.cuunan.service.CommunityFeedService;
 
@@ -167,6 +169,98 @@ public class FeedApiController {
             err.put("success", false);
             err.put("message", ex.getMessage());
             return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @GetMapping("/posts/{id}")
+    public ResponseEntity<?> getPostById(@PathVariable("id") Long id) {
+        try {
+            CommunityPost post = feedService.getPostById(id);
+            return ResponseEntity.ok(post);
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/posts/{id}/verify")
+    public ResponseEntity<?> verifyPost(@PathVariable("id") Long id,
+                                        @RequestParam("status") String statusStr,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+        }
+
+        try {
+            VerificationStatus status = VerificationStatus.valueOf(statusStr.trim().toUpperCase());
+            CommunityPost post = feedService.verifyPost(id, status, userDetails.getUser());
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "postId", id,
+                    "status", post.getVerificationStatus().name(),
+                    "label", post.getVerificationStatus().getLabel(),
+                    "color", post.getVerificationStatus().getColor(),
+                    "message", "Đã cập nhật trạng thái phê duyệt bài viết #" + id + " thành '" + post.getVerificationStatus().getLabel() + "'!"
+            ));
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi phê duyệt: " + ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/posts/{id}/edit")
+    public ResponseEntity<?> editPost(@PathVariable("id") Long id,
+                                      @RequestParam("content") String content,
+                                      @RequestParam(value = "hazardType", required = false) String hazardType,
+                                      @RequestParam(value = "locationName", required = false) String locationName,
+                                      @RequestParam(value = "latitude", required = false) Double latitude,
+                                      @RequestParam(value = "longitude", required = false) Double longitude,
+                                      @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                                      @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+        }
+
+        try {
+            CommunityPost updated = feedService.updatePost(id, userDetails.getUser(), hazardType, content,
+                    locationName, latitude, longitude, imageFile, removeImage);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "post", updated,
+                    "message", "Cập nhật bài viết thành công!"
+            ));
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi cập nhật bài viết: " + ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable("id") Long id,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+        }
+
+        try {
+            feedService.deletePost(id, userDetails.getUser());
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "postId", id,
+                    "message", "Đã xóa bài viết thành công!"
+            ));
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "Lỗi xóa bài viết: " + ex.getMessage()));
         }
     }
 }

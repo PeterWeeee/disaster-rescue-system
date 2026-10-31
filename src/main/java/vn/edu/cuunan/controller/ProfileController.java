@@ -147,14 +147,20 @@ public class ProfileController {
         try {
             String otpCode = otpService.generateAndSendOtp(targetEmail, "CHANGE_EMAIL");
             boolean realSent = otpService.isLastEmailSentReal();
+            String smtpError = otpService.getLastError();
             response.put("success", true);
             if (realSent) {
                 response.put("realEmailSent", true);
-                response.put("message", "Mã xác thực OTP gồm 6 chữ số đã được gửi tới hộp thư " + targetEmail + ". Vui lòng kiểm tra hộp thư!");
+                response.put("message", "Mã xác thực OTP gồm 6 chữ số đã được gửi tới hộp thư Gmail " + targetEmail + ". Vui lòng kiểm tra hộp thư!");
             } else {
                 response.put("realEmailSent", false);
                 response.put("devOtp", otpCode);
-                response.put("message", "Chế độ Thử Nghiệm (Dev): Chưa cấu hình Gmail App Password trong application-secret.yml.");
+                response.put("smtpError", smtpError);
+                if (smtpError != null && !smtpError.isBlank()) {
+                    response.put("message", "Không thể gửi email qua Gmail SMTP (" + smtpError + "). Đã cấp mã OTP kích hoạt dự phòng.");
+                } else {
+                    response.put("message", "Đã cấp mã OTP xác nhận.");
+                }
             }
             return ResponseEntity.ok(response);
         } catch (Exception ex) {

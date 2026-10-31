@@ -12,6 +12,7 @@ public interface PostUpvoteRepository extends JpaRepository<PostUpvote, Long> {
     Optional<PostUpvote> findByPostIdAndUserId(Long postId, Long userId);
     boolean existsByPostIdAndUserId(Long postId, Long userId);
     void deleteByPostIdAndUserId(Long postId, Long userId);
+    void deleteByPostId(Long postId);
     List<PostUpvote> findByPostId(Long postId);
     List<PostUpvote> findByUserId(Long userId);
     long countByPostId(Long postId);

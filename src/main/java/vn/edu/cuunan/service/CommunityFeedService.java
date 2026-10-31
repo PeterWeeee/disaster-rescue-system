@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,6 +47,7 @@ public class CommunityFeedService {
     private final PostCommentRepository commentRepository;
     private final CloudinaryService cloudinaryService;
     private final SosService sosService;
+    private final ActivityLogService activityLogService;
 
     @Autowired(required = false)
     private DataSource dataSource;
@@ -55,13 +57,15 @@ public class CommunityFeedService {
                                 PostUpvoteRepository upvoteRepository,
                                 PostCommentRepository commentRepository,
                                 CloudinaryService cloudinaryService,
-                                SosService sosService) {
+                                SosService sosService,
+                                ActivityLogService activityLogService) {
         this.postRepository = postRepository;
         this.shelterRepository = shelterRepository;
         this.upvoteRepository = upvoteRepository;
         this.commentRepository = commentRepository;
         this.cloudinaryService = cloudinaryService;
         this.sosService = sosService;
+        this.activityLogService = activityLogService;
     }
 
     @PostConstruct
@@ -584,5 +588,124 @@ public class CommunityFeedService {
         res.put("sosId", savedSos.getId());
         res.put("message", "Đã chuyển thành công thành đơn cứu hộ SOS-" + savedSos.getId() + "!");
         return res;
+    }
+
+    public List<CommunityPost> getMyPosts(Long userId) {
+        if (userId == null) return List.of();
+        return postRepository.findByAuthorIdOrderByCreatedAtDesc(userId);
+    }
+
+    public long countMyPosts(Long userId) {
+        if (userId == null) return 0L;
+        return postRepository.countByAuthorId(userId);
+    }
+
+    public CommunityPost getPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
+    }
+
+    @Transactional
+    public CommunityPost updatePost(Long postId, User currentUser, String hazardTypeName,
+                                   String content, String locationName, Double latitude,
+                                   Double longitude, MultipartFile imageFile, boolean removeImage) {
+        CommunityPost post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
+
+        boolean isAuthor = post.getAuthor() != null && currentUser != null
+                && post.getAuthor().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser != null && currentUser.getRole() != null
+                && "ROLE_ADMIN".equalsIgnoreCase(currentUser.getRole().getName());
+
+        if (!isAuthor && !isAdmin) {
+            throw new AccessDeniedException("Bạn không có quyền chỉnh sửa bài viết này!");
+        }
+
+        if (content == null || content.trim().isBlank()) {
+            throw new IllegalArgumentException("Nội dung bài viết không được để trống!");
+        }
+
+        HazardType hazardType = HazardType.OTHER;
+        if (hazardTypeName != null && !hazardTypeName.isBlank()) {
+            try {
+                hazardType = HazardType.valueOf(hazardTypeName.trim().toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        post.setHazardType(hazardType);
+        post.setContent(content.trim());
+        if (locationName != null && !locationName.isBlank()) {
+            post.setLocationName(locationName.trim());
+        }
+        if (latitude != null) post.setLatitude(latitude);
+        if (longitude != null) post.setLongitude(longitude);
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String newImageUrl = cloudinaryService.uploadImage(imageFile, "community_feed");
+            if (newImageUrl != null && !newImageUrl.isBlank()) {
+                post.setImageUrl(newImageUrl);
+            }
+        } else if (removeImage) {
+            post.setImageUrl(null);
+        }
+
+        CommunityPost saved = postRepository.save(post);
+        if (activityLogService != null) {
+            activityLogService.log(currentUser, "UPDATE_COMMUNITY_POST", "CommunityPost",
+                    "Cập nhật bài viết #" + postId, null);
+        }
+        return saved;
+    }
+
+    @Transactional
+    public void deletePost(Long postId, User currentUser) {
+        CommunityPost post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
+
+        boolean isAuthor = post.getAuthor() != null && currentUser != null
+                && post.getAuthor().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser != null && currentUser.getRole() != null
+                && "ROLE_ADMIN".equalsIgnoreCase(currentUser.getRole().getName());
+
+        if (!isAuthor && !isAdmin) {
+            throw new AccessDeniedException("Bạn không có quyền xóa bài viết này!");
+        }
+
+        upvoteRepository.deleteByPostId(postId);
+        commentRepository.deleteByPostId(postId);
+        postRepository.delete(post);
+
+        if (activityLogService != null) {
+            activityLogService.log(currentUser, "DELETE_COMMUNITY_POST", "CommunityPost",
+                    "Xóa bài viết #" + postId + " của tác giả: " + post.getAuthorName(), null);
+        }
+    }
+
+    @Transactional
+    public CommunityPost verifyPost(Long postId, VerificationStatus newStatus, User reviewer) {
+        CommunityPost post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + postId));
+
+        boolean canModerate = reviewer != null && reviewer.getRole() != null
+                && ("ROLE_COORDINATOR".equalsIgnoreCase(reviewer.getRole().getName())
+                || "ROLE_ADMIN".equalsIgnoreCase(reviewer.getRole().getName()));
+
+        if (!canModerate) {
+            throw new AccessDeniedException("Chỉ Điều Phối Viên hoặc Quản Trị Viên mới có quyền phê duyệt bài đăng!");
+        }
+
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Trạng thái phê duyệt không hợp lệ!");
+        }
+
+        post.setVerificationStatus(newStatus);
+        CommunityPost saved = postRepository.save(post);
+
+        if (activityLogService != null) {
+            activityLogService.log(reviewer, "VERIFY_COMMUNITY_POST", "CommunityPost",
+                    "Phê duyệt bài viết #" + postId + " sang trạng thái: " + newStatus.getLabel(), null);
+        }
+        return saved;
     }
 }
