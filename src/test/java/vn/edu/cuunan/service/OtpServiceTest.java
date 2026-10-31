@@ -94,4 +94,40 @@ class OtpServiceTest {
 
         assertFalse(isValid);
     }
+
+    @Test
+    @DisplayName("Tra cứu mã OTP mới nhất chưa sử dụng")
+    void testGetLatestOtp() {
+        String email = "citizen@cuunan.vn";
+        String type = "REGISTRATION";
+
+        OtpVerification otpEntity = OtpVerification.builder()
+                .id(2L)
+                .email(email)
+                .otpCode("987654")
+                .type(type)
+                .isUsed(false)
+                .build();
+
+        when(otpVerificationRepository.findTopByEmailAndTypeAndIsUsedFalseOrderByCreatedAtDesc(email, type))
+                .thenReturn(Optional.of(otpEntity));
+
+        Optional<String> latestOtp = otpService.getLatestOtp(email, type);
+
+        assertTrue(latestOtp.isPresent());
+        assertEquals("987654", latestOtp.get());
+    }
+
+    @Test
+    @DisplayName("Ủy quyền kiểm tra trạng thái gửi email qua EmailService")
+    void testSmtpDelegation() {
+        when(emailService.isLastEmailSentReal()).thenReturn(true);
+        when(emailService.isSmtpConfigured()).thenReturn(true);
+
+        assertTrue(otpService.isLastEmailSentReal());
+        assertTrue(otpService.isSmtpConfigured());
+
+        verify(emailService, times(1)).isLastEmailSentReal();
+        verify(emailService, times(1)).isSmtpConfigured();
+    }
 }

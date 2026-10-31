@@ -26,6 +26,23 @@
                             <span th:text="${errorMessage}"></span>
                         </div>
 
+                        <!-- Chế độ Dev Simulator khi chưa cấu hình mật khẩu Gmail SMTP -->
+                        <div th:if="${devOtpCode}" class="alert alert-warning border border-warning shadow-sm small py-3 mb-3 rounded-3">
+                            <div class="fw-bold text-dark d-flex align-items-center mb-1">
+                                <i class="fa-solid fa-flask-vial me-2 text-warning fs-5"></i>
+                                <span>Chế Độ Thử Nghiệm (Dev Simulator)</span>
+                            </div>
+                            <p class="text-muted mb-2 small">
+                                Chưa cấu hình Mật khẩu ứng dụng Gmail SMTP (<code>spring.mail.password</code>). Để thuận tiện thử nghiệm, mã OTP kích hoạt của bạn là:
+                            </p>
+                            <div class="p-2 bg-white rounded border border-warning text-center">
+                                <span class="fs-4 fw-bold text-danger font-monospace tracking-wide" th:text="${devOtpCode}">123456</span>
+                            </div>
+                            <small class="text-secondary d-block mt-2">
+                                <i class="fa-solid fa-circle-info me-1"></i> (Mã đã được tự động điền vào ô bên dưới, chỉ cần nhấn "Xác Nhận Kích Hoạt")
+                            </small>
+                        </div>
+
                         <p class="small text-muted text-center mb-4">
                             Mã xác nhận bảo mật đã được gửi tới hòm thư: <br>
                             <strong class="text-dark fs-6" th:text="${email}">user@example.com</strong>
@@ -41,6 +58,7 @@
                                     <span class="input-group-text bg-light"><i class="fa-solid fa-key text-danger"></i></span>
                                     <input type="text" class="form-control text-center fs-3 fw-bold font-monospace tracking-wide" 
                                            name="otpCode" id="otpCode" maxlength="6" pattern="[0-9]{6}" required 
+                                           th:value="${devOtpCode != null ? devOtpCode : ''}"
                                            placeholder="------" autofocus autocomplete="off">
                                 </div>
                                 <div class="form-text text-center small text-muted mt-2">

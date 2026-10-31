@@ -145,9 +145,17 @@ public class ProfileController {
         }
 
         try {
-            otpService.generateAndSendOtp(targetEmail, "CHANGE_EMAIL");
+            String otpCode = otpService.generateAndSendOtp(targetEmail, "CHANGE_EMAIL");
+            boolean realSent = otpService.isLastEmailSentReal();
             response.put("success", true);
-            response.put("message", "Mã xác thực OTP gồm 6 chữ số đã được gửi tới " + targetEmail + ". Vui lòng kiểm tra hộp thư!");
+            if (realSent) {
+                response.put("realEmailSent", true);
+                response.put("message", "Mã xác thực OTP gồm 6 chữ số đã được gửi tới hộp thư " + targetEmail + ". Vui lòng kiểm tra hộp thư!");
+            } else {
+                response.put("realEmailSent", false);
+                response.put("devOtp", otpCode);
+                response.put("message", "Chế độ Thử Nghiệm (Dev): Chưa cấu hình Gmail App Password trong application-secret.yml.");
+            }
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             response.put("success", false);

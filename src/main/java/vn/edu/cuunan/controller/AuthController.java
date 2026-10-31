@@ -109,8 +109,17 @@ public class AuthController {
         try {
             // Đăng ký và sinh mã OTP gửi về Email
             authService.register(registerDto, true);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Mã OTP xác thực 6 chữ số đã được gửi đến email " + registerDto.getEmail() + ". Vui lòng nhập mã để kích hoạt tài khoản!");
+
+            boolean realSent = authService.isLastEmailSentReal();
+            if (realSent) {
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Mã OTP xác thực 6 chữ số đã được gửi đến hộp thư Gmail " + registerDto.getEmail() + ". Vui lòng kiểm tra hộp thư đến (và thư rác/spam) để kích hoạt tài khoản!");
+            } else {
+                String devOtp = authService.getLatestOtp(registerDto.getEmail(), "REGISTRATION").orElse("");
+                redirectAttributes.addFlashAttribute("devOtpCode", devOtp);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Chế độ Thử Nghiệm (Dev): Chưa cấu hình Gmail App Password trong application-secret.yml. Mã OTP kích hoạt của bạn là: " + devOtp);
+            }
             return "redirect:/auth/verify-otp?email=" + registerDto.getEmail();
         } catch (Exception ex) {
             log.warn("Đăng ký tài khoản thất bại: {}", ex.getMessage());
@@ -128,6 +137,9 @@ public class AuthController {
         model.addAttribute("email", email);
         if (resend != null) {
             model.addAttribute("successMessage", "Đã gửi lại mã OTP mới đến email của bạn.");
+        }
+        if (!model.containsAttribute("devOtpCode") && email != null && !authService.isLastEmailSentReal()) {
+            authService.getLatestOtp(email, "REGISTRATION").ifPresent(otp -> model.addAttribute("devOtpCode", otp));
         }
         return "auth/verify-otp";
     }
@@ -151,7 +163,14 @@ public class AuthController {
                                   RedirectAttributes redirectAttributes) {
         try {
             authService.resendRegistrationOtp(email);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP thành công. Vui lòng kiểm tra email!");
+            boolean realSent = authService.isLastEmailSentReal();
+            if (realSent) {
+                redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP mới đến hộp thư Gmail " + email + ". Vui lòng kiểm tra hộp thư!");
+            } else {
+                String devOtp = authService.getLatestOtp(email, "REGISTRATION").orElse("");
+                redirectAttributes.addFlashAttribute("devOtpCode", devOtp);
+                redirectAttributes.addFlashAttribute("successMessage", "Chế độ Thử Nghiệm (Dev): Mã OTP mới của bạn là: " + devOtp);
+            }
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -170,8 +189,16 @@ public class AuthController {
                                        RedirectAttributes redirectAttributes) {
         try {
             authService.initiateForgotPassword(email);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Mã OTP khôi phục mật khẩu đã được gửi đến email " + email + ". Vui lòng kiểm tra hộp thư!");
+            boolean realSent = authService.isLastEmailSentReal();
+            if (realSent) {
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Mã OTP khôi phục mật khẩu đã được gửi đến email " + email + ". Vui lòng kiểm tra hộp thư!");
+            } else {
+                String devOtp = authService.getLatestOtp(email, "FORGOT_PASSWORD").orElse("");
+                redirectAttributes.addFlashAttribute("devOtpCode", devOtp);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Chế độ Thử Nghiệm (Dev): Mã OTP đặt lại mật khẩu là: " + devOtp);
+            }
             return "redirect:/auth/reset-password?email=" + email;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
@@ -185,6 +212,9 @@ public class AuthController {
         model.addAttribute("appName", appName);
         model.addAttribute("pageTitle", "Đặt Lại Mật Khẩu Mới - CứuNạn 24/7");
         model.addAttribute("email", email);
+        if (!model.containsAttribute("devOtpCode") && email != null && !authService.isLastEmailSentReal()) {
+            authService.getLatestOtp(email, "FORGOT_PASSWORD").ifPresent(otp -> model.addAttribute("devOtpCode", otp));
+        }
         return "auth/reset-password";
     }
 

@@ -16,6 +16,8 @@ import vn.edu.cuunan.repository.RoleRepository;
 import vn.edu.cuunan.repository.UserRepository;
 import vn.edu.cuunan.security.JwtTokenProvider;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -219,5 +221,13 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword.trim()));
         userRepository.save(user);
         log.info(">>> Đã đặt lại mật khẩu thành công cho tài khoản: {}", user.getUsername());
+    }
+
+    public boolean isLastEmailSentReal() {
+        return otpService != null && otpService.isLastEmailSentReal();
+    }
+
+    public Optional<String> getLatestOtp(String email, String type) {
+        return otpService != null ? otpService.getLatestOtp(email, type) : Optional.empty();
     }
 }

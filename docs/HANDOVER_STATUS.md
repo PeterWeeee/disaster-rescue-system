@@ -6,11 +6,12 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 31/10/2026
 - **Nhánh Git hiện tại:** `main`
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 22):
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 23):
   - **SESSION 20 (Đồng bộ cự ly tuyến đường OSRM & Định vị Live GPS thời gian thực cho 3 vai trò)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 21 (Tích hợp chuyển khoản ngân hàng thật qua VietQR Napas 24/7 & SePay Webhook Auto-Confirmation)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 22 (Khắc phục Phân hệ Hồ sơ cá nhân: Sửa lỗi 403 Forbidden, Tải ảnh đại diện từ máy tính, Xác thực OTP đổi Email & Sửa link quyên góp)** ✅ ĐÃ HOÀN THÀNH 100%
-- **Trạng thái tổng quan:** Toàn bộ **144/144 unit & integration tests đạt BUILD SUCCESS 100%**.
+  - **SESSION 23 (Sửa triệt để nút chọn ảnh hồ sơ do layout fragment stripping & Nâng cấp luồng gửi OTP Email kép Gmail SMTP + Dev Simulator)** ✅ ĐÃ HOÀN THÀNH 100%
+- **Trạng thái tổng quan:** Toàn bộ **146/146 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 
@@ -76,7 +77,12 @@
   - [x] Sửa liên kết "Ủng hộ quỹ cứu trợ" từ `@{/donate}` thành `@{/donations}` và bổ sung redirect fallback trong `HomeController.java`.
   - [x] Hỗ trợ chọn tệp ảnh đại diện từ máy tính khi bấm vào icon ảnh hoặc nút "Chọn ảnh", tự động upload lên `/api/upload/image?folder=avatars` và cập nhật ảnh preview tức thì.
   - [x] Tích hợp gửi mã xác thực OTP 6 số qua Email khi thay đổi email tài khoản, xác thực chặt chẽ tại `ProfileController.java` và `EmailService.java`.
-  - [x] Toàn bộ **144/144 unit & integration tests đạt BUILD SUCCESS 100%**.
+- [x] **SESSION 23 (PeterWeeee - Nhánh `main`):**
+  - [x] Sửa triệt để sự cố nút chọn ảnh và gửi OTP không phản hồi: Di chuyển toàn bộ `<script>` vào bên trong `#profile-content` để Thymeleaf layout không loại bỏ, kèm bổ sung inline handler `onclick="document.getElementById('avatarFileInput').click();"` trực tiếp trên icon, nút bấm và avatar wrapper.
+  - [x] Nâng cấp luồng gửi OTP Email hỗ trợ kép:
+    - **Gmail SMTP Thực Tế:** Hỗ trợ cấu hình `spring.mail.username` và `spring.mail.password` (Google App Password 16 số) trong `application-secret.yml` để chuyển phát trực tiếp đến hộp thư người dùng.
+    - **Chế độ Thử Nghiệm Thông Minh (Dev Simulator):** Tự động phát hiện khi chưa cấu hình mật khẩu SMTP, hiển thị mã OTP 6 số trực tiếp trên giao diện `/auth/verify-otp`, `/auth/reset-password` và popup `/profile`, đồng thời tự động điền sẵn mã để quá trình kiểm thử không bị gián đoạn.
+  - [x] Toàn bộ **146/146 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 

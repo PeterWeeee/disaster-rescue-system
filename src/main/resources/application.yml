@@ -10,6 +10,11 @@ spring:
           auth: true
           starttls:
             enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+        transport:
+          protocol: smtp
   application:
     name: disaster-rescue-system
   profiles:

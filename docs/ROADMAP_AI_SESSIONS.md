@@ -127,5 +127,8 @@
     - Sửa liên kết "Ủng hộ quỹ cứu trợ" từ `@{/donate}` thành `@{/donations}` và bổ sung redirect fallback trong `HomeController.java`.
     - Hỗ trợ chọn tệp ảnh đại diện từ máy tính khi bấm vào icon ảnh hoặc nút "Chọn ảnh", tự động upload lên `/api/upload/image?folder=avatars` và cập nhật ảnh preview tức thì.
     - Tích hợp gửi mã xác thực OTP 6 số qua Email khi thay đổi email tài khoản, xác thực chặt chẽ tại `ProfileController.java` và `EmailService.java`.
-23. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+23. **[Session 23: Sửa Nút Chọn Ảnh Hồ Sơ & Nâng Cấp Luồng Gửi OTP Email (Gmail SMTP + Dev Simulator)](roadmap/session-23-avatar-picker-and-gmail-smtp-dev-otp-flow.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Sửa triệt để lỗi nút chọn ảnh hồ sơ và gửi OTP không hoạt động do Thymeleaf layout fragment loại bỏ thẻ `<script>` đặt ngoài `#profile-content`, bổ sung inline onclick handler trực tiếp trên giao diện.
+    - Nâng cấp luồng gửi OTP Email hỗ trợ kép: gửi thật qua Gmail SMTP (với hướng dẫn cấu hình Google App Password 16 số trong `application-secret.example.yml`), tự động kích hoạt Dev Simulator hiển thị mã OTP trực tiếp trên màn hình và tự điền khi chưa cấu hình SMTP.
+24. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

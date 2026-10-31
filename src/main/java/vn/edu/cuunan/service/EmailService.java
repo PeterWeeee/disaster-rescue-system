@@ -20,9 +20,33 @@ public class EmailService {
     @Value("${spring.mail.username:cuunan247.vn@gmail.com}")
     private String fromEmail;
 
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
+    private volatile boolean lastEmailSentReal = false;
+    private volatile String lastSentOtp = null;
+    private volatile String lastError = null;
+
     @Autowired
     public EmailService(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
+    }
+
+    public boolean isSmtpConfigured() {
+        return mailPassword != null && !mailPassword.trim().isEmpty() &&
+               fromEmail != null && !fromEmail.trim().isEmpty();
+    }
+
+    public boolean isLastEmailSentReal() {
+        return lastEmailSentReal;
+    }
+
+    public String getLastSentOtp() {
+        return lastSentOtp;
+    }
+
+    public String getLastError() {
+        return lastError;
     }
 
     /**
@@ -92,13 +116,17 @@ public class EmailService {
             </html>
             """.formatted(actionTitle, actionDescription, otpCode);
 
+        this.lastSentOtp = otpCode;
+
         // Luôn log ra console để hỗ trợ dev/test nhanh trong trường hợp offline/chưa có mật khẩu ứng dụng Gmail
         log.info("==========================================================================");
         log.info(">>> [EMAIL SERVICE] Gửi OTP tới: [{}] - Loại: [{}] - Mã OTP: [{}]", toEmail, type, otpCode);
         log.info("==========================================================================");
 
-        if (mailSender == null) {
-            log.warn(">>> JavaMailSender chưa được cấu hình. Đã kích hoạt Dev Simulator (OTP: {}).", otpCode);
+        if (mailSender == null || !isSmtpConfigured()) {
+            this.lastEmailSentReal = false;
+            this.lastError = "Chưa cấu hình mật khẩu ứng dụng Gmail (spring.mail.password)";
+            log.warn(">>> JavaMailSender chưa được cấu hình mật khẩu SMTP. Đã kích hoạt Dev Simulator (OTP: {}).", otpCode);
             return true;
         }
 
@@ -111,9 +139,13 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
+            this.lastEmailSentReal = true;
+            this.lastError = null;
             log.info(">>> [EMAIL SERVICE] Đã gửi email thực tế thành công tới: {}", toEmail);
             return true;
         } catch (Exception e) {
+            this.lastEmailSentReal = false;
+            this.lastError = e.getMessage();
             log.warn(">>> [EMAIL SERVICE] Không thể gửi email thực tế qua SMTP (Lý do: {}). Vẫn chấp nhận OTP {} cho dev/test.", e.getMessage(), otpCode);
             return true; // Trả về true để không gián đoạn luồng test của sinh viên/giảng viên
         }

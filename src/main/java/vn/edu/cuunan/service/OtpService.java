@@ -9,6 +9,7 @@ import vn.edu.cuunan.repository.OtpVerificationRepository;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class OtpService {
@@ -81,5 +82,19 @@ public class OtpService {
         otpRepository.save(verification);
         log.info(">>> Xác thực OTP thành công cho email: {} [Loại: {}]", normalizedEmail, type);
         return true;
+    }
+
+    public boolean isLastEmailSentReal() {
+        return emailService.isLastEmailSentReal();
+    }
+
+    public boolean isSmtpConfigured() {
+        return emailService.isSmtpConfigured();
+    }
+
+    public Optional<String> getLatestOtp(String email, String type) {
+        if (email == null) return Optional.empty();
+        return otpRepository.findTopByEmailAndTypeAndIsUsedFalseOrderByCreatedAtDesc(email.trim().toLowerCase(), type)
+                .map(OtpVerification::getOtpCode);
     }
 }
