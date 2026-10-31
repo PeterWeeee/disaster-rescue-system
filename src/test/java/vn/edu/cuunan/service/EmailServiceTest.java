@@ -46,4 +46,14 @@ class EmailServiceTest {
 
         assertTrue(service.isSmtpConfigured());
     }
+
+    @Test
+    @DisplayName("isResendConfigured nhận diện khi có RESEND_API_KEY")
+    void testIsResendConfigured() {
+        EmailService service = new EmailService(null);
+        assertFalse(service.isResendConfigured());
+
+        ReflectionTestUtils.setField(service, "resendApiKey", "re_123456789");
+        assertTrue(service.isResendConfigured());
+    }
 }

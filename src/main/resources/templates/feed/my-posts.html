@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: layout('Quản Lý Bài Đăng Của Bạn - Cứu Nạn 24/7', ~{::#my-posts-content})}">
+<body>
+
+<div id="my-posts-content" class="py-4">
+    <div class="container-xl">
+
+        <!-- HEADER BANNER -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-gradient position-relative text-white"
+             style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="p-4 p-md-5 position-relative" style="z-index: 2;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2 small">
+                                <li class="breadcrumb-item"><a th:href="@{/feed}" class="text-white-50 text-decoration-none"><i class="fa-solid fa-house me-1"></i>Bảng Tin</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Bài đăng của bạn</li>
+                            </ol>
+                        </nav>
+                        <h2 class="fw-black mb-2 tracking-tight d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-user-pen text-info"></i> Quản Lý Bài Đăng Của Bạn
+                        </h2>
+                        <p class="text-white-50 mb-0 small max-w-2xl">
+                            Theo dõi tiến độ kiểm duyệt từ Ban Điều Phối, cập nhật tình hình thực địa hoặc quản lý chỉnh sửa, xóa các bài viết cảnh báo của bạn.
+                        </p>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a th:href="@{/feed}" class="btn btn-outline-light fw-bold shadow-sm rounded-pill px-3">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại Bảng Tin
+                        </a>
+                        <button type="button" class="btn btn-danger fw-bold shadow-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                                data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fa-solid fa-pen-to-square"></i> Đăng Tin Mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 KPI SUMMARY CARDS -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-primary-subtle text-primary p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-newspaper fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-secondary small fw-bold text-uppercase tracking-wider">Tổng bài đăng</span>
+                            <h3 class="fw-bold mb-0 text-dark" th:text="${myPostsCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-success-subtle text-success p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-circle-check fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-secondary small fw-bold text-uppercase tracking-wider">Đã xác minh</span>
+                            <h3 class="fw-bold mb-0 text-success" th:text="${verifiedCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-warning-subtle text-warning p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-hourglass-half fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-secondary small fw-bold text-uppercase tracking-wider">Chờ xét duyệt</span>
+                            <h3 class="fw-bold mb-0 text-warning" th:text="${pendingCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-danger-subtle text-danger p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-circle-xmark fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-secondary small fw-bold text-uppercase tracking-wider">Đã bác bỏ</span>
+                            <h3 class="fw-bold mb-0 text-danger" th:text="${rejectedCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN POST LIST CONTENT -->
+        <div class="row">
+            <div class="col-12">
+
+                <!-- EMPTY STATE -->
+                <div th:if="${#lists.isEmpty(myPosts)}" class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-3">
+                    <div class="py-4">
+                        <div class="rounded-circle bg-light text-secondary mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fa-solid fa-folder-open fa-2x opacity-50"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark">Bạn chưa có bài đăng cảnh báo nào</h4>
+                        <p class="text-muted small mx-auto mb-4" style="max-width: 480px;">
+                            Khi gặp tình hình bão lũ, ngập lụt, sạt lở hoặc các mối nguy hiểm tại địa phương, hãy đăng bài chia sẻ để bà con và đội cứu trợ nắm bắt kịp thời.
+                        </p>
+                        <button type="button" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm"
+                                data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Đăng bài cảnh báo ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- POSTS STREAM -->
+                <div th:unless="${#lists.isEmpty(myPosts)}" class="d-flex flex-column gap-3">
+                    <article th:each="post : ${myPosts}" th:id="'my-post-' + ${post.id}" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                        <div class="card-body p-3 p-sm-4">
+
+                            <!-- Header Row: Author + Verification Badge + Actions -->
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div th:if="${post.author != null && post.author.avatarUrl != null && !#strings.isEmpty(post.author.avatarUrl)}"
+                                         class="flex-shrink-0" style="width: 44px; height: 44px;">
+                                        <img th:src="${post.author.avatarUrl}" class="rounded-circle object-fit-cover shadow-xs w-100 h-100" alt="Avatar">
+                                    </div>
+                                    <div th:unless="${post.author != null && post.author.avatarUrl != null && !#strings.isEmpty(post.author.avatarUrl)}"
+                                         class="rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                                         style="width: 44px; height: 44px; min-width: 44px; font-size: 1.15rem;">
+                                        <span th:text="${post.authorName != null ? #strings.substring(post.authorName, 0, 1) : 'U'}">U</span>
+                                    </div>
+
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <span class="fw-bold text-dark fs-6" th:text="${post.authorName}">Tên Bạn</span>
+                                            <span class="badge bg-light text-secondary border small">Tác giả bài viết</span>
+                                            <span class="badge fw-bold"
+                                                  th:style="'background-color: ' + ${post.hazardType.badgeColor} + '; color: #fff;'"
+                                                  th:text="${post.hazardType.shortName}">SẠT LỞ</span>
+                                        </div>
+                                        <div class="text-muted small mt-0.5">
+                                            <i class="fa-regular fa-clock me-1"></i>
+                                            <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'HH:mm - dd/MM/yyyy') : 'Vừa xong'}">Vừa xong</span>
+                                            <span th:if="${post.locationName != null}">
+                                                <span class="mx-1 opacity-50">·</span>
+                                                <i class="fa-solid fa-location-dot text-danger me-1"></i><span class="text-dark-emphasis fw-medium" th:text="${post.locationName}">Địa điểm</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Verification Status Badge & Action Buttons -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <div th:id="'status-wrap-' + ${post.id}">
+                                        <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-3 py-2 rounded-pill shadow-xs">
+                                            <i class="fa-solid fa-check me-1"></i> Đã xác minh
+                                        </span>
+                                        <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-3 py-2 rounded-pill">
+                                            <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
+                                        </span>
+                                        <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-3 py-2 rounded-pill">
+                                            <i class="fa-solid fa-xmark me-1"></i> Đã bác bỏ
+                                        </span>
+                                    </div>
+
+                                    <!-- Quick Action Buttons -->
+                                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-2.5 py-1"
+                                            th:onclick="'openEditPostModal(' + ${post.id} + ')'" title="Chỉnh sửa bài viết">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-2.5 py-1"
+                                            th:onclick="'deletePost(' + ${post.id} + ')'" title="Xóa bài viết">
+                                        <i class="fa-solid fa-trash-can me-1"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Verification Explanatory Box -->
+                            <div th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-shield-check fs-6 text-success"></i>
+                                <span><strong>Thông tin đã thẩm định:</strong> Ban Điều Phối đã kiểm tra thực tế và xác thực đây là cảnh báo chính xác.</span>
+                            </div>
+                            <div th:if="${post.verificationStatus.name() == 'PENDING'}" class="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-info fs-6 text-warning"></i>
+                                <span><strong>Đang chờ phê duyệt:</strong> Ban Điều Phối hoặc Quản Trị Viên đang đối chiếu thông tin cứu nạn từ hiện trường. Bạn có thể cập nhật thông tin nếu có diễn biến mới.</span>
+                            </div>
+                            <div th:if="${post.verificationStatus.name() == 'REJECTED'}" class="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation fs-6 text-danger"></i>
+                                <span><strong>Bác bỏ:</strong> Tin báo này bị cơ quan chức năng từ chối do không đúng hiện trường hoặc đã qua thời điểm nguy hiểm.</span>
+                            </div>
+
+                            <!-- Post Content Text -->
+                            <p class="post-content-text mb-3 text-dark fs-6" style="white-space: pre-line;" th:text="${post.content}">
+                                Nội dung bài viết cảnh báo thiên tai...
+                            </p>
+
+                            <!-- Post Image (if any) -->
+                            <div th:if="${post.imageUrl != null && !#strings.isEmpty(post.imageUrl)}" class="mb-3 rounded-3 overflow-hidden shadow-xs border position-relative bg-light">
+                                <img th:src="${post.imageUrl}"
+                                     class="w-100 object-fit-cover"
+                                     style="max-height: 460px; cursor: pointer;"
+                                     th:onclick="'previewImage(\'' + ${post.imageUrl} + '\', \'' + ${post.locationName} + '\')'"
+                                     alt="Ảnh hiện trường">
+                            </div>
+
+                            <!-- Post Footer Stats -->
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top text-muted small">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span><i class="fa-solid fa-heart text-danger me-1"></i><span th:text="${post.upvoteCount}">0</span> lượt cảm xúc</span>
+                                    <span><i class="fa-solid fa-comment text-primary me-1"></i><span th:text="${post.commentCount}">0</span> bình luận</span>
+                                </div>
+                                <a th:href="@{/feed}" class="btn btn-link btn-sm text-decoration-none fw-semibold p-0">
+                                    Xem trên Bảng Tin <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i>
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL CHỈNH SỬA BÀI VIẾT (EDIT POST MODAL) -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title fw-bold text-dark fs-6" id="editPostModalLabel">
+                        <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa bài viết cảnh báo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editPostForm" enctype="multipart/form-data" onsubmit="submitEditPost(event)">
+                    <input type="hidden" id="editPostId" name="postId">
+                    <div class="modal-body p-4">
+                        <!-- Content Textarea -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Nội dung phản ánh:</label>
+                            <textarea class="form-control text-dark fs-6 shadow-none" id="editPostContent" name="content" rows="4" required></textarea>
+                        </div>
+
+                        <!-- Hazard Selector Pills -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Loại hiểm họa:</label>
+                            <div class="d-flex flex-wrap gap-2" id="editHazardPills">
+                                <div th:each="hazard : ${hazardTypes}">
+                                    <input type="radio" class="btn-check" name="hazardType" th:id="'edit_hazard_' + ${hazard.name()}" th:value="${hazard.name()}">
+                                    <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'edit_hazard_' + ${hazard.name()}" th:text="${hazard.shortName}">Sạt lở</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Row -->
+                        <div class="mb-3 p-2.5 rounded-3 bg-light border small">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-danger fw-bold"><i class="fa-solid fa-location-dot me-1"></i>Vị trí hiện trường:</span>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-primary fw-bold text-decoration-none" onclick="scanEditGps()">
+                                    <i class="fa-solid fa-crosshairs me-1"></i>Lấy GPS hiện tại
+                                </button>
+                            </div>
+                            <input type="text" class="form-control form-control-sm mt-1.5" id="editLocationName" name="locationName" placeholder="Xã/Phường, Huyện/Quận, Tỉnh/Thành phố">
+                            <input type="hidden" id="editLatitude" name="latitude">
+                            <input type="hidden" id="editLongitude" name="longitude">
+                        </div>
+
+                        <!-- Current Image Preview & Image Upload -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Ảnh hiện trường:</label>
+                            <div id="editCurrentImageWrap" class="mb-2 d-none">
+                                <div class="position-relative d-inline-block">
+                                    <img id="editCurrentImage" src="" class="rounded-3 border shadow-xs" style="max-height: 120px; max-width: 100%; object-fit: cover;" alt="Ảnh hiện tại">
+                                    <div class="form-check mt-1">
+                                        <input class="form-check-input" type="checkbox" id="editRemoveImage" name="removeImage" value="true">
+                                        <label class="form-check-label small text-danger" for="editRemoveImage">Xóa ảnh hiện tại</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" class="form-control form-control-sm" id="editImageFile" name="imageFile" accept="image/*">
+                            <span class="text-muted small" style="font-size: 0.75rem;">(Để trống nếu không muốn thay đổi ảnh)</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top p-3">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" id="btnSubmitEditPost" class="btn btn-primary fw-bold px-4">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL TẠO BÀI VIẾT MỚI (CREATE POST MODAL) -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title fw-bold text-dark fs-6" id="createPostModalLabel">Tạo bài viết cảnh báo thiên tai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="createPostForm" enctype="multipart/form-data">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <textarea class="form-control border p-2.5 text-dark fs-6 rounded-3 shadow-none" id="postContent" name="content" rows="3"
+                                      placeholder="Bạn đang thấy hiểm họa gì? Nước dâng cao bao nhiêu, sạt lở ở vị trí nào..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Loại hiểm họa:</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div th:each="hazard : ${hazardTypes}">
+                                    <input type="radio" class="btn-check" name="hazardType" th:id="'create_hazard_' + ${hazard.name()}"
+                                           th:value="${hazard.name()}" th:checked="${hazard.name() == 'LANDSLIDE'}">
+                                    <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'create_hazard_' + ${hazard.name()}"
+                                           th:text="${hazard.shortName}">Sạt lở</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 p-2.5 rounded-3 bg-light border small">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-danger fw-bold"><i class="fa-solid fa-location-dot me-1"></i>Vị trí hiện trường:</span>
+                                <button type="button" id="btnScanGps" class="btn btn-link btn-sm p-0 text-primary fw-bold text-decoration-none">
+                                    <i class="fa-solid fa-crosshairs me-1"></i>Lấy GPS
+                                </button>
+                            </div>
+                            <input type="text" class="form-control form-control-sm mt-1.5" id="locationName" name="locationName"
+                                   placeholder="Xã/Phường, Huyện/Quận, Tỉnh/Thành phố">
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Ảnh hiện trường:</label>
+                            <input type="file" class="form-control form-control-sm" id="imageFile" name="imageFile" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top p-3">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" id="btnSubmitPost" class="btn btn-primary fw-bold px-4">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL XEM ẢNH FULL SIZE -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 overflow-hidden bg-dark text-white shadow-lg">
+                <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                    <span id="previewModalCaption" class="small text-white-50"></span>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body text-center p-3">
+                    <img id="previewModalImg" src="" class="img-fluid rounded-3 shadow" style="max-height: 72vh; width: auto;" alt="Xem trước ảnh">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- INLINE JAVASCRIPT LOGIC -->
+<script>
+    function previewImage(url, caption) {
+        document.getElementById('previewModalImg').src = url;
+        document.getElementById('previewModalCaption').innerText = caption || 'Ảnh hiện trường';
+        const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        modal.show();
+    }
+
+    function openEditPostModal(postId) {
+        fetch(`/api/feed/posts/${postId}`)
+        .then(res => res.json())
+        .then(post => {
+            if (!post || !post.id) {
+                alert('Không thể tải dữ liệu bài viết!');
+                return;
+            }
+            document.getElementById('editPostId').value = post.id;
+            document.getElementById('editPostContent').value = post.content || '';
+            document.getElementById('editLocationName').value = post.locationName || '';
+            document.getElementById('editLatitude').value = post.latitude || '';
+            document.getElementById('editLongitude').value = post.longitude || '';
+
+            const hazardRadio = document.getElementById('edit_hazard_' + post.hazardType);
+            if (hazardRadio) hazardRadio.checked = true;
+
+            const imgWrap = document.getElementById('editCurrentImageWrap');
+            const imgEl = document.getElementById('editCurrentImage');
+            const removeCheck = document.getElementById('editRemoveImage');
+            if (removeCheck) removeCheck.checked = false;
+
+            if (post.imageUrl) {
+                imgEl.src = post.imageUrl;
+                imgWrap.classList.remove('d-none');
+            } else {
+                imgWrap.classList.add('d-none');
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('editPostModal'));
+            modal.show();
+        })
+        .catch(err => alert('Lỗi tải bài viết: ' + err.message));
+    }
+
+    function scanEditGps() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('editLatitude').value = pos.coords.latitude;
+                document.getElementById('editLongitude').value = pos.coords.longitude;
+                if (!document.getElementById('editLocationName').value) {
+                    document.getElementById('editLocationName').value = 'Tọa độ GPS: ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+                }
+                alert('Đã cập nhật tọa độ GPS thành công!');
+            }, err => {
+                alert('Không thể lấy tọa độ GPS: ' + err.message);
+            });
+        } else {
+            alert('Trình duyệt của bạn không hỗ trợ Geolocation.');
+        }
+    }
+
+    function submitEditPost(e) {
+        e.preventDefault();
+        const postId = document.getElementById('editPostId').value;
+        const form = document.getElementById('editPostForm');
+        const formData = new FormData(form);
+
+        const btn = document.getElementById('btnSubmitEditPost');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+        fetch(`/api/feed/posts/${postId}/edit`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi';
+            if (data.success) {
+                alert(data.message || 'Cập nhật thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể cập nhật bài viết'));
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi';
+            alert('Lỗi kết nối: ' + err.message);
+        });
+    }
+
+    function deletePost(postId) {
+        if (!confirm(`BẠN CÓ CHẮC CHẮN MUỐN XÓA BÀI VIẾT #${postId}?\n\nHành động này sẽ xóa vĩnh viễn bài đăng của bạn khỏi hệ thống. Thao tác không thể hoàn tác.`)) {
+            return;
+        }
+
+        fetch(`/api/feed/posts/${postId}`, {
+            method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Đã xóa bài viết thành công!');
+                const card = document.getElementById('my-post-' + postId);
+                if (card) {
+                    card.remove();
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể xóa bài viết'));
+            }
+        })
+        .catch(err => alert('Lỗi kết nối: ' + err.message));
+    }
+
+    // Xử lý tạo bài mới từ my-posts
+    document.addEventListener('DOMContentLoaded', function() {
+        const createForm = document.getElementById('createPostForm');
+        if (createForm) {
+            createForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btnSubmit = document.getElementById('btnSubmitPost');
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang đăng...';
+
+                const formData = new FormData(createForm);
+                fetch('/api/feed/posts', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
+                    if (data.success) {
+                        alert(data.message || 'Đăng tin thành công!');
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Không thể đăng bài viết');
+                    }
+                })
+                .catch(err => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Đăng Bài Cảnh Báo';
+                    alert('Lỗi kết nối: ' + err.message);
+                });
+            });
+        }
+
+        const btnScan = document.getElementById('btnScanGps');
+        if (btnScan) {
+            btnScan.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        document.getElementById('latitude').value = pos.coords.latitude;
+                        document.getElementById('longitude').value = pos.coords.longitude;
+                        if (!document.getElementById('locationName').value) {
+                            document.getElementById('locationName').value = 'Tọa độ GPS: ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+                        }
+                        alert('Đã lấy tọa độ GPS thành công!');
+                    }, err => {
+                        alert('Không thể lấy tọa độ: ' + err.message);
+                    });
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

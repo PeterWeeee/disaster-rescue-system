@@ -90,3 +90,8 @@ donation:
     name: ${DONATION_BANK_NAME:BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)}
     account-no: ${DONATION_ACCOUNT_NO:962471ABQD}
     account-name: ${DONATION_ACCOUNT_NAME:NGUYEN TRI THAI}
+
+# Resend Email HTTP API (Giao thức HTTPS Port 443 - hoạt động trên Render Free Tier)
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:Cứu Nạn 24/7 <onboarding@resend.dev>}

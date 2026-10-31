@@ -1,5 +1,6 @@
 package vn.edu.cuunan.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,18 +11,35 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import vn.edu.cuunan.entity.Donation;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${spring.mail.username:cuunan247.vn@gmail.com}")
     private String fromEmail;
 
     @Value("${spring.mail.password:}")
     private String mailPassword;
+
+    @Value("${resend.api-key:${RESEND_API_KEY:}}")
+    private String resendApiKey;
+
+    @Value("${resend.from-email:${RESEND_FROM_EMAIL:Cứu Nạn 24/7 <onboarding@resend.dev>}}")
+    private String resendFromEmail;
 
     private volatile boolean lastEmailSentReal = false;
     private volatile String lastSentOtp = null;
@@ -38,6 +56,10 @@ public class EmailService {
         return !pwd.isEmpty() && !user.isEmpty();
     }
 
+    public boolean isResendConfigured() {
+        return resendApiKey != null && !resendApiKey.trim().isEmpty();
+    }
+
     public boolean isLastEmailSentReal() {
         return lastEmailSentReal;
     }
@@ -51,8 +73,63 @@ public class EmailService {
     }
 
     /**
+     * Gửi email thực tế qua Resend HTTP REST API (Port 443 HTTPS).
+     * Hoạt động 100% trên Render Free Tier mà không bao giờ bị chặn cổng SMTP.
+     */
+    public boolean sendViaResend(String toEmail, String subject, String htmlContent) {
+        if (!isResendConfigured()) {
+            return false;
+        }
+
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", resendFromEmail != null && !resendFromEmail.trim().isEmpty() 
+                    ? resendFromEmail.trim() 
+                    : "Cứu Nạn 24/7 <onboarding@resend.dev>");
+            payload.put("to", List.of(toEmail.trim()));
+            payload.put("subject", subject);
+            payload.put("html", htmlContent);
+
+            String jsonPayload = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Authorization", "Bearer " + resendApiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(10))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info(">>> [RESEND API] Đã gửi email thực tế qua HTTPS Port 443 thành công tới: {}", toEmail);
+                this.lastEmailSentReal = true;
+                this.lastError = null;
+                return true;
+            } else {
+                log.warn(">>> [RESEND API] Lỗi gửi email: HTTP {} - {}", response.statusCode(), response.body());
+                this.lastEmailSentReal = false;
+                this.lastError = "Resend API error (" + response.statusCode() + "): " + response.body();
+                return false;
+            }
+        } catch (Exception e) {
+            log.warn(">>> [RESEND API] Ngoại lệ khi gọi API qua HTTPS: {}", e.getMessage());
+            this.lastEmailSentReal = false;
+            this.lastError = "Resend API Exception: " + e.getMessage();
+            return false;
+        }
+    }
+
+    /**
      * Gửi mã OTP xác thực qua Email với giao diện HTML chuẩn cứu nạn khẩn cấp.
-     * Tự động chuyển sang chế độ Dev Simulator nếu chưa cấu hình SMTP hoặc gửi thất bại.
+     * Thứ tự ưu tiên:
+     * 1. Resend API (HTTPS Port 443 - không bao giờ bị Render chặn)
+     * 2. Gmail SMTP (Port 587)
+     * 3. Dev Simulator fallback (hiển thị mã trực tiếp trên UI)
      */
     public boolean sendOtpEmail(String toEmail, String otpCode, String type) {
         String subject;
@@ -124,37 +201,46 @@ public class EmailService {
         log.info(">>> [EMAIL SERVICE] Gửi OTP tới: [{}] - Loại: [{}] - Mã OTP: [{}]", toEmail, type, otpCode);
         log.info("==========================================================================");
 
-        if (mailSender == null || !isSmtpConfigured()) {
-            this.lastEmailSentReal = false;
-            this.lastError = "Chưa cấu hình mật khẩu ứng dụng Gmail (spring.mail.password)";
-            log.warn(">>> JavaMailSender chưa được cấu hình mật khẩu SMTP. Đã kích hoạt Dev Simulator (OTP: {}).", otpCode);
-            return true;
-        }
-
-        try {
-            if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
-                if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
-                    impl.setPassword(impl.getPassword().replace(" ", "").trim());
-                }
+        // 1. Thử gửi qua Resend HTTPS REST API (Port 443 - không bao giờ bị Render chặn)
+        if (isResendConfigured()) {
+            boolean resendOk = sendViaResend(toEmail, subject, htmlContent);
+            if (resendOk) {
+                return true;
             }
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail, "CứuNạn 24/7");
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            this.lastEmailSentReal = true;
-            this.lastError = null;
-            log.info(">>> [EMAIL SERVICE] Đã gửi email thực tế thành công tới: {}", toEmail);
-            return true;
-        } catch (Exception e) {
-            this.lastEmailSentReal = false;
-            this.lastError = e.getMessage();
-            log.warn(">>> [EMAIL SERVICE] Không thể gửi email thực tế qua SMTP (Lý do: {}). Vẫn chấp nhận OTP {} cho dev/test.", e.getMessage(), otpCode);
-            return true; // Trả về true để không gián đoạn luồng test của sinh viên/giảng viên
         }
+
+        // 2. Thử gửi qua Gmail SMTP (Port 587)
+        if (mailSender != null && isSmtpConfigured()) {
+            try {
+                if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
+                    if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
+                        impl.setPassword(impl.getPassword().replace(" ", "").trim());
+                    }
+                }
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                helper.setFrom(fromEmail.trim(), "CứuNạn 24/7");
+                helper.setTo(toEmail.trim());
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
+
+                mailSender.send(message);
+                this.lastEmailSentReal = true;
+                this.lastError = null;
+                log.info(">>> [EMAIL SERVICE] Đã gửi email thực tế qua Gmail SMTP thành công tới: {}", toEmail);
+                return true;
+            } catch (Exception e) {
+                this.lastEmailSentReal = false;
+                this.lastError = e.getMessage();
+                log.warn(">>> [EMAIL SERVICE] Không thể gửi qua Gmail SMTP (Lý do: {}). Vẫn chấp nhận OTP {} cho dev/test.", e.getMessage(), otpCode);
+            }
+        } else if (!isResendConfigured()) {
+            this.lastEmailSentReal = false;
+            this.lastError = "Chưa cấu hình mật khẩu ứng dụng Gmail (spring.mail.password) hoặc Resend API Key";
+            log.warn(">>> Chưa cấu hình SMTP/Resend API. Đã kích hoạt Dev Simulator (OTP: {}).", otpCode);
+        }
+
+        return true;
     }
 
     /**
@@ -240,30 +326,38 @@ public class EmailService {
 
         log.info(">>> [DONATION EMAIL] Gửi thư cảm ơn ủng hộ tới: [{}] - Số tiền: [{}]", toEmail, amountFormatted);
 
-        if (mailSender == null) {
-            log.info(">>> JavaMailSender dev fallback: Đã gửi thư cảm ơn thành công giả lập tới {}", toEmail);
-            return true;
-        }
-
-        try {
-            if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
-                if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
-                    impl.setPassword(impl.getPassword().replace(" ", "").trim());
-                }
+        // 1. Thử gửi qua Resend HTTPS API (Port 443)
+        if (isResendConfigured()) {
+            boolean resendOk = sendViaResend(toEmail, subject, htmlContent);
+            if (resendOk) {
+                return true;
             }
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail, "CứuNạn 24/7 - Ban Cứu Trợ");
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            log.info(">>> [DONATION EMAIL] Đã gửi thư cảm ơn thực tế tới {}", toEmail);
-            return true;
-        } catch (Exception e) {
-            log.warn(">>> [DONATION EMAIL] Không thể gửi thư cảm ơn qua SMTP: {}", e.getMessage());
-            return true;
         }
+
+        // 2. Thử gửi qua SMTP
+        if (mailSender != null && isSmtpConfigured()) {
+            try {
+                if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
+                    if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
+                        impl.setPassword(impl.getPassword().replace(" ", "").trim());
+                    }
+                }
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                helper.setFrom(fromEmail.trim(), "CứuNạn 24/7 - Ban Cứu Trợ");
+                helper.setTo(toEmail.trim());
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
+
+                mailSender.send(message);
+                log.info(">>> [DONATION EMAIL] Đã gửi thư cảm ơn thực tế tới {}", toEmail);
+                return true;
+            } catch (Exception e) {
+                log.warn(">>> [DONATION EMAIL] Không thể gửi thư cảm ơn qua SMTP: {}", e.getMessage());
+            }
+        }
+
+        log.info(">>> Dev fallback: Đã gửi thư cảm ơn giả lập tới {}", toEmail);
+        return true;
     }
 }

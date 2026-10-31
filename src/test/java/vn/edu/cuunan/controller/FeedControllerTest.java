@@ -197,4 +197,106 @@ class FeedControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.sosId").exists());
     }
+
+    @Test
+    @DisplayName("GET /feed/my-posts -> Trả về View feed/my-posts 200 OK")
+    void testShowMyPosts() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Của Tôi");
+        post.setContent("Bài đăng mẫu của chính tài khoản này");
+        post.setHazardType(HazardType.STORM);
+        post.setVerificationStatus(VerificationStatus.PENDING);
+        postRepository.save(post);
+
+        mockMvc.perform(get("/feed/my-posts").with(user(testUserDetails)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("feed/my-posts"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("myPosts"))
+                .andExpect(model().attributeExists("myPostsCount"))
+                .andExpect(model().attributeExists("pendingCount"));
+    }
+
+    @Test
+    @DisplayName("POST /api/feed/posts/{id}/verify -> Điều phối viên hoặc Admin duyệt bài")
+    void testVerifyPostApi() throws Exception {
+        Role roleCoord = roleRepository.findByName("ROLE_COORDINATOR")
+                .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_COORDINATOR")));
+
+        User coordUser = userRepository.findByUsername("coord_tester").orElseGet(() -> {
+            User u = new User();
+            u.setUsername("coord_tester");
+            u.setPassword("encodedPassword123");
+            u.setFullName("Điều Phối Viên Test");
+            u.setPhone("0911223344");
+            u.setEmail("coord_tester@test.com");
+            u.setRole(roleCoord);
+            u.setStatus("ACTIVE");
+            return userRepository.save(u);
+        });
+        CustomUserDetails coordDetails = new CustomUserDetails(coordUser);
+
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Người Dân Báo Tin");
+        post.setContent("Đang có hiện tượng lũ quét cục bộ");
+        post.setHazardType(HazardType.FLOOD);
+        post.setVerificationStatus(VerificationStatus.PENDING);
+        CommunityPost saved = postRepository.save(post);
+
+        // Điều phối viên duyệt bài thành VERIFIED
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/verify")
+                        .with(user(coordDetails))
+                        .param("status", "VERIFIED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value("VERIFIED"));
+
+        // Điều phối viên bác bỏ bài thành REJECTED
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/verify")
+                        .with(user(coordDetails))
+                        .param("status", "REJECTED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value("REJECTED"));
+    }
+
+    @Test
+    @DisplayName("POST /api/feed/posts/{id}/edit -> Tác giả sửa bài viết thành công")
+    void testEditPostApi() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Cần Sửa");
+        post.setContent("Nội dung ban đầu");
+        post.setHazardType(HazardType.FLOOD);
+        post.setLocationName("Đà Nẵng ban đầu");
+        CommunityPost saved = postRepository.save(post);
+
+        mockMvc.perform(post("/api/feed/posts/" + saved.getId() + "/edit")
+                        .with(user(testUserDetails))
+                        .param("content", "Nội dung sau khi cập nhật đã sửa đổi")
+                        .param("hazardType", "LANDSLIDE")
+                        .param("locationName", "Đèo Hải Vân, Đà Nẵng"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.post.content").value("Nội dung sau khi cập nhật đã sửa đổi"))
+                .andExpect(jsonPath("$.post.hazardType").value("LANDSLIDE"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/feed/posts/{id} -> Tác giả xóa bài viết thành công")
+    void testDeletePostApi() throws Exception {
+        CommunityPost post = new CommunityPost();
+        post.setAuthor(testUser);
+        post.setAuthorName("Tác giả Cần Xóa");
+        post.setContent("Bài viết chuẩn bị xóa");
+        post.setHazardType(HazardType.OTHER);
+        CommunityPost saved = postRepository.save(post);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/feed/posts/" + saved.getId())
+                        .with(user(testUserDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
 }

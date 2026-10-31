@@ -165,6 +165,16 @@
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small fw-semibold">
 
                                 <li>
+                                    <a th:href="@{/feed/my-posts}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between p-1.5 rounded hover-bg">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-user-pen text-primary"></i>
+                                            <span>Quản lý bài đăng của bạn</span>
+                                        </div>
+                                        <span class="badge bg-primary-subtle text-primary fw-bold" th:text="${myPostsCount != null ? myPostsCount : 0}">0</span>
+                                    </a>
+                                </li>
+
+                                <li>
 
                                     <a th:href="@{/map}" class="text-decoration-none text-dark d-flex align-items-center gap-2 p-1.5 rounded hover-bg">
 
@@ -322,15 +332,41 @@
 
 
 
-                <!-- FEED STREAM CONTAINER -->
+                <!-- FEED FILTER BAR -->
+                <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                <i class="fa-solid fa-bullhorn fs-6"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Bảng Tin Cảnh Báo Hiện Trường</h6>
+                                <span class="small text-muted">Cộng đồng phản ánh · Ban Điều Phối kiểm duyệt</span>
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-sm flex-wrap shadow-xs rounded-pill border p-0.5" role="group" id="feedFilterButtons">
+                            <button type="button" class="btn btn-outline-secondary border-0 active fw-bold px-2.5 py-1 rounded-pill" onclick="filterFeedByStatus('ALL')">Tất cả</button>
+                            <button type="button" class="btn btn-outline-success border-0 fw-semibold px-2.5 py-1 rounded-pill" onclick="filterFeedByStatus('VERIFIED')">
+                                <i class="fa-solid fa-check me-1"></i>Đã xác minh
+                            </button>
+                            <button type="button" class="btn btn-outline-warning text-dark border-0 fw-semibold px-2.5 py-1 rounded-pill" onclick="filterFeedByStatus('PENDING')">
+                                <i class="fa-solid fa-hourglass-half me-1"></i>Chờ duyệt
+                            </button>
+                            <button type="button" class="btn btn-outline-danger border-0 fw-semibold px-2.5 py-1 rounded-pill" onclick="filterFeedByStatus('REJECTED')">
+                                <i class="fa-solid fa-xmark me-1"></i>Bác bỏ
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- FEED STREAM CONTAINER -->
                 <div id="postsStream" class="d-flex flex-column gap-3">
 
 
 
                     <!-- Loop through posts -->
 
-                    <article th:each="post : ${posts}" th:id="'post-' + ${post.id}" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                    <article th:each="post : ${posts}" th:id="'post-' + ${post.id}" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden feed-post-card" th:attr="data-verification-status=${post.verificationStatus.name()}">
 
                         <div class="card-body p-3 p-sm-4">
 
@@ -394,33 +430,77 @@
 
 
 
-                                <!-- Verification Status Badge -->
+                                <!-- Verification Status Badge & Post Action Menu -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <div th:id="'badge-wrap-' + ${post.id}">
+                                        <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-2.5 py-1.5 rounded-pill shadow-xs">
+                                            <i class="fa-solid fa-check me-1"></i> Đã xác minh
+                                        </span>
+                                        <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-2.5 py-1.5 rounded-pill">
+                                            <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
+                                        </span>
+                                        <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-2.5 py-1.5 rounded-pill">
+                                            Đã bác bỏ
+                                        </span>
+                                    </div>
 
-                                <div>
-
-                                    <span th:if="${post.verificationStatus.name() == 'VERIFIED'}" class="badge bg-success fw-bold px-2.5 py-1.5 rounded-pill shadow-xs">
-
-                                        <i class="fa-solid fa-check me-1"></i> Đã xác minh
-
-                                    </span>
-
-                                    <span th:if="${post.verificationStatus.name() == 'PENDING'}" class="badge bg-warning text-dark border border-warning fw-bold px-2.5 py-1.5 rounded-pill">
-
-                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác minh
-
-                                    </span>
-
-                                    <span th:if="${post.verificationStatus.name() == 'REJECTED'}" class="badge bg-danger fw-bold px-2.5 py-1.5 rounded-pill">
-
-                                        Đã bác bỏ
-
-                                    </span>
-
+                                    <!-- 3-Dot Actions Menu for Author or Admin -->
+                                    <div th:if="${(post.author != null and currentUser != null and post.author.id == currentUser.id) or (currentUser != null and currentUser.role != null and currentUser.role.name == 'ROLE_ADMIN')}"
+                                         class="dropdown">
+                                        <button class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-xs"
+                                                style="width: 32px; height: 32px;"
+                                                type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Tùy chọn bài viết">
+                                            <i class="fa-solid fa-ellipsis-vertical text-secondary"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-1" style="font-size: 0.88rem;">
+                                            <li>
+                                                <a class="dropdown-item py-1.5 d-flex align-items-center gap-2 text-dark" href="javascript:void(0)"
+                                                   th:onclick="'openEditPostModal(' + ${post.id} + ')'">
+                                                    <i class="fa-solid fa-pen-to-square text-primary"></i> Sửa bài viết
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider my-1"></li>
+                                            <li>
+                                                <a class="dropdown-item py-1.5 d-flex align-items-center gap-2 text-danger" href="javascript:void(0)"
+                                                   th:onclick="'deletePost(' + ${post.id} + ')'">
+                                                    <i class="fa-solid fa-trash-can"></i> Xóa bài viết
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
                             </div>
 
 
+
+                            <!-- Moderator Toolbar (Coordinator & Admin) -->
+                            <div th:if="${currentUser != null and currentUser.role != null and (currentUser.role.name == 'ROLE_COORDINATOR' or currentUser.role.name == 'ROLE_ADMIN')}"
+                                 class="bg-light-subtle border rounded-3 p-2 px-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-2xs"
+                                 th:id="'mod-bar-' + ${post.id}">
+                                <div class="d-flex align-items-center gap-1.5 small text-secondary">
+                                    <i class="fa-solid fa-user-shield text-primary"></i>
+                                    <span class="fw-bold">Phê duyệt:</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <button type="button" class="btn btn-sm btn-success fw-bold px-2.5 py-1 rounded-pill"
+                                            style="font-size: 0.78rem;"
+                                            th:onclick="'verifyPost(' + ${post.id} + ', \'VERIFIED\')'">
+                                        <i class="fa-solid fa-check me-1"></i> Duyệt tin
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-2.5 py-1 rounded-pill"
+                                            style="font-size: 0.78rem;"
+                                            th:onclick="'verifyPost(' + ${post.id} + ', \'REJECTED\')'">
+                                        <i class="fa-solid fa-xmark me-1"></i> Bác bỏ
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold px-2 py-1 rounded-pill"
+                                            style="font-size: 0.78rem;"
+                                            th:onclick="'verifyPost(' + ${post.id} + ', \'PENDING\')'"
+                                            title="Chuyển về trạng thái chờ duyệt">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> Chờ duyệt
+                                    </button>
+                                </div>
+                            </div>
 
                             <!-- Content text -->
 
@@ -1161,6 +1241,78 @@
 
 
 <!-- ========================================================================= -->
+
+<!-- ========================================================================= -->
+<!-- MODAL CHỈNH SỬA BÀI VIẾT (EDIT POST MODAL) -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark fs-6" id="editPostModalLabel">
+                    <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa bài viết cảnh báo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editPostForm" enctype="multipart/form-data" onsubmit="submitEditPost(event)">
+                <input type="hidden" id="editPostId" name="postId">
+                <div class="modal-body p-4">
+                    <!-- Content Textarea -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Nội dung phản ánh:</label>
+                        <textarea class="form-control text-dark fs-6 shadow-none" id="editPostContent" name="content" rows="4" required></textarea>
+                    </div>
+
+                    <!-- Hazard Selector Pills -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Loại hiểm họa:</label>
+                        <div class="d-flex flex-wrap gap-2" id="editHazardPills">
+                            <div th:each="hazard : ${hazardTypes}">
+                                <input type="radio" class="btn-check" name="hazardType" th:id="'edit_hazard_' + ${hazard.name()}" th:value="${hazard.name()}">
+                                <label class="btn btn-outline-dark btn-sm rounded-pill fw-bold" th:for="'edit_hazard_' + ${hazard.name()}" th:text="${hazard.shortName}">Sạt lở</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Row -->
+                    <div class="mb-3 p-2.5 rounded-3 bg-light border small">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-danger fw-bold"><i class="fa-solid fa-location-dot me-1"></i>Vị trí hiện trường:</span>
+                            <button type="button" id="btnEditScanGps" class="btn btn-link btn-sm p-0 text-primary fw-bold text-decoration-none" onclick="scanEditGps()">
+                                <i class="fa-solid fa-crosshairs me-1"></i>Lấy GPS
+                            </button>
+                        </div>
+                        <input type="text" class="form-control form-control-sm mt-1.5" id="editLocationName" name="locationName" placeholder="Xã/Phường, Huyện/Quận, Tỉnh/Thành phố">
+                        <input type="hidden" id="editLatitude" name="latitude">
+                        <input type="hidden" id="editLongitude" name="longitude">
+                    </div>
+
+                    <!-- Current Image Preview & Image Upload -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Ảnh hiện trường:</label>
+                        <div id="editCurrentImageWrap" class="mb-2 d-none">
+                            <div class="position-relative d-inline-block">
+                                <img id="editCurrentImage" src="" class="rounded-3 border shadow-xs" style="max-height: 120px; max-width: 100%; object-fit: cover;">
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" id="editRemoveImage" name="removeImage" value="true">
+                                    <label class="form-check-label small text-danger" for="editRemoveImage">Xóa ảnh hiện tại</label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" class="form-control form-control-sm" id="editImageFile" name="imageFile" accept="image/*">
+                        <span class="text-muted small" style="font-size: 0.75rem;">(Để trống nếu giữ nguyên ảnh)</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" id="btnSubmitEditPost" class="btn btn-primary fw-bold px-4">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- MODAL XEM CHI TIẾT ẢNH HIỆN TRƯỜNG CLOUDINARY FULL SIZE -->
 
