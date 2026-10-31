@@ -33,8 +33,9 @@ public class EmailService {
     }
 
     public boolean isSmtpConfigured() {
-        return mailPassword != null && !mailPassword.trim().isEmpty() &&
-               fromEmail != null && !fromEmail.trim().isEmpty();
+        String pwd = mailPassword != null ? mailPassword.replace(" ", "").trim() : "";
+        String user = fromEmail != null ? fromEmail.trim() : "";
+        return !pwd.isEmpty() && !user.isEmpty();
     }
 
     public boolean isLastEmailSentReal() {
@@ -131,6 +132,11 @@ public class EmailService {
         }
 
         try {
+            if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
+                if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
+                    impl.setPassword(impl.getPassword().replace(" ", "").trim());
+                }
+            }
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(fromEmail, "CứuNạn 24/7");
@@ -240,6 +246,11 @@ public class EmailService {
         }
 
         try {
+            if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
+                if (impl.getPassword() != null && impl.getPassword().contains(" ")) {
+                    impl.setPassword(impl.getPassword().replace(" ", "").trim());
+                }
+            }
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(fromEmail, "CứuNạn 24/7 - Ban Cứu Trợ");

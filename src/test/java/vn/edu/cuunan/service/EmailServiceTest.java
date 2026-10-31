@@ -35,4 +35,15 @@ class EmailServiceTest {
 
         assertTrue(service.isSmtpConfigured());
     }
+
+    @Test
+    @DisplayName("isSmtpConfigured tự động nhận diện mật khẩu có khoảng trắng (Google App Password dạng 'xxxx xxxx xxxx xxxx')")
+    void testIsSmtpConfiguredWithSpaces() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        EmailService service = new EmailService(mailSender);
+        ReflectionTestUtils.setField(service, "fromEmail", "vovanthinh2006@gmail.com");
+        ReflectionTestUtils.setField(service, "mailPassword", "ylug qnns jrfz ijif");
+
+        assertTrue(service.isSmtpConfigured());
+    }
 }
