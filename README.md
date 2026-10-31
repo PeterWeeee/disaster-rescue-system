@@ -2,7 +2,7 @@
 ### Disaster Rescue & Relief Management System
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/PeterWeeee/disaster-rescue-system)
-[![Tests](https://img.shields.io/badge/Tests-97%2F97%20Passed-success.svg)](https://github.com/PeterWeeee/disaster-rescue-system)
+[![Tests](https://img.shields.io/badge/Tests-144%2F144%20Passed-success.svg)](https://github.com/PeterWeeee/disaster-rescue-system)
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021%20%7C%2025-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-blue.svg)](https://spring.io/projects/spring-boot)
 [![Security](https://img.shields.io/badge/Security-Spring%20Security%206%20%2B%20JWT-red.svg)](https://spring.io/projects/spring-security)
@@ -31,7 +31,7 @@ Hệ thống kết nối trực tiếp **3 đối tượng nòng cốt** trong c
 - **📡 Truyền Tin Thời Gian Thực (WebSocket STOMP):** Đẩy thông báo khẩn, cập nhật trạng thái nhiệm vụ cứu hộ và vị trí GPS tức thời mà không cần reload trang.
 - **📰 Bảng Tin Cộng Đồng & Xác Thực Tin Tức:** Kênh chia sẻ thông tin cứu trợ, cảnh báo mưa lũ, tích hợp cơ chế kiểm duyệt (Verified/Rejected) nhằm ngăn chặn tin giả và thông tin sai lệch trong thiên tai.
 - **💳 Cổng Quyên Góp & Quản Lý Quỹ Minh Bạch:** Tích hợp VNPay Sandbox (HMAC-SHA512), MoMo QR và VietQR chuyển khoản 24/7, tự động cập nhật số dư quỹ cứu trợ và công khai sao kê chi viện.
-- **🛡️ Bảo Mật & Xác Thực An Toàn:** Kiến trúc bảo mật Spring Security 6, JWT Token bảo vệ bằng HttpOnly Cookie chống XSS/CSRF, mã hóa BCrypt và xác thực OTP qua Email.
+- **🛡️ Bảo Mật & Quản Trị Danh Tính Toàn Diện:** Kiến trúc bảo mật Spring Security 6, JWT Token bảo vệ bằng HttpOnly Cookie chống XSS/CSRF, mã hóa BCrypt, đổi mật khẩu an toàn, tải ảnh đại diện trực tiếp từ máy tính và xác thực OTP qua Email khi thay đổi hòm thư liên kết.
 
 ---
 
@@ -79,8 +79,8 @@ Dự án được cấu hình sẵn profile `local` sử dụng H2 Database, t�
 git clone https://github.com/PeterWeeee/disaster-rescue-system.git
 cd disaster-rescue-system
 
-# 2. Chuyển sang nhánh develop
-git checkout develop
+# 2. Chuyển sang nhánh main
+git checkout main
 
 # 3. Chạy ứng dụng với profile local
 mvn clean spring-boot:run -Dspring-boot.run.profiles=local
@@ -100,7 +100,7 @@ Sau khi ứng dụng khởi động thành công, truy cập hệ thống tại:
    ```
 
 ### 4. Kiểm Thử Tự Động (Unit & Integration Tests)
-Chạy toàn bộ 97 bài kiểm thử tích hợp (Bảo mật, Điều phối, SOS, Feed, Quyên góp):
+Chạy toàn bộ 144 bài kiểm thử tích hợp (Bảo mật, Điều phối, SOS, Feed, Quyên góp, Hồ sơ cá nhân & OTP):
 ```bash
 mvn test
 ```
@@ -127,6 +127,8 @@ Hệ thống được cấu hình sẵn các vai trò mẫu với mật khẩu m
 - [Hướng Dẫn Cài Đặt Cơ Sở Dữ Liệu](docs/DATABASE_SETUP.md)
 - [Danh Sách Tài Khoản Kiểm Thử Chi Tiết](docs/TEST_ACCOUNTS.md)
 - [Báo Cáo Hoàn Thiện Tính Năng Hệ Thống](docs/BAO_CAO_DANH_GIA_MUC_DO_HOAN_THANH.md)
+- [Kế Hoạch & Lộ Trình Các Phiên Làm Việc AI](docs/ROADMAP_AI_SESSIONS.md)
+- [Bảng Bàn Giao & Trạng Thái Dự Án](docs/HANDOVER_STATUS.md)
 
 ---
 

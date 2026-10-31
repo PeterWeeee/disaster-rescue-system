@@ -32,6 +32,13 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    public Optional<User> findByEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return Optional.empty();
+        }
+        return userRepository.findByEmail(email.trim().toLowerCase());
+    }
+
     /**
      * Cập nhật thông tin hồ sơ người dùng.
      */

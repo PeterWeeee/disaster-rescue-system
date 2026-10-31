@@ -38,6 +38,10 @@ public class EmailService {
             subject = "[CứuNạn 24/7] Mã OTP Kích Hoạt Tài Khoản Của Bạn";
             actionTitle = "XÁC THỰC KÍCH HOẠT TÀI KHOẢN";
             actionDescription = "Bạn hoặc ai đó vừa dùng email này để đăng ký tài khoản trên Hệ Thống Cứu Nạn 24/7. Vui lòng nhập mã OTP bên dưới để kích hoạt tài khoản:";
+        } else if ("CHANGE_EMAIL".equalsIgnoreCase(type)) {
+            subject = "[CứuNạn 24/7] Mã OTP Xác Nhận Thay Đổi Email";
+            actionTitle = "XÁC NHẬN THAY ĐỔI ĐỊA CHỈ EMAIL";
+            actionDescription = "Bạn vừa yêu cầu cập nhật địa chỉ email liên kết trên Hệ Thống Cứu Nạn 24/7. Vui lòng sử dụng mã OTP bên dưới để xác thực thay đổi:";
         } else {
             subject = "[CứuNạn 24/7] Mã OTP Đặt Lại Mật Khẩu";
             actionTitle = "YÊU CẦU ĐẶT LẠI MẬT KHẨU";

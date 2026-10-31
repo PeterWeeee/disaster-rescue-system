@@ -6,11 +6,11 @@
 ## 1. Trạng Thái Hiện Tại (Current Snapshot)
 - **Thời điểm cập nhật:** 31/10/2026
 - **Nhánh Git hiện tại:** `main`
-- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 21):
-  - **SESSION 19 (Khắc phục Popover cảm xúc hover, đồng bộ bình luận & Tự phục hồi Unicode Database)** ✅ ĐÃ HOÀN THÀNH 100%
+- **Giai đoạn (Phase):** ĐÃ HOÀN THÀNH 100% CÁC PHÂN HỆ CỐT LÕI (SESSIONS 01 - 22):
   - **SESSION 20 (Đồng bộ cự ly tuyến đường OSRM & Định vị Live GPS thời gian thực cho 3 vai trò)** ✅ ĐÃ HOÀN THÀNH 100%
   - **SESSION 21 (Tích hợp chuyển khoản ngân hàng thật qua VietQR Napas 24/7 & SePay Webhook Auto-Confirmation)** ✅ ĐÃ HOÀN THÀNH 100%
-- **Trạng thái tổng quan:** Toàn bộ **133/133 unit & integration tests đạt BUILD SUCCESS 100%**.
+  - **SESSION 22 (Khắc phục Phân hệ Hồ sơ cá nhân: Sửa lỗi 403 Forbidden, Tải ảnh đại diện từ máy tính, Xác thực OTP đổi Email & Sửa link quyên góp)** ✅ ĐÃ HOÀN THÀNH 100%
+- **Trạng thái tổng quan:** Toàn bộ **144/144 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 
@@ -71,7 +71,12 @@
   - [x] Xây dựng DTO `SepayWebhookDto` và REST endpoint `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư ngân hàng thời gian thực từ SePay, bảo mật bằng API Key.
   - [x] Tự động trích xuất mã giao dịch bằng Regex `CN\d+`, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn trực tiếp vào Quỹ Cứu Trợ.
   - [x] Giao diện `pay.html` tự động nhận diện giao dịch thành công (Polling 3s) và tự động chuyển hướng sang trang Cảm ơn / Biên nhận điện tử.
-  - [x] Toàn bộ **133/133 unit & integration tests đạt BUILD SUCCESS 100%**.
+- [x] **SESSION 22 (PeterWeeee - Nhánh `main`):**
+  - [x] Khắc phục triệt để lỗi 403 Forbidden ("Bạn không có quyền truy cập chức năng này!") khi lưu hồ sơ và đổi mật khẩu bằng việc miễn trừ CSRF cho `/profile/**` trong `SecurityConfig.java`.
+  - [x] Sửa liên kết "Ủng hộ quỹ cứu trợ" từ `@{/donate}` thành `@{/donations}` và bổ sung redirect fallback trong `HomeController.java`.
+  - [x] Hỗ trợ chọn tệp ảnh đại diện từ máy tính khi bấm vào icon ảnh hoặc nút "Chọn ảnh", tự động upload lên `/api/upload/image?folder=avatars` và cập nhật ảnh preview tức thì.
+  - [x] Tích hợp gửi mã xác thực OTP 6 số qua Email khi thay đổi email tài khoản, xác thực chặt chẽ tại `ProfileController.java` và `EmailService.java`.
+  - [x] Toàn bộ **144/144 unit & integration tests đạt BUILD SUCCESS 100%**.
 
 ---
 

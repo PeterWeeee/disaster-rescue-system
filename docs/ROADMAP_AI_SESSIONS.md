@@ -61,6 +61,9 @@
 │ Session 21: Tích Hợp Chuyển Khoản Ngân Hàng Thật (Dynamic VietQR)      │
 │             (SePay Webhook Auto-Confirmation & Real-time Fund Update)  │
 │    ↓                                                                   │
+│ Session 22: Khắc Phục Phân Hệ Hồ Sơ Cá Nhân & Quản Trị Danh Tính       │
+│             (Profile 403 CSRF Fix, Local Avatar Upload, Email OTP)     │
+│    ↓                                                                   │
 │ [SESSION CHƯA LÀM]: Tối ưu Mobile, Kiểm thử & Kịch bản Demo bảo vệ     │
 │             (Dời về cuối lộ trình - Chưa thực hiện trong project này)  │
 └────────────────────────────────────────────────────────────────────────┘
@@ -119,5 +122,10 @@
     - Xây dựng API Webhook `POST /api/donations/sepay-webhook` tiếp nhận biến động số dư thời gian thực từ SePay, bảo mật bằng API Key.
     - Tự động trích xuất mã giao dịch bằng Regex, tự động cập nhật số tiền thực tế nhận được vào CSDL và cộng dồn quỹ cứu trợ tức thì.
     - Giao diện `pay.html` tự động nhận diện giao dịch thành công và chuyển hướng sang trang cảm ơn/biên nhận điện tử.
-22. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
+22. **[Session 22: Khắc Phục Phân Hệ Hồ Sơ Cá Nhân & Quản Trị Danh Tính (Profile 403 CSRF Fix, Local Avatar Upload, Email OTP)](roadmap/session-22-profile-fixes-avatar-upload-email-otp.md)** *(✅ Đã hoàn thành - PeterWeeee)*
+    - Khắc phục triệt để lỗi 403 Forbidden ("Bạn không có quyền truy cập chức năng này!") khi lưu hồ sơ và đổi mật khẩu bằng việc miễn trừ CSRF cho `/profile/**` trong `SecurityConfig.java`.
+    - Sửa liên kết "Ủng hộ quỹ cứu trợ" từ `@{/donate}` thành `@{/donations}` và bổ sung redirect fallback trong `HomeController.java`.
+    - Hỗ trợ chọn tệp ảnh đại diện từ máy tính khi bấm vào icon ảnh hoặc nút "Chọn ảnh", tự động upload lên `/api/upload/image?folder=avatars` và cập nhật ảnh preview tức thì.
+    - Tích hợp gửi mã xác thực OTP 6 số qua Email khi thay đổi email tài khoản, xác thực chặt chẽ tại `ProfileController.java` và `EmailService.java`.
+23. **[Session Chưa Làm: Tối Ưu Mobile, Kiểm Thử & Kịch Bản Demo Bảo Vệ](roadmap/session-chua-lam-mobile-testing-demo-script.md)** *(⏸️ Chưa làm trong project này)*
     - Tối ưu hóa màn hình điện thoại di động, nạp dữ liệu mẫu tự động và kịch bản 5 bước thuyết trình bảo vệ đồ án (Dời về cuối lộ trình, chưa triển khai trong phạm vi đồ án hiện tại).

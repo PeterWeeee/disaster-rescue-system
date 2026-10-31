@@ -48,4 +48,9 @@ public class HomeController {
         model.addAttribute("pageTitle", "Bản Đồ Cứu Nạn Trực Tuyến & Cảnh Báo Thiên Tai");
         return "map/live-map";
     }
+
+    @GetMapping({"/donate", "/donate/**"})
+    public String donateRedirect() {
+        return "redirect:/donations";
+    }
 }

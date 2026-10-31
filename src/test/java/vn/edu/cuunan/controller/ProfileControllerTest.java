@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.cuunan.entity.User;
 import vn.edu.cuunan.repository.UserRepository;
 import vn.edu.cuunan.security.CustomUserDetails;
+import vn.edu.cuunan.service.OtpService;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -29,6 +30,9 @@ class ProfileControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OtpService otpService;
 
     @Test
     @DisplayName("GET /profile khi chưa đăng nhập sẽ chuyển hướng về trang login")
@@ -54,7 +58,7 @@ class ProfileControllerTest {
     }
 
     @Test
-    @DisplayName("POST /profile/update cập nhật thành công họ tên, địa chỉ")
+    @DisplayName("POST /profile/update cập nhật thành công khi email không đổi")
     void testUpdateProfileSuccess() throws Exception {
         User citizen = userRepository.findByUsername("citizen")
                 .orElseGet(() -> userRepository.findAll().get(0));
@@ -65,12 +69,73 @@ class ProfileControllerTest {
                         .with(csrf())
                         .param("fullName", "Nguyễn Văn Đã Cập Nhật")
                         .param("phone", citizen.getPhone())
-                        .param("email", "test.update@cuunan247.vn")
+                        .param("email", citizen.getEmail() != null ? citizen.getEmail() : "")
                         .param("address", "TP. Đà Nẵng")
                         .param("avatarUrl", "https://example.com/avatar.jpg"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/profile?tab=edit"))
                 .andExpect(flash().attributeExists("successMessage"));
+    }
+
+    @Test
+    @DisplayName("POST /profile/update cập nhật thành công email mới khi có OTP hợp lệ")
+    void testUpdateProfileWithNewEmailAndOtp() throws Exception {
+        User citizen = userRepository.findByUsername("citizen")
+                .orElseGet(() -> userRepository.findAll().get(0));
+        CustomUserDetails userDetails = new CustomUserDetails(citizen);
+
+        String newEmail = "new.email." + System.currentTimeMillis() + "@cuunan247.vn";
+        String otp = otpService.generateAndSendOtp(newEmail, "CHANGE_EMAIL");
+
+        mockMvc.perform(post("/profile/update")
+                        .with(user(userDetails))
+                        .with(csrf())
+                        .param("fullName", "Nguyễn Văn Đã Cập Nhật")
+                        .param("phone", citizen.getPhone())
+                        .param("email", newEmail)
+                        .param("emailOtp", otp)
+                        .param("address", "TP. Đà Nẵng")
+                        .param("avatarUrl", "https://example.com/avatar.jpg"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profile?tab=edit"))
+                .andExpect(flash().attributeExists("successMessage"));
+    }
+
+    @Test
+    @DisplayName("POST /profile/update thất bại khi thay đổi email mà không nhập OTP")
+    void testUpdateProfileWithNewEmailWithoutOtp() throws Exception {
+        User citizen = userRepository.findByUsername("citizen")
+                .orElseGet(() -> userRepository.findAll().get(0));
+        CustomUserDetails userDetails = new CustomUserDetails(citizen);
+
+        String newEmail = "new.email.no.otp@cuunan247.vn";
+
+        mockMvc.perform(post("/profile/update")
+                        .with(user(userDetails))
+                        .with(csrf())
+                        .param("fullName", "Nguyễn Văn Đã Cập Nhật")
+                        .param("phone", citizen.getPhone())
+                        .param("email", newEmail)
+                        .param("address", "TP. Đà Nẵng")
+                        .param("avatarUrl", "https://example.com/avatar.jpg"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profile?tab=edit"))
+                .andExpect(flash().attributeExists("errorMessage"));
+    }
+
+    @Test
+    @DisplayName("POST /profile/send-email-otp gửi OTP thành công cho email hợp lệ")
+    void testSendEmailOtp() throws Exception {
+        User citizen = userRepository.findByUsername("citizen")
+                .orElseGet(() -> userRepository.findAll().get(0));
+        CustomUserDetails userDetails = new CustomUserDetails(citizen);
+
+        mockMvc.perform(post("/profile/send-email-otp")
+                        .with(user(userDetails))
+                        .with(csrf())
+                        .param("email", "otp.check@gmail.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test

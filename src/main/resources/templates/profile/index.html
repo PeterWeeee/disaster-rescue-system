@@ -28,17 +28,19 @@
             <div class="col-lg-4 col-md-5">
                 <div class="card border-0 shadow-sm rounded-4 text-center overflow-hidden mb-4">
                     <div class="bg-navy py-4 px-3 text-white position-relative" style="background: linear-gradient(135deg, #0d233a 0%, #1e3c72 100%);">
-                        <div class="avatar-wrapper mb-3 position-relative d-inline-block">
+                        <div class="avatar-wrapper mb-3 position-relative d-inline-block" id="profileAvatarWrapper">
                             <img th:if="${user != null and user.avatarUrl != null and !user.avatarUrl.empty}"
                                  th:src="${user.avatarUrl}"
                                  alt="Avatar"
+                                 id="profileAvatarImg"
                                  class="rounded-circle border border-4 border-white shadow-sm object-fit-cover"
                                  style="width: 110px; height: 110px;"
                                  onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff&size=110';" />
                             <div th:unless="${user != null and user.avatarUrl != null and !user.avatarUrl.empty}"
+                                 id="profileAvatarPlaceholder"
                                  class="rounded-circle border border-4 border-white shadow-sm bg-primary d-inline-flex align-items-center justify-content-center text-white fw-bold fs-2"
                                  style="width: 110px; height: 110px;">
-                                <span th:text="${user != null and user.fullName != null and !user.fullName.empty ? #strings.substring(user.fullName, 0, 1) : 'U'}">U</span>
+                                <span id="profileAvatarInitial" th:text="${user != null and user.fullName != null and !user.fullName.empty ? #strings.substring(user.fullName, 0, 1) : 'U'}">U</span>
                             </div>
                             <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success p-2 border border-2 border-white" title="Trạng thái: Đang hoạt động">
                                 <span class="visually-hidden">Online</span>
@@ -68,7 +70,7 @@
                             <div class="bg-light p-2 rounded-3 me-3 text-danger"><i class="fa-solid fa-envelope fa-fw"></i></div>
                             <div class="text-truncate">
                                 <small class="text-muted d-block">Hộp thư Email</small>
-                                <strong class="text-navy text-truncate d-block" th:text="${user != null and user.email != null and !user.email.empty ? user.email : 'Chưa cập nhật'}">email@cuunan247.vn</strong>
+                                <strong class="text-navy text-truncate d-block" id="summaryEmail" th:text="${user != null and user.email != null and !user.email.empty ? user.email : 'Chưa cập nhật'}">email@cuunan247.vn</strong>
                             </div>
                         </div>
 
@@ -195,7 +197,9 @@
                                     </span>
                                 </div>
 
-                                <form th:action="@{/profile/update}" method="post">
+                                <form th:action="@{/profile/update}" method="post" id="profileUpdateForm">
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold small text-navy">Tên đăng nhập (Username)</label>
@@ -238,8 +242,28 @@
                                             <div class="input-group">
                                                 <span class="input-group-text text-navy"><i class="fa-solid fa-envelope"></i></span>
                                                 <input type="email" class="form-control" id="email" name="email"
-                                                       th:value="${user != null ? user.email : ''}" placeholder="email@vi-du.vn">
+                                                       th:value="${user != null ? user.email : ''}"
+                                                       th:data-original-email="${user != null and user.email != null ? user.email : ''}"
+                                                       placeholder="email@vi-du.vn">
+                                                <button type="button" class="btn btn-warning fw-semibold text-dark" id="btnSendEmailOtp" style="display: none;">
+                                                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi OTP
+                                                </button>
                                             </div>
+
+                                            <!-- Nhóm nhập mã OTP khi thay đổi Email -->
+                                            <div id="emailOtpGroup" class="mt-2" style="display: none;">
+                                                <div class="alert alert-warning py-2 px-3 small d-flex align-items-center mb-2 border-warning-subtle">
+                                                    <i class="fa-solid fa-shield-halved text-warning fs-5 me-2 flex-shrink-0"></i>
+                                                    <span>Bạn đang đổi địa chỉ email. Vui lòng bấm <strong>Gửi OTP</strong> và nhập mã xác thực gửi đến email mới.</span>
+                                                </div>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light text-navy"><i class="fa-solid fa-key"></i></span>
+                                                    <input type="text" class="form-control" id="emailOtp" name="emailOtp" maxlength="6" placeholder="Nhập mã OTP 6 số xác thực email">
+                                                </div>
+                                                <div id="emailOtpFeedback" class="small mt-1" style="display: none;"></div>
+                                            </div>
+
+                                            <small class="text-muted" id="emailHelpText">Nhập email để nhận thông báo cứu trợ và hỗ trợ bảo mật tài khoản.</small>
                                         </div>
 
                                         <div class="col-md-6">
@@ -254,19 +278,26 @@
                                         <div class="col-12">
                                             <label for="avatarUrl" class="form-label fw-semibold small text-navy">Đường dẫn ảnh đại diện (Avatar URL)</label>
                                             <div class="input-group">
-                                                <span class="input-group-text text-navy"><i class="fa-solid fa-image"></i></span>
-                                                <input type="url" class="form-control" id="avatarUrl" name="avatarUrl"
-                                                       th:value="${user != null ? user.avatarUrl : ''}" placeholder="https://res.cloudinary.com/... hoặc link ảnh đại diện">
+                                                <span class="input-group-text text-navy border-primary" id="avatarUploadIconBtn" role="button" tabindex="0" style="cursor: pointer; background-color: #f0f7ff;" title="Nhấn vào icon để chọn ảnh từ máy tính">
+                                                    <i class="fa-solid fa-image text-primary" id="avatarIcon"></i>
+                                                </span>
+                                                <input type="text" class="form-control" id="avatarUrl" name="avatarUrl"
+                                                       th:value="${user != null ? user.avatarUrl : ''}" placeholder="Nhấp icon ảnh để chọn từ máy tính hoặc dán URL ảnh">
+                                                <button type="button" class="btn btn-outline-primary" id="btnBrowseAvatar" title="Chọn ảnh từ máy tính">
+                                                    <i class="fa-solid fa-folder-open me-1"></i> Chọn ảnh
+                                                </button>
                                             </div>
-                                            <small class="text-muted">Dán đường dẫn ảnh đại diện (Cloudinary, Imgur hoặc link ảnh hợp lệ).</small>
+                                            <input type="file" id="avatarFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;">
+                                            <div id="avatarUploadFeedback" class="small mt-1" style="display: none;"></div>
+                                            <small class="text-muted">Nhấn vào icon <i class="fa-solid fa-image text-primary"></i> hoặc nút "Chọn ảnh" để tải ảnh trực tiếp từ máy tính lên hệ thống (JPG, PNG, WEBP, GIF).</small>
                                         </div>
                                     </div>
 
                                     <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                                        <button type="reset" class="btn btn-outline-secondary px-4 rounded-3">
+                                        <button type="reset" class="btn btn-outline-secondary px-4 rounded-3" id="btnResetProfile">
                                             <i class="fa-solid fa-rotate-left me-1"></i> Đặt Lại
                                         </button>
-                                        <button type="submit" class="btn btn-primary px-4 rounded-3 shadow-sm">
+                                        <button type="submit" class="btn btn-primary px-4 rounded-3 shadow-sm" id="btnSubmitProfile">
                                             <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Thay Đổi Hồ Sơ
                                         </button>
                                     </div>
@@ -286,6 +317,8 @@
                                 </div>
 
                                 <form th:action="@{/profile/change-password}" method="post">
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                                     <div class="row g-3" style="max-width: 600px;">
                                         <div class="col-12">
                                             <label for="currentPassword" class="form-label fw-semibold small text-navy">Mật khẩu hiện tại <span class="text-danger">*</span></label>
@@ -396,7 +429,7 @@
                                         <h5 class="fw-bold text-navy mb-1">Lịch Sử Quyên Góp Cứu Trợ Đồng Bào</h5>
                                         <p class="text-muted small mb-0">Danh sách các khoản đóng góp cứu trợ bão lũ gắn liền với số điện thoại của bạn.</p>
                                     </div>
-                                    <a th:href="@{/donate}" class="btn btn-success btn-sm rounded-pill px-3">
+                                    <a th:href="@{/donations}" class="btn btn-success btn-sm rounded-pill px-3">
                                         <i class="fa-solid fa-heart me-1"></i> Quyên Góp Ngay
                                     </a>
                                 </div>
@@ -405,7 +438,7 @@
                                     <i class="fa-solid fa-hand-holding-heart fa-3x text-muted opacity-50 mb-3"></i>
                                     <h6 class="fw-semibold text-muted">Chưa có lịch sử quyên góp được ghi nhận</h6>
                                     <p class="small text-muted mb-3">Mỗi đóng góp của bạn đều góp phần hỗ trợ người dân vùng bão lũ vượt qua thiên tai.</p>
-                                    <a th:href="@{/donate}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                                    <a th:href="@{/donations}" class="btn btn-outline-success btn-sm rounded-pill px-4">
                                         <i class="fa-solid fa-heart me-1"></i> Ủng Hộ Quỹ Cứu Trợ
                                     </a>
                                 </div>
@@ -457,8 +490,8 @@
 </div>
 
 <script>
-    // Tự động kích hoạt tab dựa trên query param ?tab=edit|security|sos|donations hoặc hash
     document.addEventListener("DOMContentLoaded", function() {
+        // 1. Tự động kích hoạt tab dựa trên query param ?tab=edit|security|sos|donations hoặc hash
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         const hash = window.location.hash;
@@ -472,6 +505,255 @@
         if (targetTabBtn && typeof bootstrap !== 'undefined') {
             const tab = new bootstrap.Tab(targetTabBtn);
             tab.show();
+        }
+
+        // 2. Xử lý Icon Ảnh Đại Diện & Tải ảnh từ máy tính
+        const avatarUploadIconBtn = document.getElementById('avatarUploadIconBtn');
+        const btnBrowseAvatar = document.getElementById('btnBrowseAvatar');
+        const avatarFileInput = document.getElementById('avatarFileInput');
+        const avatarUrlInput = document.getElementById('avatarUrl');
+        const avatarFeedback = document.getElementById('avatarUploadFeedback');
+        const avatarIcon = document.getElementById('avatarIcon');
+
+        function triggerAvatarPicker() {
+            if (avatarFileInput) {
+                avatarFileInput.click();
+            }
+        }
+
+        if (avatarUploadIconBtn) {
+            avatarUploadIconBtn.addEventListener('click', triggerAvatarPicker);
+            avatarUploadIconBtn.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    triggerAvatarPicker();
+                }
+            });
+        }
+
+        if (btnBrowseAvatar) {
+            btnBrowseAvatar.addEventListener('click', triggerAvatarPicker);
+        }
+
+        function updateAvatarPreview(url) {
+            const wrapper = document.getElementById('profileAvatarWrapper');
+            if (!wrapper) return;
+
+            let img = document.getElementById('profileAvatarImg');
+            const placeholder = document.getElementById('profileAvatarPlaceholder');
+
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+
+            if (!img) {
+                img = document.createElement('img');
+                img.id = 'profileAvatarImg';
+                img.className = 'rounded-circle border border-4 border-white shadow-sm object-fit-cover';
+                img.style.width = '110px';
+                img.style.height = '110px';
+                img.alt = 'Avatar';
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff&size=110';
+                };
+                wrapper.insertBefore(img, wrapper.firstChild);
+            }
+            img.src = url;
+            img.style.display = 'inline-block';
+        }
+
+        function showAvatarFeedback(type, messageHtml) {
+            if (!avatarFeedback) return;
+            avatarFeedback.className = `small mt-1 text-${type}`;
+            avatarFeedback.innerHTML = messageHtml;
+            avatarFeedback.style.display = 'block';
+        }
+
+        if (avatarFileInput) {
+            avatarFileInput.addEventListener('change', function() {
+                const file = avatarFileInput.files && avatarFileInput.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    showAvatarFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Vui lòng chọn một file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!');
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    showAvatarFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Dung lượng ảnh quá lớn! Tối đa 5MB.');
+                    return;
+                }
+
+                if (avatarIcon) {
+                    avatarIcon.className = 'fa-solid fa-spinner fa-spin text-primary';
+                }
+                showAvatarFeedback('info', '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải ảnh lên máy chủ, vui lòng đợi...');
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'avatars');
+
+                fetch('/api/upload/image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (avatarIcon) {
+                        avatarIcon.className = 'fa-solid fa-image text-primary';
+                    }
+                    if (data.success && data.url) {
+                        avatarUrlInput.value = data.url;
+                        showAvatarFeedback('success', '<i class="fa-solid fa-circle-check me-1"></i> Tải ảnh lên thành công!');
+                        updateAvatarPreview(data.url);
+                    } else {
+                        showAvatarFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> ' + (data.message || 'Lỗi khi tải ảnh lên!'));
+                    }
+                })
+                .catch(err => {
+                    if (avatarIcon) {
+                        avatarIcon.className = 'fa-solid fa-image text-primary';
+                    }
+                    showAvatarFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Lỗi kết nối khi tải ảnh: ' + err.message);
+                });
+            });
+        }
+
+        if (avatarUrlInput) {
+            avatarUrlInput.addEventListener('input', function() {
+                const val = (avatarUrlInput.value || '').trim();
+                if (val.length > 5) {
+                    updateAvatarPreview(val);
+                }
+            });
+        }
+
+        // 3. Xử lý Thay Đổi Email & Xác Thực OTP
+        const emailInput = document.getElementById('email');
+        const originalEmail = emailInput ? (emailInput.dataset.originalEmail || '').trim().toLowerCase() : '';
+        const btnSendEmailOtp = document.getElementById('btnSendEmailOtp');
+        const emailOtpGroup = document.getElementById('emailOtpGroup');
+        const emailOtpInput = document.getElementById('emailOtp');
+        const emailOtpFeedback = document.getElementById('emailOtpFeedback');
+        let emailOtpTimer = null;
+
+        function checkEmailChanged() {
+            if (!emailInput) return;
+            const currentEmail = (emailInput.value || '').trim().toLowerCase();
+            const hasChanged = currentEmail.length > 0 && currentEmail !== originalEmail;
+
+            if (hasChanged) {
+                if (btnSendEmailOtp) btnSendEmailOtp.style.display = 'inline-block';
+                if (emailOtpGroup) emailOtpGroup.style.display = 'block';
+            } else {
+                if (btnSendEmailOtp) btnSendEmailOtp.style.display = 'none';
+                if (emailOtpGroup) emailOtpGroup.style.display = 'none';
+                if (emailOtpInput) emailOtpInput.value = '';
+                if (emailOtpFeedback) emailOtpFeedback.style.display = 'none';
+            }
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('input', checkEmailChanged);
+        }
+
+        function showEmailOtpFeedback(type, messageHtml) {
+            if (!emailOtpFeedback) return;
+            emailOtpFeedback.className = `small mt-1 text-${type}`;
+            emailOtpFeedback.innerHTML = messageHtml;
+            emailOtpFeedback.style.display = 'block';
+        }
+
+        function startOtpCountdown(seconds) {
+            if (!btnSendEmailOtp) return;
+            let remain = seconds;
+            btnSendEmailOtp.disabled = true;
+            btnSendEmailOtp.innerHTML = `<i class="fa-solid fa-clock me-1"></i> Gửi lại (${remain}s)`;
+
+            if (emailOtpTimer) clearInterval(emailOtpTimer);
+            emailOtpTimer = setInterval(function() {
+                remain--;
+                if (remain <= 0) {
+                    clearInterval(emailOtpTimer);
+                    btnSendEmailOtp.disabled = false;
+                    btnSendEmailOtp.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Gửi lại OTP';
+                } else {
+                    btnSendEmailOtp.innerHTML = `<i class="fa-solid fa-clock me-1"></i> Gửi lại (${remain}s)`;
+                }
+            }, 1000);
+        }
+
+        if (btnSendEmailOtp) {
+            btnSendEmailOtp.addEventListener('click', function() {
+                const targetEmail = (emailInput.value || '').trim();
+                if (!targetEmail) {
+                    showEmailOtpFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Vui lòng nhập địa chỉ email mới!');
+                    return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+                    showEmailOtpFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Địa chỉ email không đúng định dạng!');
+                    return;
+                }
+
+                btnSendEmailOtp.disabled = true;
+                showEmailOtpFeedback('info', '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang gửi mã OTP đến ' + targetEmail + '...');
+
+                const formData = new FormData();
+                formData.append('email', targetEmail);
+
+                fetch('/profile/send-email-otp', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showEmailOtpFeedback('success', '<i class="fa-solid fa-circle-check me-1"></i> ' + data.message);
+                        if (emailOtpInput) emailOtpInput.focus();
+                        startOtpCountdown(60);
+                    } else {
+                        btnSendEmailOtp.disabled = false;
+                        showEmailOtpFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> ' + (data.message || 'Lỗi khi gửi mã OTP!'));
+                    }
+                })
+                .catch(err => {
+                    btnSendEmailOtp.disabled = false;
+                    showEmailOtpFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Lỗi kết nối: ' + err.message);
+                });
+            });
+        }
+
+        // 4. Kiểm tra trước khi submit form cập nhật hồ sơ
+        const profileUpdateForm = document.getElementById('profileUpdateForm');
+        if (profileUpdateForm) {
+            profileUpdateForm.addEventListener('submit', function(e) {
+                if (emailInput) {
+                    const currentEmail = (emailInput.value || '').trim().toLowerCase();
+                    const hasChanged = currentEmail.length > 0 && currentEmail !== originalEmail;
+                    if (hasChanged) {
+                        const otpVal = emailOtpInput ? (emailOtpInput.value || '').trim() : '';
+                        if (!otpVal) {
+                            e.preventDefault();
+                            showEmailOtpFeedback('danger', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Bạn đã đổi email. Vui lòng bấm "Gửi OTP" và nhập mã xác thực OTP trước khi lưu.');
+                            if (emailOtpGroup) emailOtpGroup.style.display = 'block';
+                            if (emailOtpInput) emailOtpInput.focus();
+                            return false;
+                        }
+                    }
+                }
+            });
+        }
+
+        const btnResetProfile = document.getElementById('btnResetProfile');
+        if (btnResetProfile) {
+            btnResetProfile.addEventListener('click', function() {
+                setTimeout(function() {
+                    checkEmailChanged();
+                    const val = (avatarUrlInput.value || '').trim();
+                    if (val) updateAvatarPreview(val);
+                }, 50);
+            });
         }
     });
 </script>

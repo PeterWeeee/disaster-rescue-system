@@ -30,11 +30,14 @@
 
 ## 2. Danh Sách REST APIs
 
-### 2.1. Xác Thực & Người Dùng (`/api/auth`)
+### 2.1. Xác Thực, Người Dùng & Hồ Sơ Cá Nhân (`/api/auth` & `/profile`)
 - `POST /api/auth/register` - Đăng ký tài khoản mới.
 - `POST /api/auth/login` - Đăng nhập, trả về JWT Token và set Cookie `jwt_token`.
 - `POST /api/auth/logout` - Đăng xuất, xóa Cookie.
 - `GET /api/auth/me` - Lấy thông tin tài khoản đang đăng nhập.
+- `POST /profile/update` - Cập nhật thông tin hồ sơ (họ tên, số điện thoại, địa chỉ, URL ảnh đại diện, email kèm xác thực `emailOtp` nếu đổi hòm thư).
+- `POST /profile/send-email-otp` - Gửi mã xác thực OTP 6 số ngẫu nhiên qua email khi người dùng thay đổi email liên kết (kiểm tra trùng lặp email).
+- `POST /profile/change-password` - Đổi mật khẩu tài khoản (kiểm tra mật khẩu hiện tại, mã hóa mật khẩu mới bằng BCrypt).
 
 ### 2.2. Quản Lý Yêu Cầu Cứu Nạn & Định Vị Live (`/api/sos`)
 - `POST /api/sos` - Gửi yêu cầu cứu nạn khẩn cấp (kèm tọa độ GPS, số người, mô tả, ảnh). Bắn WebSocket `/topic/sos-alerts`.
@@ -59,8 +62,9 @@
 - `POST /api/rescuer/assignments/{id}/location` - Đội cứu hộ cập nhật vị trí GPS thời gian thực (watchPosition). Bắn WebSocket `/topic/map-updates` với type `LOCATION_UPDATE` và tính lại cự ly OSRM.
 - `POST /api/rescuer/assignments/{id}/complete` - Hoàn thành nhiệm vụ (kèm ảnh hiện trường báo cáo).
 
-### 2.5. Upload Tệp Lên Cloudinary (`/api/media` & `/api/upload`)
+### 2.5. Upload Tệp & Ảnh Hiện Trường (`/api/media` & `/api/upload`)
 - `POST /api/media/upload` - Multipart form upload ảnh hiện trường, trả về link ảnh an toàn HTTPS của Cloudinary.
+- `POST /api/upload/image` - Tải ảnh lên máy chủ (hỗ trợ ảnh hiện trường SOS và ảnh đại diện `folder=avatars`), tự động chuyển sang Cloudinary hoặc lưu trữ cục bộ `/uploads/`.
 - `POST /api/upload/guide-image` - Upload ảnh minh họa cẩm nang cứu nạn lên thư mục `cuunan_guides` của Cloudinary CDN.
 
 ### 2.6. Khung Chat Trực Tuyến Ca Cứu Hộ (`/api/chat`)
@@ -77,8 +81,8 @@
 - `POST /api/feed/posts/{id}/comments` - Gửi bình luận mới cho bài viết (tham số: `content`).
 - `GET /api/feed/shelters` - Lấy danh sách các điểm sơ tán tránh trú bão lũ an toàn.
 
-
-### 2.8. Cổng Quyên Góp & Webhook Ngân Hàng (`/api/donations`)
+### 2.8. Cổng Quyên Góp & Webhook Ngân Hàng (`/api/donations` & `/donations`)
+- `GET /donations` & `GET /donate` - Giao diện cổng quyên góp ủng hộ đồng bào bão lũ (tự động chuyển hướng từ `/donate` sang `/donations`).
 - `GET /api/donations/stats` - Lấy thống kê tổng số tiền quyên góp, tổng lượt đóng góp và tiến độ quỹ cứu trợ.
 - `GET /api/donations/recent` - Lấy danh sách 15 nhà hảo tâm ủng hộ mới nhất để vinh danh trên Bảng Vàng.
 - `GET /api/donations/status/{code}` - Tra cứu trạng thái giao dịch ủng hộ theo mã `CNxxxx` (hỗ trợ JavaScript Polling định kỳ 3 giây tại `pay.html`).
